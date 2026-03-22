@@ -36,6 +36,7 @@ v1.route('/vendors', vendorRoutes)
 v1.route('/services', serviceRoutes)
 v1.route('/orders', orderRoutes)
 v1.route('/vouchers', voucherRoutes)
+v1.route('/payments', paymentRoutes)
 v1.route('/admin', adminRoutes)
 app.route('/api/v1', v1)
 
