@@ -65,7 +65,7 @@ describe('Voucher Flow', () => {
   // ─── Voucher state machine (unit-like) ───
   describe('State Machine', () => {
     test('valid transitions are defined', async () => {
-      const { VOUCHER_TRANSITIONS, canTransition } = await import('../src/services/voucher-state')
+      const { canTransition } = await import('../src/services/voucher-state')
       // Valid transitions
       expect(canTransition('created', 'paid')).toBe(true)
       expect(canTransition('paid', 'redeemed')).toBe(true)
