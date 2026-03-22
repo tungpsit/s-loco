@@ -1,4 +1,17 @@
+'use client'
+
+import { dashboardApi } from '@/lib/api'
+import { useQuery } from '@tanstack/react-query'
+
 export default function DashboardPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-dashboard'],
+    queryFn: dashboardApi.adminStats,
+  })
+
+  const stats = data?.data
+  const fmt = (n?: number | string) => n != null ? Number(n).toLocaleString('vi-VN') : '—'
+
   return (
     <>
       {/* Header */}
@@ -9,13 +22,13 @@ export default function DashboardPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <StatCard icon="💰" label="Tổng doanh thu" value="— ₫" accent="bg-primary-fixed" />
-        <StatCard icon="🛒" label="Tổng đơn hàng" value="—" accent="bg-secondary-container" />
-        <StatCard icon="🏪" label="Vendor hoạt động" value="—" accent="bg-tertiary-fixed" />
-        <StatCard icon="💳" label="Chờ giải ngân" value="—" accent="bg-primary-fixed-dim" />
+        <StatCard icon="💰" label="Tổng doanh thu" value={isLoading ? '...' : `${fmt(stats?.totalRevenue)}₫`} accent="bg-primary-fixed" />
+        <StatCard icon="🛒" label="Tổng đơn hàng" value={isLoading ? '...' : fmt(stats?.totalOrders)} accent="bg-secondary-container" />
+        <StatCard icon="🏪" label="Vendor hoạt động" value={isLoading ? '...' : fmt(stats?.activeVendors)} accent="bg-tertiary-fixed" />
+        <StatCard icon="💳" label="Chờ giải ngân" value={isLoading ? '...' : `${fmt(stats?.pendingSettlements)}₫`} accent="bg-primary-fixed-dim" />
       </div>
 
-      {/* Revenue Chart Placeholder */}
+      {/* Revenue + Commission */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
         <div className="lg:col-span-2 bg-white rounded-2xl p-6">
           <h2 className="font-display font-semibold text-on-surface mb-4">Doanh thu theo tháng</h2>
@@ -27,21 +40,20 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Commission Summary */}
         <div className="bg-white rounded-2xl p-6">
           <h2 className="font-display font-semibold text-on-surface mb-4">Hoa hồng</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center py-3 border-b border-outline-variant/15">
               <span className="text-sm text-on-surface-variant">Tổng hoa hồng</span>
-              <span className="font-display font-bold text-on-surface">— ₫</span>
+              <span className="font-display font-bold text-on-surface">{fmt(stats?.totalCommission)}₫</span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-outline-variant/15">
               <span className="text-sm text-on-surface-variant">Đã giải ngân</span>
-              <span className="font-display font-bold text-primary">— ₫</span>
+              <span className="font-display font-bold text-primary">{fmt(stats?.disbursedAmount)}₫</span>
             </div>
             <div className="flex justify-between items-center py-3">
               <span className="text-sm text-on-surface-variant">Chờ duyệt</span>
-              <span className="font-display font-bold text-tertiary">— batch</span>
+              <span className="font-display font-bold text-tertiary">{fmt(stats?.pendingBatches)} batch</span>
             </div>
           </div>
         </div>

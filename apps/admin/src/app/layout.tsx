@@ -1,3 +1,4 @@
+import Providers from "@/components/providers";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className="h-full antialiased">
-      <body className="min-h-full flex flex-col font-body">{children}</body>
+      <body className="min-h-full flex flex-col font-body">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
