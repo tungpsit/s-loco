@@ -4,7 +4,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-display font-bold text-on-surface">Tổng quan</h1>
-        <p className="text-sm text-on-surface-variant mt-1">Số liệu hoạt động nền tảng S-Local</p>
+        <p className="text-sm text-on-surface-variant mt-1">Số liệu hoạt động nền tảng S-Loco</p>
       </div>
 
       {/* Stat Cards */}

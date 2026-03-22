@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "S-Local Admin — Quản trị hệ thống",
+  title: "S-Loco Admin — Quản trị hệ thống",
   description:
-    "Bảng điều khiển quản trị S-Local — quản lý vendor, voucher, đơn hàng và báo cáo.",
+    "Bảng điều khiển quản trị S-Loco — quản lý vendor, voucher, đơn hàng và báo cáo.",
 };
 
 export default function RootLayout({

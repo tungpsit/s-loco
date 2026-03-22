@@ -28,7 +28,7 @@ export const momoGateway: PaymentGateway = {
 
     const body = {
       partnerCode: MOMO_PARTNER_CODE,
-      partnerName: 'S-Local',
+      partnerName: 'S-Loco',
       storeId: 'slocal',
       requestId,
       amount: params.amount,

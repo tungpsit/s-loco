@@ -17,7 +17,7 @@ export default function OrdersScreen() {
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏪 S-Local Vendor</Text>
+        <Text style={styles.headerTitle}>🏪 S-Loco Vendor</Text>
         <Text style={styles.headerSub}>Quản lý đơn hàng</Text>
       </View>
 

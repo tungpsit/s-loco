@@ -22,7 +22,7 @@ export default function Sidebar() {
           S
         </span>
         <div>
-          <p className="font-display font-bold text-on-surface text-sm">S-Local Admin</p>
+          <p className="font-display font-bold text-on-surface text-sm">S-Loco Admin</p>
           <p className="text-xs text-on-surface-variant">Quản trị hệ thống</p>
         </div>
       </div>

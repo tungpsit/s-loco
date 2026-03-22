@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router'
 
-/* ─── S-Local Blue Design System Tokens ─── */
+/* ─── S-Loco Blue Design System Tokens ─── */
 const colors = {
   primary: '#005E97',
   primaryContainer: '#0077B6',

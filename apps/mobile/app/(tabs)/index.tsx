@@ -19,7 +19,7 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       {/* Hero */}
       <View style={styles.hero}>
-        <Text style={styles.heroTitle}>🏖️ S-Local</Text>
+        <Text style={styles.heroTitle}>🏖️ S-Loco</Text>
         <Text style={styles.heroSubtitle}>Khám phá Sầm Sơn</Text>
       </View>
 

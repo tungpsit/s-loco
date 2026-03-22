@@ -36,7 +36,7 @@ export async function sendOtp(phone: string) {
     console.log(`║  Expires in 5 minutes             ║`)
     console.log(`╚════════════════════════════════════╝\n`)
   } else {
-    await smsProvider.send(phone, `Mã OTP S-Local của bạn: ${code}. Hết hạn sau 5 phút.`)
+    await smsProvider.send(phone, `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`)
   }
 
   return { success: true, expires_in: APP_CONSTANTS.OTP_EXPIRY_SECONDS }

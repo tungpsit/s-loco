@@ -36,7 +36,7 @@ export async function initiatePayment(orderId: string, userId: string, gateway: 
   const { paymentUrl, transactionId } = await gw.createPaymentUrl({
     orderId,
     amount: Math.round(Number(order.finalAmount)),
-    description: `S-Local #${orderId.slice(0, 8)}`,
+    description: `S-Loco #${orderId.slice(0, 8)}`,
     returnUrl: `${APP_URL}/api/v1/payments/return`,
     ipnUrl: `${APP_URL}/api/v1/payments/webhook/${gateway}`,
     ipAddress,
