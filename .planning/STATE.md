@@ -1,43 +1,34 @@
-# Project State: S-Local
+# Project State: S-Loco
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-03-22)
 
 **Core value:** Khách du lịch tìm, đặt, thanh toán dịch vụ Sầm Sơn trong 1 app — voucher + QR + giá minh bạch
-**Current focus:** All 6 backend phases COMPLETE. Frontend UI in progress.
+**Current focus:** Docker + Deploy
 
 ## Current Phase
 
-**Phase:** Post-v1 — All backend phases complete
-**Status:** Backend API v1.0.0 done (67 endpoints). Frontend UI being built.
-**Next:** Frontend screen development, API integration, testing, deployment
+**Phase:** Post-v1 — Deployment preparation
+**Status:** Backend API v1.0.0 + Admin Dashboard + Tests complete
+**Next:** Docker containerization and CI/CD pipeline
 
 ## Progress
 
 | Phase | Status | Commit |
 |-------|--------|--------|
-| Phase 1: Foundation & Auth | ✅ Done | `e926d26` |
-| Phase 2: Vendor & Service Management | ✅ Done | `093843d` |
-| Phase 3: Orders, Vouchers & QR | ✅ Done | `269db31` |
-| Phase 4: Payment Integration | ✅ Done | `871ac7b` |
-| Phase 5: Settlement, Notifications & Dashboards | ✅ Done | `7211775` |
-| Phase 6: AI, Combos, Content & Reviews | ✅ Done | `50778ae` |
-| Frontend UI: Blue design system | ✅ Done | `cea7393` |
+| Phase 1-6: Backend API | ✅ Done | 67 endpoints, 63/63 reqs |
+| Frontend: Blue design system | ✅ Done | 8 mobile/vendor screens |
+| Admin Dashboard (Next.js) | ✅ Done | 5 pages + live API via React Query |
+| Brand rename S-Loco | ✅ Done | 13 occurrences across 11 files |
+| API Integration Tests | ✅ Done | 35+ tests across 6 suites |
 
-## Session Log
+## Remaining
 
-| Date | Activity | Output |
-|------|----------|--------|
-| 2026-03-22 | Project initialized | PROJECT.md, config.json, research/ |
-| 2026-03-22 | Phases 1-6 complete | 67 API endpoints, 63 requirements |
-| 2026-03-22 | Blue design system applied | DESIGN.md, 8 mobile/vendor screens |
-
-## Stats
-
-- **API Endpoints:** 67 across 14 route groups
-- **Requirements:** 63/63 v1 complete
-- **Design System:** Ocean Blue (#005E97) primary
+- [ ] 🐳 Docker + docker-compose
+- [ ] 🔄 CI/CD pipeline (GitHub Actions)
+- [ ] 📱 Mobile API integration
+- [ ] 📄 OpenAPI spec / API docs
 
 ---
-*Last updated: 2026-03-22 after all phases complete*
+*Last updated: 2026-03-22*

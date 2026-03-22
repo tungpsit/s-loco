@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+*.md
+.planning
+.agents
+dist
+*.log
+.env
+.env.local

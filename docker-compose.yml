@@ -1,45 +1,72 @@
+version: "3.9"
+
 services:
+  # ─── PostgreSQL ───
   postgres:
     image: postgres:16-alpine
-    ports:
-      - '5432:5432'
     environment:
-      POSTGRES_USER: slocal
-      POSTGRES_PASSWORD: slocal_dev
-      POSTGRES_DB: slocal
+      POSTGRES_USER: sloco
+      POSTGRES_PASSWORD: sloco_dev_2026
+      POSTGRES_DB: sloco
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U slocal']
+      test: ["CMD-SHELL", "pg_isready -U sloco"]
       interval: 5s
       timeout: 3s
       retries: 5
 
+  # ─── Redis ───
   redis:
     image: redis:7-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redisdata:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  rustfs:
-    image: rustfs/rustfs:latest
+  # ─── API Server ───
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
     ports:
-      - '9000:9000'
-      - '9001:9001'
+      - "3000:3000"
     environment:
-      RUSTFS_ROOT_USER: slocal
-      RUSTFS_ROOT_PASSWORD: slocal_dev
-    volumes:
-      - rustfs_data:/data
-    command: server /data --console-address ':9001'
+      DATABASE_URL: postgres://sloco:sloco_dev_2026@postgres:5432/sloco
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: sloco-dev-jwt-secret-2026
+      JWT_REFRESH_SECRET: sloco-dev-refresh-secret-2026
+      QR_JWT_SECRET: sloco-dev-qr-secret-2026
+      VNPAY_HASH_SECRET: dev-vnpay-hash
+      MOMO_SECRET_KEY: dev-momo-secret
+      SEPAY_SECRET_KEY: dev-sepay-secret
+      APP_URL: http://localhost:3000
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ─── Admin Dashboard ───
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:3000/api/v1
+    depends_on:
+      - api
 
 volumes:
-  postgres_data:
-  redis_data:
-  rustfs_data:
+  pgdata:
+  redisdata:
