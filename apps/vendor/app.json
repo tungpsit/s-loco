@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "S-Local Vendor",
+    "slug": "s-local-vendor",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "scheme": "slocal-vendor",
+    "platforms": ["ios", "android"],
+    "newArchEnabled": true,
+    "plugins": ["expo-router", "expo-camera"]
+  }
+}

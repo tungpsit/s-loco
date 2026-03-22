@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "S-Local",
+    "slug": "s-local-mobile",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "scheme": "slocal",
+    "platforms": ["ios", "android"],
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router"]
+  }
+}

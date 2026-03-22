@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: slocal
+      POSTGRES_PASSWORD: slocal_dev
+      POSTGRES_DB: slocal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U slocal']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      RUSTFS_ROOT_USER: slocal
+      RUSTFS_ROOT_PASSWORD: slocal_dev
+    volumes:
+      - rustfs_data:/data
+    command: server /data --console-address ':9001'
+
+volumes:
+  postgres_data:
+  redis_data:
+  rustfs_data:

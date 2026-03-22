@@ -1,0 +1,22 @@
+{
+  "name": "s-local",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check": "turbo check",
+    "db:generate": "turbo db:generate --filter=@s-local/db",
+    "db:migrate": "turbo db:migrate --filter=@s-local/db",
+    "db:push": "turbo db:push --filter=@s-local/db",
+    "db:seed": "turbo db:seed --filter=@s-local/db",
+    "db:studio": "turbo db:studio --filter=@s-local/db"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0"
+  }
+}
