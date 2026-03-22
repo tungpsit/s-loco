@@ -30,5 +30,11 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 - [ ] 📱 Mobile API integration
 - [ ] 📄 OpenAPI spec / API docs
 
+## Pending Todos
+
+| # | Title | Area | Created |
+|---|-------|------|---------|
+| | Không có todo nào chờ xử lý | | |
+
 ---
 *Last updated: 2026-03-22*

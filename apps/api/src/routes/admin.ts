@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import { createVendorSchema } from '@s-local/shared/validators'
+import { adminUpdateVendorSchema, createVendorSchema } from '@S-Loco/shared/validators'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { authMiddleware, requireRole } from '../middleware/auth'
@@ -17,6 +17,18 @@ const adminRoutes = new Hono()
 // All admin routes require admin role
 adminRoutes.use('*', authMiddleware(), requireRole('admin'))
 
+// ─── GET /admin/vendors — list vendors ────
+adminRoutes.get(
+  '/vendors',
+  async (c) => {
+    const status = c.req.query('status') || undefined
+    const page = Number(c.req.query('page') || 1)
+    const limit = Number(c.req.query('limit') || 20)
+    const result = await vendorSvc.listVendors({ status, page, limit })
+    return c.json({ success: true, data: result })
+  },
+)
+
 // ─── POST /admin/vendors — create vendor ────
 adminRoutes.post(
   '/vendors',
@@ -29,6 +41,60 @@ adminRoutes.post(
     } catch (err) {
       if (err instanceof VendorError) {
         return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── PUT /admin/vendors/:id/status — update status ────
+adminRoutes.put(
+  '/vendors/:id/status',
+  async (c) => {
+    try {
+      const vendorId = c.req.param('id')
+      const body = await c.req.json()
+      const vendor = await vendorSvc.updateVendorStatus(vendorId, body)
+      return c.json({ success: true, data: { vendor } })
+    } catch (err) {
+      if (err instanceof VendorError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── GET /admin/vendors/:id — get vendor detail ────
+adminRoutes.get(
+  '/vendors/:id',
+  async (c) => {
+    try {
+      const vendorId = c.req.param('id')
+      const vendor = await vendorSvc.getVendorById(vendorId)
+      return c.json({ success: true, data: { vendor } })
+    } catch (err) {
+      if (err instanceof VendorError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── PUT /admin/vendors/:id — update vendor info & commission ────
+adminRoutes.put(
+  '/vendors/:id',
+  zValidator('json', adminUpdateVendorSchema),
+  async (c) => {
+    try {
+      const vendorId = c.req.param('id')
+      const data = c.req.valid('json')
+      const vendor = await vendorSvc.adminUpdateVendor(vendorId, data)
+      return c.json({ success: true, data: { vendor } })
+    } catch (err) {
+      if (err instanceof VendorError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
       }
       throw err
     }

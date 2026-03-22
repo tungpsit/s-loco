@@ -1,6 +1,6 @@
-import { getDb } from '@s-local/db'
-import { vendors } from '@s-local/db/schema'
-import type { CreateVendorInput, UpdateVendorInput, UpdateVendorStatusInput } from '@s-local/shared/validators'
+import { getDb } from '@S-Loco/db'
+import { vendors } from '@S-Loco/db/schema'
+import type { AdminUpdateVendorInput, CreateVendorInput, UpdateVendorInput, UpdateVendorStatusInput } from '@S-Loco/shared/validators'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 
 export async function createVendor(data: CreateVendorInput) {
@@ -89,6 +89,31 @@ export async function updateVendor(vendorId: string, ownerId: string, data: Upda
       ...(data.phone !== undefined && { phone: data.phone }),
       ...(data.email !== undefined && { email: data.email }),
       ...(data.business_hours !== undefined && { businessHours: data.business_hours }),
+      updatedAt: new Date(),
+    })
+    .where(eq(vendors.id, vendorId))
+    .returning()
+  return updated!
+}
+
+export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendorInput) {
+  const db = getDb()
+  const [vendor] = await db.select().from(vendors)
+    .where(eq(vendors.id, vendorId))
+    .limit(1)
+  if (!vendor) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
+
+  const [updated] = await db.update(vendors)
+    .set({
+      ...(data.name && { name: data.name }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.address !== undefined && { address: data.address }),
+      ...(data.latitude !== undefined && { latitude: data.latitude }),
+      ...(data.longitude !== undefined && { longitude: data.longitude }),
+      ...(data.phone !== undefined && { phone: data.phone }),
+      ...(data.email !== undefined && { email: data.email }),
+      ...(data.business_hours !== undefined && { businessHours: data.business_hours }),
+      ...(data.commission_rate !== undefined && { commissionRate: data.commission_rate }),
       updatedAt: new Date(),
     })
     .where(eq(vendors.id, vendorId))

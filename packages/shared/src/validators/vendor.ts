@@ -29,6 +29,12 @@ export const updateVendorSchema = z.object({
 })
 export type UpdateVendorInput = z.infer<typeof updateVendorSchema>
 
+// ─── Update Vendor (Admin) ─────────────────────────────
+export const adminUpdateVendorSchema = updateVendorSchema.extend({
+  commission_rate: z.string().optional(),
+})
+export type AdminUpdateVendorInput = z.infer<typeof adminUpdateVendorSchema>
+
 // ─── Update Vendor Status (Admin) ──────────────────────
 export const updateVendorStatusSchema = z.object({
   status: z.enum(['pending', 'active', 'suspended', 'rejected']),
