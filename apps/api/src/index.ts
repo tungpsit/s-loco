@@ -37,6 +37,18 @@ app.get('/health', (c) =>
   }),
 )
 
+// API docs
+app.get('/docs', (c) =>
+  c.html(`<!DOCTYPE html>
+<html><head><title>S-Loco API Docs</title><meta charset="utf-8"/></head>
+<body><script id="api-reference" data-url="/openapi.yaml"></script>
+<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script></body></html>`),
+)
+app.get('/openapi.yaml', async (c) => {
+  const spec = await Bun.file('./docs/openapi.yaml').text()
+  return c.text(spec, 200, { 'Content-Type': 'text/yaml' })
+})
+
 // API v1 routes
 const v1 = new Hono()
 v1.route('/auth', authRoutes)

@@ -1,0 +1,685 @@
+openapi: 3.1.0
+info:
+  title: S-Loco API
+  version: 1.0.0
+  description: |
+    API nền tảng du lịch S-Loco — Sầm Sơn. Quản lý dịch vụ, voucher, thanh toán,
+    và kết nối du khách với vendor địa phương.
+  contact:
+    name: S-Loco Team
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Đăng ký, đăng nhập OTP/email, refresh token
+  - name: Services
+    description: Dịch vụ du lịch — tìm kiếm, lọc, chi tiết
+  - name: Orders
+    description: Đơn hàng — tạo, thanh toán, hủy
+  - name: Vouchers
+    description: Voucher — danh sách, quét QR, sử dụng
+  - name: Payments
+    description: Thanh toán VNPay/Momo/SePay, webhook, hoàn tiền
+  - name: Settlements
+    description: Giải ngân cho vendor — batch, duyệt, đối soát
+  - name: Dashboard
+    description: Bảng điều khiển admin và vendor
+  - name: Content
+    description: Bài viết, sự kiện, thời tiết
+  - name: Combos
+    description: Gói combo dịch vụ
+  - name: Itinerary
+    description: Lịch trình AI
+  - name: Reviews
+    description: Đánh giá vendor/dịch vụ
+  - name: Admin
+    description: Quản trị vendor
+  - name: Notifications
+    description: Thông báo push và in-app
+
+paths:
+  # ─── Auth ───
+  /auth/otp/send:
+    post:
+      tags: [Auth]
+      summary: Gửi mã OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, example: "0901234567" }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/SuccessResponse" } } } }
+        "429": { description: Rate limited }
+
+  /auth/otp/verify:
+    post:
+      tags: [Auth]
+      summary: Xác thực OTP → nhận JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone: { type: string }
+                code: { type: string, example: "123456" }
+                full_name: { type: string }
+                email: { type: string, format: email }
+      responses:
+        "200":
+          description: JWT tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  refresh_token: { type: string }
+                  user: { $ref: "#/components/schemas/User" }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập email (admin/vendor)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200": { description: JWT tokens }
+        "401": { description: Invalid credentials }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token: { type: string }
+      responses:
+        "200": { description: New JWT pair }
+        "401": { description: Invalid or expired refresh token }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Đăng xuất
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Logged out }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Lấy thông tin user hiện tại
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: User profile }
+        "401": { description: Unauthorized }
+
+  # ─── Services ───
+  /services:
+    get:
+      tags: [Services]
+      summary: Tìm kiếm & lọc dịch vụ (public)
+      parameters:
+        - { name: q, in: query, schema: { type: string }, description: Từ khóa tìm kiếm }
+        - { name: category, in: query, schema: { type: string } }
+        - { name: min_price, in: query, schema: { type: number } }
+        - { name: max_price, in: query, schema: { type: number } }
+        - { name: min_rating, in: query, schema: { type: number } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        "200": { description: Paginated service list }
+
+  /services/categories:
+    get:
+      tags: [Services]
+      summary: Danh sách danh mục
+      responses:
+        "200": { description: Category list }
+
+  /services/featured:
+    get:
+      tags: [Services]
+      summary: Vendor nổi bật
+      responses:
+        "200": { description: Featured vendors }
+
+  /services/{id}:
+    get:
+      tags: [Services]
+      summary: Chi tiết dịch vụ
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Service detail }
+        "404": { description: Not found }
+    patch:
+      tags: [Services]
+      summary: Cập nhật dịch vụ (vendor)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Updated service }
+    delete:
+      tags: [Services]
+      summary: Xóa dịch vụ (vendor)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Deleted }
+
+  /services/vendor/{vendorId}:
+    get:
+      tags: [Services]
+      summary: Dịch vụ theo vendor
+      parameters:
+        - { name: vendorId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Service list }
+    post:
+      tags: [Services]
+      summary: Tạo dịch vụ mới (vendor)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: vendorId, in: path, required: true, schema: { type: string } }
+      responses:
+        "201": { description: Created service }
+
+  # ─── Orders ───
+  /orders:
+    get:
+      tags: [Orders]
+      summary: Lịch sử đơn hàng
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses:
+        "200": { description: Order list }
+    post:
+      tags: [Orders]
+      summary: Tạo đơn hàng
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      service_id: { type: string }
+                      quantity: { type: integer }
+      responses:
+        "201": { description: Created order with vouchers }
+
+  /orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Chi tiết đơn hàng
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Order detail }
+
+  /orders/{id}/pay:
+    post:
+      tags: [Orders]
+      summary: Mock payment (dev)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Payment processed }
+
+  /orders/{id}/cancel:
+    post:
+      tags: [Orders]
+      summary: Hủy đơn chưa thanh toán
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Order cancelled }
+
+  # ─── Vouchers ───
+  /vouchers:
+    get:
+      tags: [Vouchers]
+      summary: Voucher của tôi
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [created, paid, redeemed, completed, expired, refunded] } }
+      responses:
+        "200": { description: Voucher list }
+
+  /vouchers/{id}:
+    get:
+      tags: [Vouchers]
+      summary: Chi tiết voucher + QR code
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Voucher detail with QR token }
+
+  /vouchers/redeem:
+    post:
+      tags: [Vouchers]
+      summary: Vendor quét QR để sử dụng voucher
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [qr_token]
+              properties:
+                qr_token: { type: string }
+      responses:
+        "200": { description: Voucher redeemed }
+        "409": { description: Already redeemed }
+
+  /vouchers/self-redeem:
+    post:
+      tags: [Vouchers]
+      summary: Khách tự quét QR vendor
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Voucher redeemed }
+
+  /vouchers/{id}/complete:
+    post:
+      tags: [Vouchers]
+      summary: Vendor xác nhận hoàn thành
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Voucher completed }
+
+  /vouchers/auto-confirm:
+    post:
+      tags: [Vouchers]
+      summary: Auto-confirm hết hạn (admin/cron)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Auto-confirmed count }
+
+  # ─── Payments ───
+  /payments/initiate:
+    post:
+      tags: [Payments]
+      summary: Bắt đầu thanh toán
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [order_id, gateway]
+              properties:
+                order_id: { type: string }
+                gateway: { type: string, enum: [vnpay, momo, sepay] }
+      responses:
+        "200": { description: Payment URL }
+
+  /payments/webhook/vnpay:
+    post:
+      tags: [Payments]
+      summary: VNPay IPN webhook
+      responses:
+        "200": { description: RspCode 00 or 99 }
+
+  /payments/webhook/momo:
+    post:
+      tags: [Payments]
+      summary: Momo callback
+      responses:
+        "200": { description: Status 0 or 1 }
+
+  /payments/webhook/sepay:
+    post:
+      tags: [Payments]
+      summary: SePay callback
+      responses:
+        "200": { description: Success }
+
+  /payments/return:
+    get:
+      tags: [Payments]
+      summary: Post-payment redirect
+      responses:
+        "200": { description: Payment status }
+
+  /payments/refund:
+    post:
+      tags: [Payments]
+      summary: Yêu cầu hoàn tiền
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Refund processed }
+
+  /payments/poll:
+    post:
+      tags: [Payments]
+      summary: Poll pending payments (admin)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Poll results }
+
+  # ─── Settlements ───
+  /settlements:
+    get:
+      tags: [Settlements]
+      summary: Lịch sử giải ngân (vendor)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Settlement list }
+
+  /settlements/all:
+    get:
+      tags: [Settlements]
+      summary: Tất cả giải ngân (admin)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: All settlements }
+
+  /settlements/reconciliation:
+    get:
+      tags: [Settlements]
+      summary: Báo cáo đối soát (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: start, in: query, schema: { type: string, format: date-time } }
+        - { name: end, in: query, schema: { type: string, format: date-time } }
+      responses:
+        "200": { description: Reconciliation report }
+
+  /settlements/{id}/approve:
+    post:
+      tags: [Settlements]
+      summary: Duyệt giải ngân (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Approved }
+
+  /settlements/{id}/disburse:
+    post:
+      tags: [Settlements]
+      summary: Giải ngân (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Disbursed }
+
+  /settlements/batch:
+    post:
+      tags: [Settlements]
+      summary: Chạy batch giải ngân (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: days, in: query, schema: { type: integer, default: 3 } }
+      responses:
+        "200": { description: Batch result }
+
+  # ─── Dashboard ───
+  /dashboard/admin:
+    get:
+      tags: [Dashboard]
+      summary: Thống kê admin
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Admin dashboard stats }
+
+  /dashboard/admin/orders:
+    get:
+      tags: [Dashboard]
+      summary: Đơn hàng admin view
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Admin order list }
+
+  /dashboard/vendor:
+    get:
+      tags: [Dashboard]
+      summary: Thống kê vendor
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Vendor dashboard stats }
+
+  # ─── Content ───
+  /content/articles:
+    get:
+      tags: [Content]
+      summary: Danh sách bài viết (public)
+      parameters:
+        - { name: category, in: query, schema: { type: string, enum: [news, event, guide] } }
+      responses:
+        "200": { description: Article list }
+    post:
+      tags: [Content]
+      summary: Tạo bài viết (admin)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "201": { description: Created article }
+
+  /content/articles/{id}:
+    put:
+      tags: [Content]
+      summary: Cập nhật bài viết
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Updated }
+    delete:
+      tags: [Content]
+      summary: Xóa bài viết
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Deleted }
+
+  /content/weather:
+    get:
+      tags: [Content]
+      summary: Thời tiết Sầm Sơn
+      responses:
+        "200": { description: Weather data }
+
+  /content/events:
+    get:
+      tags: [Content]
+      summary: Sự kiện sắp tới
+      responses:
+        "200": { description: Event list }
+
+  # ─── Combos ───
+  /combos:
+    get:
+      tags: [Combos]
+      summary: Danh sách combo (public)
+      responses:
+        "200": { description: Combo list }
+    post:
+      tags: [Combos]
+      summary: Tạo combo (vendor)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "201": { description: Created combo }
+
+  /combos/{id}:
+    get:
+      tags: [Combos]
+      summary: Chi tiết combo
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Combo detail }
+
+  # ─── Itinerary ───
+  /itinerary/generate:
+    post:
+      tags: [Itinerary]
+      summary: Tạo lịch trình AI
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                days: { type: integer, example: 3 }
+                budget: { type: number, example: 5000000 }
+                preferences: { type: array, items: { type: string } }
+      responses:
+        "200": { description: AI-generated itinerary }
+
+  # ─── Reviews ───
+  /reviews/{vendorId}:
+    get:
+      tags: [Reviews]
+      summary: Đánh giá theo vendor (public)
+      parameters:
+        - { name: vendorId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Review list }
+
+  /reviews:
+    post:
+      tags: [Reviews]
+      summary: Gửi đánh giá
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vendor_id, rating]
+              properties:
+                vendor_id: { type: string }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                comment: { type: string }
+      responses:
+        "201": { description: Review created }
+
+  # ─── Admin ───
+  /admin/vendors:
+    get:
+      tags: [Admin]
+      summary: Danh sách vendor (admin)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, active, suspended] } }
+      responses:
+        "200": { description: Vendor list }
+
+  /admin/vendors/{id}/status:
+    put:
+      tags: [Admin]
+      summary: Thay đổi trạng thái vendor
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [active, suspended] }
+      responses:
+        "200": { description: Status updated }
+
+  # ─── Notifications ───
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: Danh sách thông báo
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200": { description: Notification list }
+
+  /notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      summary: Đánh dấu đã đọc
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Marked as read }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data: { type: object }
+
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        phone: { type: string }
+        email: { type: string }
+        full_name: { type: string }
+        role: { type: string, enum: [tourist, vendor_owner, admin] }
