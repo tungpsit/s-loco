@@ -40,7 +40,7 @@ Monorepo scaffolding (all 4 apps + core packages), database schema deployment vi
 - **Apps get hello-world routes** — basic structure from day 1, full implementation in later phases
 - **packages/validators** added when first needed (Phase 2 or 3, not Phase 1)
 - **Seed script:** Sample Sầm Sơn-themed data — 5-10 fake vendors, services, service categories for development
-- **Docker Compose:** Full local infra — PostgreSQL 16 + Redis 7 + MinIO (all services from the start)
+- **Docker Compose:** Full local infra — PostgreSQL 16 + Redis 7 + RustFS (all services from the start)
 
 ### Claude's Discretion
 - Password hashing algorithm (bcrypt/argon2)

@@ -21,7 +21,7 @@
 | **Primary DB** | PostgreSQL | 16+ | ✅ High — ACID for payments, JSONB, full-text search |
 | **Cache/Queue** | Redis (Valkey) | 7+ | ✅ High — Sessions, OTP, BullMQ jobs |
 | **Job Queue** | BullMQ | 5.x | ✅ High — Redis-backed, dashboard UI, retries |
-| **Object Storage** | Cloudflare R2 / MinIO | — | ✅ High — S3-compatible, free egress |
+| **Object Storage** | Cloudflare R2 / RustFS | — | ✅ High — S3-compatible, free egress |
 
 ### Frontend — Mobile (Tourist + Vendor)
 

@@ -9,7 +9,7 @@
 
 - [ ] **FNDN-01**: Monorepo initialized with Bun workspaces + Turborepo (apps/api, apps/mobile, apps/vendor, apps/admin, packages/db, packages/shared, packages/validators)
 - [ ] **FNDN-02**: PostgreSQL database schema created with Drizzle ORM (all 15+ tables, indexes, constraints)
-- [ ] **FNDN-03**: Docker Compose setup for local development (PostgreSQL, Redis, MinIO)
+- [ ] **FNDN-03**: Docker Compose setup for local development (PostgreSQL, Redis, RustFS)
 - [ ] **FNDN-04**: CI pipeline with linting (Biome), type checking, and tests (GitHub Actions)
 - [ ] **FNDN-05**: Shared Zod validators between frontend and backend (packages/validators)
 

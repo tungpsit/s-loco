@@ -27,7 +27,7 @@
 
 **Success Criteria:**
 1. `bun install` successfully installs all workspace dependencies
-2. `docker compose up` starts PostgreSQL, Redis, MinIO locally
+2. `docker compose up` starts PostgreSQL, Redis, RustFS locally
 3. Drizzle migration creates all tables with correct schema
 4. Tourist can request OTP, verify OTP, receive JWT tokens
 5. Admin/vendor can login with email/password and receive JWT
