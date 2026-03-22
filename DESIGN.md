@@ -23,7 +23,7 @@
 1. **Fluid, not rigid** — allow images to break the grid, overlap containers
 2. **Premium equals space** — generous padding, no cramped elements
 3. **No-Line Rule** — no 1px borders; use background color shifts for boundaries
-4. **Glass & Gradient** — glassmorphism for floating headers/nav, blue gradients for CTAs
+4. **Glass & Gradient** — glassmorphism for floating headers/nav, deep-blue gradients for CTAs
 
 ---
 
@@ -37,37 +37,37 @@
 | `primary_fixed` | `#90E0EF` | Icon backgrounds, subtle highlights |
 | `primary_fixed_dim` | `#48CAE4` | Image inner glow, hover states |
 
-### Secondary — Aqua
+### Secondary — Slate Blue
 | Token | Hex | Role |
 |-------|-----|------|
-| `secondary` | `#006A62` | Secondary buttons, links |
-| `secondary_container` | `#5EF6E6` | Chips, tags ("Local Favorite") |
-| `on_secondary_container` | `#006F66` | Chip text |
+| `secondary` | `#3A5A8C` | Secondary buttons, links |
+| `secondary_container` | `#B8D4F0` | Chips, tags ("Local Favorite") |
+| `on_secondary_container` | `#1E3A5F` | Chip text |
 
-### Tertiary — Coral Accent
+### Tertiary — Deep Indigo Accent
 | Token | Hex | Role |
 |-------|-----|------|
-| `tertiary` | `#9E380D` | Discount badges, alerts |
-| `tertiary_container` | `#BF5025` | Sale tags, promotional highlights |
-| `tertiary_fixed` | `#FFDBCF` | Subtle warm backgrounds |
+| `tertiary` | `#3F3D99` | Discount badges, alerts |
+| `tertiary_container` | `#5856D6` | Sale tags, promotional highlights |
+| `tertiary_fixed` | `#E0DFFF` | Subtle cool accent backgrounds |
 
-### Surfaces — Tonal Layering
+### Surfaces — Cool Blue-Gray Tonal Layering
 | Token | Hex | Role |
 |-------|-----|------|
-| `surface` | `#F6FAF9` | Base page background |
-| `surface_container_low` | `#F0F4F3` | Section backgrounds |
-| `surface_container` | `#EBEFEE` | Card containers |
-| `surface_container_high` | `#E5E9E8` | Secondary button backgrounds |
-| `surface_container_highest` | `#DFE3E2` | Input field backgrounds |
+| `surface` | `#F4F7FB` | Base page background |
+| `surface_container_low` | `#EDF1F8` | Section backgrounds |
+| `surface_container` | `#E6EBF4` | Card containers |
+| `surface_container_high` | `#DEE4EF` | Secondary button backgrounds |
+| `surface_container_highest` | `#D6DDEA` | Input field backgrounds |
 | `surface_container_lowest` | `#FFFFFF` | Cards, elevated content |
 
 ### Text
 | Token | Hex | Role |
 |-------|-----|------|
-| `on_surface` | `#181C1C` | Primary text (NEVER use pure `#000`) |
-| `on_surface_variant` | `#3E4949` | Secondary text (only `body-md+`) |
-| `outline` | `#6E7979` | Placeholder text, disabled icons |
-| `outline_variant` | `#BDC9C8` | Ghost borders (15% opacity) |
+| `on_surface` | `#161B2E` | Primary text (NEVER use pure `#000`) |
+| `on_surface_variant` | `#3B4460` | Secondary text (only `body-md+`) |
+| `outline` | `#6B7694` | Placeholder text, disabled icons |
+| `outline_variant` | `#B5BED4` | Ghost borders (15% opacity) |
 
 ### Error
 | Token | Hex | Role |
@@ -131,7 +131,7 @@ box-shadow: none;
 
 **Secondary**
 ```css
-background: #E5E9E8;
+background: #DEE4EF;
 color: #005E97;
 border-radius: 3rem;
 padding: 12px 24px;
@@ -140,7 +140,7 @@ padding: 12px 24px;
 **Tertiary (Ghost)**
 ```css
 background: transparent;
-color: #006565;
+color: #3A5A8C;
 font: 500 14px "Be Vietnam Pro";
 /* Small icon + text only */
 ```
@@ -151,7 +151,7 @@ background: #FFFFFF;
 border-radius: 16px;
 padding: 16px;
 /* No border! Use tonal layering */
-/* Place on #F0F4F3 background for subtle lift */
+/* Place on #EDF1F8 background for subtle lift */
 ```
 
 **Image Cards**: Images with 16px+ corner radius and `#48CAE4` inner glow for "underwater" premium feel.
@@ -159,12 +159,12 @@ padding: 16px;
 ### Input Fields
 ```css
 /* Default */
-background: #DFE3E2;
+background: #D6DDEA;
 border: none;
 border-radius: 12px;
 padding: 16px;
 font: 400 16px "Be Vietnam Pro";
-color: #181C1C;
+color: #161B2E;
 
 /* Focus */
 background: #FFFFFF;
@@ -174,8 +174,8 @@ border: 2px solid #005E97;
 ### Chips / Tags
 ```css
 /* "Local's Insight" Chip */
-background: #5EF6E6;
-color: #006F66;
+background: #B8D4F0;
+color: #1E3A5F;
 border-radius: 9999px;
 padding: 6px 14px;
 font: 500 12px "Be Vietnam Pro";
@@ -183,7 +183,7 @@ font: 500 12px "Be Vietnam Pro";
 
 ### Discount Badge
 ```css
-background: #BF5025;
+background: #5856D6;
 color: #FFFFFF;
 border-radius: 8px;
 padding: 4px 8px;
@@ -193,14 +193,14 @@ font: 600 11px "Be Vietnam Pro";
 ### Bottom Tab Bar
 ```css
 /* Glassmorphism */
-background: rgba(246, 250, 249, 0.7);
+background: rgba(244, 247, 251, 0.7);
 backdrop-filter: blur(20px);
 border-top: none;
 ```
 
 ### Floating Header
 ```css
-background: rgba(246, 250, 249, 0.7);
+background: rgba(244, 247, 251, 0.7);
 backdrop-filter: blur(20px);
 position: sticky;
 top: 0;
@@ -234,7 +234,7 @@ top: 0;
 ### Image Rules
 - Hero images: full-bleed with gradient overlay (`rgba(0,94,151,0.3)` to transparent)
 - Vendor photos: 16:9 aspect ratio, 16px border radius
-- Category icons: 48x48px on `#90E0EF` background circles
+- Category icons: 48×48px on `#90E0EF` background circles
 
 ---
 
@@ -242,8 +242,8 @@ top: 0;
 
 ### Tonal Layering (Primary Method)
 ```
-Page background:  #F6FAF9  (surface)
-Section:          #F0F4F3  (surface_container_low)
+Page background:  #F4F7FB  (surface)
+Section:          #EDF1F8  (surface_container_low)
 Card:             #FFFFFF  (surface_container_lowest)
 ```
 The difference in luminance IS the elevation. No shadows needed.
@@ -251,14 +251,14 @@ The difference in luminance IS the elevation. No shadows needed.
 ### Ambient Shadows (Floating Elements Only)
 ```css
 /* FABs, modals, active bottom sheets */
-box-shadow: 0 8px 32px rgba(24, 28, 28, 0.06);
-/* Never use pure black — use tinted on_surface */
+box-shadow: 0 8px 32px rgba(22, 27, 46, 0.06);
+/* Never use pure black — use blue-tinted on_surface */
 ```
 
 ### Ghost Border (Same-Color Fallback)
 ```css
 /* When a container sits on same-color background */
-border: 1px solid rgba(189, 201, 200, 0.15);
+border: 1px solid rgba(181, 190, 212, 0.15);
 ```
 
 ---
@@ -269,7 +269,7 @@ border: 1px solid rgba(189, 201, 200, 0.15);
 - Allow images to **break the grid** (bleed into status bar, overlap containers)
 - Use `primary_fixed` (`#90E0EF`) for icon highlight backgrounds
 - Use the full spacing scale — premium equals space
-- Use `on_surface` (`#181C1C`) for text instead of pure `#000000`
+- Use `on_surface` (`#161B2E`) for text instead of pure `#000000`
 - Add gradient overlays to hero images
 
 ### ❌ Don't

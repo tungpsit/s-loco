@@ -1,26 +1,81 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap");
 
+/* ─── S-Local Blue Design System ─────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary — Ocean Blue */
+  --color-primary: #005E97;
+  --color-primary-container: #0077B6;
+  --color-primary-fixed: #90E0EF;
+  --color-primary-fixed-dim: #48CAE4;
+
+  /* Secondary — Slate Blue */
+  --color-secondary: #3A5A8C;
+  --color-secondary-container: #B8D4F0;
+  --color-on-secondary-container: #1E3A5F;
+
+  /* Tertiary — Deep Indigo */
+  --color-tertiary: #3F3D99;
+  --color-tertiary-container: #5856D6;
+  --color-tertiary-fixed: #E0DFFF;
+
+  /* Surfaces — Cool Blue-Gray */
+  --color-surface: #F4F7FB;
+  --color-surface-container-low: #EDF1F8;
+  --color-surface-container: #E6EBF4;
+  --color-surface-container-high: #DEE4EF;
+  --color-surface-container-highest: #D6DDEA;
+  --color-surface-container-lowest: #FFFFFF;
+
+  /* Text */
+  --color-on-surface: #161B2E;
+  --color-on-surface-variant: #3B4460;
+  --color-outline: #6B7694;
+  --color-outline-variant: #B5BED4;
+
+  /* Error */
+  --color-error: #BA1A1A;
+  --color-on-error: #FFFFFF;
+
+  /* Background / Foreground shortcuts */
+  --background: var(--color-surface);
+  --foreground: var(--color-on-surface);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Design Tokens */
+  --color-primary: #005E97;
+  --color-primary-container: #0077B6;
+  --color-primary-fixed: #90E0EF;
+  --color-primary-fixed-dim: #48CAE4;
+  --color-secondary: #3A5A8C;
+  --color-secondary-container: #B8D4F0;
+  --color-on-secondary-container: #1E3A5F;
+  --color-tertiary: #3F3D99;
+  --color-tertiary-container: #5856D6;
+  --color-tertiary-fixed: #E0DFFF;
+  --color-surface: #F4F7FB;
+  --color-surface-low: #EDF1F8;
+  --color-surface-mid: #E6EBF4;
+  --color-surface-high: #DEE4EF;
+  --color-surface-highest: #D6DDEA;
+  --color-on-surface: #161B2E;
+  --color-on-surface-variant: #3B4460;
+  --color-outline: #6B7694;
+  --color-outline-variant: #B5BED4;
+  --color-error: #BA1A1A;
+
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

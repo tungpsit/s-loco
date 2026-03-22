@@ -9,14 +9,12 @@ interface ItineraryInput {
   days: number
   budget: number
   preferences: string[]
-  groupType: string // solo, couple, family, friends
+  groupType: string
 }
 
-// ─── Generate AI Itinerary ─────────────────────────────
 export async function generateItinerary(input: ItineraryInput) {
   const db = getDb()
 
-  // Fetch available services to inject as context
   const availableServices = await db.select({
     id: services.id,
     name: services.name,
@@ -69,7 +67,6 @@ Trả về JSON (không markdown) theo format:
 }`
 
   if (!GEMINI_API_KEY) {
-    // Dev fallback: return mock itinerary
     return generateMockItinerary(input, availableServices)
   }
 
@@ -85,12 +82,8 @@ Trả về JSON (không markdown) theo format:
 
     const data = await res.json() as any
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-
-    // Parse JSON from response (handle potential markdown wrapping)
     const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
-    }
+    if (jsonMatch) return JSON.parse(jsonMatch[0])
   } catch (err) {
     console.error('[Itinerary] Gemini API error:', err)
   }
@@ -110,7 +103,6 @@ function generateMockItinerary(input: ItineraryInput, availableServices: any[]) 
     }))
     days.push({ day: d, title: `Ngày ${d}`, activities })
   }
-
   return {
     title: `Lịch trình ${input.days} ngày tại Sầm Sơn`,
     summary: `Hành trình ${input.groupType} ${input.days} ngày khám phá Sầm Sơn`,
