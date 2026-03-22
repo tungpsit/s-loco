@@ -3,8 +3,12 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import adminRoutes from './routes/admin'
 import authRoutes from './routes/auth'
+import dashboardRoutes from './routes/dashboard'
+import notificationRoutes from './routes/notifications'
 import orderRoutes from './routes/orders'
+import paymentRoutes from './routes/payments'
 import serviceRoutes from './routes/services'
+import settlementRoutes from './routes/settlements'
 import vendorRoutes from './routes/vendors'
 import voucherRoutes from './routes/vouchers'
 
@@ -37,6 +41,9 @@ v1.route('/services', serviceRoutes)
 v1.route('/orders', orderRoutes)
 v1.route('/vouchers', voucherRoutes)
 v1.route('/payments', paymentRoutes)
+v1.route('/settlements', settlementRoutes)
+v1.route('/notifications', notificationRoutes)
+v1.route('/dashboard', dashboardRoutes)
 v1.route('/admin', adminRoutes)
 app.route('/api/v1', v1)
 
