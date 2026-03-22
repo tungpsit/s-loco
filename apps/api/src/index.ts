@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import authRoutes from './routes/auth'
 
 const app = new Hono()
 
@@ -23,8 +24,19 @@ app.get('/health', (c) =>
   }),
 )
 
-// API v1 routes will be registered here
-app.get('/api/v1', (c) => c.json({ message: 'S-Local API v1' }))
+// API v1 routes
+const v1 = new Hono()
+v1.route('/auth', authRoutes)
+app.route('/api/v1', v1)
+
+// Global error handler
+app.onError((err, c) => {
+  console.error('[API Error]', err)
+  return c.json(
+    { success: false, error: { code: 'INTERNAL_ERROR', message: 'Lỗi hệ thống. Vui lòng thử lại.' } },
+    500,
+  )
+})
 
 export default {
   port: Number(process.env.PORT) || 3000,
