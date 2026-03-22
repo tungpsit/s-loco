@@ -1,7 +1,10 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import adminRoutes from './routes/admin'
 import authRoutes from './routes/auth'
+import serviceRoutes from './routes/services'
+import vendorRoutes from './routes/vendors'
 
 const app = new Hono()
 
@@ -27,6 +30,9 @@ app.get('/health', (c) =>
 // API v1 routes
 const v1 = new Hono()
 v1.route('/auth', authRoutes)
+v1.route('/vendors', vendorRoutes)
+v1.route('/services', serviceRoutes)
+v1.route('/admin', adminRoutes)
 app.route('/api/v1', v1)
 
 // Global error handler
