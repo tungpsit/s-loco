@@ -23,19 +23,19 @@
 1. **Fluid, not rigid** — allow images to break the grid, overlap containers
 2. **Premium equals space** — generous padding, no cramped elements
 3. **No-Line Rule** — no 1px borders; use background color shifts for boundaries
-4. **Glass & Gradient** — glassmorphism for floating headers/nav, teal gradients for CTAs
+4. **Glass & Gradient** — glassmorphism for floating headers/nav, blue gradients for CTAs
 
 ---
 
 ## 2. Color Palette & Roles
 
-### Primary — Ocean Teal
+### Primary — Ocean Blue
 | Token | Hex | Role |
 |-------|-----|------|
-| `primary` | `#006565` | Primary actions, navigation highlights |
-| `primary_container` | `#008080` | CTA gradient end, badges, active states |
-| `primary_fixed` | `#93F2F2` | Icon backgrounds, subtle highlights |
-| `primary_fixed_dim` | `#76D6D5` | Image inner glow, hover states |
+| `primary` | `#005E97` | Primary actions, navigation highlights |
+| `primary_container` | `#0077B6` | CTA gradient end, badges, active states |
+| `primary_fixed` | `#90E0EF` | Icon backgrounds, subtle highlights |
+| `primary_fixed_dim` | `#48CAE4` | Image inner glow, hover states |
 
 ### Secondary — Aqua
 | Token | Hex | Role |
@@ -78,7 +78,7 @@
 ### Signature Gradient
 ```css
 /* Hero CTAs — The signature S-Local gradient */
-background: linear-gradient(135deg, #006565, #008080);
+background: linear-gradient(135deg, #005E97, #0077B6);
 ```
 
 ---
@@ -121,7 +121,7 @@ background: linear-gradient(135deg, #006565, #008080);
 
 **Primary (CTA)**
 ```css
-background: linear-gradient(135deg, #006565, #008080);
+background: linear-gradient(135deg, #005E97, #0077B6);
 color: #FFFFFF;
 border-radius: 3rem;
 padding: 16px 32px;
@@ -132,7 +132,7 @@ box-shadow: none;
 **Secondary**
 ```css
 background: #E5E9E8;
-color: #006565;
+color: #005E97;
 border-radius: 3rem;
 padding: 12px 24px;
 ```
@@ -154,7 +154,7 @@ padding: 16px;
 /* Place on #F0F4F3 background for subtle lift */
 ```
 
-**Image Cards**: Images with 16px+ corner radius and `#76D6D5` inner glow for "underwater" premium feel.
+**Image Cards**: Images with 16px+ corner radius and `#48CAE4` inner glow for "underwater" premium feel.
 
 ### Input Fields
 ```css
@@ -168,7 +168,7 @@ color: #181C1C;
 
 /* Focus */
 background: #FFFFFF;
-border: 2px solid #006565;
+border: 2px solid #005E97;
 ```
 
 ### Chips / Tags
@@ -232,9 +232,9 @@ top: 0;
 - Cards separated by background color shifts, never borders
 
 ### Image Rules
-- Hero images: full-bleed with gradient overlay (`rgba(0,101,101,0.3)` to transparent)
+- Hero images: full-bleed with gradient overlay (`rgba(0,94,151,0.3)` to transparent)
 - Vendor photos: 16:9 aspect ratio, 16px border radius
-- Category icons: 48x48px on `#93F2F2` background circles
+- Category icons: 48x48px on `#90E0EF` background circles
 
 ---
 
@@ -267,7 +267,7 @@ border: 1px solid rgba(189, 201, 200, 0.15);
 
 ### ✅ Do
 - Allow images to **break the grid** (bleed into status bar, overlap containers)
-- Use `primary_fixed` (`#93F2F2`) for icon highlight backgrounds
+- Use `primary_fixed` (`#90E0EF`) for icon highlight backgrounds
 - Use the full spacing scale — premium equals space
 - Use `on_surface` (`#181C1C`) for text instead of pure `#000000`
 - Add gradient overlays to hero images

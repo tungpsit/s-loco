@@ -3,8 +3,10 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import adminRoutes from './routes/admin'
 import authRoutes from './routes/auth'
+import orderRoutes from './routes/orders'
 import serviceRoutes from './routes/services'
 import vendorRoutes from './routes/vendors'
+import voucherRoutes from './routes/vouchers'
 
 const app = new Hono()
 
@@ -32,6 +34,8 @@ const v1 = new Hono()
 v1.route('/auth', authRoutes)
 v1.route('/vendors', vendorRoutes)
 v1.route('/services', serviceRoutes)
+v1.route('/orders', orderRoutes)
+v1.route('/vouchers', voucherRoutes)
 v1.route('/admin', adminRoutes)
 app.route('/api/v1', v1)
 

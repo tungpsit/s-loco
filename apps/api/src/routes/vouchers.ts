@@ -1,0 +1,172 @@
+import { zValidator } from '@hono/zod-validator'
+import { redeemVoucherSchema, selfRedeemSchema } from '@s-local/shared/validators'
+import { Hono } from 'hono'
+import { autoConfirmExpired } from '../jobs/auto-confirm'
+import { authMiddleware, requireRole } from '../middleware/auth'
+import * as qrSvc from '../services/qr.service'
+import { StateError } from '../services/voucher-state'
+import * as voucherSvc from '../services/voucher.service'
+import { VoucherError } from '../services/voucher.service'
+
+const voucherRoutes = new Hono()
+
+// All voucher routes require authentication
+voucherRoutes.use('*', authMiddleware())
+
+// ─── GET /vouchers — user's vouchers ────
+voucherRoutes.get(
+  '/',
+  async (c) => {
+    const userId = c.get('userId')!
+    const status = c.req.query('status') || undefined
+    const page = Number(c.req.query('page') || 1)
+    const limit = Number(c.req.query('limit') || 20)
+    const result = await voucherSvc.listVouchersByUser(userId, { status, page, limit })
+    return c.json({ success: true, data: result })
+  },
+)
+
+// ─── GET /vouchers/:id — voucher detail with QR ────
+voucherRoutes.get(
+  '/:id',
+  async (c) => {
+    try {
+      const voucherId = c.req.param('id')
+      const userId = c.get('userId')!
+      const result = await voucherSvc.getVoucherDetail(voucherId, userId)
+      return c.json({ success: true, data: result })
+    } catch (err) {
+      if (err instanceof VoucherError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── POST /vouchers/redeem — vendor redeems (scans tourist QR) ────
+voucherRoutes.post(
+  '/redeem',
+  requireRole('vendor_owner'),
+  zValidator('json', redeemVoucherSchema),
+  async (c) => {
+    try {
+      const { qr_token } = c.req.valid('json')
+      // Vendor needs their vendor_id — get from their owned vendors
+      const userId = c.get('userId')!
+      const { getVendorByOwnerId } = await import('../services/vendor.service')
+      const vendorList = await getVendorByOwnerId(userId)
+      if (!vendorList.length) {
+        return c.json({ success: false, error: { code: 'NO_VENDOR', message: 'Bạn chưa có cửa hàng.' } }, 400)
+      }
+      // Try redeem against each vendor the owner has
+      let redeemed = null
+      let lastError: any = null
+      for (const vendor of vendorList) {
+        try {
+          redeemed = await qrSvc.redeemByQr(qr_token, vendor.id)
+          break
+        } catch (err) {
+          lastError = err
+        }
+      }
+      if (!redeemed) {
+        if (lastError instanceof VoucherError || lastError instanceof StateError) {
+          const status = lastError.code === 'ALREADY_REDEEMED' ? 409 : 400
+          return c.json({ success: false, error: { code: lastError.code, message: lastError.message } }, status)
+        }
+        throw lastError
+      }
+      return c.json({ success: true, data: { voucher: redeemed } })
+    } catch (err) {
+      if (err instanceof VoucherError || err instanceof StateError) {
+        const status = err instanceof VoucherError && err.code === 'ALREADY_REDEEMED' ? 409 : 400
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── POST /vouchers/self-redeem — tourist self-redeems ────
+voucherRoutes.post(
+  '/self-redeem',
+  zValidator('json', selfRedeemSchema),
+  async (c) => {
+    try {
+      const userId = c.get('userId')!
+      const { voucher_id, vendor_id } = c.req.valid('json')
+      const result = await qrSvc.selfRedeem(voucher_id, userId, vendor_id)
+      return c.json({ success: true, data: { voucher: result } })
+    } catch (err) {
+      if (err instanceof VoucherError || err instanceof StateError) {
+        const status = err instanceof VoucherError && err.code === 'ALREADY_REDEEMED' ? 409 : 400
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── POST /vouchers/:id/preview — vendor checks QR without redeeming ────
+voucherRoutes.post(
+  '/:id/preview',
+  requireRole('vendor_owner'),
+  async (c) => {
+    try {
+      const qrToken = c.req.header('x-qr-token')
+      if (!qrToken) return c.json({ success: false, error: { code: 'MISSING_TOKEN', message: 'Thiếu QR token.' } }, 400)
+      const result = await qrSvc.previewVoucher(qrToken)
+      return c.json({ success: true, data: result })
+    } catch (err) {
+      if (err instanceof VoucherError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── POST /vouchers/:id/complete — vendor confirms completion ────
+voucherRoutes.post(
+  '/:id/complete',
+  requireRole('vendor_owner'),
+  async (c) => {
+    try {
+      const voucherId = c.req.param('id')
+      const userId = c.get('userId')!
+      const { getVendorByOwnerId } = await import('../services/vendor.service')
+      const vendorList = await getVendorByOwnerId(userId)
+      const vendorIds = vendorList.map((v) => v.id)
+
+      let completed = null
+      for (const vendorId of vendorIds) {
+        try {
+          completed = await qrSvc.confirmCompletion(voucherId, vendorId)
+          break
+        } catch { /* try next vendor */ }
+      }
+      if (!completed) {
+        return c.json({ success: false, error: { code: 'NOT_FOUND', message: 'Voucher không tồn tại hoặc bạn không có quyền.' } }, 404)
+      }
+      return c.json({ success: true, data: { voucher: completed } })
+    } catch (err) {
+      if (err instanceof VoucherError || err instanceof StateError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── POST /vouchers/auto-confirm — trigger auto-confirm (admin/cron) ────
+voucherRoutes.post(
+  '/auto-confirm',
+  requireRole('admin'),
+  async (c) => {
+    const result = await autoConfirmExpired()
+    return c.json({ success: true, data: result })
+  },
+)
+
+export default voucherRoutes
