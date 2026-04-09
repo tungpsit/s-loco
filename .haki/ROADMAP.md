@@ -195,6 +195,7 @@
 | App | Screen | Doc | Status |
 |-----|--------|-----|--------|
 | Tourist | Home (Trang chủ) | [.haki/screens/tourist-home.md](.haki/screens/tourist-home.md) | ✅ |
+| Tourist | Search (Tìm kiếm) | [.haki/screens/tourist-search.md](.haki/screens/tourist-search.md) | ✅ |
 | Tourist | All screens | [.haki/layouts/tourist-screen-flow.md](.haki/layouts/tourist-screen-flow.md) | ✅ |
 
 *Last updated: 2026-04-09*
