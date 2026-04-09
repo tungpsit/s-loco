@@ -28,9 +28,7 @@ node bin/install.js . --force
 
 | Location             | Contents                                  |
 | -------------------- | ----------------------------------------- |
-| `.agent/workflows/`  | 7 haki command files                      |
-| `.agent/bin/`        | CLI tools (haki-tools.cjs + lib/)         |
-| `.agent/skills/`     | 17 skill folders                          |
-| `.agent/templates/`  | project, roadmap, task templates + config |
-| `.agent/references/` | questioning.md, ui-brand.md               |
+| `.claude/workflows/`  | 14 haki command files                      |
+| `.claude/skills/`     | 17 skill folders                          |
+| `.claude/references/` | questioning.md, ui-brand.md               |
 | `.haki/`             | Runtime data directory (gitignored)       |

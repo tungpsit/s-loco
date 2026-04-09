@@ -26,13 +26,13 @@ node .agent/bin/haki-tools.cjs roadmap update-status [task-id] in_progress --raw
 ```
 
 3. **Research** (if enabled):
-   - Read: `.agent/skills/context7-research/SKILL.md`
+   - Read: `.claude/skills/context7-research/SKILL.md`
    - Use Context7 MCP for library docs (verified versions, install commands)
    - Analyze codebase for existing patterns
-   - Read relevant `.agent/skills/` for methodology (TDD, etc.)
+   - Read relevant `.claude/skills/` for methodology (TDD, etc.)
 
 4. **Write TDD-first plan** to `.haki/tasks/[task-id].md` **(MANDATORY)**:
-   - If file does NOT exist → create from `.agent/templates/task.md`
+   - If file does NOT exist → create from `.haki/templates/task.md`
    - If file exists → preserve `Context & Decisions`, update `Implementation Steps`
    - Each step: write test → verify FAIL → implement → verify PASS → commit
    - Exact file paths, complete code, exact test commands

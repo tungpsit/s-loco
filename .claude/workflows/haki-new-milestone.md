@@ -23,7 +23,7 @@ If no ROADMAP.md exists → tell user to run `/haki:new-project` first and stop.
    - Otherwise → ask: "What is this milestone called? (e.g., 'Auth & Permissions', 'Billing', 'v2 Features')"
 
 3. **Extract tasks via Socratic Questioning:**
-   - Read: `.agent/references/questioning.md`
+   - Read: `.claude/references/questioning.md`
    - Goal: enumerate concrete, independent tasks for this milestone
    - Ask one question at a time:
      - "What are the main features or capabilities this milestone delivers?"

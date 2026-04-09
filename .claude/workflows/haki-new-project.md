@@ -18,7 +18,7 @@ node .agent/bin/haki-tools.cjs state detect --raw
 If `initialized: true` and has project, warn user and confirm reinitialize.
 
 2. **Socratic Questioning (Dream Extraction)**
-   - Read: `.agent/references/questioning.md`
+   - Read: `.claude/references/questioning.md`
    - Start open — let user dump their mental model
    - Follow energy, challenge vagueness, make abstract concrete
    - Background checklist: What, Why, Who, Done
@@ -45,19 +45,19 @@ If `initialized: true` and has project, warn user and confirm reinitialize.
 
 4. **Research (4 parallel subagents)**
    - Agent 1 → `.haki/research/STACK.md` (tech options, trade-offs)
-     - **MUST read:** `.agent/skills/context7-research/SKILL.md`
+     - **MUST read:** `.claude/skills/context7-research/SKILL.md`
      - Use Context7 MCP to verify every library version before writing
    - Agent 2 → `.haki/research/FEATURES.md` (feature analysis, must vs nice-to-have)
    - Agent 3 → `.haki/research/ARCHITECTURE.md` (system design, data flow)
    - Agent 4 → `.haki/research/PITFALLS.md` (anti-patterns, known issues)
 
 5. **Generate PROJECT.md**
-   - Read template: `.agent/templates/project.md`
+   - Read template: `.haki/templates/project.md`
    - Fill placeholders from questioning + research
    - Save to `.haki/PROJECT.md`
 
 6. **Generate ROADMAP.md**
-   - Read template: `.agent/templates/roadmap.md`
+   - Read template: `.haki/templates/roadmap.md`
    - Create task breakdown with status/priority/dependencies
    - Save to `.haki/ROADMAP.md`
    - Create `.haki/tasks/` directory

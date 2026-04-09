@@ -20,11 +20,11 @@ Run these as slash commands in your AI coding agent:
 | `/haki:docs`          | Generate user guides with screenshots for project modules                   |
 | `/haki:map-codebase`  | Parallel agents map stack, architecture, conventions, and structure         |
 
-Workflow definitions live in `.agent/workflows/haki-*.md`.
+Workflow definitions live in `.claude/workflows/haki-*.md`.
 
 ## Skills
 
-Skills are in `.agent/skills/`. Each has a `SKILL.md` with frontmatter (`name`, `description`) and detailed instructions. Read a skill's `SKILL.md` before applying it.
+Skills are in `.claude/skills/`. Each has a `SKILL.md` with frontmatter (`name`, `description`) and detailed instructions. Read a skill's `SKILL.md` before applying it.
 
 ## CLI Tools
 
@@ -42,5 +42,5 @@ node .agent/bin/haki-tools.cjs config get ui_design_skill  # read config
 - **Roadmap:** `.haki/ROADMAP.md`
 - **Task plans:** `.haki/tasks/`
 - **Research output:** `.haki/research/`
-- **Templates:** `.agent/templates/`
-- **References:** `.agent/references/`
+- **Templates:** `.haki/templates/`
+- **References:** `.claude/references/`

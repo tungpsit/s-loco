@@ -23,11 +23,11 @@ API integration testing workflow. Vitest + fetch. TypeScript only. TDD mandatory
 
 1. **Read skill rules:**
 
-   Read `.agent/skills/api-testing/SKILL.md` for conventions.
+   Read `.claude/skills/api-testing/SKILL.md` for conventions.
 
 2. **Research latest Vitest version:**
 
-   Read `.agent/skills/context7-research/SKILL.md` and use Context7 MCP:
+   Read `.claude/skills/context7-research/SKILL.md` and use Context7 MCP:
 
    ```
    resolve-library-id: "vitest"

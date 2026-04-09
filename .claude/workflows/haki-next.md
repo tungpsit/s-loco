@@ -17,7 +17,7 @@ Perfect for resuming work after a context clear or starting a fresh session.
 
 | Phase       | Required Action                                                          |
 | ----------- | ------------------------------------------------------------------------ |
-| **discuss** | CREATE file if missing (from `.agent/templates/task.md`). Save decisions |
+| **discuss** | CREATE file if missing (from `.haki/templates/task.md`). Save decisions |
 | **plan**    | UPDATE file with implementation steps                                    |
 | **exec**    | UPDATE file with Implementation Details + Execution Results              |
 

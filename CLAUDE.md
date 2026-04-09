@@ -30,8 +30,8 @@ Read `AGENTS.md` in this directory for the full workflow system reference (comma
 
 ## Skill Loading
 
-Before implementing anything, check `.agent/skills/` for relevant skills. Read the `SKILL.md` file first — follow its instructions exactly.
+Before implementing anything, check `.claude/skills/` for relevant skills. Read the `SKILL.md` file first — follow its instructions exactly.
 
 ## Workflow Entry Point
 
-Start with `/haki:next` — it auto-detects project state and routes to the right command. Workflow files are in `.agent/workflows/haki-*.md`.
+Start with `/haki:next` — it auto-detects project state and routes to the right command. Workflow files are in `.claude/workflows/haki-*.md`.

@@ -21,7 +21,7 @@ Look up latest library documentation, versions, and setup instructions using Con
    - If no project files → ask user what they want to build
 
 2. **Read the skill:**
-   - Read: `.agent/skills/context7-research/SKILL.md`
+   - Read: `.claude/skills/context7-research/SKILL.md`
    - Follow the protocol exactly
 
 3. **For each library — Resolve ID:**

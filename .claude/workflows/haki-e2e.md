@@ -23,11 +23,11 @@ Playwright E2E testing workflow. TypeScript only, TDD mandatory.
 
 1. **Read skill rules:**
 
-   Read `.agent/skills/playwright-automation/SKILL.md` for conventions.
+   Read `.claude/skills/playwright-automation/SKILL.md` for conventions.
 
 2. **Research latest Playwright version:**
 
-   Read `.agent/skills/context7-research/SKILL.md` and use Context7 MCP:
+   Read `.claude/skills/context7-research/SKILL.md` and use Context7 MCP:
 
    ```
    resolve-library-id: "@playwright/test"
@@ -101,7 +101,7 @@ Playwright E2E testing workflow. TypeScript only, TDD mandatory.
    - If **no specs found** → proceed to step 0a
 
    **0a. Generate spec from intent (via `playwright-intent-to-spec`):**
-   - Read `.agent/skills/playwright-intent-to-spec/SKILL.md`
+   - Read `.claude/skills/playwright-intent-to-spec/SKILL.md`
    - Ask user for a natural-language test description (Vietnamese or English)
    - Parse intent → identify critical ambiguities → **ask user to clarify** before generating
    - Generate draft `tests/[feature].spec.ts` following the skill's hard rules

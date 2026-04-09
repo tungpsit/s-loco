@@ -24,7 +24,7 @@ Example:
 
 1. **Read skill rules:**
 
-   Read `.agent/skills/playwright-intent-to-spec/SKILL.md` — follow ALL hard rules, Phase 0, and the clarification protocol.
+   Read `.claude/skills/playwright-intent-to-spec/SKILL.md` — follow ALL hard rules, Phase 0, and the clarification protocol.
 
 2. **Accept user intent:**
 

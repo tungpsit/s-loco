@@ -33,7 +33,8 @@ postgres_data/
 redis_data/
 rustfs_data/
 
-# Haki runtime data
-.haki/
 # CocoIndex Code (ccc)
 /.cocoindex_code/
+# Haki runtime artifacts (do NOT commit)
+/.haki/runtime/
+/.haki/ui/

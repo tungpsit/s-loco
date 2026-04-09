@@ -22,8 +22,8 @@ Orchestrate a complete product team using Claude Code subagents. Each agent assu
 
 ## Prerequisites
 
-- `brainstorming` skill is available in `.agent/skills/brainstorming/`
-- `writing-plans` skill is available in `.agent/skills/writing-plans/`
+- `brainstorming` skill is available in `.claude/skills/brainstorming/`
+- `writing-plans` skill is available in `.claude/skills/writing-plans/`
 - `DESIGN.md` exists in the project (optional — if absent, Designer will propose a new design system)
 
 ---
@@ -77,15 +77,15 @@ Orchestrate a complete product team using Claude Code subagents. Each agent assu
 
 ### Role Summary
 
-| Phase | Role | Responsibility | Project Type |
-|-------|------|----------------|-------------|
-| 0 | Product Discovery | Assess project state, determine which phases to run | Brownfield only |
-| 1 | Requirements Analyst | Elicit, document, and clarify requirements from the raw idea | Both |
-| 2 | Product Strategist | Define vision, personas, user stories, and success metrics | Both |
-| 3 | Product Architect | System architecture, API contracts, data model, tech approach | Both |
-| 3 | UI/UX Designer | Design system, component inventory, layout, accessibility | Both |
-| 4 | Spec Writer | Consolidate all Phase 1–3 outputs into a single `*-design.md` document | Both |
-| 5 | Implementation Planner | Break the spec into tasks, milestones, estimates → `.haki/ROADMAP.md` | Both |
+| Phase | Role                   | Responsibility                                                         | Project Type    |
+| ----- | ---------------------- | ---------------------------------------------------------------------- | --------------- |
+| 0     | Product Discovery      | Assess project state, determine which phases to run                    | Brownfield only |
+| 1     | Requirements Analyst   | Elicit, document, and clarify requirements from the raw idea           | Both            |
+| 2     | Product Strategist     | Define vision, personas, user stories, and success metrics             | Both            |
+| 3     | Product Architect      | System architecture, API contracts, data model, tech approach          | Both            |
+| 3     | UI/UX Designer         | Design system, component inventory, layout, accessibility              | Both            |
+| 4     | Spec Writer            | Consolidate all Phase 1–3 outputs into a single `*-design.md` document | Both            |
+| 5     | Implementation Planner | Break the spec into tasks, milestones, estimates → `.haki/ROADMAP.md`  | Both            |
 
 ---
 
@@ -121,9 +121,8 @@ docs/
 ├── ARCHITECTURE.md              ← From Phase 3 Product Architect
 ├── api-contract.md             ← From Phase 3 Product Architect
 ├── DESIGN.md                   ← From Phase 3 UI/UX Designer
-└── superpowers/
-    └── specs/
-        └── YYYY-MM-DD-<topic>-design.md   ← Phase 4: final approved spec
+└── specs/
+    └── YYYY-MM-DD-<topic>-design.md   ← Phase 4: final approved spec
 ```
 
 ---
@@ -172,6 +171,7 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
 - **Issues found:** [Any problems discovered or open questions]
 
 ### Task 2: [Name]
+
 ...
 
 ---
@@ -208,40 +208,40 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
 
    Scan the following in order. Stop as soon as you have enough information.
 
-   | Check | Command / Action | What to look for |
-   |-------|-----------------|-----------------|
-   | `.haki/` exists? | `ls .haki/` | PROJECT.md, ROADMAP.md, requirements.md, codebase/ |
-   | DESIGN.md? | `find . -name "DESIGN.md" -not -path "*/node_modules/*"` | Design tokens, component library |
-   | Source files | `find . -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" \| head -20` | Tech stack, patterns |
-   | Package files | `find . -name "package.json" -o -name "pyproject.toml" -o -name "go.mod" \| head -5` | Build tools, frameworks |
-   | README | `cat README.md 2>/dev/null \| head -50` | Project overview, setup |
-   | Docs | `find docs -name "*.md" 2>/dev/null` | Existing documentation |
+   | Check            | Command / Action                                                                     | What to look for                                   |
+   | ---------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------- |
+   | `.haki/` exists? | `ls .haki/`                                                                          | PROJECT.md, ROADMAP.md, requirements.md, codebase/ |
+   | DESIGN.md?       | `find . -name "DESIGN.md" -not -path "*/node_modules/*"`                             | Design tokens, component library                   |
+   | Source files     | `find . -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" \| head -20`   | Tech stack, patterns                               |
+   | Package files    | `find . -name "package.json" -o -name "pyproject.toml" -o -name "go.mod" \| head -5` | Build tools, frameworks                            |
+   | README           | `cat README.md 2>/dev/null \| head -50`                                              | Project overview, setup                            |
+   | Docs             | `find docs -name "*.md" 2>/dev/null`                                                 | Existing documentation                             |
 
 2. **Assess what's already done:**
 
-   | File | Status | Implication |
-   |------|--------|-------------|
-   | `.haki/PROJECT.md` | ✅ Exists | Skip Phase 2 vision/strategy; reuse it |
-   | `.haki/requirements.md` | ✅ Exists | Skip Phase 1; extend it with new idea |
-   | `.haki/PRD.md` | ✅ Exists | Skip Phase 2 user stories; extend them |
-   | `.haki/codebase/` | ✅ Exists | Skip codebase mapping in Phase 0 |
-   | `DESIGN.md` | ✅ Exists | Phase 3 Designer extends it |
-   | `DESIGN.md` | ❌ Missing | Phase 3 Designer proposes new design system |
-   | `docs/ARCHITECTURE.md` | ✅ Exists | Phase 3 Architect reviews and extends |
-   | `docs/api-contract.md` | ✅ Exists | Phase 3 Architect reviews and extends |
-   | `docs/superpowers/specs/` | ✅ Has recent spec | Phase 4 Spec Writer references it |
-   | `.haki/ROADMAP.md` | ✅ Exists | Phase 5 Planner extends it, adds new tasks |
+   | File                    | Status             | Implication                                 |
+   | ----------------------- | ------------------ | ------------------------------------------- |
+   | `.haki/PROJECT.md`      | ✅ Exists          | Skip Phase 2 vision/strategy; reuse it      |
+   | `.haki/requirements.md` | ✅ Exists          | Skip Phase 1; extend it with new idea       |
+   | `.haki/PRD.md`          | ✅ Exists          | Skip Phase 2 user stories; extend them      |
+   | `.haki/codebase/`       | ✅ Exists          | Skip codebase mapping in Phase 0            |
+   | `DESIGN.md`             | ✅ Exists          | Phase 3 Designer extends it                 |
+   | `DESIGN.md`             | ❌ Missing         | Phase 3 Designer proposes new design system |
+   | `docs/ARCHITECTURE.md`  | ✅ Exists          | Phase 3 Architect reviews and extends       |
+   | `docs/api-contract.md`  | ✅ Exists          | Phase 3 Architect reviews and extends       |
+   | `.haki/specs/`          | ✅ Has recent spec | Phase 4 Spec Writer references it           |
+   | `.haki/ROADMAP.md`      | ✅ Exists          | Phase 5 Planner extends it, adds new tasks  |
 
 3. **Map existing codebase (if `.haki/codebase/` does not exist):**
 
    Run 4 mappers in parallel:
 
-   | Mapper | Output | Content |
-   |--------|--------|---------|
-   | Stack Mapper | `.haki/codebase/STACK.md` | Languages, frameworks, build tools, dependencies |
-   | Architecture Mapper | `.haki/codebase/ARCHITECTURE.md` | System patterns, data flow, API design |
-   | Conventions Mapper | `.haki/codebase/CONVENTIONS.md` | Code style, naming, testing patterns |
-   | Structure Mapper | `.haki/codebase/STRUCTURE.md` | Directory tree, entry points, configs |
+   | Mapper              | Output                           | Content                                          |
+   | ------------------- | -------------------------------- | ------------------------------------------------ |
+   | Stack Mapper        | `.haki/codebase/STACK.md`        | Languages, frameworks, build tools, dependencies |
+   | Architecture Mapper | `.haki/codebase/ARCHITECTURE.md` | System patterns, data flow, API design           |
+   | Conventions Mapper  | `.haki/codebase/CONVENTIONS.md`  | Code style, naming, testing patterns             |
+   | Structure Mapper    | `.haki/codebase/STRUCTURE.md`    | Directory tree, entry points, configs            |
 
 4. **Write discovery summary:**
 
@@ -252,6 +252,7 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
    - List of existing files to respect (conventions, design tokens, API contracts)
 
    **Decision matrix template:**
+
    ```
    | Artifact | Status | Action |
    |----------|--------|--------|
@@ -264,7 +265,7 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
    | DESIGN.md | ❌ Missing | PROPOSE — Designer creates in Phase 3 |
    | docs/ARCHITECTURE.md | ✅ Exists | REVIEW — Architect extends |
    | docs/api-contract.md | ✅ Exists | REVIEW — Architect extends |
-   | docs/superpowers/specs/* | ✅ Has recent | REFERENCE — Spec Writer consolidates |
+   | .haki/specs/* | ✅ Has recent | REFERENCE — Spec Writer consolidates |
    | .haki/ROADMAP.md | ✅ Exists | EXTEND — add new tasks |
    | .haki/ROADMAP.md | ❌ Missing | CREATE — Planner generates in Phase 5 |
    ```
@@ -278,6 +279,7 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
 **Also create:** `.haki/discovery.md`, `.haki/codebase/*.md` (if missing)
 
 **Brownfield golden rules:**
+
 - Do NOT refactor working code just for style preferences
 - Do NOT change tech stack unless there is a critical reason
 - Prioritize CONSISTENCY with existing conventions
@@ -293,9 +295,11 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
 #### 📋 Subagent: Requirements Analyst
 
 **Haki skills to read first:**
-- `.agent/skills/brainstorming/SKILL.md` — follow the brainstorming process for understanding the idea
+
+- `.claude/skills/brainstorming/SKILL.md` — follow the brainstorming process for understanding the idea
 
 **Haki context to load:**
+
 - `.haki/discovery.md` (brownfield — Phase 0 output)
 - `.haki/codebase/CONVENTIONS.md` (brownfield)
 
@@ -342,6 +346,7 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
 #### 📈 Subagent: Product Strategist
 
 **Haki context to load:**
+
 - `.haki/requirements.md` — from Phase 1
 - `.haki/discovery.md` (brownfield — existing vision and personas)
 - `.haki/codebase/CONVENTIONS.md` (brownfield)
@@ -396,10 +401,12 @@ Spawn Product Architect and UI/UX Designer in parallel.
 #### 📐 Subagent: Product Architect
 
 **Haki skills to read first:**
-- `.agent/skills/brainstorming/SKILL.md` — architecture section
-- `.agent/skills/writing-plans/SKILL.md` — for understanding how plans are structured
+
+- `.claude/skills/brainstorming/SKILL.md` — architecture section
+- `.claude/skills/writing-plans/SKILL.md` — for understanding how plans are structured
 
 **Haki context to load:**
+
 - `.haki/requirements.md`
 - `.haki/PROJECT.md`
 - `.haki/prd.md`
@@ -451,10 +458,12 @@ Spawn Product Architect and UI/UX Designer in parallel.
 #### 🎨 Subagent: UI/UX Designer
 
 **Haki skills to read first:**
-- `.agent/skills/ui-ux-pro-max/SKILL.md` (if available)
-- `.agent/skills/taste-skill/SKILL.md` (if available)
+
+- `.claude/skills/ui-ux-pro-max/SKILL.md` (if available)
+- `.claude/skills/taste-skill/SKILL.md` (if available)
 
 **Haki context to load:**
+
 - `.haki/requirements.md`
 - `.haki/PROJECT.md`
 - `.haki/prd.md`
@@ -510,10 +519,12 @@ Spawn Product Architect and UI/UX Designer in parallel.
 #### 📝 Subagent: Spec Writer
 
 **Haki skills to read first:**
-- `.agent/skills/brainstorming/SKILL.md` — spec document section
-- `.agent/skills/subagent-driven-development/spec-reviewer-prompt.md` — for review process
+
+- `.claude/skills/brainstorming/SKILL.md` — spec document section
+- `.claude/skills/subagent-driven-development/spec-reviewer-prompt.md` — for review process
 
 **Haki context to load:**
+
 - `.haki/requirements.md`
 - `.haki/PROJECT.md`
 - `.haki/prd.md`
@@ -533,7 +544,7 @@ Spawn Product Architect and UI/UX Designer in parallel.
    - For brownfield: reference existing artifacts, only document the NEW parts
 
 2. **Write the spec document:**
-   - Write to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+   - Write to `.haki/specs/YYYY-MM-DD-<topic>-design.md`
    - Use the brainstorming skill's spec document format as reference
    - Scale sections to complexity: brief for simple projects, detailed for complex ones
 
@@ -554,7 +565,7 @@ Spawn Product Architect and UI/UX Designer in parallel.
    - If after 3 iterations issues remain, surface to user for guidance
 
 **Output:** Write report to `.haki/reports/05-spec-writer.md`
-**Final output:** `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+**Final output:** `.haki/specs/YYYY-MM-DD-<topic>-design.md`
 
 ---
 
@@ -563,15 +574,17 @@ Spawn Product Architect and UI/UX Designer in parallel.
 #### 📊 Subagent: Implementation Planner
 
 **Haki skills to read first:**
-- `.agent/skills/writing-plans/SKILL.md`
+
+- `.claude/skills/writing-plans/SKILL.md`
 
 **Haki context to load:**
+
 - `.haki/requirements.md`
 - `.haki/PROJECT.md`
 - `.haki/prd.md`
 - `.haki/discovery.md` (brownfield — Phase 0)
 - `.haki/reports/05-spec-writer.md`
-- `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- `.haki/specs/YYYY-MM-DD-<topic>-design.md`
 - `.haki/ROADMAP.md` (brownfield — if exists)
 
 **Instructions:**
@@ -607,7 +620,7 @@ Spawn Product Architect and UI/UX Designer in parallel.
 
 6. **Generate individual task files:**
    - For each NEW task in ROADMAP, create `.haki/tasks/<task-id>.md`
-   - Follow the task template from `.agent/templates/task.md`
+   - Follow the task template from `.haki/templates/task.md`
 
 **Output:** Write report to `.haki/reports/06-implementation-planner.md`
 **Also create:** `.haki/ROADMAP.md` (or update it), `.haki/tasks/*.md`
@@ -622,7 +635,7 @@ After Phase 5 completes, the handoff package is ready:
 ✅ .haki/PROJECT.md          — Vision, scope, constraints
 ✅ .haki/ROADMAP.md           — Task breakdown, milestones
 ✅ .haki/requirements.md      — Full requirements
-✅ docs/superpowers/specs/
+✅ .haki/specs/
     └── YYYY-MM-DD-<topic>-design.md  — Approved design spec
 ✅ docs/DESIGN.md             — Design system (created or extended)
 ✅ docs/ARCHITECTURE.md       — Architecture (created or extended)
@@ -631,6 +644,7 @@ After Phase 5 completes, the handoff package is ready:
 ```
 
 **To start development:**
+
 ```
 /swarm-dev-team
 ```
@@ -642,12 +656,14 @@ After Phase 5 completes, the handoff package is ready:
 ### Quick Start
 
 **For a new project:**
+
 ```
 /swarm-product-team
 # ... provide project name and idea description ...
 ```
 
 **For an existing project:**
+
 ```
 /swarm-product-team
 # ... provide project name, idea description, and note it's an existing project ...
@@ -656,8 +672,9 @@ After Phase 5 completes, the handoff package is ready:
 ### Full Orchestration Prompt
 
 **Greenfield (new project):**
+
 ```
-Read `.agent/skills/swarm-product-team/SKILL.md`.
+Read `.claude/skills/swarm-product-team/SKILL.md`.
 
 This is a GREENFIELD project.
 Project name: [NAME]
@@ -684,8 +701,9 @@ After Phase 5:
 ```
 
 **Brownfield (existing project):**
+
 ```
-Read `.agent/skills/swarm-product-team/SKILL.md`.
+Read `.claude/skills/swarm-product-team/SKILL.md`.
 
 This is a BROWNFIELD project.
 Project name: [NAME]
@@ -715,7 +733,7 @@ After Phase 5:
 
 ```bash
 # Phase 0 — brownfield only
-"You are PRODUCT DISCOVERY AGENT. Read .agent/skills/swarm-product-team/SKILL.md Phase 0.
+"You are PRODUCT DISCOVERY AGENT. Read .claude/skills/swarm-product-team/SKILL.md Phase 0.
 Scan this existing project: [describe the project].
 Check: .haki/, DESIGN.md, docs/, source files, package files.
 Build the decision matrix: which phases to SKIP, REUSE, EXTEND, or RUN.
@@ -724,14 +742,14 @@ Map the codebase: create .haki/codebase/STACK.md, ARCHITECTURE.md, CONVENTIONS.m
 Write report to .haki/reports/00-product-discovery.md."
 
 # Phase 1 — skip if .haki/requirements.md exists and covers the idea
-"You are REQUIREMENTS ANALYST. Read .agent/skills/swarm-product-team/SKILL.md Phase 1.
+"You are REQUIREMENTS ANALYST. Read .claude/skills/swarm-product-team/SKILL.md Phase 1.
 Load .haki/discovery.md (brownfield) to check existing requirements.
 Analyze the idea: [idea description].
 Write report to .haki/reports/01-requirements-analyst.md.
 Create or update .haki/requirements.md."
 
 # Phase 2 — skip if .haki/PROJECT.md and .haki/prd.md exist and cover the idea
-"You are PRODUCT STRATEGIST. Read .agent/skills/swarm-product-team/SKILL.md Phase 2.
+"You are PRODUCT STRATEGIST. Read .claude/skills/swarm-product-team/SKILL.md Phase 2.
 Load .haki/requirements.md, .haki/discovery.md (brownfield).
 Write vision, personas, user stories.
 Write report to .haki/reports/02-product-strategist.md.
@@ -739,7 +757,7 @@ Create or update .haki/PROJECT.md, .haki/vision.md, .haki/prd.md."
 
 # Phase 3 — parallel; Designer ALWAYS runs
 # Subagent 1: Product Architect
-"You are PRODUCT ARCHITECT. Read .agent/skills/swarm-product-team/SKILL.md Phase 3 Architect.
+"You are PRODUCT ARCHITECT. Read .claude/skills/swarm-product-team/SKILL.md Phase 3 Architect.
 Load .haki/requirements.md, .haki/PROJECT.md, .haki/discovery.md.
 For brownfield: read docs/ARCHITECTURE.md, docs/api-contract.md, .haki/codebase/ARCHITECTURE.md.
 Design architecture and API contracts.
@@ -747,7 +765,7 @@ Write report to .haki/reports/03-product-architect.md.
 Create or update docs/ARCHITECTURE.md, docs/api-contract.md."
 
 # Subagent 2: UI/UX Designer
-"You are UI/UX DESIGNER. Read .agent/skills/swarm-product-team/SKILL.md Phase 3 Designer.
+"You are UI/UX DESIGNER. Read .claude/skills/swarm-product-team/SKILL.md Phase 3 Designer.
 Load .haki/requirements.md, .haki/PROJECT.md, .haki/discovery.md.
 MANDATORY: first check if DESIGN.md exists anywhere:
   find . -name 'DESIGN.md' -not -path '*/node_modules/*' -not -path '*/.haki/*'
@@ -755,14 +773,14 @@ If exists: extend it. If not: propose and create new DESIGN.md.
 Write report to .haki/reports/04-ui-ux-designer.md."
 
 # Phase 4
-"You are SPEC WRITER. Read .agent/skills/swarm-product-team/SKILL.md Phase 4.
+"You are SPEC WRITER. Read .claude/skills/swarm-product-team/SKILL.md Phase 4.
 Load all Phase 1–3 reports and discovery.md.
-Write consolidated spec to docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md.
+Write consolidated spec to .haki/specs/YYYY-MM-DD-<topic>-design.md.
 Run spec review loop (max 3 iterations).
 Write report to .haki/reports/05-spec-writer.md."
 
 # Phase 5
-"You are IMPLEMENTATION PLANNER. Read .agent/skills/swarm-product-team/SKILL.md Phase 5.
+"You are IMPLEMENTATION PLANNER. Read .claude/skills/swarm-product-team/SKILL.md Phase 5.
 Load spec, requirements, PROJECT.md, discovery.md.
 For brownfield: read existing .haki/ROADMAP.md, extend it with new tasks.
 Generate ROADMAP.md (create or update) and task files.
@@ -770,7 +788,7 @@ Write report to .haki/reports/06-implementation-planner.md."
 
 # Confirm handoff
 "Review all Phase 0–5 outputs. Confirm .haki/PROJECT.md, .haki/ROADMAP.md,
-docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md, DESIGN.md exist.
+.haki/specs/YYYY-MM-DD-<topic>-design.md, DESIGN.md exist.
 Report which files were CREATED vs EXTENDED (brownfield).
 Prompt user to review the spec before running /swarm-dev-team."
 ```
@@ -779,28 +797,28 @@ Prompt user to review the spec before running /swarm-dev-team."
 
 ## Quality Gates
 
-| Phase | Gate | Criteria |
-|-------|------|----------|
-| 0 Discovery | ✅ Project Assessed | Decision matrix written, codebase mapped (if needed) |
+| Phase          | Gate                     | Criteria                                                                         |
+| -------------- | ------------------------ | -------------------------------------------------------------------------------- |
+| 0 Discovery    | ✅ Project Assessed      | Decision matrix written, codebase mapped (if needed)                             |
 | 1 Requirements | ✅ Requirements Complete | Functional + non-functional requirements documented, acceptance criteria defined |
-| 2 Strategy | ✅ Vision Clear | Vision, personas, user stories, and PROJECT.md exist |
-| 3 Architecture | ✅ Architecture Ready | Architecture and API contracts created or extended |
-| 3 Design | ✅ Design System Ready | Component inventory, tokens, accessibility requirements documented |
-| 4 Spec | ✅ Spec Approved | Spec review loop passed, spec file committed to git |
-| 5 Planning | ✅ Plan Ready | ROADMAP.md exists with all tasks, task files created |
+| 2 Strategy     | ✅ Vision Clear          | Vision, personas, user stories, and PROJECT.md exist                             |
+| 3 Architecture | ✅ Architecture Ready    | Architecture and API contracts created or extended                               |
+| 3 Design       | ✅ Design System Ready   | Component inventory, tokens, accessibility requirements documented               |
+| 4 Spec         | ✅ Spec Approved         | Spec review loop passed, spec file committed to git                              |
+| 5 Planning     | ✅ Plan Ready            | ROADMAP.md exists with all tasks, task files created                             |
 
 ---
 
 ## Integration with Haki State Machine
 
-| Haki State | Product Team Action |
-|------------|---------------------|
-| No `.haki/` | Run Phase 0 → full 5 phases (greenfield) |
-| Has `.haki/`, no `discovery.md` | Run Phase 0 (discovery) → then Phase 1–5 based on decision matrix |
-| Has full `.haki/` (all phases done) | Run Phase 0 to assess → skip all phases if complete |
-| Has partial `.haki/` | Run Phase 0 → decision matrix will identify what to skip/run |
-| Has ROADMAP, tasks ⏳ Pending | Phase 0 will detect → skip to Phase 0 decision, likely minimal work |
-| New idea on existing project | Run Phase 0 → extend existing artifacts per decision matrix |
-| Has ROADMAP, tasks 🔴 Blocked | Use Phase 0 discovery to refine blocked items |
+| Haki State                          | Product Team Action                                                 |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| No `.haki/`                         | Run Phase 0 → full 5 phases (greenfield)                            |
+| Has `.haki/`, no `discovery.md`     | Run Phase 0 (discovery) → then Phase 1–5 based on decision matrix   |
+| Has full `.haki/` (all phases done) | Run Phase 0 to assess → skip all phases if complete                 |
+| Has partial `.haki/`                | Run Phase 0 → decision matrix will identify what to skip/run        |
+| Has ROADMAP, tasks ⏳ Pending       | Phase 0 will detect → skip to Phase 0 decision, likely minimal work |
+| New idea on existing project        | Run Phase 0 → extend existing artifacts per decision matrix         |
+| Has ROADMAP, tasks 🔴 Blocked       | Use Phase 0 discovery to refine blocked items                       |
 
 The product team does NOT replace brainstorming — it runs **after** brainstorming produces an approved direction, to formalize and plan that direction.

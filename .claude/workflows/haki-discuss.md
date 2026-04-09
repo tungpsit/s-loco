@@ -29,7 +29,7 @@ node .agent/bin/haki-tools.cjs roadmap update-status [task-id] in_progress --raw
    - `.haki/research/` — relevant research files
    - `.haki/codebase/` — codebase map (if exists)
    - `.haki/tasks/[task-id].md` — prior discussions (if exists)
-   - Read: `.agent/references/questioning.md`
+   - Read: `.claude/references/questioning.md`
 
 4. **Analyze gray areas** from task requirements and acceptance criteria:
    - Unresolved technical decisions
@@ -43,7 +43,7 @@ node .agent/bin/haki-tools.cjs roadmap update-status [task-id] in_progress --raw
    - Capture decisions concisely
 
 6. **Save decisions** to `.haki/tasks/[task-id].md` **(MANDATORY)**:
-   - If file does NOT exist → create it from `.agent/templates/task.md`
+   - If file does NOT exist → create it from `.haki/templates/task.md`
    - Fill `Context & Decisions` section with all captured decisions
    - **Do NOT skip this step** — the file must exist before moving to plan
 

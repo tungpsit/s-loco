@@ -7,7 +7,7 @@ description: Spawn a full software development team as parallel subagents, each 
 
 Orchestrate a complete software development team using Claude Code subagents. Each agent assumes a specialized role, leverages specific haki skills/workflows, and produces a standardized report.
 
-**Works with:** Existing haki workflows (`/haki:*`), haki-tools CLI, and all `.agent/skills/`.
+**Works with:** Existing haki workflows (`/haki:*`), haki-tools CLI, and all `.claude/skills/`.
 
 ---
 
@@ -130,7 +130,7 @@ Every subagent MUST write its report to `.haki/reports/NN-role.md` using this ex
 ### Task 1: [Name]
 
 - **Status:** ✅ Done | ⚠️ Partial | ❌ Failed | ⏭️ Skipped
-- **Haki skill used:** [skill name from .agent/skills/]
+- **Haki skill used:** [skill name from .claude/skills/]
 - **Haki workflow used:** [workflow name, if any]
 - **Files changed:**
 
@@ -227,8 +227,8 @@ Spawn two subagents in parallel:
 #### 📐 Subagent: System Architect
 
 **Haki skills to read first:**
-- `.agent/skills/writing-plans/SKILL.md`
-- `.agent/skills/brainstorming/SKILL.md`
+- `.claude/skills/writing-plans/SKILL.md`
+- `.claude/skills/brainstorming/SKILL.md`
 
 **Haki context to load:**
 - `.haki/PROJECT.md` — project vision and constraints
@@ -268,7 +268,7 @@ Spawn two subagents in parallel:
 #### 🔬 Subagent: Tech Researcher
 
 **Haki skills to read first:**
-- `.agent/skills/context7-research/SKILL.md`
+- `.claude/skills/context7-research/SKILL.md`
 
 **Haki workflow:** Follow `/haki:research` protocol exactly.
 
@@ -292,8 +292,8 @@ Spawn two subagents in parallel:
 #### 🗄️ Subagent: Database Engineer
 
 **Haki skills to read first:**
-- `.agent/skills/test-driven-development/SKILL.md`
-- `.agent/skills/subagent-driven-development/SKILL.md`
+- `.claude/skills/test-driven-development/SKILL.md`
+- `.claude/skills/subagent-driven-development/SKILL.md`
 
 **Haki context to load:**
 - `.haki/reports/01-architect.md` — architecture decisions
@@ -336,10 +336,10 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 #### ⚙️ Subagent: Backend Developer
 
 **Haki skills to read first:**
-- `.agent/skills/subagent-driven-development/SKILL.md` — follow the implementer prompt
-- `.agent/skills/test-driven-development/SKILL.md` — TDD cycle is mandatory
-- `.agent/skills/systematic-debugging/SKILL.md` — for when tests fail unexpectedly
-- `.agent/skills/verification-before-completion/SKILL.md` — verify before marking done
+- `.claude/skills/subagent-driven-development/SKILL.md` — follow the implementer prompt
+- `.claude/skills/test-driven-development/SKILL.md` — TDD cycle is mandatory
+- `.claude/skills/systematic-debugging/SKILL.md` — for when tests fail unexpectedly
+- `.claude/skills/verification-before-completion/SKILL.md` — verify before marking done
 
 **Haki workflow integration:**
 - For each task from ROADMAP, the plan in `.haki/tasks/[task-id].md` defines the steps
@@ -391,12 +391,12 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 #### 🎨 Subagent: Frontend Developer
 
 **Haki skills to read first:**
-- `.agent/skills/subagent-driven-development/SKILL.md`
-- `.agent/skills/test-driven-development/SKILL.md`
+- `.claude/skills/subagent-driven-development/SKILL.md`
+- `.claude/skills/test-driven-development/SKILL.md`
 - Read UI skill based on config: `node .agent/bin/haki-tools.cjs config get ui_design_skill --raw`
-  - If `ui-ux-pro-max` → read `.agent/skills/ui-ux-pro-max/SKILL.md`
-  - If `taste-skill` → read `.agent/skills/taste-skill/SKILL.md` + variant skill
-- `.agent/skills/verification-before-completion/SKILL.md`
+  - If `ui-ux-pro-max` → read `.claude/skills/ui-ux-pro-max/SKILL.md`
+  - If `taste-skill` → read `.claude/skills/taste-skill/SKILL.md` + variant skill
+- `.claude/skills/verification-before-completion/SKILL.md`
 
 **Haki context to load:**
 - `.haki/reports/01-architect.md` — API contracts, component architecture
@@ -443,12 +443,12 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 #### 🧪 Subagent: QA / Test Engineer
 
 **Haki skills to read first:**
-- `.agent/skills/test-driven-development/SKILL.md`
-- `.agent/skills/api-testing/SKILL.md`
-- `.agent/skills/playwright-automation/SKILL.md`
-- `.agent/skills/playwright-intent-to-spec/SKILL.md`
-- `.agent/skills/systematic-debugging/SKILL.md`
-- `.agent/skills/verification-before-completion/SKILL.md`
+- `.claude/skills/test-driven-development/SKILL.md`
+- `.claude/skills/api-testing/SKILL.md`
+- `.claude/skills/playwright-automation/SKILL.md`
+- `.claude/skills/playwright-intent-to-spec/SKILL.md`
+- `.claude/skills/systematic-debugging/SKILL.md`
+- `.claude/skills/verification-before-completion/SKILL.md`
 
 **Haki workflows to use:**
 - `/haki:api-test init` → set up API test infrastructure
@@ -461,7 +461,7 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 1. **Review existing tests:**
    - Scan all `*.test.*` and `*.spec.*` files
    - Identify untested code paths using coverage reports
-   - Check for testing anti-patterns (read `.agent/skills/test-driven-development/testing-anti-patterns.md`)
+   - Check for testing anti-patterns (read `.claude/skills/test-driven-development/testing-anti-patterns.md`)
 
 2. **Unit test gaps:**
    - Add tests for edge cases: null inputs, boundary values, error scenarios
@@ -494,8 +494,8 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 #### 🔒 Subagent: Security Engineer
 
 **Haki skills to read first:**
-- `.agent/skills/systematic-debugging/SKILL.md` — root cause analysis methodology
-- `.agent/skills/verification-before-completion/SKILL.md`
+- `.claude/skills/systematic-debugging/SKILL.md` — root cause analysis methodology
+- `.claude/skills/verification-before-completion/SKILL.md`
 
 **Instructions:**
 
@@ -540,8 +540,8 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 #### 📝 Subagent: Technical Writer
 
 **Haki skills to read first:**
-- `.agent/skills/user-docs-generator/SKILL.md`
-- `.agent/skills/output-skill/SKILL.md` — full output enforcement
+- `.claude/skills/user-docs-generator/SKILL.md`
+- `.claude/skills/output-skill/SKILL.md` — full output enforcement
 
 **Haki workflow to use:**
 - `/haki:docs --all` — generate user guides for all modules
@@ -570,14 +570,14 @@ Spawn two subagents in parallel. Both MUST follow TDD.
 
 5. **ADRs (Architecture Decision Records):**
    - Extract decisions from `.haki/reports/01-architect.md`
-   - Write to `docs/adr/NNN-decision-title.md`
+   - Write to `.haki/decisions/NNN-decision-title.md`
 
 **Output:** Write report to `.haki/reports/08-tech-writer.md`
 
 #### 🚀 Subagent: DevOps Engineer
 
 **Haki skills to read first:**
-- `.agent/skills/verification-before-completion/SKILL.md`
+- `.claude/skills/verification-before-completion/SKILL.md`
 
 **Instructions:**
 
@@ -714,7 +714,7 @@ For an existing project:
 ### Full Orchestration Prompt
 
 ```
-Read `.agent/skills/swarm-dev-team/SKILL.md`.
+Read `.claude/skills/swarm-dev-team/SKILL.md`.
 
 This is a [NEW | EXISTING] project.
 Project: [NAME]
@@ -749,17 +749,17 @@ If you prefer to run each phase manually with review between phases:
 /haki:map-codebase
 
 # Phase 1 — parallel
-# Subagent 1: "You are SYSTEM ARCHITECT. Read .agent/skills/swarm-dev-team/SKILL.md Phase 1 Architect section. Load .haki/PROJECT.md and .haki/ROADMAP.md. Write report to .haki/reports/01-architect.md"
+# Subagent 1: "You are SYSTEM ARCHITECT. Read .claude/skills/swarm-dev-team/SKILL.md Phase 1 Architect section. Load .haki/PROJECT.md and .haki/ROADMAP.md. Write report to .haki/reports/01-architect.md"
 # Subagent 2: "You are TECH RESEARCHER. Run /haki:research for the full tech stack. Write report to .haki/reports/02-researcher.md"
 
 # Review Phase 1 reports before continuing...
 
 # Phase 2
-# "You are DB ENGINEER. Read .agent/skills/swarm-dev-team/SKILL.md Phase 2. Load reports 01 and 02. Write report to .haki/reports/03-db-engineer.md"
+# "You are DB ENGINEER. Read .claude/skills/swarm-dev-team/SKILL.md Phase 2. Load reports 01 and 02. Write report to .haki/reports/03-db-engineer.md"
 
 # Phase 3 — parallel
-# Subagent 1: "You are BACKEND DEVELOPER. Read .agent/skills/swarm-dev-team/SKILL.md Phase 3 Backend section..."
-# Subagent 2: "You are FRONTEND DEVELOPER. Read .agent/skills/swarm-dev-team/SKILL.md Phase 3 Frontend section..."
+# Subagent 1: "You are BACKEND DEVELOPER. Read .claude/skills/swarm-dev-team/SKILL.md Phase 3 Backend section..."
+# Subagent 2: "You are FRONTEND DEVELOPER. Read .claude/skills/swarm-dev-team/SKILL.md Phase 3 Frontend section..."
 
 # Phase 4 — parallel
 # Subagent 1: "You are QA ENGINEER. Use /haki:api-test and /haki:e2e workflows..."

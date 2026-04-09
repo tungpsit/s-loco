@@ -8,10 +8,10 @@ Create end-user documentation for a module with screenshots, flow diagrams, and 
 
 ## Steps
 
-1. **Read skill instructions:**
-   - Read: `.agent/skills/user-docs-generator/SKILL.md`
-   - Read config: `docs_language` and `docs_output_dir` from `.haki/config.json`
-   - Default language: `vi`, default dir: `.haki/generated/docs/user-guides`
+1. **Read config:**
+   - Read: `.haki/config.json`
+   - `docs_language` → language for output (default: `vi`)
+   - `docs_output_dir` → output directory (default: `.haki/generated/docs/user-guides`)
 
 2. **Resolve module(s):**
 
@@ -53,7 +53,7 @@ Create end-user documentation for a module with screenshots, flow diagrams, and 
    - Thông báo user có thể chạy lại `/haki:docs [module]` khi dev server ready để bổ sung ảnh
 
 5. **Generate documentation:**
-   - Read template: `.agent/templates/user-docs-module.md`
+   - Read template: `.haki/templates/user-docs-module.md`
    - Fill 5 sections:
      1. **Tổng quan** — từ Q&A answers + code analysis
      2. **Luồng thao tác** — Mermaid flowchart từ user flow chính
@@ -64,7 +64,7 @@ Create end-user documentation for a module with screenshots, flow diagrams, and 
    - Lưu vào `{docs_output_dir}/{module-slug}.md`
 
 6. **Update index:**
-   - Read hoặc tạo `{docs_output_dir}/index.md` từ template `.agent/templates/user-docs-index.md`
+   - Read hoặc tạo `{docs_output_dir}/index.md` từ template `.haki/templates/user-docs-index.md`
    - Thêm/cập nhật entry cho module vừa tạo
    - Sort entries theo alphabet
 
