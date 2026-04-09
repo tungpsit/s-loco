@@ -197,6 +197,7 @@
 | Tourist | Home (Trang chủ) | [.haki/screens/tourist-home.md](.haki/screens/tourist-home.md) | ✅ |
 | Tourist | Search (Tìm kiếm) | [.haki/screens/tourist-search.md](.haki/screens/tourist-search.md) | ✅ |
 | Tourist | Vouchers (Voucher của tôi) | [.haki/screens/tourist-vouchers.md](.haki/screens/tourist-vouchers.md) | ✅ |
+| Tourist | Auth OTP (Đăng nhập) | [.haki/screens/tourist-auth.md](.haki/screens/tourist-auth.md) | ✅ |
 | Tourist | All screens | [.haki/layouts/tourist-screen-flow.md](.haki/layouts/tourist-screen-flow.md) | ✅ |
 
 *Last updated: 2026-04-09*
