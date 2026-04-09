@@ -212,5 +212,12 @@
 | Vendor | Dashboard | [.haki/screens/vendor-dashboard.md](.haki/screens/vendor-dashboard.md) | ✅ |
 | Vendor | Orders | [.haki/screens/vendor-orders.md](.haki/screens/vendor-orders.md) | ✅ |
 | Vendor | QR Scan (Redeem) | [.haki/screens/vendor-scan.md](.haki/screens/vendor-scan.md) | ✅ |
+| Admin | Login | [.haki/screens/admin-login.md](.haki/screens/admin-login.md) | ✅ |
+| Admin | Dashboard | [.haki/screens/admin-dashboard.md](.haki/screens/admin-dashboard.md) | ✅ |
+| Admin | Orders | [.haki/screens/admin-orders.md](.haki/screens/admin-orders.md) | ✅ |
+| Admin | Vendors | [.haki/screens/admin-vendors.md](.haki/screens/admin-vendors.md) | ✅ |
+| Admin | Settlements (Đối soát) | [.haki/screens/admin-settlements.md](.haki/screens/admin-settlements.md) | ✅ |
+| Admin | Users | [.haki/screens/admin-users.md](.haki/screens/admin-users.md) | ✅ |
+| Admin | Content | [.haki/screens/admin-content.md](.haki/screens/admin-content.md) | ✅ |
 
-*Last updated: 2026-04-09 after vendor screen docs*
+*Last updated: 2026-04-09 after admin screen docs*
