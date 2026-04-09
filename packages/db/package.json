@@ -1,5 +1,5 @@
 {
-  "name": "@s-local/db",
+  "name": "@S-Loco/db",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -18,11 +18,12 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "drizzle-orm": "^0.38.0"
+    "drizzle-orm": "0.45.1"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.30.0",
-    "typescript": "^5.7.0",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "0.31.10",
+    "pg": "^8.13.0",
+    "typescript": "^5.7.0"
   }
 }

@@ -1,6 +1,6 @@
-import { getDb } from '@s-local/db'
-import { users } from '@s-local/db/schema'
-import { APP_CONSTANTS } from '@s-local/shared'
+import { getDb } from '../db'
+import { users } from '@S-Loco/db/schema'
+import { APP_CONSTANTS } from '@S-Loco/shared'
 import { eq } from 'drizzle-orm'
 import { verifyPassword } from '../lib/password'
 import { verifyOtp } from './otp.service'
@@ -31,7 +31,10 @@ export async function registerOrLoginWithOtp(
     if (profile?.full_name) insertValues.fullName = profile.full_name
     if (profile?.email) insertValues.email = profile.email
 
-    const [newUser] = await db.insert(users).values(insertValues as any).returning()
+    const [newUser] = await db
+      .insert(users)
+      .values(insertValues as any)
+      .returning()
     user = newUser!
   }
 

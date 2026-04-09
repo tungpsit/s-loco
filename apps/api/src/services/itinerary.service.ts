@@ -1,9 +1,10 @@
-import { getDb } from '@s-local/db'
-import { categories, services, vendors } from '@s-local/db/schema'
+import { getDb } from '../db'
+import { serviceCategories, services, vendors } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+const GEMINI_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 interface ItineraryInput {
   days: number
@@ -15,23 +16,27 @@ interface ItineraryInput {
 export async function generateItinerary(input: ItineraryInput) {
   const db = getDb()
 
-  const availableServices = await db.select({
-    id: services.id,
-    name: services.name,
-    category: categories.name,
-    price: services.discountPrice,
-    originalPrice: services.originalPrice,
-    vendorName: vendors.name,
-  })
+  const availableServices = await db
+    .select({
+      id: services.id,
+      name: services.name,
+      category: serviceCategories.name,
+      price: services.discountPrice,
+      originalPrice: services.originalPrice,
+      vendorName: vendors.name,
+    })
     .from(services)
     .innerJoin(vendors, eq(services.vendorId, vendors.id))
-    .leftJoin(categories, eq(services.categoryId, categories.id))
+    .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
     .where(and(eq(services.isActive, true), eq(vendors.status, 'active')))
     .limit(50)
 
-  const serviceList = availableServices.map((s) =>
-    `- ${s.name} (${s.category || 'Khác'}) — ${s.price || s.originalPrice}đ tại ${s.vendorName} [ID: ${s.id}]`
-  ).join('\n')
+  const serviceList = availableServices
+    .map(
+      (s) =>
+        `- ${s.name} (${s.category || 'Khác'}) — ${s.price || s.originalPrice}đ tại ${s.vendorName} [ID: ${s.id}]`,
+    )
+    .join('\n')
 
   const prompt = `Bạn là một hướng dẫn viên du lịch chuyên nghiệp tại Sầm Sơn, Thanh Hóa, Việt Nam.
 Tạo lịch trình du lịch chi tiết cho khách du lịch với thông tin sau:
@@ -80,7 +85,7 @@ Trả về JSON (không markdown) theo format:
       }),
     })
 
-    const data = await res.json() as any
+    const data = (await res.json()) as any
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) return JSON.parse(jsonMatch[0])
@@ -108,6 +113,10 @@ function generateMockItinerary(input: ItineraryInput, availableServices: any[]) 
     summary: `Hành trình ${input.groupType} ${input.days} ngày khám phá Sầm Sơn`,
     days,
     total_estimated_cost: input.budget,
-    tips: ['Mang kem chống nắng', 'Thử hải sản tươi tại chợ Sầm Sơn', 'Đặt dịch vụ trước để có giá tốt'],
+    tips: [
+      'Mang kem chống nắng',
+      'Thử hải sản tươi tại chợ Sầm Sơn',
+      'Đặt dịch vụ trước để có giá tốt',
+    ],
   }
 }

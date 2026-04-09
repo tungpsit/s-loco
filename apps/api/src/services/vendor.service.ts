@@ -1,30 +1,71 @@
-import { getDb } from '@S-Loco/db'
+import { getDb } from '../db'
 import { vendors } from '@S-Loco/db/schema'
-import type { AdminUpdateVendorInput, CreateVendorInput, UpdateVendorInput, UpdateVendorStatusInput } from '@S-Loco/shared/validators'
+import type {
+  AdminUpdateVendorInput,
+  CreateVendorInput,
+  UpdateVendorInput,
+  UpdateVendorStatusInput,
+} from '@S-Loco/shared/validators'
 import { and, eq, isNull, sql } from 'drizzle-orm'
+
+/** Non-null assertion for Drizzle scalar selects */
+function scalar<T>(rows: T[]): T {
+  return rows[0]!
+}
 
 export async function createVendor(data: CreateVendorInput) {
   const db = getDb()
-  const [vendor] = await db.insert(vendors).values({
-    ownerId: data.owner_id,
-    name: data.name,
-    slug: data.slug,
-    description: data.description,
-    address: data.address,
-    latitude: data.latitude,
-    longitude: data.longitude,
-    phone: data.phone,
-    email: data.email,
-    commissionRate: data.commission_rate || '8.00',
-    businessHours: data.business_hours,
-  }).returning()
+  const [vendor] = await db
+    .insert(vendors)
+    .values({
+      ownerId: data.owner_id,
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      phone: data.phone,
+      email: data.email,
+      commissionRate: data.commission_rate || '8.00',
+      businessHours: data.business_hours,
+    })
+    .returning()
   return vendor!
 }
 
 export async function updateVendorStatus(vendorId: string, input: UpdateVendorStatusInput) {
   const db = getDb()
-  const [updated] = await db.update(vendors)
-    .set({ status: input.status, updatedAt: new Date() })
+
+  // Load current vendor
+  const [vendor] = await db.select().from(vendors).where(eq(vendors.id, vendorId)).limit(1)
+  if (!vendor) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
+
+  // Enforce valid status transitions
+  const valid: Record<string, string[]> = {
+    pending: ['active', 'rejected'],
+    active: ['suspended'],
+    suspended: ['active'],
+  }
+  if (!valid[vendor.status]?.includes(input.status)) {
+    throw new VendorError(
+      'INVALID_TRANSITION',
+      `Không thể chuyển trạng thái từ '${vendor.status}' sang '${input.status}'.`,
+    )
+  }
+
+  // Rejection must include reason
+  if (input.status === 'rejected' && !input.rejection_reason?.trim()) {
+    throw new VendorError('MISSING_REASON', 'Vui lòng cung cấp lý do từ chối.')
+  }
+
+  const [updated] = await db
+    .update(vendors)
+    .set({
+      status: input.status as any,
+      rejectionReason: input.rejection_reason || null,
+      updatedAt: new Date(),
+    })
     .where(eq(vendors.id, vendorId))
     .returning()
   if (!updated) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
@@ -33,7 +74,9 @@ export async function updateVendorStatus(vendorId: string, input: UpdateVendorSt
 
 export async function getVendorBySlug(slug: string) {
   const db = getDb()
-  const [vendor] = await db.select().from(vendors)
+  const [vendor] = await db
+    .select()
+    .from(vendors)
     .where(and(eq(vendors.slug, slug), isNull(vendors.deletedAt)))
     .limit(1)
   if (!vendor) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
@@ -42,7 +85,9 @@ export async function getVendorBySlug(slug: string) {
 
 export async function getVendorById(vendorId: string) {
   const db = getDb()
-  const [vendor] = await db.select().from(vendors)
+  const [vendor] = await db
+    .select()
+    .from(vendors)
     .where(and(eq(vendors.id, vendorId), isNull(vendors.deletedAt)))
     .limit(1)
   if (!vendor) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
@@ -58,28 +103,34 @@ export async function listVendors(opts: { status?: string; page?: number; limit?
   const conditions = [isNull(vendors.deletedAt)]
   if (opts.status) conditions.push(eq(vendors.status, opts.status as any))
 
-  const items = await db.select().from(vendors)
+  const items = await db
+    .select()
+    .from(vendors)
     .where(and(...conditions))
     .orderBy(sql`${vendors.createdAt} DESC`)
     .limit(limit)
     .offset(offset)
 
-  const [{ count }] = await db.select({ count: sql<number>`count(*)` })
+  const countRows = await db
+    .select({ count: sql<number>`count(*)` })
     .from(vendors)
     .where(and(...conditions))
 
-  return { items, total: Number(count), page, limit }
+  return { items, total: Number(scalar(countRows).count), page, limit }
 }
 
 export async function updateVendor(vendorId: string, ownerId: string, data: UpdateVendorInput) {
   const db = getDb()
   // Check ownership
-  const [vendor] = await db.select().from(vendors)
+  const [vendor] = await db
+    .select()
+    .from(vendors)
     .where(and(eq(vendors.id, vendorId), eq(vendors.ownerId, ownerId)))
     .limit(1)
   if (!vendor) throw new VendorError('FORBIDDEN', 'Bạn không có quyền chỉnh sửa cửa hàng này.')
 
-  const [updated] = await db.update(vendors)
+  const [updated] = await db
+    .update(vendors)
     .set({
       ...(data.name && { name: data.name }),
       ...(data.description !== undefined && { description: data.description }),
@@ -98,12 +149,11 @@ export async function updateVendor(vendorId: string, ownerId: string, data: Upda
 
 export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendorInput) {
   const db = getDb()
-  const [vendor] = await db.select().from(vendors)
-    .where(eq(vendors.id, vendorId))
-    .limit(1)
+  const [vendor] = await db.select().from(vendors).where(eq(vendors.id, vendorId)).limit(1)
   if (!vendor) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
 
-  const [updated] = await db.update(vendors)
+  const [updated] = await db
+    .update(vendors)
     .set({
       ...(data.name && { name: data.name }),
       ...(data.description !== undefined && { description: data.description }),
@@ -123,7 +173,9 @@ export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendo
 
 export async function getVendorByOwnerId(ownerId: string) {
   const db = getDb()
-  const items = await db.select().from(vendors)
+  const items = await db
+    .select()
+    .from(vendors)
     .where(and(eq(vendors.ownerId, ownerId), isNull(vendors.deletedAt)))
   return items
 }

@@ -1,24 +1,26 @@
 {
-  "name": "@s-local/api",
+  "name": "@S-Loco/api",
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
+    "dev": "bun run --env-file=.env src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=./dist",
     "check": "tsc --noEmit",
     "lint": "biome check src/",
     "test": "bun test tests/"
   },
   "dependencies": {
-    "hono": "^4.6.0",
+    "@S-Loco/db": "workspace:*",
+    "@S-Loco/shared": "workspace:*",
     "@hono/zod-openapi": "^0.18.0",
     "@hono/zod-validator": "^0.4.0",
-    "zod": "^3.24.0",
-    "jose": "^5.9.0",
+    "drizzle-orm": "0.45.1",
+    "hono": "^4.6.0",
     "ioredis": "^5.4.0",
-    "drizzle-orm": "^0.38.0",
-    "@s-local/db": "workspace:*",
-    "@s-local/shared": "workspace:*"
+    "jose": "^5.9.0",
+    "postgres": "3.4.9",
+    "postgres-js": "0.1.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

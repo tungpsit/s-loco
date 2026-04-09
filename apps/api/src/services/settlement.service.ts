@@ -1,6 +1,11 @@
-import { getDb } from '@s-local/db'
-import { orderItems, settlementItems, settlements, vendors, vouchers } from '@s-local/db/schema'
+import { getDb } from '../db'
+import { orderItems, settlementItems, settlements, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, gte, lte, sql } from 'drizzle-orm'
+
+/** Non-null assertion for Drizzle scalar selects */
+function scalar<T>(rows: T[]): T {
+  return rows[0]!
+}
 
 const COMMISSION_RATE = 0.08 // 8% total: 5% tourist discount + 3% platform
 
@@ -9,18 +14,21 @@ export async function createSettlementBatch(vendorId: string, periodStart: Date,
   const db = getDb()
 
   // Find COMPLETED vouchers in period that haven't been settled
-  const completedVouchers = await db.select({
-    voucher: vouchers,
-    orderItem: orderItems,
-  })
+  const completedVouchers = await db
+    .select({
+      voucher: vouchers,
+      orderItem: orderItems,
+    })
     .from(vouchers)
     .innerJoin(orderItems, eq(vouchers.orderItemId, orderItems.id))
-    .where(and(
-      eq(vouchers.vendorId, vendorId),
-      eq(vouchers.status, 'completed'),
-      gte(vouchers.completedAt!, periodStart),
-      lte(vouchers.completedAt!, periodEnd),
-    ))
+    .where(
+      and(
+        eq(vouchers.vendorId, vendorId),
+        eq(vouchers.status, 'completed'),
+        gte(vouchers.completedAt!, periodStart),
+        lte(vouchers.completedAt!, periodEnd),
+      ),
+    )
 
   if (completedVouchers.length === 0) return null
 
@@ -40,16 +48,19 @@ export async function createSettlementBatch(vendorId: string, periodStart: Date,
 
   // Create settlement + items in transaction
   const result = await db.transaction(async (tx) => {
-    const [settlement] = await tx.insert(settlements).values({
-      vendorId,
-      periodStart,
-      periodEnd,
-      totalAmount: String(totalAmount),
-      commissionAmount: String(commissionAmount),
-      netAmount: String(netAmount),
-      voucherCount: items.length,
-      status: 'pending',
-    }).returning()
+    const [settlement] = await tx
+      .insert(settlements)
+      .values({
+        vendorId,
+        periodStart,
+        periodEnd,
+        totalAmount: String(totalAmount),
+        commissionAmount: String(commissionAmount),
+        netAmount: String(netAmount),
+        voucherCount: items.length,
+        status: 'pending',
+      })
+      .returning()
 
     for (const item of items) {
       await tx.insert(settlementItems).values({
@@ -62,7 +73,8 @@ export async function createSettlementBatch(vendorId: string, periodStart: Date,
 
     // Mark vouchers as settled
     for (const item of items) {
-      await tx.update(vouchers)
+      await tx
+        .update(vouchers)
         .set({ status: 'settled', settledAt: new Date(), updatedAt: new Date() })
         .where(eq(vouchers.id, item.voucherId))
     }
@@ -76,53 +88,66 @@ export async function createSettlementBatch(vendorId: string, periodStart: Date,
 // ─── Admin approve settlement ──────────────────────────
 export async function approveSettlement(settlementId: string, adminId: string) {
   const db = getDb()
-  const [updated] = await db.update(settlements)
+  const [updated] = await db
+    .update(settlements)
     .set({ status: 'approved', approvedBy: adminId, updatedAt: new Date() })
     .where(and(eq(settlements.id, settlementId), eq(settlements.status, 'pending')))
     .returning()
-  if (!updated) throw new SettlementError('NOT_FOUND', 'Settlement không tồn tại hoặc đã được xử lý.')
+  if (!updated)
+    throw new SettlementError('NOT_FOUND', 'Settlement không tồn tại hoặc đã được xử lý.')
   return updated
 }
 
 // ─── Admin disburse settlement ─────────────────────────
 export async function disburseSettlement(settlementId: string) {
   const db = getDb()
-  const [updated] = await db.update(settlements)
+  const [updated] = await db
+    .update(settlements)
     .set({ status: 'disbursed', disbursedAt: new Date(), updatedAt: new Date() })
     .where(and(eq(settlements.id, settlementId), eq(settlements.status, 'approved')))
     .returning()
-  if (!updated) throw new SettlementError('NOT_FOUND', 'Settlement chưa được duyệt hoặc đã giải ngân.')
+  if (!updated)
+    throw new SettlementError('NOT_FOUND', 'Settlement chưa được duyệt hoặc đã giải ngân.')
   return updated
 }
 
 // ─── Admin reject settlement ───────────────────────────
 export async function rejectSettlement(settlementId: string) {
   const db = getDb()
-  const [updated] = await db.update(settlements)
+  const [updated] = await db
+    .update(settlements)
     .set({ status: 'rejected', updatedAt: new Date() })
     .where(and(eq(settlements.id, settlementId), eq(settlements.status, 'pending')))
     .returning()
-  if (!updated) throw new SettlementError('NOT_FOUND', 'Settlement không tồn tại hoặc đã được xử lý.')
+  if (!updated)
+    throw new SettlementError('NOT_FOUND', 'Settlement không tồn tại hoặc đã được xử lý.')
   return updated
 }
 
 // ─── Vendor settlement history ─────────────────────────
-export async function listSettlementsByVendor(vendorId: string, opts: { page?: number; limit?: number }) {
+export async function listSettlementsByVendor(
+  vendorId: string,
+  opts: { page?: number; limit?: number },
+) {
   const db = getDb()
   const page = opts.page || 1
   const limit = opts.limit || 20
   const offset = (page - 1) * limit
 
-  const items = await db.select().from(settlements)
+  const items = await db
+    .select()
+    .from(settlements)
     .where(eq(settlements.vendorId, vendorId))
     .orderBy(sql`${settlements.createdAt} DESC`)
     .limit(limit)
     .offset(offset)
 
-  const [{ count }] = await db.select({ count: sql<number>`count(*)` })
-    .from(settlements).where(eq(settlements.vendorId, vendorId))
+  const countRows = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(settlements)
+    .where(eq(settlements.vendorId, vendorId))
 
-  return { items, total: Number(count), page, limit }
+  return { items, total: Number(scalar(countRows).count), page, limit }
 }
 
 // ─── Admin list all settlements ────────────────────────
@@ -136,7 +161,8 @@ export async function listAllSettlements(opts: { status?: string; page?: number;
   if (opts.status) conditions.push(eq(settlements.status, opts.status as any))
   const where = conditions.length ? and(...conditions) : undefined
 
-  const items = await db.select({ settlement: settlements, vendor: { id: vendors.id, name: vendors.name } })
+  const items = await db
+    .select({ settlement: settlements, vendor: { id: vendors.id, name: vendors.name } })
     .from(settlements)
     .innerJoin(vendors, eq(settlements.vendorId, vendors.id))
     .where(where)
@@ -144,31 +170,34 @@ export async function listAllSettlements(opts: { status?: string; page?: number;
     .limit(limit)
     .offset(offset)
 
-  const [{ count }] = await db.select({ count: sql<number>`count(*)` })
-    .from(settlements).where(where)
+  const rows2 = await db.select({ count: sql<number>`count(*)` }).from(settlements).where(where)
 
-  return { items, total: Number(count), page, limit }
+  return { items, total: Number(scalar(rows2).count), page, limit }
 }
 
 // ─── Reconciliation report ─────────────────────────────
 export async function getReconciliationReport(periodStart: Date, periodEnd: Date) {
   const db = getDb()
 
-  const [settlementTotals] = await db.select({
-    totalAmount: sql<string>`COALESCE(SUM(${settlements.totalAmount}::numeric), 0)`,
-    totalCommission: sql<string>`COALESCE(SUM(${settlements.commissionAmount}::numeric), 0)`,
-    totalNet: sql<string>`COALESCE(SUM(${settlements.netAmount}::numeric), 0)`,
-    count: sql<number>`count(*)`,
-  }).from(settlements)
-    .where(and(gte(settlements.periodStart, periodStart), lte(settlements.periodEnd, periodEnd)))
+  const [settlementTotals] = await db
+    .select({
+      totalAmount: sql<string>`COALESCE(SUM(${settlements.totalAmount}::numeric), 0)`,
+      totalCommission: sql<string>`COALESCE(SUM(${settlements.commissionAmount}::numeric), 0)`,
+      totalNet: sql<string>`COALESCE(SUM(${settlements.netAmount}::numeric), 0)`,
+      count: sql<number>`count(*)`,
+    })
+    .from(settlements)
+    .where(and(gte(settlements.periodStart, periodStart), lte(settlements.periodEnd, periodEnd)))!
 
   return {
     period: { start: periodStart, end: periodEnd },
-    totalVoucherAmount: settlementTotals.totalAmount,
-    totalCommission: settlementTotals.totalCommission,
-    totalVendorNet: settlementTotals.totalNet,
-    settlementCount: Number(settlementTotals.count),
-    balanced: Number(settlementTotals.totalAmount) === Number(settlementTotals.totalCommission) + Number(settlementTotals.totalNet),
+    totalVoucherAmount: settlementTotals!.totalAmount,
+    totalCommission: settlementTotals!.totalCommission,
+    totalVendorNet: settlementTotals!.totalNet,
+    settlementCount: Number(settlementTotals!.count),
+    balanced:
+      Number(settlementTotals!.totalAmount) ===
+      Number(settlementTotals!.totalCommission) + Number(settlementTotals!.totalNet),
   }
 }
 

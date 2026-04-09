@@ -1,77 +1,67 @@
 import { zValidator } from '@hono/zod-validator'
-import { createServiceSchema, serviceFilterSchema, updateServiceSchema } from '@s-local/shared/validators'
+import {
+  createServiceSchema,
+  serviceFilterSchema,
+  updateServiceSchema,
+} from '@S-Loco/shared/validators'
 import { Hono } from 'hono'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import * as discoverySvc from '../services/discovery.service'
 import * as serviceSvc from '../services/service.service'
 import { ServiceError } from '../services/service.service'
 
-const serviceRoutes = new Hono()
+const serviceRoutes = new Hono<{ Variables: { userId: string | null; userRole: string | null } }>()
 
 // ─── GET /services — search/filter/browse (public) ────
-serviceRoutes.get(
-  '/',
-  async (c) => {
-    const filters = serviceFilterSchema.parse({
-      q: c.req.query('q'),
-      category: c.req.query('category'),
-      min_price: c.req.query('min_price'),
-      max_price: c.req.query('max_price'),
-      min_rating: c.req.query('min_rating'),
-      page: c.req.query('page'),
-      limit: c.req.query('limit'),
-    })
-    const result = await discoverySvc.searchServices(filters)
-    return c.json({ success: true, data: result })
-  },
-)
+serviceRoutes.get('/', async (c) => {
+  const filters = serviceFilterSchema.parse({
+    q: c.req.query('q'),
+    category: c.req.query('category'),
+    min_price: c.req.query('min_price'),
+    max_price: c.req.query('max_price'),
+    min_rating: c.req.query('min_rating'),
+    sort: c.req.query('sort'),
+    page: c.req.query('page'),
+    limit: c.req.query('limit'),
+  })
+  const result = await discoverySvc.searchServices(filters)
+  return c.json({ success: true, data: result })
+})
 
 // ─── GET /services/categories — list all categories ────
-serviceRoutes.get(
-  '/categories',
-  async (c) => {
-    const categories = await discoverySvc.listCategories()
-    return c.json({ success: true, data: { categories } })
-  },
-)
+serviceRoutes.get('/categories', async (c) => {
+  const categories = await discoverySvc.listCategories()
+  return c.json({ success: true, data: { categories } })
+})
 
 // ─── GET /services/featured — featured vendors ────
-serviceRoutes.get(
-  '/featured',
-  async (c) => {
-    const vendors = await discoverySvc.getFeaturedVendors()
-    return c.json({ success: true, data: { vendors } })
-  },
-)
+serviceRoutes.get('/featured', async (c) => {
+  const vendors = await discoverySvc.getFeaturedVendors()
+  return c.json({ success: true, data: { vendors } })
+})
 
 // ─── GET /services/:id — service detail ────
-serviceRoutes.get(
-  '/:id',
-  async (c) => {
-    try {
-      const serviceId = c.req.param('id')
-      const result = await serviceSvc.getServiceById(serviceId)
-      return c.json({ success: true, data: result })
-    } catch (err) {
-      if (err instanceof ServiceError) {
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
-      }
-      throw err
+serviceRoutes.get('/:id', async (c) => {
+  try {
+    const serviceId = c.req.param('id')
+    const result = await serviceSvc.getServiceById(serviceId)
+    return c.json({ success: true, data: result })
+  } catch (err) {
+    if (err instanceof ServiceError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
     }
-  },
-)
+    throw err
+  }
+})
 
 // ─── Vendor-scoped service routes ──────────────────────
 
 // GET /vendors/:vendorId/services — list services for a vendor
-serviceRoutes.get(
-  '/vendor/:vendorId',
-  async (c) => {
-    const vendorId = c.req.param('vendorId')
-    const items = await serviceSvc.listServicesByVendor(vendorId)
-    return c.json({ success: true, data: { services: items } })
-  },
-)
+serviceRoutes.get('/vendor/:vendorId', async (c) => {
+  const vendorId = c.req.param('vendorId')
+  const items = await serviceSvc.listServicesByVendor(vendorId)
+  return c.json({ success: true, data: { services: items } })
+})
 
 // POST /vendors/:vendorId/services — vendor creates service
 serviceRoutes.post(
@@ -104,7 +94,7 @@ serviceRoutes.patch(
   zValidator('json', updateServiceSchema),
   async (c) => {
     try {
-      const serviceId = c.req.param('id')
+      const serviceId = c.req.param('id')!
       const ownerId = c.get('userId')!
       const data = c.req.valid('json')
       const service = await serviceSvc.updateService(serviceId, ownerId, data)
@@ -120,24 +110,19 @@ serviceRoutes.patch(
 )
 
 // DELETE /services/:id — vendor soft-deletes service
-serviceRoutes.delete(
-  '/:id',
-  authMiddleware(),
-  requireRole('vendor_owner'),
-  async (c) => {
-    try {
-      const serviceId = c.req.param('id')
-      const ownerId = c.get('userId')!
-      await serviceSvc.deleteService(serviceId, ownerId)
-      return c.json({ success: true, data: { message: 'Đã xóa dịch vụ.' } })
-    } catch (err) {
-      if (err instanceof ServiceError) {
-        const status = err.code === 'FORBIDDEN' ? 403 : 400
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
-      }
-      throw err
+serviceRoutes.delete('/:id', authMiddleware(), requireRole('vendor_owner'), async (c) => {
+  try {
+    const serviceId = c.req.param('id')!
+    const ownerId = c.get('userId')!
+    await serviceSvc.deleteService(serviceId, ownerId)
+    return c.json({ success: true, data: { message: 'Đã xóa dịch vụ.' } })
+  } catch (err) {
+    if (err instanceof ServiceError) {
+      const status = err.code === 'FORBIDDEN' ? 403 : 400
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
     }
-  },
-)
+    throw err
+  }
+})
 
 export default serviceRoutes

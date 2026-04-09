@@ -17,7 +17,7 @@ must_haves:
 # Plan 04: UI Design System with Stitch
 
 <objective>
-Use Google Stitch to design the core screens for S-Local (tourist login, home/discovery, vendor detail), then run the `design-md` skill to synthesize a DESIGN.md capturing the visual design system for all downstream frontend work.
+Use Google Stitch to design the core screens for S-Loco (tourist login, home/discovery, vendor detail), then run the `design-md` skill to synthesize a DESIGN.md capturing the visual design system for all downstream frontend work.
 </objective>
 
 ## Tasks
@@ -28,16 +28,16 @@ Use Google Stitch to design the core screens for S-Local (tourist login, home/di
 - .planning/phases/01-foundation-auth/01-CONTEXT.md (Tourist Auth Flow section)
 </read_first>
 <action>
-1. Use `mcp_StitchMCP_create_project` to create "S-Local" Stitch project
+1. Use `mcp_StitchMCP_create_project` to create "S-Loco" Stitch project
 2. Generate screens using `mcp_StitchMCP_generate_screen_from_text`:
-   - **Login/OTP Screen** — "Mobile login screen for Vietnamese tourism app. Phone number input with country code +84. OTP verification. Brand colors teal/ocean blue. Vietnamese text 'Đăng nhập S-Local'. Clean, modern, friendly."
+   - **Login/OTP Screen** — "Mobile login screen for Vietnamese tourism app. Phone number input with country code +84. OTP verification. Brand colors teal/ocean blue. Vietnamese text 'Đăng nhập S-Loco'. Clean, modern, friendly."
    - **Home/Discovery Screen** — "Mobile home screen for local tourism app. Hero carousel of Sầm Sơn beach photos. Category grid: Ẩm thực, Lưu trú, Spa, Xe điện, Giải trí, Mua sắm. Featured vendors section. Bottom tab bar. Vietnamese labels. Ocean/teal theme."
    - **Vendor Detail Screen** — "Mobile vendor detail page for restaurant. Hero image, vendor name 'Nhà hàng Biển Xanh', rating 4.5 stars, address, phone. Service menu list with prices in VND format. Book/Buy button. Vietnamese text."
 3. Set device type to MOBILE for all screens
 4. Iterate on designs using `mcp_StitchMCP_edit_screens` if needed
 </action>
 <acceptance_criteria>
-- Stitch project "S-Local" created with project ID
+- Stitch project "S-Loco" created with project ID
 - At least 3 screens designed: Login, Home, Vendor Detail
 - All screens use MOBILE device type
 - Screens use Vietnamese text and VND pricing

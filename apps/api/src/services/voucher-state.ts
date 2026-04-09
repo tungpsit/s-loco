@@ -1,15 +1,14 @@
 // ─── Voucher State Machine ─────────────────────────────
 // Valid transitions map: from → [allowed targets]
 
-
 const TRANSITIONS: Record<string, string[]> = {
-  created:   ['paid', 'cancelled'],
-  paid:      ['redeemed', 'refunded', 'expired'],
-  redeemed:  ['completed'],
+  created: ['paid', 'cancelled'],
+  paid: ['redeemed', 'refunded', 'expired'],
+  redeemed: ['completed'],
   completed: ['settled'],
-  settled:   [],
-  refunded:  [],
-  expired:   [],
+  settled: [],
+  refunded: [],
+  expired: [],
   cancelled: [],
 }
 

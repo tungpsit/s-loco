@@ -1,6 +1,6 @@
-import { getDb } from '@s-local/db'
-import { otpCodes } from '@s-local/db/schema'
-import { APP_CONSTANTS } from '@s-local/shared'
+import { getDb } from '../db'
+import { otpCodes } from '@S-Loco/db/schema'
+import { APP_CONSTANTS } from '@S-Loco/shared'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import { ConsoleSMSProvider, type SMSProvider } from '../lib/sms-provider'
 
@@ -51,11 +51,7 @@ export async function verifyOtp(phone: string, code: string) {
     .select()
     .from(otpCodes)
     .where(
-      and(
-        eq(otpCodes.phone, phone),
-        eq(otpCodes.verified, false),
-        gt(otpCodes.expiresAt, now),
-      ),
+      and(eq(otpCodes.phone, phone), eq(otpCodes.verified, false), gt(otpCodes.expiresAt, now)),
     )
     .orderBy(sql`${otpCodes.createdAt} DESC`)
     .limit(1)
@@ -81,10 +77,7 @@ export async function verifyOtp(phone: string, code: string) {
   }
 
   // Mark as verified
-  await db
-    .update(otpCodes)
-    .set({ verified: true })
-    .where(eq(otpCodes.id, otpRecord.id))
+  await db.update(otpCodes).set({ verified: true }).where(eq(otpCodes.id, otpRecord.id))
 
   return { verified: true }
 }

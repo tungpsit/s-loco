@@ -1,22 +1,40 @@
 {
-  "name": "s-local",
+  "name": "S-Loco",
   "private": true,
+  "packageManager": "bun@1.3.4",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=@S-Loco/api --filter=@S-Loco/admin",
+    "dev:all": "turbo dev",
+    "dev:api": "turbo dev --filter=@S-Loco/api",
+    "dev:admin": "turbo dev --filter=@S-Loco/admin",
+    "dev:mobile": "turbo dev --filter=@s-loco/mobile",
+    "dev:vendor": "turbo dev --filter=@S-Loco/vendor",
     "build": "turbo build",
     "lint": "biome check .",
     "format": "biome format --write .",
     "check": "turbo check",
-    "db:generate": "turbo db:generate --filter=@s-local/db",
-    "db:migrate": "turbo db:migrate --filter=@s-local/db",
-    "db:push": "turbo db:push --filter=@s-local/db",
-    "db:seed": "turbo db:seed --filter=@s-local/db",
-    "db:studio": "turbo db:studio --filter=@s-local/db"
+    "db:generate": "turbo db:generate --filter=@S-Loco/db",
+    "db:migrate": "turbo db:migrate --filter=@S-Loco/db",
+    "db:push": "turbo db:push --filter=@S-Loco/db",
+    "db:seed": "turbo db:seed --filter=@S-Loco/db",
+    "db:studio": "turbo db:studio --filter=@S-Loco/db"
+  },
+  "overrides": {
+    "@types/react": "~18.3.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.0",
+    "@biomejs/biome": "2.4.10",
+    "@playwright/test": "1.59.1",
+    "tsx": "4.21.0",
     "turbo": "^2.3.0",
     "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "expo-camera": "55.0.11",
+    "postgres-js": "0.1.0",
+    "qrcode": "1.5.4",
+    "react-native-qrcode-svg": "6.3.21",
+    "react-native-svg": "15.15.4"
   }
 }

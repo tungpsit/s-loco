@@ -1,10 +1,17 @@
 import crypto from 'crypto'
-import type { CreatePaymentParams, PaymentGateway, RefundParams, RefundResult, WebhookResult } from '../services/payment-gateway'
+import type {
+  CreatePaymentParams,
+  PaymentGateway,
+  RefundParams,
+  RefundResult,
+  WebhookResult,
+} from '../services/payment-gateway'
 
 const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE || 'demo_partner'
 const MOMO_ACCESS_KEY = process.env.MOMO_ACCESS_KEY || 'demo_access'
 const MOMO_SECRET_KEY = process.env.MOMO_SECRET_KEY || 'demo_secret'
-const MOMO_API_URL = process.env.MOMO_API_URL || 'https://test-payment.momo.vn/v2/gateway/api/create'
+const MOMO_API_URL =
+  process.env.MOMO_API_URL || 'https://test-payment.momo.vn/v2/gateway/api/create'
 
 export const momoGateway: PaymentGateway = {
   async createPaymentUrl(params: CreatePaymentParams) {
@@ -24,7 +31,10 @@ export const momoGateway: PaymentGateway = {
       `requestType=payWithMethod`,
     ].join('&')
 
-    const signature = crypto.createHmac('sha256', MOMO_SECRET_KEY).update(rawSignature).digest('hex')
+    const signature = crypto
+      .createHmac('sha256', MOMO_SECRET_KEY)
+      .update(rawSignature)
+      .digest('hex')
 
     const body = {
       partnerCode: MOMO_PARTNER_CODE,
@@ -48,7 +58,7 @@ export const momoGateway: PaymentGateway = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      const data = await res.json() as { payUrl?: string; resultCode?: number }
+      const data = (await res.json()) as { payUrl?: string; resultCode?: number }
       if (data.payUrl) {
         return { paymentUrl: data.payUrl, transactionId: orderId }
       }
@@ -80,7 +90,10 @@ export const momoGateway: PaymentGateway = {
       `transId=${payload.transId}`,
     ].join('&')
 
-    const expectedSig = crypto.createHmac('sha256', MOMO_SECRET_KEY).update(rawSignature).digest('hex')
+    const expectedSig = crypto
+      .createHmac('sha256', MOMO_SECRET_KEY)
+      .update(rawSignature)
+      .digest('hex')
     return receivedSig === expectedSig
   },
 

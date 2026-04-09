@@ -1,5 +1,11 @@
 import crypto from 'crypto'
-import type { CreatePaymentParams, PaymentGateway, RefundParams, RefundResult, WebhookResult } from '../services/payment-gateway'
+import type {
+  CreatePaymentParams,
+  PaymentGateway,
+  RefundParams,
+  RefundResult,
+  WebhookResult,
+} from '../services/payment-gateway'
 
 const SEPAY_API_KEY = process.env.SEPAY_API_KEY || 'demo_api_key'
 const SEPAY_WEBHOOK_SECRET = process.env.SEPAY_WEBHOOK_SECRET || 'demo_webhook_secret'

@@ -13,7 +13,10 @@ export function authMiddleware() {
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return c.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Token xác thực không tồn tại.' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'Token xác thực không tồn tại.' },
+        },
         401,
       )
     }
@@ -26,7 +29,10 @@ export function authMiddleware() {
       c.set('userRole', payload.role)
     } catch {
       return c.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Token không hợp lệ hoặc đã hết hạn.' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'Token không hợp lệ hoặc đã hết hạn.' },
+        },
         401,
       )
     }

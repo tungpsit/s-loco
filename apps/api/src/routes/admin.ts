@@ -12,124 +12,141 @@ const updateRoleSchema = z.object({
   role: z.enum(['tourist', 'vendor_owner', 'admin']),
 })
 
-const adminRoutes = new Hono()
+const updateStatusSchema = z.object({
+  is_active: z.boolean(),
+})
+
+const adminRoutes = new Hono<{ Variables: { userId: string | null; userRole: string | null } }>()
 
 // All admin routes require admin role
 adminRoutes.use('*', authMiddleware(), requireRole('admin'))
 
 // ─── GET /admin/vendors — list vendors ────
-adminRoutes.get(
-  '/vendors',
-  async (c) => {
-    const status = c.req.query('status') || undefined
-    const page = Number(c.req.query('page') || 1)
-    const limit = Number(c.req.query('limit') || 20)
-    const result = await vendorSvc.listVendors({ status, page, limit })
-    return c.json({ success: true, data: result })
-  },
-)
+adminRoutes.get('/vendors', async (c) => {
+  const status = c.req.query('status') || undefined
+  const page = Number(c.req.query('page') || 1)
+  const limit = Number(c.req.query('limit') || 20)
+  const result = await vendorSvc.listVendors({ status, page, limit })
+  return c.json({ success: true, data: result })
+})
 
 // ─── POST /admin/vendors — create vendor ────
-adminRoutes.post(
-  '/vendors',
-  zValidator('json', createVendorSchema),
-  async (c) => {
-    try {
-      const data = c.req.valid('json')
-      const vendor = await vendorSvc.createVendor(data)
-      return c.json({ success: true, data: { vendor } }, 201)
-    } catch (err) {
-      if (err instanceof VendorError) {
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
-      }
-      throw err
+adminRoutes.post('/vendors', zValidator('json', createVendorSchema), async (c) => {
+  try {
+    const data = c.req.valid('json')
+    const vendor = await vendorSvc.createVendor(data)
+    return c.json({ success: true, data: { vendor } }, 201)
+  } catch (err) {
+    if (err instanceof VendorError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
     }
-  },
-)
+    throw err
+  }
+})
 
 // ─── PUT /admin/vendors/:id/status — update status ────
-adminRoutes.put(
-  '/vendors/:id/status',
-  async (c) => {
-    try {
-      const vendorId = c.req.param('id')
-      const body = await c.req.json()
-      const vendor = await vendorSvc.updateVendorStatus(vendorId, body)
-      return c.json({ success: true, data: { vendor } })
-    } catch (err) {
-      if (err instanceof VendorError) {
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
-      }
-      throw err
+adminRoutes.put('/vendors/:id/status', async (c) => {
+  try {
+    const vendorId = c.req.param('id')
+    const body = await c.req.json()
+    const vendor = await vendorSvc.updateVendorStatus(vendorId, body)
+    return c.json({ success: true, data: { vendor } })
+  } catch (err) {
+    if (err instanceof VendorError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
     }
-  },
-)
+    throw err
+  }
+})
 
 // ─── GET /admin/vendors/:id — get vendor detail ────
-adminRoutes.get(
-  '/vendors/:id',
-  async (c) => {
-    try {
-      const vendorId = c.req.param('id')
-      const vendor = await vendorSvc.getVendorById(vendorId)
-      return c.json({ success: true, data: { vendor } })
-    } catch (err) {
-      if (err instanceof VendorError) {
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
-      }
-      throw err
+adminRoutes.get('/vendors/:id', async (c) => {
+  try {
+    const vendorId = c.req.param('id')
+    const vendor = await vendorSvc.getVendorById(vendorId)
+    return c.json({ success: true, data: { vendor } })
+  } catch (err) {
+    if (err instanceof VendorError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
     }
-  },
-)
+    throw err
+  }
+})
 
 // ─── PUT /admin/vendors/:id — update vendor info & commission ────
-adminRoutes.put(
-  '/vendors/:id',
-  zValidator('json', adminUpdateVendorSchema),
-  async (c) => {
-    try {
-      const vendorId = c.req.param('id')
-      const data = c.req.valid('json')
-      const vendor = await vendorSvc.adminUpdateVendor(vendorId, data)
-      return c.json({ success: true, data: { vendor } })
-    } catch (err) {
-      if (err instanceof VendorError) {
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
-      }
-      throw err
+adminRoutes.put('/vendors/:id', zValidator('json', adminUpdateVendorSchema), async (c) => {
+  try {
+    const vendorId = c.req.param('id')
+    const data = c.req.valid('json')
+    const vendor = await vendorSvc.adminUpdateVendor(vendorId, data)
+    return c.json({ success: true, data: { vendor } })
+  } catch (err) {
+    if (err instanceof VendorError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
     }
-  },
-)
+    throw err
+  }
+})
 
 // ─── GET /admin/users — list users ────
-adminRoutes.get(
-  '/users',
-  async (c) => {
-    const role = c.req.query('role') || undefined
-    const page = Number(c.req.query('page') || 1)
-    const limit = Number(c.req.query('limit') || 20)
-    const result = await adminSvc.listUsers({ role, page, limit })
-    return c.json({ success: true, data: result })
-  },
-)
+adminRoutes.get('/users', async (c) => {
+  const role = c.req.query('role') || undefined
+  const page = Number(c.req.query('page') || 1)
+  const limit = Number(c.req.query('limit') || 20)
+  const result = await adminSvc.listUsers({ role, page, limit })
+  return c.json({ success: true, data: result })
+})
+
+// ─── GET /admin/users/:id — get user detail ────
+adminRoutes.get('/users/:id', async (c) => {
+  try {
+    const userId = c.req.param('id')
+    const user = await adminSvc.getUserById(userId)
+    return c.json({ success: true, data: { user } })
+  } catch (err) {
+    if (err instanceof AdminError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+    }
+    throw err
+  }
+})
+
+// ─── GET /admin/vendors/pending — pending vendor applications ────
+adminRoutes.get('/vendors/pending', async (c) => {
+  const result = await vendorSvc.listVendors({ status: 'pending', page: 1, limit: 20 })
+  return c.json({ success: true, data: result })
+})
 
 // ─── PATCH /admin/users/:id/role — change user role ────
-adminRoutes.patch(
-  '/users/:id/role',
-  zValidator('json', updateRoleSchema),
-  async (c) => {
-    try {
-      const userId = c.req.param('id')
-      const { role } = c.req.valid('json')
-      const user = await adminSvc.updateUserRole(userId, role)
-      return c.json({ success: true, data: { user } })
-    } catch (err) {
-      if (err instanceof AdminError) {
-        return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
-      }
-      throw err
+adminRoutes.patch('/users/:id/role', zValidator('json', updateRoleSchema), async (c) => {
+  try {
+    const userId = c.req.param('id')
+    const adminId = c.get('userId')!
+    const { role } = c.req.valid('json')
+    const user = await adminSvc.updateUserRole(userId, role, adminId)
+    return c.json({ success: true, data: { user } })
+  } catch (err) {
+    if (err instanceof AdminError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, err.code === 'FORBIDDEN' ? 403 : 404)
     }
-  },
-)
+    throw err
+  }
+})
+
+// ─── PATCH /admin/users/:id/status — enable/disable user ────
+adminRoutes.patch('/users/:id/status', zValidator('json', updateStatusSchema), async (c) => {
+  try {
+    const userId = c.req.param('id')
+    const adminId = c.get('userId')!
+    const { is_active } = c.req.valid('json')
+    const user = await adminSvc.updateUserStatus(userId, is_active, adminId)
+    return c.json({ success: true, data: { user } })
+  } catch (err) {
+    if (err instanceof AdminError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, err.code === 'FORBIDDEN' ? 403 : 404)
+    }
+    throw err
+  }
+})
 
 export default adminRoutes

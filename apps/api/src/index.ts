@@ -23,8 +23,12 @@ app.use('*', logger())
 app.use(
   '*',
   cors({
-    origin: ['http://localhost:3001', 'http://localhost:3002', 'http://localhost:8081'],
+    origin: (
+      process.env.ALLOWED_ORIGINS ??
+      'http://localhost:3001,http://localhost:3002,http://localhost:8081'
+    ).split(','),
     credentials: true,
+    exposeHeaders: ['Content-Disposition'],
   }),
 )
 
@@ -71,7 +75,10 @@ app.route('/api/v1', v1)
 app.onError((err, c) => {
   console.error('[API Error]', err)
   return c.json(
-    { success: false, error: { code: 'INTERNAL_ERROR', message: 'Lỗi hệ thống. Vui lòng thử lại.' } },
+    {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Lỗi hệ thống. Vui lòng thử lại.' },
+    },
     500,
   )
 })

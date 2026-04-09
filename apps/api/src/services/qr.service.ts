@@ -1,5 +1,5 @@
-import { getDb } from '@s-local/db'
-import { vouchers } from '@s-local/db/schema'
+import { getDb } from '../db'
+import { vouchers } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
 import { assertTransition } from './voucher-state'
 import { verifyQrToken, VoucherError } from './voucher.service'
@@ -14,7 +14,9 @@ export async function redeemByQr(qrToken: string, vendorId: string) {
 export async function selfRedeem(voucherId: string, userId: string, vendorId: string) {
   const db = getDb()
   // Verify the voucher belongs to this user
-  const [v] = await db.select().from(vouchers)
+  const [v] = await db
+    .select()
+    .from(vouchers)
     .where(and(eq(vouchers.id, voucherId), eq(vouchers.userId, userId)))
     .limit(1)
   if (!v) throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại.')
@@ -43,14 +45,17 @@ export async function previewVoucher(qrToken: string) {
 export async function confirmCompletion(voucherId: string, vendorId: string) {
   const db = getDb()
 
-  const [v] = await db.select().from(vouchers)
+  const [v] = await db
+    .select()
+    .from(vouchers)
     .where(and(eq(vouchers.id, voucherId), eq(vouchers.vendorId, vendorId)))
     .limit(1)
   if (!v) throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại hoặc bạn không có quyền.')
 
   assertTransition(v.status, 'completed')
 
-  const [updated] = await db.update(vouchers)
+  const [updated] = await db
+    .update(vouchers)
     .set({
       status: 'completed',
       completedAt: new Date(),
@@ -69,10 +74,13 @@ async function atomicRedeem(voucherId: string, vendorId: string) {
   const db = getDb()
 
   // Fetch voucher with vendor check
-  const [v] = await db.select().from(vouchers)
+  const [v] = await db
+    .select()
+    .from(vouchers)
     .where(and(eq(vouchers.id, voucherId), eq(vouchers.vendorId, vendorId)))
     .limit(1)
-  if (!v) throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại hoặc không thuộc cửa hàng này.')
+  if (!v)
+    throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại hoặc không thuộc cửa hàng này.')
 
   // Check expiry
   if (new Date() > v.expiresAt) {
@@ -83,17 +91,15 @@ async function atomicRedeem(voucherId: string, vendorId: string) {
   assertTransition(v.status, 'redeemed')
 
   // Optimistic lock: only update if version matches (prevents double-redemption)
-  const [updated] = await db.update(vouchers)
+  const [updated] = await db
+    .update(vouchers)
     .set({
       status: 'redeemed',
       redeemedAt: new Date(),
       version: v.version + 1,
       updatedAt: new Date(),
     })
-    .where(and(
-      eq(vouchers.id, voucherId),
-      eq(vouchers.version, v.version),
-    ))
+    .where(and(eq(vouchers.id, voucherId), eq(vouchers.version, v.version)))
     .returning()
 
   if (!updated) {

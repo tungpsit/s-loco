@@ -3,7 +3,9 @@
 
 export interface PaymentGateway {
   /** Generate a payment URL for the tourist to redirect to */
-  createPaymentUrl(params: CreatePaymentParams): Promise<{ paymentUrl: string; transactionId: string }>
+  createPaymentUrl(
+    params: CreatePaymentParams,
+  ): Promise<{ paymentUrl: string; transactionId: string }>
 
   /** Verify webhook signature authenticity */
   verifyWebhook(payload: Record<string, unknown>, signature: string): boolean
@@ -17,7 +19,7 @@ export interface PaymentGateway {
 
 export interface CreatePaymentParams {
   orderId: string
-  amount: number  // VND integer (no decimals)
+  amount: number // VND integer (no decimals)
   description: string
   returnUrl: string
   ipnUrl: string

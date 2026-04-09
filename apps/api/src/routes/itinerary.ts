@@ -6,12 +6,17 @@ const itineraryRoutes = new Hono()
 itineraryRoutes.use('*', authMiddleware())
 
 itineraryRoutes.post('/generate', async (c) => {
-  const body = await c.req.json() as {
-    days?: number; budget?: number; preferences?: string[]; group_type?: string
+  const body = (await c.req.json()) as {
+    days?: number
+    budget?: number
+    preferences?: string[]
+    group_type?: string
   }
   const result = await generateItinerary({
-    days: body.days || 2, budget: body.budget || 2000000,
-    preferences: body.preferences || ['biển', 'ẩm thực'], groupType: body.group_type || 'couple',
+    days: body.days || 2,
+    budget: body.budget || 2000000,
+    preferences: body.preferences || ['biển', 'ẩm thực'],
+    groupType: body.group_type || 'couple',
   })
   return c.json({ success: true, data: result })
 })

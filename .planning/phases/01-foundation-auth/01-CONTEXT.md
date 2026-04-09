@@ -104,7 +104,7 @@ Monorepo scaffolding (all 4 apps + core packages), database schema deployment vi
 ## Specific Ideas
 
 - Seed data should use real Sầm Sơn venue types: "Nhà hàng Biển Xanh", "Spa Hương Sen", "Xe điện Sầm Sơn Tour" etc.
-- OTP message template in Vietnamese: "Mã xác thực S-Local của bạn là: {code}. Hết hạn sau 5 phút."
+- OTP message template in Vietnamese: "Mã xác thực S-Loco của bạn là: {code}. Hết hạn sau 5 phút."
 - Zalo ZNS as primary OTP channel reflects Vietnamese market reality — most users have Zalo installed
 
 </specifics>

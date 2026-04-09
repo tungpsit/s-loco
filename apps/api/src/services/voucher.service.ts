@@ -1,9 +1,21 @@
-import { getDb } from '@s-local/db'
-import { services, vouchers } from '@s-local/db/schema'
+import { getDb } from '../db'
+import { services, vouchers } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { SignJWT, jwtVerify } from 'jose'
 
-const QR_SECRET = new TextEncoder().encode(process.env.QR_SECRET || 'qr-dev-secret')
+/** Non-null assertion for Drizzle scalar selects */
+function scalar<T>(rows: T[]): T {
+  return rows[0]!
+}
+
+const QR_SECRET = process.env.QR_SECRET
+if (!QR_SECRET) {
+  throw new Error('FATAL: QR_SECRET env var is required. Set it before starting the server.')
+}
+if (QR_SECRET.length < 32) {
+  throw new Error('FATAL: QR_SECRET must be at least 32 characters.')
+}
+const _qrSecretBuffer = new TextEncoder().encode(QR_SECRET)
 
 // ─── Generate unique voucher code ──────────────────────
 export function generateVoucherCode(): string {
@@ -21,13 +33,13 @@ export async function generateQrToken(voucherId: string, expiresAt: Date): Promi
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(Math.floor(expiresAt.getTime() / 1000))
-    .sign(QR_SECRET)
+    .sign(_qrSecretBuffer)
 }
 
 // ─── Verify QR JWT ─────────────────────────────────────
 export async function verifyQrToken(token: string): Promise<{ voucherId: string }> {
   try {
-    const { payload } = await jwtVerify(token, QR_SECRET)
+    const { payload } = await jwtVerify(token, _qrSecretBuffer)
     return { voucherId: payload.voucher_id as string }
   } catch {
     throw new VoucherError('INVALID_QR', 'Mã QR không hợp lệ hoặc đã hết hạn.')
@@ -35,7 +47,10 @@ export async function verifyQrToken(token: string): Promise<{ voucherId: string 
 }
 
 // ─── List user's vouchers ──────────────────────────────
-export async function listVouchersByUser(userId: string, opts: { status?: string; page?: number; limit?: number }) {
+export async function listVouchersByUser(
+  userId: string,
+  opts: { status?: string; page?: number; limit?: number },
+) {
   const db = getDb()
   const page = opts.page || 1
   const limit = opts.limit || 20
@@ -44,10 +59,11 @@ export async function listVouchersByUser(userId: string, opts: { status?: string
   const conditions = [eq(vouchers.userId, userId)]
   if (opts.status) conditions.push(eq(vouchers.status, opts.status as any))
 
-  const items = await db.select({
-    voucher: vouchers,
-    service: { id: services.id, name: services.name, images: services.images },
-  })
+  const items = await db
+    .select({
+      voucher: vouchers,
+      service: { id: services.id, name: services.name, images: services.images },
+    })
     .from(vouchers)
     .innerJoin(services, eq(vouchers.serviceId, services.id))
     .where(and(...conditions))
@@ -55,20 +71,27 @@ export async function listVouchersByUser(userId: string, opts: { status?: string
     .limit(limit)
     .offset(offset)
 
-  const [{ count }] = await db.select({ count: sql<number>`count(*)` })
+  const countRows = await db
+    .select({ count: sql<number>`count(*)` })
     .from(vouchers)
     .where(and(...conditions))
 
-  return { items, total: Number(count), page, limit }
+  return { items, total: Number(scalar(countRows).count), page, limit }
 }
 
 // ─── Get voucher detail with QR ────────────────────────
 export async function getVoucherDetail(voucherId: string, userId: string) {
   const db = getDb()
-  const [result] = await db.select({
-    voucher: vouchers,
-    service: { id: services.id, name: services.name, images: services.images, description: services.description },
-  })
+  const [result] = await db
+    .select({
+      voucher: vouchers,
+      service: {
+        id: services.id,
+        name: services.name,
+        images: services.images,
+        description: services.description,
+      },
+    })
     .from(vouchers)
     .innerJoin(services, eq(vouchers.serviceId, services.id))
     .where(and(eq(vouchers.id, voucherId), eq(vouchers.userId, userId)))

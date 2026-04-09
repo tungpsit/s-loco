@@ -38,5 +38,6 @@ export type AdminUpdateVendorInput = z.infer<typeof adminUpdateVendorSchema>
 // ─── Update Vendor Status (Admin) ──────────────────────
 export const updateVendorStatusSchema = z.object({
   status: z.enum(['pending', 'active', 'suspended', 'rejected']),
+  rejection_reason: z.string().max(500).optional(),
 })
 export type UpdateVendorStatusInput = z.infer<typeof updateVendorStatusSchema>

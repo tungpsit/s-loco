@@ -5,17 +5,17 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: sloco
-      POSTGRES_PASSWORD: sloco_dev_2026
       POSTGRES_DB: sloco
+      POSTGRES_USER: sloco
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sloco_dev_2026}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sloco"]
-      interval: 5s
-      timeout: 3s
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   # ─── Redis ───
@@ -27,9 +27,9 @@ services:
       - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # ─── API Server ───
   api:
@@ -38,22 +38,22 @@ services:
       dockerfile: apps/api/Dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       DATABASE_URL: postgres://sloco:sloco_dev_2026@postgres:5432/sloco
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: sloco-dev-jwt-secret-2026
-      JWT_REFRESH_SECRET: sloco-dev-refresh-secret-2026
-      QR_JWT_SECRET: sloco-dev-qr-secret-2026
-      VNPAY_HASH_SECRET: dev-vnpay-hash
-      MOMO_SECRET_KEY: dev-momo-secret
-      SEPAY_SECRET_KEY: dev-sepay-secret
-      APP_URL: http://localhost:3000
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV:-development}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # ─── Admin Dashboard ───
   admin:
@@ -62,6 +62,8 @@ services:
       dockerfile: apps/admin/Dockerfile
     ports:
       - "3001:3001"
+    env_file:
+      - .env
     environment:
       NEXT_PUBLIC_API_URL: http://api:3000/api/v1
     depends_on:

@@ -1,4 +1,4 @@
-# S-Local Design System — The Coastal Editorial
+# S-Loco Design System — The Coastal Editorial
 
 > **Creative North Star: "The Fluid Concierge"**
 >
@@ -77,7 +77,7 @@
 
 ### Signature Gradient
 ```css
-/* Hero CTAs — The signature S-Local gradient */
+/* Hero CTAs — The signature S-Loco gradient */
 background: linear-gradient(135deg, #005E97, #0077B6);
 ```
 
@@ -279,3 +279,66 @@ border: 1px solid rgba(181, 190, 212, 0.15);
 - Use standard Material Design drop shadows
 - Use `on_surface_variant` for text smaller than `body-md`
 - Create cramped layouts — when in doubt, add more space
+
+---
+
+## 8. App-Specific Design Supplements
+
+All 4 S-Loco applications share the core design tokens defined in Sections 1–6 of this document. Each app has a dedicated design supplement:
+
+| App | Supplement File | Platform |
+|-----|---------------|----------|
+| Tourist Mobile App | `docs/design-mobile.md` | React Native / Expo |
+| Vendor App | `docs/design-vendor.md` | React Native / Expo |
+| Admin Dashboard | `docs/design-admin.md` | Next.js 16 / Tailwind CSS v4 |
+| PWA | `docs/design-pwa.md` | React Native Web / Expo |
+
+### Supplement Scope
+
+Each supplement extends this root document with:
+- **Platform-specific design tokens** (touch targets, safe areas, breakpoints)
+- **Navigation patterns** unique to each platform (bottom tabs, sidebar, header)
+- **Screen inventory** mapped to app routes
+- **Platform-specific components** (QR scanner overlay, data tables, bottom sheets)
+- **Loading / error / empty states** per screen
+- **Accessibility requirements** (WCAG 2.1 AA for web, platform conventions for mobile)
+- **Key user flows** with screen-level walkthroughs
+
+### Key Differences by App
+
+| Concern | Tourist App | Vendor App | Admin | PWA |
+|---------|------------|-----------|-------|-----|
+| Navigation | Bottom tab bar (4 tabs) | Bottom tab bar (5 tabs) | Sidebar (dark) | Header + avatar dropdown |
+| Touch targets | 44×44px min | 48×48px min (actions) | N/A (mouse) | N/A |
+| Safe areas | iOS SafeAreaView | Same | N/A | N/A |
+| QR handling | Display + scan | Scan + verify | N/A | Display (print option) |
+| Offline | Limited | Important (store use) | N/A | Offline indicator |
+| Key screen | Home → Checkout → Voucher | Scan → Redeem → Earnings | Tables + Modals | Tourist app, desktop layout |
+
+---
+
+## 9. Gap Analysis (Phase 3)
+
+### Gaps Filled in Phase 3
+
+| Gap | Status | Resolved By |
+|-----|--------|-------------|
+| No mobile-specific design tokens defined | ✅ Resolved | `docs/design-mobile.md` — touch targets, safe areas, notch handling |
+| No QR scanner overlay pattern documented | ✅ Resolved | `docs/design-vendor.md` — full viewfinder + bottom sheet spec |
+| No admin sidebar dark theme tokens | ✅ Resolved | `docs/design-admin.md` — sidebar palette + hover/active states |
+| No PWA design document | ✅ Resolved | `docs/design-pwa.md` — responsive breakpoints, install prompt, manifest |
+| No VND price formatting rule | ✅ Resolved | All 4 supplements document `Intl.NumberFormat('vi-VN')` |
+| No loading/error/empty states per screen | ✅ Resolved | Each supplement has a state table per screen |
+| No accessibility guidance for mobile | ✅ Resolved | `docs/design-mobile.md` — WCAG 2.1 AA, ARIA labels, outdoor contrast |
+| No OTP input spec (6-digit, auto-advance) | ✅ Resolved | `docs/design-mobile.md` — behavior + animation notes |
+
+### Remaining Open Items
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Animation spec | ⚠️ Open | No formal animation tokens (spring, timing) defined. Use platform defaults. |
+| Illustration/empty state art | ⚠️ Open | No custom illustrations commissioned; use icon-based empty states |
+| Font loading strategy | ⚠️ Open | Use `font-display: swap` for Plus Jakarta Sans and Be Vietnam Pro |
+| Notification toast duration | ⚠️ Open | Default: 2.5s (mobile), 4s (admin web) |
+| Maximum upload sizes | ⚠️ Open | Not defined; defer to API contract |
+| Dark mode | 🚫 Out of scope | Not planned for v1 — single light theme only |

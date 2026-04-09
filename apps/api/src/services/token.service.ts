@@ -1,10 +1,17 @@
-import { getDb } from '@s-local/db'
-import { userSessions } from '@s-local/db/schema'
-import { APP_CONSTANTS } from '@s-local/shared'
+import { getDb } from '../db'
+import { userSessions } from '@S-Loco/db/schema'
+import { APP_CONSTANTS } from '@S-Loco/shared'
 import { eq } from 'drizzle-orm'
 import { SignJWT, jwtVerify } from 'jose'
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret')
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET env var is required. Set it before starting the server.')
+}
+if (JWT_SECRET.length < 32) {
+  throw new Error('FATAL: JWT_SECRET must be at least 32 characters.')
+}
+const _jwtSecretBuffer = new TextEncoder().encode(JWT_SECRET)
 
 // ─── Access Token ──────────────────────────────────────
 
@@ -13,11 +20,11 @@ export async function generateAccessToken(user: { id: string; role: string }) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${APP_CONSTANTS.ACCESS_TOKEN_TTL_SECONDS}s`)
-    .sign(JWT_SECRET)
+    .sign(_jwtSecretBuffer)
 }
 
 export async function verifyAccessToken(token: string) {
-  const { payload } = await jwtVerify(token, JWT_SECRET)
+  const { payload } = await jwtVerify(token, _jwtSecretBuffer)
   return { userId: payload.sub as string, role: payload.role as string }
 }
 
@@ -40,7 +47,9 @@ export async function generateRefreshToken(
   const db = getDb()
   const rawToken = crypto.randomUUID()
   const tokenHash = await hashToken(rawToken)
-  const expiresAt = new Date(Date.now() + APP_CONSTANTS.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000)
+  const expiresAt = new Date(
+    Date.now() + APP_CONSTANTS.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
+  )
 
   await db.insert(userSessions).values({
     userId,
@@ -79,7 +88,7 @@ export async function refreshTokens(refreshToken: string) {
 
   // Generate new tokens
   // Need to fetch user role for access token
-  const { users } = await import('@s-local/db/schema')
+  const { users } = await import('@S-Loco/db/schema')
   const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1)
 
   if (!user) {

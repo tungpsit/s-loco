@@ -45,7 +45,7 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 1. Create root `package.json` with workspaces config:
    ```json
    {
-     "name": "s-local",
+     "name": "S-Loco",
      "private": true,
      "workspaces": ["apps/*", "packages/*"],
      "scripts": {
@@ -53,8 +53,8 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
        "build": "turbo build",
        "lint": "turbo lint",
        "check": "turbo check",
-       "db:migrate": "turbo db:migrate --filter=@s-local/db",
-       "db:seed": "turbo db:seed --filter=@s-local/db"
+       "db:migrate": "turbo db:migrate --filter=@S-Loco/db",
+       "db:seed": "turbo db:seed --filter=@S-Loco/db"
      }
    }
    ```
@@ -80,7 +80,7 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 - docs/architecture/api-design.md (§1 Conventions)
 </read_first>
 <action>
-1. Create `apps/api/package.json` with name `@s-local/api`, dependencies: `hono`, `@hono/zod-openapi`, `@hono/zod-validator`, `zod`, `jose`, `@s-local/db`, `@s-local/shared`
+1. Create `apps/api/package.json` with name `@S-Loco/api`, dependencies: `hono`, `@hono/zod-openapi`, `@hono/zod-validator`, `zod`, `jose`, `@S-Loco/db`, `@S-Loco/shared`
 2. Create `apps/api/tsconfig.json` extending base
 3. Create `apps/api/src/index.ts` with basic Hono app:
    ```typescript
@@ -98,7 +98,7 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 4. Add dev script: `"dev": "bun run --hot src/index.ts"`
 </action>
 <acceptance_criteria>
-- `apps/api/package.json` contains `"name": "@s-local/api"`
+- `apps/api/package.json` contains `"name": "@S-Loco/api"`
 - `apps/api/package.json` contains `"hono"` in dependencies
 - `apps/api/src/index.ts` contains `new Hono()`
 - `apps/api/src/index.ts` contains `/health` route
@@ -112,13 +112,13 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 </read_first>
 <action>
 1. Run `bunx create-expo-app@latest apps/mobile --template tabs` (or equivalent non-interactive command)
-2. Update `apps/mobile/package.json` name to `@s-local/mobile`
-3. Add dependencies: `@s-local/shared`, `zustand`, `@tanstack/react-query`
-4. Create basic `app/(tabs)/index.tsx` with placeholder "S-Local Tourist" text
+2. Update `apps/mobile/package.json` name to `@S-Loco/mobile`
+3. Add dependencies: `@S-Loco/shared`, `zustand`, `@tanstack/react-query`
+4. Create basic `app/(tabs)/index.tsx` with placeholder "S-Loco Tourist" text
 5. Ensure Expo Router file-based routing structure is in place
 </action>
 <acceptance_criteria>
-- `apps/mobile/package.json` contains `"name": "@s-local/mobile"`
+- `apps/mobile/package.json` contains `"name": "@S-Loco/mobile"`
 - `apps/mobile/package.json` contains `"expo"` in dependencies
 - `apps/mobile/app` directory exists with route files
 - `apps/mobile/package.json` contains `"zustand"` in dependencies
@@ -131,12 +131,12 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 </read_first>
 <action>
 1. Run `bunx create-expo-app@latest apps/vendor --template tabs`
-2. Update `apps/vendor/package.json` name to `@s-local/vendor`
-3. Add dependencies: `@s-local/shared`, `zustand`, `@tanstack/react-query`
-4. Create basic `app/(tabs)/index.tsx` with placeholder "S-Local Vendor" text
+2. Update `apps/vendor/package.json` name to `@S-Loco/vendor`
+3. Add dependencies: `@S-Loco/shared`, `zustand`, `@tanstack/react-query`
+4. Create basic `app/(tabs)/index.tsx` with placeholder "S-Loco Vendor" text
 </action>
 <acceptance_criteria>
-- `apps/vendor/package.json` contains `"name": "@s-local/vendor"`
+- `apps/vendor/package.json` contains `"name": "@S-Loco/vendor"`
 - `apps/vendor/package.json` contains `"expo"` in dependencies
 - `apps/vendor/app` directory exists
 </acceptance_criteria>
@@ -148,13 +148,13 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 </read_first>
 <action>
 1. Run `bunx create-next-app@latest apps/admin --typescript --tailwind --app --src-dir --no-eslint --import-alias "@/*"` (non-interactive)
-2. Update `apps/admin/package.json` name to `@s-local/admin`
-3. Add dependencies: `@s-local/shared`, `zustand`, `@tanstack/react-query`
+2. Update `apps/admin/package.json` name to `@S-Loco/admin`
+3. Add dependencies: `@S-Loco/shared`, `zustand`, `@tanstack/react-query`
 4. Install shadcn/ui: `bunx shadcn@latest init` with default config
-5. Create basic `app/(dashboard)/page.tsx` with "S-Local Admin" placeholder
+5. Create basic `app/(dashboard)/page.tsx` with "S-Loco Admin" placeholder
 </action>
 <acceptance_criteria>
-- `apps/admin/package.json` contains `"name": "@s-local/admin"`
+- `apps/admin/package.json` contains `"name": "@S-Loco/admin"`
 - `apps/admin/package.json` contains `"next"` in dependencies
 - `apps/admin/app` directory exists
 - Tailwind CSS configured in `tailwind.config.ts` or equivalent
@@ -166,20 +166,20 @@ Set up the Bun workspaces monorepo with Turborepo, scaffold all 4 apps (api, mob
 - docs/architecture/tech-stack.md (§2.3 Shared Packages)
 </read_first>
 <action>
-1. Create `packages/db/package.json` with name `@s-local/db`, dependencies: `drizzle-orm`, devDependencies: `drizzle-kit`
+1. Create `packages/db/package.json` with name `@S-Loco/db`, dependencies: `drizzle-orm`, devDependencies: `drizzle-kit`
 2. Create `packages/db/src/index.ts` with placeholder export
 3. Create `packages/db/drizzle.config.ts` with PostgreSQL config pointing to `DATABASE_URL` env var
 4. Create `packages/db/tsconfig.json` extending base
-5. Create `packages/shared/package.json` with name `@s-local/shared`
+5. Create `packages/shared/package.json` with name `@S-Loco/shared`
 6. Create `packages/shared/src/index.ts` with shared types (ApiResponse, ApiError, PaginatedResponse)
 7. Create `packages/shared/src/constants.ts` with app constants (SERVICE_CATEGORIES enum, VOUCHER_STATUSES enum, USER_ROLES enum)
 8. Create `packages/shared/tsconfig.json` extending base
 </action>
 <acceptance_criteria>
-- `packages/db/package.json` contains `"name": "@s-local/db"`
+- `packages/db/package.json` contains `"name": "@S-Loco/db"`
 - `packages/db/package.json` contains `"drizzle-orm"` in dependencies
 - `packages/db/drizzle.config.ts` contains `dialect: 'postgresql'`
-- `packages/shared/package.json` contains `"name": "@s-local/shared"`
+- `packages/shared/package.json` contains `"name": "@S-Loco/shared"`
 - `packages/shared/src/constants.ts` contains `SERVICE_CATEGORIES`
 - `bun install` succeeds from root with all workspace links
 </acceptance_criteria>

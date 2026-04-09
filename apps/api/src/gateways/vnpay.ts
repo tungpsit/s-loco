@@ -1,10 +1,17 @@
 import crypto from 'crypto'
-import type { CreatePaymentParams, PaymentGateway, RefundParams, RefundResult, WebhookResult } from '../services/payment-gateway'
+import type {
+  CreatePaymentParams,
+  PaymentGateway,
+  RefundParams,
+  RefundResult,
+  WebhookResult,
+} from '../services/payment-gateway'
 
 const VNPAY_TMN_CODE = process.env.VNPAY_TMN_CODE || 'demo_tmn'
 const VNPAY_HASH_SECRET = process.env.VNPAY_HASH_SECRET || 'demo_secret'
 const VNPAY_URL = process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'
-const VNPAY_API_URL = process.env.VNPAY_API_URL || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'
+const VNPAY_API_URL =
+  process.env.VNPAY_API_URL || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'
 
 export const vnpayGateway: PaymentGateway = {
   async createPaymentUrl(params: CreatePaymentParams) {
@@ -48,7 +55,9 @@ export const vnpayGateway: PaymentGateway = {
     delete filtered.vnp_SecureHashType
 
     const sortedKeys = Object.keys(filtered).sort()
-    const queryString = sortedKeys.map((k) => `${k}=${encodeURIComponent(String(filtered[k]))}`).join('&')
+    const queryString = sortedKeys
+      .map((k) => `${k}=${encodeURIComponent(String(filtered[k]))}`)
+      .join('&')
 
     const hmac = crypto.createHmac('sha512', VNPAY_HASH_SECRET)
     hmac.update(queryString)

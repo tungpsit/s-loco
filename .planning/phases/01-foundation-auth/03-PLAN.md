@@ -252,7 +252,7 @@ Implement the complete authentication system: tourist OTP phone login, vendor/ad
    - `POST /auth/refresh` — refresh token rotation
    - `POST /auth/logout` — revoke session (requires auth)
    - `GET /auth/me` — get current user profile (requires auth)
-2. Use `@hono/zod-validator` with schemas from `@s-local/shared`
+2. Use `@hono/zod-validator` with schemas from `@S-Loco/shared`
 3. Response format per API design doc:
    ```json
    {
