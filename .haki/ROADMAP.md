@@ -202,6 +202,7 @@
 | Tourist | Voucher Detail | [.haki/screens/tourist-voucher-detail.md](.haki/screens/tourist-voucher-detail.md) | ✅ |
 | Tourist | Checkout | [.haki/screens/tourist-checkout.md](.haki/screens/tourist-checkout.md) | ✅ |
 | Tourist | Order Detail | [.haki/screens/tourist-order-detail.md](.haki/screens/tourist-order-detail.md) | ✅ |
+| Tourist | Vendor Detail | [.haki/screens/tourist-vendor-detail.md](.haki/screens/tourist-vendor-detail.md) | ✅ |
 | Tourist | All screens | [.haki/layouts/tourist-screen-flow.md](.haki/layouts/tourist-screen-flow.md) | ✅ |
 
 *Last updated: 2026-04-09*
