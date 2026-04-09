@@ -1,4 +1,4 @@
-# Database Design – S-Local
+# Database Design – S-Loco
 
 > Entity-Relationship, schema conventions, indexing, and partitioning
 

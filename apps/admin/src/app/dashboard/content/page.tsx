@@ -28,20 +28,18 @@ export default function ContentPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-on-surface">Quản lý nội dung</h1>
-          <p className="text-sm text-on-surface-variant mt-1">Bài viết, sự kiện và tin tức địa phương</p>
-        </div>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-display font-bold text-on-surface">Quản lý nội dung</h1>
+        <p className="text-sm text-on-surface-variant mt-1">Bài viết, sự kiện và tin tức địa phương</p>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-2 mb-6">
+      {/* Category Tabs — scrollable on mobile */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setCategory(tab.key)}
-            className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-full transition-colors whitespace-nowrap shrink-0 ${
               category === tab.key ? 'bg-primary text-white' : 'bg-surface-high text-on-surface-variant hover:bg-surface-highest'
             }`}
           >
@@ -59,26 +57,26 @@ export default function ContentPage() {
           <p className="text-sm">Chưa có bài viết nào</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {articles.map((article: any) => (
             <div key={article.id} className="bg-white rounded-2xl overflow-hidden group">
-              <div className="h-40 bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center">
+              <div className="h-32 sm:h-40 bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center">
                 <span className="text-4xl">{article.category === 'event' ? '🎪' : article.category === 'guide' ? '📖' : '📰'}</span>
               </div>
-              <div className="p-5">
+              <div className="p-4 md:p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <CategoryBadge category={article.category} />
                   {!article.isPublished && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-tertiary-fixed/50 text-tertiary font-medium">Nháp</span>
                   )}
                 </div>
-                <h3 className="font-display font-semibold text-on-surface text-base mb-1 group-hover:text-primary transition-colors">
+                <h3 className="font-display font-semibold text-on-surface text-sm sm:text-base mb-1 group-hover:text-primary transition-colors line-clamp-2">
                   {article.title}
                 </h3>
                 <p className="text-xs text-on-surface-variant">
                   {article.createdAt ? new Date(article.createdAt).toLocaleDateString('vi-VN') : ''}
                 </p>
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-3 md:mt-4">
                   <button
                     onClick={() => deleteMut.mutate(article.id)}
                     disabled={deleteMut.isPending}

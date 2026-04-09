@@ -1,4 +1,4 @@
-# API Design – S-Local
+# API Design – S-Loco
 
 > RESTful API contracts, conventions, and endpoint catalog
 
@@ -9,8 +9,8 @@
 ### 1.1. Base URL
 
 ```
-Production:  https://api.s-local.vn/v1
-Staging:     https://api-staging.s-local.vn/v1
+Production:  https://api.S-Loco.vn/v1
+Staging:     https://api-staging.S-Loco.vn/v1
 Development: http://localhost:3000/v1
 ```
 

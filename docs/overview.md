@@ -1,12 +1,12 @@
 # TÀI LIỆU TỔNG QUAN DỰ ÁN
 
-## S-Local – Siêu ứng dụng du lịch bản địa tại Sầm Sơn
+## S-Loco – Siêu ứng dụng du lịch bản địa tại Sầm Sơn
 
 ## 1. Giới thiệu dự án
 
-**S-Local** là nền tảng công nghệ tích hợp dưới dạng **mobile app, web app và PWA**, được xây dựng với mục tiêu **số hóa hệ sinh thái dịch vụ du lịch tại Sầm Sơn**. Dự án hướng đến việc kết nối khách du lịch với các nhà cung cấp dịch vụ địa phương như nhà hàng, khách sạn, xe điện, quán cà phê, địa điểm giải trí, spa, cửa hàng lưu niệm và các hoạt động trải nghiệm biển.
+**S-Loco** là nền tảng công nghệ tích hợp dưới dạng **mobile app, web app và PWA**, được xây dựng với mục tiêu **số hóa hệ sinh thái dịch vụ du lịch tại Sầm Sơn**. Dự án hướng đến việc kết nối khách du lịch với các nhà cung cấp dịch vụ địa phương như nhà hàng, khách sạn, xe điện, quán cà phê, địa điểm giải trí, spa, cửa hàng lưu niệm và các hoạt động trải nghiệm biển.
 
-S-Local không chỉ là một ứng dụng đặt dịch vụ, mà được định vị như một **“siêu ứng dụng bản địa”** – nơi khách du lịch và người dân địa phương có thể tìm kiếm thông tin, đặt dịch vụ, thanh toán, nhận ưu đãi và được gợi ý lịch trình phù hợp theo nhu cầu cá nhân.
+S-Loco không chỉ là một ứng dụng đặt dịch vụ, mà được định vị như một **“siêu ứng dụng bản địa”** – nơi khách du lịch và người dân địa phương có thể tìm kiếm thông tin, đặt dịch vụ, thanh toán, nhận ưu đãi và được gợi ý lịch trình phù hợp theo nhu cầu cá nhân.
 
 ---
 
@@ -20,7 +20,7 @@ Thị trường du lịch địa phương tại Sầm Sơn vẫn tồn tại nhi
 * Nhiều nhà cung cấp địa phương chưa có công cụ số để bán hàng và quản lý đơn hàng
 * Khách hàng chưa có một nền tảng thống nhất để đặt nhiều dịch vụ trong cùng một hành trình
 
-S-Local ra đời để giải quyết các vấn đề trên bằng cách tạo ra một hệ sinh thái số minh bạch, có kiểm duyệt, có thanh toán và có khả năng mở rộng.
+S-Loco ra đời để giải quyết các vấn đề trên bằng cách tạo ra một hệ sinh thái số minh bạch, có kiểm duyệt, có thanh toán và có khả năng mở rộng.
 
 ---
 
@@ -36,7 +36,7 @@ Mang đến cho khách du lịch một trải nghiệm **thuận tiện – minh
 
 ### Định vị
 
-S-Local được định vị là:
+S-Loco được định vị là:
 
 * **Siêu ứng dụng du lịch bản địa**
 * **Nền tảng voucher và combo dịch vụ địa phương**
@@ -57,7 +57,7 @@ Các vendor được khảo sát, kiểm tra chất lượng và chuẩn hóa tr
 
 ### 4.3. Hệ sinh thái dịch vụ đa dạng
 
-S-Local không chỉ tập trung vào đặt phòng hay ăn uống, mà tích hợp nhiều nhóm dịch vụ trong cùng một ứng dụng: lưu trú, ẩm thực, di chuyển, giải trí, trải nghiệm, tin tức địa phương, thời tiết và lịch trình cá nhân hóa.
+S-Loco không chỉ tập trung vào đặt phòng hay ăn uống, mà tích hợp nhiều nhóm dịch vụ trong cùng một ứng dụng: lưu trú, ẩm thực, di chuyển, giải trí, trải nghiệm, tin tức địa phương, thời tiết và lịch trình cá nhân hóa.
 
 ### 4.4. Khả năng tạo combo và đề xuất thông minh
 
@@ -85,7 +85,7 @@ Nền tảng có thể gợi ý sản phẩm tương tự mô hình Klook, đồ
 
 ### 6.1. Sản phẩm chính
 
-Sản phẩm cốt lõi của S-Local là **voucher giảm giá và ưu đãi dịch vụ địa phương**, bao gồm:
+Sản phẩm cốt lõi của S-Loco là **voucher giảm giá và ưu đãi dịch vụ địa phương**, bao gồm:
 
 * Nhà nghỉ, khách sạn, homestay
 * Nhà hàng, quán ăn, cà phê
@@ -109,7 +109,7 @@ Nền tảng cung cấp thêm chuyên mục:
 
 ### 6.4. AI tạo lịch trình
 
-S-Local tích hợp tính năng AI hỗ trợ cá nhân hóa hành trình dựa trên các thông tin đầu vào như:
+S-Loco tích hợp tính năng AI hỗ trợ cá nhân hóa hành trình dựa trên các thông tin đầu vào như:
 
 * Thời gian lưu trú (check-in, check-out)
 * Ngân sách tổng hoặc ngân sách theo người
@@ -123,7 +123,7 @@ AI sẽ đề xuất lịch trình phù hợp và gợi ý các dịch vụ tư�
 
 ## 7. Mô hình doanh thu
 
-S-Local có mô hình doanh thu đa nguồn, gồm:
+S-Loco có mô hình doanh thu đa nguồn, gồm:
 
 ### 7.1. Hoa hồng từ vendor
 
@@ -147,7 +147,7 @@ Mở rộng sang dịch vụ bán gói cho tour đoàn, doanh nghiệp, đơn v�
 
 ### 8.1. Mô hình tổng quan: Voucher Pre-pay & Hold
 
-S-Local áp dụng mô hình **Voucher Pre-pay & Hold** – khách thanh toán trước trên nền tảng để nhận voucher điện tử, sau đó mang voucher đến cơ sở để sử dụng dịch vụ. Tiền được giữ tạm (hold) bởi hệ thống cho đến khi dịch vụ hoàn tất, sau đó mới giải ngân cho vendor.
+S-Loco áp dụng mô hình **Voucher Pre-pay & Hold** – khách thanh toán trước trên nền tảng để nhận voucher điện tử, sau đó mang voucher đến cơ sở để sử dụng dịch vụ. Tiền được giữ tạm (hold) bởi hệ thống cho đến khi dịch vụ hoàn tất, sau đó mới giải ngân cho vendor.
 
 **Tại sao chọn mô hình này:**
 
@@ -158,18 +158,18 @@ S-Local áp dụng mô hình **Voucher Pre-pay & Hold** – khách thanh toán t
 
 ### 8.2. Mô hình tài chính
 
-Vendor niêm yết giá gốc trên hệ thống và cung cấp mức chiết khấu **8%** cho S-Local. S-Local phân bổ như sau:
+Vendor niêm yết giá gốc trên hệ thống và cung cấp mức chiết khấu **8%** cho S-Loco. S-Loco phân bổ như sau:
 
 | Thành phần | Tỷ lệ | Mô tả |
 |---|---|---|
 | **Giá khách trả** | 95% giá gốc | Khách được giảm **5%** so với giá tại chỗ |
-| **Hoa hồng S-Local** | 3% giá gốc | Doanh thu nền tảng |
+| **Hoa hồng S-Loco** | 3% giá gốc | Doanh thu nền tảng |
 | **Vendor nhận** | 92% giá gốc | Sau khi trừ chiết khấu 8% cho nền tảng |
 
 **Ví dụ minh họa** (dịch vụ giá gốc 1.000.000đ):
 
 * Khách thanh toán: **950.000đ** (tiết kiệm 50.000đ)
-* S-Local giữ lại: **30.000đ** (hoa hồng)
+* S-Loco giữ lại: **30.000đ** (hoa hồng)
 * Vendor nhận: **920.000đ**
 
 > Mức chiết khấu 8% là mặc định, có thể thương lượng theo từng vendor và danh mục dịch vụ.
@@ -202,7 +202,7 @@ Tất cả loại dịch vụ (nhà hàng, spa, xe điện, tour, khách sạn..
 └─────────────────────────────────────────────────────────┘
 ```
 
-![Luồng giao dịch thống nhất S-Local](images/transaction-flow.png)
+![Luồng giao dịch thống nhất S-Loco](images/transaction-flow.png)
 
 ### 8.4. Vòng đời voucher (State Machine)
 
@@ -221,7 +221,7 @@ Mỗi voucher trải qua các trạng thái sau:
                       [SETTLED]
 ```
 
-![Vòng đời voucher S-Local](images/voucher-lifecycle.png)
+![Vòng đời voucher S-Loco](images/voucher-lifecycle.png)
 
 | Trạng thái | Mô tả |
 |---|---|
@@ -263,7 +263,7 @@ Hệ thống hỗ trợ **hai cơ chế xác nhận** đồng thời:
 
 ### 8.8. Cơ chế thanh toán
 
-S-Local hỗ trợ nhiều phương thức thanh toán:
+S-Loco hỗ trợ nhiều phương thức thanh toán:
 
 * QR cá nhân, ví dụ SePay
 * Cổng thanh toán như VNPay, Momo
@@ -281,7 +281,7 @@ Vendor có thể chọn **một trong hai hình thức** nhận tiền:
 Quy trình đối soát:
 
 1. Voucher chuyển sang trạng thái COMPLETED
-2. Hệ thống tính toán: số tiền vendor nhận = giá khách trả – hoa hồng S-Local
+2. Hệ thống tính toán: số tiền vendor nhận = giá khách trả – hoa hồng S-Loco
 3. Nếu vendor chọn "rút ngay" → giải ngân tức thì
 4. Nếu vendor chọn "theo chu kỳ" → gom vào đợt giải ngân tiếp theo
 5. Voucher chuyển sang trạng thái SETTLED sau khi giải ngân thành công
@@ -388,8 +388,8 @@ Các nền tảng lớn có thể tham gia thị trường.
 
 ## 14. Kết luận
 
-S-Local là một dự án có tiềm năng xây dựng thành **nền tảng số trung tâm cho du lịch Sầm Sơn**, giải quyết đồng thời ba bài toán lớn: **trải nghiệm khách du lịch, doanh thu cho vendor và minh bạch thị trường địa phương**.
+S-Loco là một dự án có tiềm năng xây dựng thành **nền tảng số trung tâm cho du lịch Sầm Sơn**, giải quyết đồng thời ba bài toán lớn: **trải nghiệm khách du lịch, doanh thu cho vendor và minh bạch thị trường địa phương**.
 
-Với định hướng “local-first”, mô hình voucher/combo linh hoạt, tích hợp thanh toán và AI cá nhân hóa lịch trình, S-Local có khả năng trở thành một sản phẩm khác biệt, dễ mở rộng và phù hợp với xu hướng số hóa dịch vụ du lịch địa phương.
+Với định hướng “local-first”, mô hình voucher/combo linh hoạt, tích hợp thanh toán và AI cá nhân hóa lịch trình, S-Loco có khả năng trở thành một sản phẩm khác biệt, dễ mở rộng và phù hợp với xu hướng số hóa dịch vụ du lịch địa phương.
 
 ---

@@ -1,73 +1,176 @@
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { vendor } from '../../lib/api'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { router } from 'expo-router'
+import { dashboardApi, settlementApi } from '../../src/lib/api'
+import { SettlementItem } from '../../src/components/settlement-item'
+import { ErrorState } from '../../src/components/error-state'
+import type { Settlement } from '../../src/lib/api'
 
 const colors = {
-  primary: '#005E97', surface: '#F4F7FB', onSurface: '#161B2E', onSurfaceVariant: '#3B4460',
+  primary: '#005E97',
+  surface: '#F4F7FB',
+  surfaceContainerLowest: '#FFFFFF',
+  onSurface: '#161B2E',
+  onSurfaceVariant: '#3B4460',
 }
 
+const fmt = (n?: number) =>
+  n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '0₫'
+
 export default function EarningsScreen() {
-  const [data, setData] = useState<any>(null)
+  const [dashData, setDashData] = useState<{
+    settlement?: { pending?: number; settled?: number }
+    total?: { revenue?: number }
+  } | null>(null)
+  const [settlements, setSettlements] = useState<Settlement[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState(false)
 
-  useEffect(() => { load() }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     try {
-      const res = await vendor.dashboard()
-      if (res.ok) setData(res.data?.data)
-    } catch {}
-    setLoading(false)
-  }
+      const [dashRes, settleRes] = await Promise.all([
+        dashboardApi.vendor(),
+        settlementApi.list({ page: 1, limit: 20 }),
+      ])
 
-  const fmt = (n?: number | string) => n != null ? Number(n).toLocaleString('vi-VN') : '0'
+      if (dashRes.ok && dashRes.data?.data) {
+        setDashData(dashRes.data.data as typeof dashData)
+      }
+      if (settleRes.ok && settleRes.data?.data) {
+        const items: Settlement[] =
+          settleRes.data.data?.items ?? settleRes.data.data?.data ?? []
+        setSettlements(items)
+      }
+      setError(false)
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    load()
+  }, [load])
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}><Text style={styles.title}>Thu nhập</Text></View>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Thu nhập</Text>
+      </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color={colors.primary} style={{ paddingVertical: 60 }} />
-      ) : (
-        <>
-          <View style={styles.summaryCard}>
+      {/* Summary */}
+      <View style={styles.summaryCard}>
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>Tổng doanh thu</Text>
-            <Text style={styles.summaryValue}>{fmt(data?.totalRevenue)}₫</Text>
+            <Text style={styles.summaryValue}>{fmt(dashData?.total?.revenue)}</Text>
           </View>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Đã thanh toán</Text>
+            <Text style={[styles.summaryValue, { color: '#2E7D32' }]}>
+              {fmt(dashData?.settlement?.settled)}
+            </Text>
+          </View>
+          <View style={styles.summaryDividerVertical} />
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Chờ giải ngân</Text>
+            <Text style={[styles.summaryValue, { color: '#E65100' }]}>
+              {fmt(dashData?.settlement?.pending)}
+            </Text>
+          </View>
+        </View>
+      </View>
 
-          <View style={styles.row}>
-            <View style={styles.halfCard}>
-              <Text style={styles.halfLabel}>Đã nhận</Text>
-              <Text style={[styles.halfValue, { color: '#2E7D32' }]}>{fmt(data?.settledAmount)}₫</Text>
-            </View>
-            <View style={styles.halfCard}>
-              <Text style={styles.halfLabel}>Chờ giải ngân</Text>
-              <Text style={[styles.halfValue, { color: '#E65100' }]}>{fmt(data?.pendingSettlement)}₫</Text>
-            </View>
-          </View>
+      {/* Commission note */}
+      <View style={styles.commissionNote}>
+        <Text style={styles.commissionNoteText}>💡 Hoa hồng nền tảng: 8%</Text>
+        <Text style={styles.commissionNoteSub}>
+          Nền tảng giữ lại 8% hoa hồng. Phần còn lại được giải ngân theo chu kỳ 3 ngày hoặc tức thời.
+        </Text>
+      </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Hoa hồng nền tảng: 8%</Text>
-            <Text style={styles.note}>Nền tảng giữ lại 8% hoa hồng trên mỗi đơn hàng. Phần còn lại được giải ngân theo chu kỳ 3 ngày hoặc tức thời.</Text>
-          </View>
-        </>
+      {/* Settlement list */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Lịch sử thanh toán</Text>
+      </View>
+
+      {loading && settlements.length === 0 ? (
+        <ActivityIndicator size="large" color={colors.primary} style={{ flex: 1, paddingVertical: 40 }} />
+      ) : error && settlements.length === 0 ? (
+        <ErrorState onRetry={load} />
+      ) : settlements.length === 0 ? (
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyEmoji}>💳</Text>
+          <Text style={styles.emptyText}>Chưa có thanh toán nào</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={settlements}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <SettlementItem
+              settlement={item}
+              onPress={() => router.push(`/settlement/${item.id}`)}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+          }
+        />
       )}
-    </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { paddingHorizontal: 16, paddingTop: 16 },
-  title: { fontSize: 22, fontWeight: '700', color: colors.onSurface },
-  summaryCard: { margin: 16, backgroundColor: colors.primary, borderRadius: 20, padding: 24, alignItems: 'center' },
-  summaryLabel: { fontSize: 14, color: '#FFF', opacity: 0.8 },
-  summaryValue: { fontSize: 32, fontWeight: '700', color: '#FFF', marginTop: 4 },
-  row: { flexDirection: 'row', gap: 12, paddingHorizontal: 16 },
-  halfCard: { flex: 1, backgroundColor: '#FFF', borderRadius: 16, padding: 20, alignItems: 'center' },
-  halfLabel: { fontSize: 13, color: colors.onSurfaceVariant },
-  halfValue: { fontSize: 20, fontWeight: '700', marginTop: 6 },
-  section: { paddingHorizontal: 16, marginTop: 24 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.onSurface },
-  note: { fontSize: 14, color: colors.onSurfaceVariant, marginTop: 8, lineHeight: 20 },
+  header: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 },
+  title: { fontSize: 24, fontWeight: '700', color: colors.onSurface },
+  summaryCard: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    marginHorizontal: 16,
+    padding: 20,
+    marginBottom: 12,
+  },
+  summaryRow: { flexDirection: 'row' },
+  summaryItem: { flex: 1, alignItems: 'center', paddingVertical: 4 },
+  summaryLabel: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4 },
+  summaryValue: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
+  summaryDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginVertical: 12 },
+  summaryDividerVertical: { width: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginHorizontal: 12 },
+  commissionNote: {
+    marginHorizontal: 16,
+    backgroundColor: '#EDF1F8',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  commissionNoteText: { fontSize: 13, fontWeight: '600', color: colors.onSurface, marginBottom: 4 },
+  commissionNoteSub: { fontSize: 12, color: colors.onSurfaceVariant, lineHeight: 17 },
+  sectionHeader: { paddingHorizontal: 16, marginBottom: 10 },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.onSurface },
+  listContent: { paddingHorizontal: 16, paddingBottom: 24 },
+  emptyCard: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
+  emptyEmoji: { fontSize: 48, marginBottom: 12 },
+  emptyText: { fontSize: 15, color: colors.onSurfaceVariant },
 })

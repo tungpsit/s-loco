@@ -1,4 +1,4 @@
-# Tech Stack – S-Local
+# Tech Stack – S-Loco
 
 > Lựa chọn công nghệ và lý do
 
@@ -6,7 +6,7 @@
 
 ## 1. Tổng quan
 
-S-Local xây dựng trên stack **TypeScript end-to-end** với Bun runtime, giúp thống nhất ngôn ngữ giữa frontend và backend, giảm context-switching và tận dụng tối đa hệ sinh thái npm.
+S-Loco xây dựng trên stack **TypeScript end-to-end** với Bun runtime, giúp thống nhất ngôn ngữ giữa frontend và backend, giảm context-switching và tận dụng tối đa hệ sinh thái npm.
 
 ---
 

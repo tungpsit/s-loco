@@ -1,4 +1,4 @@
-# Deployment Guide – S-Local
+# Deployment Guide – S-Loco
 
 > CI/CD pipeline, environment strategy, and infrastructure setup
 
@@ -9,8 +9,8 @@
 | Environment | URL | Purpose | Deploy Trigger |
 |---|---|---|---|
 | **Development** | `localhost:3000` | Local dev | Manual |
-| **Staging** | `api-staging.s-local.vn` | Testing + QA | Push to `develop` |
-| **Production** | `api.s-local.vn` | Live | Merge to `main` |
+| **Staging** | `api-staging.S-Loco.vn` | Testing + QA | Push to `develop` |
+| **Production** | `api.S-Loco.vn` | Live | Merge to `main` |
 
 ### 1.1. Environment Variables
 
@@ -45,7 +45,7 @@ SEPAY_API_KEY=xxx
 # === External Services ===
 GEMINI_API_KEY=xxx
 SMS_GATEWAY_API_KEY=xxx
-SMS_GATEWAY_BRAND_NAME=S-Local
+SMS_GATEWAY_BRAND_NAME=S-Loco
 
 # === QR Security ===
 QR_SIGNING_SECRET=xxx
@@ -169,7 +169,7 @@ DATABASE_URL=$PROD_DB_URL bun run db:migrate
 ## 4. Project Structure
 
 ```
-s-local/
+S-Loco/
 ├── apps/
 │   ├── api/                    # Main backend API
 │   │   ├── src/

@@ -1,5 +1,5 @@
 {
-  "name": "@s-local/mobile",
+  "name": "@s-loco/mobile",
   "private": true,
   "version": "0.0.1",
   "main": "expo-router/entry",
@@ -12,23 +12,27 @@
     "lint": "biome check app/ components/ hooks/"
   },
   "dependencies": {
-    "expo": "~52.0.0",
-    "expo-router": "~4.0.0",
-    "expo-linking": "~7.0.0",
-    "expo-constants": "~17.0.0",
-    "expo-status-bar": "~2.0.0",
-    "expo-splash-screen": "~0.29.0",
-    "react": "18.3.1",
-    "react-native": "0.76.6",
-    "react-native-safe-area-context": "~5.0.0",
-    "react-native-screens": "~4.4.0",
+    "@react-native-async-storage/async-storage": "3.0.1",
     "@react-navigation/bottom-tabs": "^7.0.0",
-    "zustand": "^5.0.0",
+    "@S-Loco/shared": "workspace:*",
     "@tanstack/react-query": "^5.62.0",
-    "@s-local/shared": "workspace:*"
+    "expo": "55.0.8",
+    "expo-asset": "55.0.10",
+    "expo-constants": "55.0.9",
+    "expo-linking": "55.0.8",
+    "expo-router": "55.0.7",
+    "expo-splash-screen": "55.0.12",
+    "expo-status-bar": "55.0.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-native": "0.84.1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-screens": "4.24.0",
+    "react-native-web": "0.21.2",
+    "zustand": "5.0.12"
   },
   "devDependencies": {
-    "@types/react": "~18.3.0",
-    "typescript": "^5.7.0"
+    "@types/react": "19.2.14",
+    "typescript": "5.9.3"
   }
 }

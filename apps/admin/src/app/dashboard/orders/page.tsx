@@ -19,15 +19,15 @@ export default function OrdersPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl font-display font-bold text-on-surface">Quản lý đơn hàng</h1>
+          <h1 className="text-xl md:text-2xl font-display font-bold text-on-surface">Quản lý đơn hàng</h1>
           <p className="text-sm text-on-surface-variant mt-1">Tất cả đơn hàng trên nền tảng</p>
         </div>
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-          className="bg-surface-high rounded-xl px-4 py-2.5 text-sm text-on-surface border-none outline-none"
+          className="bg-surface-high rounded-xl px-4 py-2.5 text-sm text-on-surface border-none outline-none w-full sm:w-auto"
         >
           <option value="">Tất cả trạng thái</option>
           <option value="paid">Đã thanh toán</option>
@@ -37,22 +37,22 @@ export default function OrdersPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 text-center">
-          <p className="text-2xl font-display font-bold text-on-surface">{total}</p>
+      <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
+        <div className="bg-white rounded-xl p-3 md:p-4 text-center">
+          <p className="text-lg md:text-2xl font-display font-bold text-on-surface">{total}</p>
           <p className="text-xs text-on-surface-variant mt-1">Tổng đơn</p>
         </div>
-        <div className="bg-white rounded-xl p-4 text-center">
-          <p className="text-2xl font-display font-bold text-primary">{orders.filter((o: any) => o.status === 'paid').length}</p>
+        <div className="bg-white rounded-xl p-3 md:p-4 text-center">
+          <p className="text-lg md:text-2xl font-display font-bold text-primary">{orders.filter((o: any) => o.status === 'paid').length}</p>
           <p className="text-xs text-on-surface-variant mt-1">Đã TT</p>
         </div>
-        <div className="bg-white rounded-xl p-4 text-center">
-          <p className="text-2xl font-display font-bold text-error">{orders.filter((o: any) => o.status === 'cancelled').length}</p>
+        <div className="bg-white rounded-xl p-3 md:p-4 text-center">
+          <p className="text-lg md:text-2xl font-display font-bold text-error">{orders.filter((o: any) => o.status === 'cancelled').length}</p>
           <p className="text-xs text-on-surface-variant mt-1">Đã hủy</p>
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table (desktop) / Cards (mobile) */}
       <div className="bg-white rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center text-on-surface-variant">Đang tải...</div>
@@ -62,30 +62,52 @@ export default function OrdersPage() {
             <p className="text-sm">Chưa có đơn hàng nào</p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-outline-variant/15">
-                <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Mã đơn</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Khách hàng</th>
-                <th className="text-right px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Tổng tiền</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Trạng thái</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Ngày</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o: any) => (
-                <tr key={o.id} className="border-b border-outline-variant/10 hover:bg-surface-low/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-mono font-medium text-primary">{o.id?.slice(0, 8)}</td>
-                  <td className="px-6 py-4 text-sm text-on-surface">{o.userId?.slice(0, 8) || '—'}</td>
-                  <td className="px-6 py-4 text-sm text-right font-medium text-on-surface">{fmt(o.finalAmount)}₫</td>
-                  <td className="px-6 py-4"><OrderStatus status={o.status} /></td>
-                  <td className="px-6 py-4 text-sm text-on-surface-variant">
-                    {o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '—'}
-                  </td>
+          <>
+            {/* Desktop table */}
+            <table className="hidden md:table w-full">
+              <thead>
+                <tr className="border-b border-outline-variant/15">
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Mã đơn</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Khách hàng</th>
+                  <th className="text-right px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Tổng tiền</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Trạng thái</th>
+                  <th className="text-left px-6 py-4 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Ngày</th>
                 </tr>
+              </thead>
+              <tbody>
+                {orders.map((o: any) => (
+                  <tr key={o.id} className="border-b border-outline-variant/10 hover:bg-surface-low/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-mono font-medium text-primary">{o.id?.slice(0, 8)}</td>
+                    <td className="px-6 py-4 text-sm text-on-surface">{o.userId?.slice(0, 8) || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-right font-medium text-on-surface">{fmt(o.finalAmount)}₫</td>
+                    <td className="px-6 py-4"><OrderStatus status={o.status} /></td>
+                    <td className="px-6 py-4 text-sm text-on-surface-variant">
+                      {o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Mobile cards */}
+            <div className="md:hidden divide-y divide-outline-variant/10">
+              {orders.map((o: any) => (
+                <div key={o.id} className="p-4 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs font-mono font-medium text-primary">#{o.id?.slice(0, 8)}</span>
+                      <OrderStatus status={o.status} />
+                    </div>
+                    <p className="font-display font-bold text-on-surface text-sm shrink-0">{fmt(o.finalAmount)}₫</p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-on-surface-variant">
+                    <span>KH: {o.userId?.slice(0, 8) || '—'}</span>
+                    <span>{o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '—'}</span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
 

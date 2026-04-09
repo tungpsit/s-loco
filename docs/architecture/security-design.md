@@ -1,4 +1,4 @@
-# Security Design – S-Local
+# Security Design – S-Loco
 
 > Authentication, authorization, data protection, and payment security
 
@@ -221,9 +221,9 @@ app.use(helmet({
 ```typescript
 const corsOptions = {
   origin: [
-    'https://admin.s-local.vn',
-    'https://vendor.s-local.vn',
-    /\.s-local\.vn$/
+    'https://admin.S-Loco.vn',
+    'https://vendor.S-Loco.vn',
+    /\.S-Loco\.vn$/
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],

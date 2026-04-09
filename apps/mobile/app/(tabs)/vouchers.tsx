@@ -1,82 +1,173 @@
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { vouchers as voucherApi } from '../../lib/api'
+import { useQuery } from '@tanstack/react-query'
+import { router } from 'expo-router'
+/**
+ * My Vouchers — list with status filter tabs
+ */
+import { useCallback, useState } from 'react'
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { colors, spacing, typography } from '../../lib/theme'
+import ErrorState from '../../src/components/error-state'
+import { VoucherCardSkeleton } from '../../src/components/loading-skeleton'
+import VoucherCardComponent from '../../src/components/voucher-card'
+import { vouchersApi } from '../../src/lib/api'
 
-const colors = {
-  primary: '#005E97', primaryFixed: '#90E0EF', surface: '#F4F7FB',
-  onSurface: '#161B2E', onSurfaceVariant: '#3B4460', error: '#BA1A1A',
-}
-
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  paid: { label: 'Đã thanh toán', color: '#005E97' },
-  redeemed: { label: 'Đã sử dụng', color: '#2E7D32' },
-  completed: { label: 'Hoàn thành', color: '#388E3C' },
-  expired: { label: 'Hết hạn', color: '#757575' },
-  refunded: { label: 'Hoàn tiền', color: '#E65100' },
-  created: { label: 'Chờ TT', color: '#F9A825' },
-}
+const STATUS_TABS = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'created', label: 'Chờ thanh toán' },
+  { key: 'paid', label: 'Đã thanh toán' },
+  { key: 'redeemed', label: 'Đã sử dụng' },
+  { key: 'completed', label: 'Hoàn thành' },
+]
 
 export default function VouchersScreen() {
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('all')
 
-  useEffect(() => { loadVouchers() }, [])
+  const statusParam = activeTab === 'all' ? undefined : activeTab
 
-  async function loadVouchers() {
-    try {
-      const res = await voucherApi.list()
-      setData(res.data?.data?.items || res.data?.data || [])
-    } catch { setData([]) }
-    setLoading(false)
-  }
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['vouchers', statusParam],
+    queryFn: () => vouchersApi.list({ status: statusParam }),
+  })
+
+  const items = data?.items ?? []
+
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => (
+      <View style={styles.cardWrap}>
+        <VoucherCardComponent item={item} onPress={() => router.push(`/voucher/${item.id}`)} />
+      </View>
+    ),
+    [],
+  )
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Voucher của tôi</Text>
+        <Text style={styles.subtitle}>Xuất trình QR khi sử dụng dịch vụ</Text>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color={colors.primary} style={{ paddingVertical: 60 }} />
-      ) : data.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={{ fontSize: 48, marginBottom: 12 }}>🎫</Text>
-          <Text style={styles.emptyTitle}>Chưa có voucher nào</Text>
-          <Text style={styles.emptyText}>Mua dịch vụ để nhận voucher và xuất trình QR khi sử dụng.</Text>
-        </View>
+      {/* Tabs */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabs}
+      >
+        {STATUS_TABS.map((tab) => (
+          <TouchableOpacity
+            key={tab.key}
+            style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+            onPress={() => setActiveTab(tab.key)}
+          >
+            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* List */}
+      {error ? (
+        <ErrorState onRetry={refetch} />
       ) : (
-        data.map((v: any) => {
-          const s = STATUS_MAP[v.status] || { label: v.status, color: '#757575' }
-          return (
-            <View key={v.id} style={styles.card}>
-              <View style={styles.cardRow}>
-                <Text style={styles.cardTitle}>{v.serviceName || `Voucher #${v.id?.slice(0, 8)}`}</Text>
-                <View style={[styles.badge, { backgroundColor: s.color + '20' }]}>
-                  <Text style={[styles.badgeText, { color: s.color }]}>{s.label}</Text>
-                </View>
+        <FlatList
+          data={isLoading ? [] : items}
+          renderItem={renderItem}
+          keyExtractor={(item: any) => item.id}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            !isLoading ? (
+              <View style={styles.empty}>
+                <Text style={styles.emptyEmoji}>🎫</Text>
+                <Text style={styles.emptyTitle}>Chưa có voucher</Text>
+                <Text style={styles.emptyText}>
+                  Mua dịch vụ để nhận voucher và xuất trình QR khi sử dụng.
+                </Text>
+                <TouchableOpacity
+                  style={styles.emptyBtn}
+                  onPress={() => router.push('/(tabs)/search')}
+                >
+                  <Text style={styles.emptyBtnText}>Khám phá dịch vụ</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.code}>Mã: {v.code || v.id?.slice(0, 12)}</Text>
-              {v.expiresAt && <Text style={styles.meta}>HSD: {new Date(v.expiresAt).toLocaleDateString('vi-VN')}</Text>}
-            </View>
-          )
-        })
+            ) : (
+              <View style={{ padding: spacing.base, gap: spacing.md }}>
+                {[1, 2, 3].map((i) => (
+                  <VoucherCardSkeleton key={i} />
+                ))}
+              </View>
+            )
+          }
+          ListFooterComponent={<View style={{ height: 100 }} />}
+          showsVerticalScrollIndicator={false}
+        />
       )}
-    </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { paddingHorizontal: 16, paddingTop: 16 },
-  title: { fontSize: 22, fontWeight: '700', color: colors.onSurface },
-  empty: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: 32 },
-  emptyTitle: { fontSize: 17, fontWeight: '600', color: colors.onSurface, marginBottom: 6 },
-  emptyText: { fontSize: 14, color: colors.onSurfaceVariant, textAlign: 'center' },
-  card: { backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginHorizontal: 16, marginTop: 12 },
-  cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.onSurface, flex: 1 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  badgeText: { fontSize: 12, fontWeight: '600' },
-  code: { fontSize: 13, fontWeight: '500', color: colors.primary, marginTop: 8, fontFamily: 'monospace' },
-  meta: { fontSize: 12, color: colors.onSurfaceVariant, marginTop: 4 },
+  header: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  title: { ...typography.headlineMd },
+  subtitle: { ...typography.bodyMd, color: colors.onSurfaceVariant, marginTop: 4 },
+  tabs: {
+    paddingHorizontal: spacing.base,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  tab: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 9999,
+    backgroundColor: colors.surfaceContainer,
+  },
+  tabActive: {
+    backgroundColor: colors.primaryContainer,
+  },
+  tabText: {
+    ...typography.labelMd,
+    color: colors.onSurfaceVariant,
+  },
+  tabTextActive: {
+    color: colors.white,
+    fontWeight: '600',
+  },
+  list: { paddingBottom: spacing.xl },
+  cardWrap: {
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.md,
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: spacing.xl,
+  },
+  emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
+  emptyTitle: { ...typography.titleMd, marginBottom: spacing.xs },
+  emptyText: {
+    ...typography.bodyMd,
+    textAlign: 'center',
+    color: colors.onSurfaceVariant,
+  },
+  emptyBtn: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.primary,
+    borderRadius: 48,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.xl,
+  },
+  emptyBtnText: {
+    color: colors.white,
+    fontWeight: '600',
+    fontSize: 14,
+  },
 })

@@ -1,4 +1,4 @@
-# Monitoring & Observability – S-Local
+# Monitoring & Observability – S-Loco
 
 > Logging, metrics, alerting, and health checks
 

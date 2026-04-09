@@ -1,129 +1,192 @@
-import { useEffect, useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { auth, getToken, setToken } from '../../lib/api'
+import { router } from 'expo-router'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { colors, spacing, typography } from '../../lib/theme'
+import { authApi } from '../../src/lib/api'
+import { useAuthStore } from '../../src/stores/auth-store'
 
-const colors = {
-  primary: '#005E97', primaryContainer: '#0077B6', primaryFixed: '#90E0EF',
-  surface: '#F4F7FB', onSurface: '#161B2E', onSurfaceVariant: '#3B4460', error: '#BA1A1A',
-}
+const MENU_ITEMS = [
+  {
+    icon: '🎫',
+    label: 'Voucher của tôi',
+    key: 'vouchers',
+    action: () => router.push('/(tabs)/vouchers'),
+  },
+  {
+    icon: '📰',
+    label: 'Bài viết',
+    key: 'articles',
+    action: () => router.push('/content/articles'),
+  },
+  { icon: '🤖', label: 'Lịch trình AI', key: 'ai', action: () => router.push('/ai/itinerary') },
+  { icon: '🌤️', label: 'Thời tiết', key: 'weather', action: () => router.push('/content/weather') },
+  { icon: '💬', label: 'Hỗ trợ', key: 'support', action: () => {} },
+  { icon: '⚙️', label: 'Cài đặt', key: 'settings', action: () => {} },
+]
 
 export default function ProfileScreen() {
-  const [user, setUser] = useState<any>(null)
-  const [phone, setPhone] = useState('')
-  const [code, setCode] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => { checkAuth() }, [])
-
-  async function checkAuth() {
-    const token = await getToken()
-    if (!token) return
-    try {
-      const res = await auth.me()
-      if (res.ok) setUser(res.data?.data?.user)
-    } catch { /* not logged in */ }
-  }
-
-  async function handleSendOtp() {
-    if (!phone.match(/^0\d{9}$/)) return Alert.alert('Lỗi','Số điện thoại không hợp lệ')
-    setLoading(true)
-    const res = await auth.sendOtp(phone)
-    setLoading(false)
-    if (res.ok) { setOtpSent(true); Alert.alert('Thành công', 'Mã OTP đã được gửi') }
-    else Alert.alert('Lỗi', res.data?.error?.message || 'Không gửi được OTP')
-  }
-
-  async function handleVerify() {
-    if (code.length < 4) return
-    setLoading(true)
-    const res = await auth.verifyOtp(phone, code)
-    setLoading(false)
-    if (res.ok && res.data?.data?.access_token) {
-      await setToken(res.data.data.access_token)
-      setUser(res.data.data.user)
-      setOtpSent(false); setCode('')
-    } else Alert.alert('Lỗi', res.data?.error?.message || 'Mã OTP không đúng')
-  }
+  const { user, logout } = useAuthStore()
 
   async function handleLogout() {
-    await auth.logout()
-    await setToken(null)
-    setUser(null)
-  }
-
-  if (user) {
-    return (
-      <ScrollView style={styles.container}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatar}><Text style={{ fontSize: 32 }}>👤</Text></View>
-          <Text style={styles.name}>{user.full_name || user.phone || 'Người dùng'}</Text>
-          <Text style={styles.phone}>{user.phone || user.email}</Text>
-        </View>
-        <View style={styles.section}>
-          <View style={styles.infoRow}><Text style={styles.infoLabel}>Vai trò</Text><Text style={styles.infoValue}>{user.role || 'tourist'}</Text></View>
-          <View style={styles.infoRow}><Text style={styles.infoLabel}>Ngày tham gia</Text><Text style={styles.infoValue}>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : '—'}</Text></View>
-        </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Đăng xuất</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    )
+    try {
+      await authApi.logout()
+    } catch {
+      /* ignore API errors on logout */
+    }
+    await logout()
+    router.replace('/auth/otp')
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.loginContainer}>
-      <Text style={{ fontSize: 48, marginBottom: 16 }}>🔐</Text>
-      <Text style={styles.loginTitle}>Đăng nhập</Text>
-      <Text style={styles.loginSub}>Nhập số điện thoại để nhận mã OTP</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Tài khoản</Text>
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Số điện thoại (0901234567)"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        editable={!otpSent}
-      />
+        {/* Profile Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {(user?.full_name ?? user?.phone ?? '?')[0]?.toUpperCase() ?? '?'}
+            </Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>
+              {user?.full_name || user?.phone || 'Người dùng S-Loco'}
+            </Text>
+            <Text style={styles.profilePhone}>{user?.phone ?? user?.email ?? ''}</Text>
+            <View style={styles.roleBadge}>
+              <Text style={styles.roleText}>
+                {user?.role === 'tourist' ? '🌊 Du khách' : 'Người dùng'}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-      {otpSent && (
-        <TextInput
-          style={[styles.input, { marginTop: 12, textAlign: 'center', letterSpacing: 8, fontSize: 24 }]}
-          placeholder="Mã OTP"
-          value={code}
-          onChangeText={setCode}
-          keyboardType="number-pad"
-          maxLength={6}
-        />
-      )}
+        {/* Menu */}
+        <View style={styles.section}>
+          <View style={styles.menuCard}>
+            {MENU_ITEMS.map((item, i) => (
+              <View key={item.key}>
+                <TouchableOpacity style={styles.menuRow} onPress={item.action} activeOpacity={0.6}>
+                  <View style={styles.menuIcon}>
+                    <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+                  </View>
+                  <Text style={[typography.bodyLg, { flex: 1 }]}>{item.label}</Text>
+                  <Text style={{ color: colors.outline, fontSize: 18 }}>›</Text>
+                </TouchableOpacity>
+                {i < MENU_ITEMS.length - 1 && <View style={styles.menuSep} />}
+              </View>
+            ))}
+          </View>
+        </View>
 
-      <TouchableOpacity
-        style={[styles.primaryBtn, loading && { opacity: 0.6 }]}
-        onPress={otpSent ? handleVerify : handleSendOtp}
-        disabled={loading}
-      >
-        <Text style={styles.primaryBtnText}>{otpSent ? 'Xác nhận OTP' : 'Gửi mã OTP'}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Logout */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
+          <Text style={styles.logoutText}>Đăng xuất</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: spacing.xl }} />
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  loginContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 32 },
-  loginTitle: { fontSize: 24, fontWeight: '700', color: colors.onSurface, marginBottom: 6 },
-  loginSub: { fontSize: 14, color: colors.onSurfaceVariant, marginBottom: 24, textAlign: 'center' },
-  input: { width: '100%', backgroundColor: '#FFF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: colors.onSurface },
-  primaryBtn: { width: '100%', backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16, marginTop: 16, alignItems: 'center' },
-  primaryBtnText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
-  profileHeader: { alignItems: 'center', paddingTop: 40, paddingBottom: 24, backgroundColor: colors.primaryContainer, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
-  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.primaryFixed, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  name: { fontSize: 20, fontWeight: '700', color: '#FFF' },
-  phone: { fontSize: 14, color: colors.primaryFixed, marginTop: 2 },
-  section: { paddingHorizontal: 16, marginTop: 24 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, marginBottom: 8 },
-  infoLabel: { fontSize: 14, color: colors.onSurfaceVariant },
-  infoValue: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
-  logoutBtn: { marginHorizontal: 16, marginTop: 32, backgroundColor: colors.error + '10', borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
-  logoutText: { color: colors.error, fontSize: 16, fontWeight: '600' },
+  header: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  title: { ...typography.headlineMd },
+  profileCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    marginHorizontal: spacing.base,
+    padding: spacing.base,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.primaryContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  profileInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  profileName: {
+    ...typography.titleMd,
+  },
+  profilePhone: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  roleBadge: {
+    marginTop: 4,
+    backgroundColor: colors.primaryFixed,
+    borderRadius: 9999,
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    alignSelf: 'flex-start',
+  },
+  roleText: {
+    ...typography.labelSm,
+    color: colors.primary,
+  },
+  section: {
+    paddingHorizontal: spacing.base,
+    marginTop: spacing.lg,
+  },
+  menuCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.base,
+    paddingVertical: 14,
+    gap: spacing.md,
+  },
+  menuIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.primaryFixed,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuSep: {
+    height: 1,
+    backgroundColor: colors.outlineVariant,
+    marginHorizontal: spacing.base,
+  },
+  logoutBtn: {
+    marginHorizontal: spacing.base,
+    marginTop: spacing.xl,
+    backgroundColor: 'rgba(186, 26, 26, 0.08)',
+    borderRadius: 48,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: colors.error,
+    fontSize: 15,
+    fontWeight: '600',
+  },
 })

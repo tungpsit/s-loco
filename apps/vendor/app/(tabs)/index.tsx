@@ -1,92 +1,241 @@
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { vendor } from '../../lib/api'
+import { useEffect, useState, useCallback } from 'react'
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { router } from 'expo-router'
+import { dashboardApi } from '../../src/lib/api'
+import { useAuthStore } from '../../src/stores/auth-store'
+import { RevenueCard } from '../../src/components/revenue-card'
+import { OrderCard } from '../../src/components/order-card'
+import { ErrorState } from '../../src/components/error-state'
 
 const colors = {
-  primary: '#005E97', primaryContainer: '#0077B6', primaryFixed: '#90E0EF',
-  surface: '#F4F7FB', onSurface: '#161B2E', onSurfaceVariant: '#3B4460',
+  primary: '#005E97',
+  primaryContainer: '#0077B6',
+  primaryFixed: '#90E0EF',
+  surface: '#F4F7FB',
+  surfaceContainerLow: '#EDF1F8',
+  surfaceContainerLowest: '#FFFFFF',
+  onSurface: '#161B2E',
+  onSurfaceVariant: '#3B4460',
 }
 
-export default function VendorDashboard() {
-  const [stats, setStats] = useState<any>(null)
+interface DashData {
+  today?: { orders?: number; revenue?: number }
+  total?: { revenue?: number }
+  settlement?: { pending?: number; settled?: number }
+  recentOrders?: Array<{
+    id: string
+    status: string
+    service_name?: string
+    customer_name?: string
+    final_amount?: number
+    created_at?: string
+    redeemed_at?: string
+  }>
+}
+
+const fmt = (n?: number) =>
+  n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '0₫'
+
+export default function DashboardScreen() {
+  const [data, setData] = useState<DashData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState(false)
+  const user = useAuthStore((s) => s.user)
 
-  useEffect(() => { loadDashboard() }, [])
-
-  async function loadDashboard() {
+  const load = useCallback(async () => {
     try {
-      const res = await vendor.dashboard()
-      if (res.ok) setStats(res.data?.data)
-    } catch {}
-    setLoading(false)
+      const res = await dashboardApi.vendor()
+      if (res.ok && res.data?.data) {
+        setData(res.data.data as DashData)
+        setError(false)
+      } else {
+        setError(true)
+      }
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    load()
+  }, [load])
+
+  const greeting = () => {
+    const h = new Date().getHours()
+    if (h < 11) return 'Chào buổi sáng'
+    if (h < 17) return 'Chào buổi chiều'
+    return 'Chào buổi tối'
   }
 
-  const fmt = (n?: number | string) => n != null ? Number(n).toLocaleString('vi-VN') : '0'
-
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏪 S-Loco Vendor</Text>
-        <Text style={styles.headerSub}>Quản lý đơn hàng</Text>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+      }
+    >
+      {/* Header */}
+      <View style={styles.headerBg}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>{greeting()}</Text>
+            <Text style={styles.vendorName}>{user?.full_name ?? 'Chủ cửa hàng'}</Text>
+          </View>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>🏪</Text>
+          </View>
+        </View>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color={colors.primary} style={{ paddingVertical: 60 }} />
-      ) : (
-        <>
-          <View style={styles.statsGrid}>
-            <StatCard label="Đơn hôm nay" value={fmt(stats?.todayOrders)} icon="🛒" />
-            <StatCard label="Doanh thu hôm nay" value={`${fmt(stats?.todayRevenue)}₫`} icon="💰" />
-            <StatCard label="Chờ xác nhận" value={fmt(stats?.pendingOrders)} icon="⏳" />
-            <StatCard label="Tổng doanh thu" value={`${fmt(stats?.totalRevenue)}₫`} icon="📊" />
-          </View>
+      {/* Stats */}
+      <View style={styles.statsRow}>
+        <RevenueCard
+          label="Đơn hôm nay"
+          value={String(data?.today?.orders ?? 0)}
+          icon="🛒"
+          accentColor={colors.primary}
+        />
+        <RevenueCard
+          label="Doanh thu hôm nay"
+          value={fmt(data?.today?.revenue)}
+          icon="💰"
+          accentColor="#2E7D32"
+        />
+      </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Đơn hàng gần đây</Text>
-            {(!stats?.recentOrders || stats.recentOrders.length === 0) ? (
-              <View style={styles.emptyCard}>
-                <Text style={{ fontSize: 36, marginBottom: 8 }}>📋</Text>
-                <Text style={styles.emptyText}>Chưa có đơn hàng nào</Text>
-              </View>
-            ) : (
-              stats.recentOrders.map((o: any) => (
-                <View key={o.id} style={styles.orderCard}>
-                  <Text style={styles.orderTitle}>Đơn #{o.id?.slice(0, 8)}</Text>
-                  <Text style={styles.orderAmount}>{fmt(o.finalAmount)}₫</Text>
-                </View>
-              ))
-            )}
+      <View style={styles.statsRow}>
+        <RevenueCard
+          label="Chờ giải ngân"
+          value={fmt(data?.settlement?.pending)}
+          icon="⏳"
+          accentColor="#E65100"
+        />
+        <RevenueCard
+          label="Đã thanh toán"
+          value={fmt(data?.settlement?.settled)}
+          icon="✅"
+          accentColor="#2E7D32"
+        />
+      </View>
+
+      {/* Total */}
+      <View style={styles.totalCard}>
+        <View style={styles.totalLeft}>
+          <Text style={styles.totalLabel}>Tổng doanh thu</Text>
+          <Text style={styles.totalValue}>{fmt(data?.total?.revenue)}</Text>
+        </View>
+        <Text style={styles.totalIcon}>📊</Text>
+      </View>
+
+      {/* Recent orders */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Đơn hàng gần đây</Text>
+          <Text
+            style={styles.viewAllBtn}
+            onPress={() => router.push('/(tabs)/orders')}
+          >
+            Xem tất cả ›
+          </Text>
+        </View>
+
+        {loading && (
+          <ActivityIndicator size="large" color={colors.primary} style={{ paddingVertical: 32 }} />
+        )}
+
+        {error && !loading && (
+          <ErrorState onRetry={load} />
+        )}
+
+        {!loading && !error && (!data?.recentOrders || data.recentOrders.length === 0) && (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyEmoji}>📋</Text>
+            <Text style={styles.emptyText}>Chưa có đơn hàng nào</Text>
+            <Text style={styles.emptySubtext}>Đơn hàng sẽ xuất hiện khi có khách đặt dịch vụ</Text>
           </View>
-        </>
-      )}
+        )}
+
+        {!loading && !error && data?.recentOrders && data.recentOrders.length > 0 && (
+          data.recentOrders.slice(0, 5).map((o) => (
+            <OrderCard
+              key={o.id}
+              voucher={o}
+              onPress={() => router.push(`/voucher/${o.id}`)}
+            />
+          ))
+        )}
+      </View>
+
+      <View style={{ height: 24 }} />
     </ScrollView>
-  )
-}
-
-function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
-  return (
-    <View style={styles.statCard}>
-      <Text style={{ fontSize: 24 }}>{icon}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24, backgroundColor: colors.primaryContainer, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF' },
-  headerSub: { fontSize: 14, color: colors.primaryFixed, marginTop: 4 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16, marginTop: 20 },
-  statCard: { width: '47%', backgroundColor: '#FFF', borderRadius: 16, padding: 16, alignItems: 'center' },
-  statValue: { fontSize: 20, fontWeight: '700', color: colors.onSurface, marginTop: 6 },
-  statLabel: { fontSize: 12, color: colors.onSurfaceVariant, marginTop: 4, textAlign: 'center' },
-  section: { paddingHorizontal: 16, marginTop: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.onSurface, marginBottom: 12 },
-  emptyCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 32, alignItems: 'center' },
-  emptyText: { fontSize: 14, color: colors.onSurfaceVariant },
-  orderCard: { backgroundColor: '#FFF', borderRadius: 12, padding: 16, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  orderTitle: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
-  orderAmount: { fontSize: 16, fontWeight: '700', color: colors.primary },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  greeting: { fontSize: 14, color: '#90E0EF', fontWeight: '500' },
+  vendorName: { fontSize: 22, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
+  headerBg: {
+    backgroundColor: colors.primaryContainer,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    paddingBottom: 24,
+  },
+  badge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: { fontSize: 22 },
+  statsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 10 },
+  totalCard: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    padding: 20,
+    marginHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  totalLeft: {},
+  totalLabel: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 4 },
+  totalValue: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
+  totalIcon: { fontSize: 36 },
+  section: { paddingHorizontal: 16 },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.onSurface },
+  viewAllBtn: { fontSize: 14, color: colors.primary, fontWeight: '500' },
+  emptyCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+  },
+  emptyEmoji: { fontSize: 40, marginBottom: 8 },
+  emptyText: { fontSize: 15, fontWeight: '600', color: colors.onSurface, marginBottom: 4 },
+  emptySubtext: { fontSize: 13, color: colors.onSurfaceVariant, textAlign: 'center' },
 })

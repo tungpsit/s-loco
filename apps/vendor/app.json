@@ -1,12 +1,24 @@
 {
   "expo": {
     "name": "S-Loco Vendor",
-    "slug": "s-local-vendor",
+    "slug": "S-Loco-vendor",
     "version": "0.0.1",
     "orientation": "portrait",
     "scheme": "slocal-vendor",
-    "platforms": ["ios", "android"],
+    "platforms": ["ios", "android", "web"],
     "newArchEnabled": true,
-    "plugins": ["expo-router", "expo-camera"]
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "S-Loco Vendor cần quyền camera để quét mã QR trên voucher của khách."
+        }
+      ]
+    ]
   }
 }

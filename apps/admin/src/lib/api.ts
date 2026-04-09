@@ -15,7 +15,7 @@ export async function api<T = any>(path: string, opts?: RequestInit & { noAuth?:
   const token = authToken || (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null)
 
   if (token && !opts?.noAuth) {
-    headers['Authorization'] = `Bearer ${token}`
+    headers.Authorization = `Bearer ${token}`
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...opts, headers })
@@ -114,4 +114,7 @@ export const userApi = {
     q.set('limit', String(params?.limit || 100))
     return api(`/admin/users?${q}`)
   },
+  update: (id: string, data: Record<string, any>) =>
+    api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  getById: (id: string) => api(`/admin/users/${id}`),
 }

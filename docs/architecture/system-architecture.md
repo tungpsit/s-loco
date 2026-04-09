@@ -1,4 +1,4 @@
-# System Architecture – S-Local
+# System Architecture – S-Loco
 
 > Super-app du lịch bản địa tại Sầm Sơn
 
@@ -6,17 +6,17 @@
 
 ## 1. Context Diagram (C4 Level 1)
 
-Hệ thống S-Local tương tác với 3 nhóm tác nhân chính và nhiều hệ thống bên ngoài.
+Hệ thống S-Loco tương tác với 3 nhóm tác nhân chính và nhiều hệ thống bên ngoài.
 
 ```mermaid
 C4Context
-    title S-Local — System Context
+    title S-Loco — System Context
 
     Person(tourist, "Khách du lịch", "Tìm kiếm, đặt dịch vụ, mua voucher, nhận gợi ý AI")
     Person(vendor, "Nhà cung cấp", "Quản lý dịch vụ, nhận đơn, quét QR, đối soát")
-    Person(admin, "Admin S-Local", "Quản trị vendor, đơn hàng, nội dung, đối soát")
+    Person(admin, "Admin S-Loco", "Quản trị vendor, đơn hàng, nội dung, đối soát")
 
-    System(slocal, "S-Local Platform", "Siêu ứng dụng du lịch bản địa — đặt dịch vụ, voucher, combo, AI lịch trình")
+    System(slocal, "S-Loco Platform", "Siêu ứng dụng du lịch bản địa — đặt dịch vụ, voucher, combo, AI lịch trình")
 
     System_Ext(payment, "Payment Gateways", "VNPay, Momo, SePay — xử lý thanh toán")
     System_Ext(ai, "AI Services", "OpenAI / Gemini — tạo lịch trình, gợi ý")
@@ -40,13 +40,13 @@ C4Context
 
 ```mermaid
 C4Container
-    title S-Local — Container Diagram
+    title S-Loco — Container Diagram
 
     Person(tourist, "Khách du lịch")
     Person(vendor, "Nhà cung cấp")
     Person(admin, "Admin")
 
-    System_Boundary(slocal, "S-Local Platform") {
+    System_Boundary(slocal, "S-Loco Platform") {
         Container(mobile, "Mobile App", "React Native / Expo", "iOS & Android — khách du lịch")
         Container(pwa, "PWA", "React Native Web", "Truy cập nhanh không cần cài đặt")
         Container(vendorApp, "Vendor App", "React Native / Expo", "Quản lý đơn, quét QR")
@@ -223,7 +223,7 @@ sequenceDiagram
 ## 8. Monorepo Structure (đề xuất)
 
 ```
-s-local/
+S-Loco/
 ├── apps/
 │   ├── mobile/          # React Native / Expo (khách du lịch)
 │   ├── vendor/          # React Native / Expo (vendor)

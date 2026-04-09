@@ -1,16 +1,24 @@
 {
   "expo": {
     "name": "S-Loco",
-    "slug": "s-local-mobile",
+    "slug": "S-Loco-mobile",
     "version": "0.0.1",
     "orientation": "portrait",
     "scheme": "slocal",
-    "platforms": ["ios", "android"],
+    "platforms": ["ios", "android", "web"],
     "newArchEnabled": true,
     "web": {
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "S-Loco cần truy cập camera để quét mã QR của cửa hàng."
+        }
+      ]
+    ]
   }
 }
