@@ -203,6 +203,11 @@
 | Tourist | Checkout | [.haki/screens/tourist-checkout.md](.haki/screens/tourist-checkout.md) | ✅ |
 | Tourist | Order Detail | [.haki/screens/tourist-order-detail.md](.haki/screens/tourist-order-detail.md) | ✅ |
 | Tourist | Vendor Detail | [.haki/screens/tourist-vendor-detail.md](.haki/screens/tourist-vendor-detail.md) | ✅ |
+| Tourist | Voucher Scan (Self-Redeem) | [.haki/screens/tourist-voucher-scan.md](.haki/screens/tourist-voucher-scan.md) | ✅ |
+| Tourist | AI Itinerary | [.haki/screens/tourist-ai-itinerary.md](.haki/screens/tourist-ai-itinerary.md) | ✅ |
+| Tourist | Articles + Detail | [.haki/screens/tourist-articles.md](.haki/screens/tourist-articles.md) | ✅ |
+| Tourist | Weather | [.haki/screens/tourist-weather.md](.haki/screens/tourist-weather.md) | ✅ |
+| Tourist | Profile | [.haki/screens/tourist-profile.md](.haki/screens/tourist-profile.md) | ✅ |
 | Tourist | All screens | [.haki/layouts/tourist-screen-flow.md](.haki/layouts/tourist-screen-flow.md) | ✅ |
 
-*Last updated: 2026-04-09*
+*Last updated: 2026-04-09 after AI/articles/weather/profile docs*
