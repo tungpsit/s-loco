@@ -9,7 +9,7 @@
 
 ## 1. Tổng quan
 
-**Mục đích:** Trang chủ cho khách du lịch đã đăng nhập — hiển thị danh mục dịch vụ, dịch vụ nổi bật, khuyến mãi, và AI itinerary. Người dùng có thể tìm kiếm và duyệt dịch vụ để discover → book.
+**Mục đích:** Trang chủ cho khách du lịch đã đăng nhập — hiển thị danh mục dịch vụ, dịch vụ nổi bật, khuyến mãi, AI itinerary CTA, tin tức/sự kiện. Người dùng discover → book.
 
 **Ai dùng:** Tourist đã đăng nhập (role: `tourist`, đăng nhập qua OTP phone)
 
@@ -25,6 +25,8 @@
   → /app/order/checkout.tsx
   → /app/ai/itinerary.tsx
   → /app/content/weather.tsx
+  → /app/content/articles.tsx
+  → /app/content/[slug].tsx
 ```
 
 ---
@@ -34,41 +36,53 @@
 ```
 ┌──────────────────────────────────────┐
 │  HEADER (floating, glass blur)       │
-│  [Xin chào! 👋]      [🌤️ weather]    │
+│  [Xin chào! 👋]      [🌤️ weather]   │
 │  [S-Loco]                            │
 ├──────────────────────────────────────┤
 │ ┌──────────────────────────────────┐ │
-│ │ HERO (Ocean Blue gradient)       │ │
+│ │ HERO (Ocean Blue gradient)        │ │
 │ │ Tagline: "Khám phá Sầm Sơn"      │ │
 │ │ Title: "S-Loco" (36px bold)      │ │
 │ │ Sub: "Ẩm thực · Lưu trú · Giải  │ │
-│ │       trí"                       │ │
+│ │       trí"                        │ │
 │ └──────────────────────────────────┘ │
 │                                      │
 │  BANNERS (horizontal scroll)         │
 │  ┌─────────────┐ ┌─────────────┐     │
-│  │ 🎆 Tết 2026│ │ 🍽️ Ẩm thực │     │
-│  │ Ưu đãi 30% │ │ Top 10 NH   │     │
+│  │ 🎆 Tết 2026│ │ 🍽️ Ẩm thực│     │
+│  │ Ưu đãi 30%│ │ Top 10 NH   │     │
 │  └─────────────┘ └─────────────┘     │
 │                                      │
 │  CATEGORIES (horizontal chips)       │
 │  [🍜] [🏨] [💆] [🛺] [🎠] [🛍️]      │
 │                                      │
-│  "Dành cho bạn"   [Xem tất cả →]    │
+│  AI ITINERARY CTA (blue card)        │
+│  ┌──────────────────────────────────┐ │
+│  │ 🤖 Lên lịch trình          →    │ │
+│  │    AI gợi ý lịch trình cho bạn │ │
+│  └──────────────────────────────────┘ │
 │                                      │
-│  ┌──────────────┐ ┌──────────────┐  │
-│  │ [image]      │ │ [image]      │  │
-│  │ Service A    │ │ Service B    │  │
-│  │ Vendor name  │ │ Vendor name  │  │
-│  │ 150.000₫  ★4.5│ │ 200.000₫    │  │
-│  └──────────────┘ └──────────────┘  │
-│  ┌──────────────┐ ┌──────────────┐  │
-│  │ ...          │ │ ...          │  │
-│  └──────────────┘ └──────────────┘  │
+│  "Tin tức & Sự kiện"  [Xem tất cả]│
+│  ┌──────────┐ ┌──────────┐ ┌───────┐ │
+│  │ [img]    │ │ [img]    │ │ [img] │ │
+│  │ 📰 Tin   │ │ 📰 Sự    │ │ 📰   │ │
+│  │    tức  │ │    kiện  │ │ Guide │ │
+│  └──────────┘ └──────────┘ └───────┘ │
+│                                      │
+│  "Dành cho bạn"        [Xem tất cả]│
+│  ┌──────────────┐ ┌──────────────┐   │
+│  │ [image]     │ │ [image]     │   │
+│  │ Service A   │ │ Service B   │   │
+│  │ Vendor name │ │ Vendor name │   │
+│  │ 150.000₫ ★4.5│ │ 200.000₫   │   │
+│  └──────────────┘ └──────────────┘   │
+│  ┌──────────────┐ ┌──────────────┐   │
+│  │ ...          │ │ ...          │   │
+│  └──────────────┘ └──────────────┘   │
 │                                      │
 ├──────────────────────────────────────┤
 │  TAB BAR (glass blur)                │
-│  [🏠 Trang chủ] [🔍] [🎫] [👤]       │
+│  [🏠 Trang chủ] [🔍] [🎫] [👤]      │
 └──────────────────────────────────────┘
 ```
 
@@ -87,20 +101,27 @@ flowchart TD
     Checkout["/order/checkout"]
     AIItinerary["/ai/itinerary"]
     Weather["/content/weather"]
+    Articles["/content/articles"]
+    ArticleDetail["/content/[slug]"]
 
     Home --> Search
     Home --> ServiceDetail
     Home --> VendorDetail
     Home --> AIItinerary
     Home --> Weather
+    Home --> Articles
+    Articles --> ArticleDetail
     ServiceDetail --> Checkout
     Checkout --> Voucher["/voucher/[id]"]
 
     Banner["Banner: Tết / Ẩm thực"] --> AIItinerary
+    AICta["AI Itinerary CTA Card"] --> AIItinerary
     CategoryChip["Category Chip"] --> Filtered["Filtered Services"]
     Filtered --> ServiceDetail
-    SeeAll["Xem tất cả →"] --> Search
+    SeeAllServices["Xem tất cả (services)"] --> Search
+    SeeAllArticles["Xem tất cả (articles)"] --> Articles
     WeatherIcon["🌤️ Header"] --> Weather
+    ArticleCard["Article Card"] --> ArticleDetail
 ```
 
 **Entry points:**
@@ -108,8 +129,11 @@ flowchart TD
 
 **Exit points:**
 - Tap banner → `/ai/itinerary`
+- Tap AI CTA card → `/ai/itinerary`
 - Tap category chip → filter + scroll to grid
-- Tap "Xem tất cả" → `/search`
+- Tap article card → `/content/[slug]`
+- Tap "Xem tất cả" (articles) → `/content/articles`
+- Tap "Xem tất cả" (services) → `/search`
 - Tap weather icon → `/content/weather`
 - Tap service card → `/service/[id]`
 - Tab bar → switch context (no unmount)
@@ -122,18 +146,18 @@ flowchart TD
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `primary` | `#005E97` | Hero background, CTA, price |
-| `primaryContainer` | `#0077B6` | Active category chip |
-| `primaryFixed` | `#90E0EF` | Weather button bg |
+| `primary` | `#005E97` | Hero bg, price text, section link |
+| `primaryContainer` | `#0077B6` | AI CTA bg, active chip |
+| `primaryFixed` | `#90E0EF` | Weather btn bg, article chip bg |
 | `secondaryContainer` | `#B8D4F0` | Category chip bg (inactive) |
 | `surface` | `#F4F7FB` | Screen background |
 | `surfaceContainerLowest` | `#FFFFFF` | Card background |
 | `onSurface` | `#161B2E` | Primary text |
-| `onSurfaceVariant` | `#3B4460` | Secondary text, vendor name |
+| `onSurfaceVariant` | `#3B4460` | Secondary text |
 | `outline` | `#6B7694` | Strikethrough price |
 | `error` | `#BA1A1A` | Discounted price |
 | `tertiaryContainer` | `#5856D6` | Discount badge bg |
-| `white` | `#FFFFFF` | Hero text, badge text |
+| `white` | `#FFFFFF` | Hero text, badge text, AI CTA text |
 
 ### Typography
 
@@ -142,9 +166,11 @@ flowchart TD
 | `headlineMd` | Plus Jakarta Sans | 28px | 600 | Header title |
 | `titleLg` | Be Vietnam Pro | 22px | 600 | Section heading |
 | `titleMd` | Be Vietnam Pro | 16px | 600 | Service name |
+| `titleSm` | Be Vietnam Pro | 14px | 600 | AI CTA title, banner title |
 | `bodySm` | Be Vietnam Pro | 12px | 400 | Vendor name, sub text |
 | `labelMd` | Be Vietnam Pro | 12px | 500 | Hero tagline |
-| Web hero title | — | 36px | 700 | Hero "S-Loco" (inline style) |
+| `labelSm` | Be Vietnam Pro | 11px | 500 | Article chip |
+| Web hero title | — | 36px | 700 | Hero "S-Loco" (inline) |
 
 ### Spacing
 
@@ -155,7 +181,7 @@ flowchart TD
 | `md` | 12px | Card padding, inner gap |
 | `base` | 16px | Screen padding, header padding |
 | `lg` | 24px | Section spacing |
-| `xl` | 32px | Major section breaks, hero padding |
+| `xl` | 32px | Major section breaks |
 
 ### Breakpoints
 
@@ -166,31 +192,33 @@ flowchart TD
 
 ## 5. Component Inventory
 
-### `HomeScreen` (`/(tabs)/index.tsx`)
+### `HomeScreen` (`app/(tabs)/index.tsx`)
 
 **Props:** none (screen component)
 **State:**
 - `category: string | null` — active category filter (slug)
-- Query state from `useQuery(['services', category])`
+- Query: `['services', category]` → `servicesApi.list()`
+- Query: `['home-articles']` → `contentApi.articles({ limit: 3 })`
 
-**Behavior:**
-- On mount: fetch services (no filter)
-- On category chip tap: toggle filter (tap active → null)
-- FlatList with 2-column grid, skeleton loading
+**Sections order:**
+1. Hero (static)
+2. Banners (static, horizontal scroll)
+3. Categories (horizontal chips)
+4. AI Itinerary CTA (fetched or static)
+5. Articles (horizontal scroll, max 3, conditional on `articles.length > 0`)
+6. Services heading + 2-column grid
 
 ### `CategoryChip` (`src/components/category-chip.tsx`)
 
 **Props:**
-
 ```typescript
 interface Props {
-  label: string       // Category display name
-  icon?: string       // Emoji icon
-  active?: boolean    // Is currently selected
+  label: string
+  icon?: string
+  active?: boolean
   onPress?: () => void
 }
 ```
-
 **States:**
 - Default: `backgroundColor: secondaryContainer (#B8D4F0)`, text dark blue
 - Active: `backgroundColor: primaryContainer (#0077B6)`, text white
@@ -199,25 +227,36 @@ interface Props {
 ### `ServiceCard` (`src/components/service-card.tsx`)
 
 **Props:**
-
 ```typescript
 interface Props {
-  item: ServiceItem    // { id, name, vendor_name, images, original_price, discount_price, discount_percent, rating }
+  item: ServiceItem
   onPress?: () => void
 }
 ```
-
 **States:**
 - Default: card with image + content
-- Has discount: shows strikethrough original price + `-XX%` badge (tertiaryContainer bg, white text)
+- Has discount: strikethrough original price + `-XX%` badge
 - No image: placeholder with 📍 emoji
-- Rating: ★ star + score (shown if `rating != null`)
+- Rating: ★ star + score (if `rating != null`)
 
-**Data flow:** `servicesApi.list({ category, limit: 20 })` → TanStack Query → rendered by FlatList
+### AI Itinerary CTA
+
+**Inline** in `HomeScreen`, not a separate component.
+**Style:** `backgroundColor: primaryContainer`, `borderRadius: 16`, white text
+**Interaction:** `TouchableOpacity` → navigate to `/ai/itinerary`
+
+### Articles Horizontal Scroll
+
+**Inline** in `HomeScreen`.
+- Fetches `contentApi.articles({ limit: 3 })`
+- Shows 3 cards in horizontal `ScrollView`
+- Conditional: only renders if `articles.length > 0`
+- Each card: 160px wide, image + category chip + title
+- Category chip: `primaryFixed` bg, `primary` text
 
 ### `LoadingSkeleton` (`src/components/loading-skeleton.tsx`)
 
-**Purpose:** Skeleton placeholder while `isLoading: true`
+**Purpose:** Skeleton while `isLoading: true`
 **Count:** 4 skeleton cards (2 per row × 2 rows)
 
 ### Tab Bar (`(tabs)/_layout.tsx`)
@@ -230,22 +269,27 @@ interface Props {
 
 ## 6. API Integration
 
+### Services
+
 **Endpoint:** `GET /services`
 **Query key:** `['services', category]`
 **Params:** `{ category?: string, limit: 20 }`
-**Query:** TanStack Query v5 (`@tanstack/react-query`)
-**Error handling:** Shows `ErrorState` component, retry via `refetch()`
+**Client:** TanStack Query v5
+
+### Articles
+
+**Endpoint:** `GET /content/articles`
+**Query key:** `['home-articles']`
+**Params:** `{ limit: 3 }`
+**Response:** `{ items: ArticleItem[], total, page, limit }`
+**Note:** Only shown if `articles.length > 0`
 
 ---
 
-## 7. Gaps vs. Spec
+## 7. Implementation Log
 
-| Spec Requirement | Implemented? |
-|-----------------|-------------|
-| Search bar (mục 3) | ⚠️ No inline search bar — only "Xem tất cả →" link to `/search` tab |
-| AI itinerary button | ⚠️ Only via banner tap — no persistent CTA button |
-| Promotions section | ✅ Banners section (horizontal scroll) |
-| News/events | ❌ No news/events section on home screen |
-| Weather display | ✅ Only icon in header (tap → full page) |
-
-**Note:** Search is on dedicated `/search` tab, not inline on home. Review whether spec needs inline search bar on hero or keep tab-based.
+| Date | Change |
+|------|--------|
+| 2026-04-09 | Initial layout doc created |
+| 2026-04-09 | Added AI Itinerary CTA card (floating, not banner-only) |
+| 2026-04-09 | Added Articles horizontal scroll section (max 3 items) |

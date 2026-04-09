@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
 /**
- * Home Screen — Trang chủ: categories grid, featured services, banners
+ * Home Screen — Trang chủ: categories grid, featured services, banners, articles, AI CTA
  */
 import { useCallback, useState } from 'react'
 import {
   FlatList,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,7 +19,7 @@ import { colors, spacing, typography } from '../../lib/theme'
 import CategoryChip from '../../src/components/category-chip'
 import { ServiceCardSkeleton } from '../../src/components/loading-skeleton'
 import ServiceCard from '../../src/components/service-card'
-import { servicesApi } from '../../src/lib/api'
+import { contentApi, servicesApi } from '../../src/lib/api'
 
 const CATEGORIES = [
   { slug: 'am-thuc', name: 'Ẩm thực', icon: '🍜' },
@@ -54,7 +55,13 @@ export default function HomeScreen() {
     queryFn: () => servicesApi.list({ category: category ?? undefined, limit: 20 }),
   })
 
+  const { data: articlesData, isLoading: articlesLoading } = useQuery({
+    queryKey: ['home-articles'],
+    queryFn: () => contentApi.articles({ limit: 3 }),
+  })
+
   const items = data?.items ?? []
+  const articles = articlesData?.items ?? []
 
   const renderService = useCallback(
     ({ item, index }: { item: any; index: number }) => (
@@ -132,6 +139,55 @@ export default function HomeScreen() {
                 </View>
               </ScrollView>
             </View>
+
+            {/* AI Itinerary CTA */}
+            <TouchableOpacity style={styles.aiCta} onPress={() => router.push('/ai/itinerary')}>
+              <View style={styles.aiCtaLeft}>
+                <Text style={styles.aiCtaEmoji}>🤖</Text>
+                <View>
+                  <Text style={styles.aiCtaTitle}>Lên lịch trình</Text>
+                  <Text style={styles.aiCtaSub}>AI gợi ý lịch trình cho bạn</Text>
+                </View>
+              </View>
+              <Text style={styles.aiCtaArrow}>→</Text>
+            </TouchableOpacity>
+
+            {/* Articles */}
+            {articles.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHead}>
+                  <Text style={styles.sectionTitle}>Tin tức & Sự kiện</Text>
+                  <TouchableOpacity onPress={() => router.push('/content/articles')}>
+                    <Text style={styles.seeAll}>Xem tất cả →</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.articleRow}>
+                    {articles.map((article: any) => (
+                      <TouchableOpacity
+                        key={article.id}
+                        style={styles.articleCard}
+                        onPress={() => router.push(`/content/${article.slug}`)}
+                      >
+                        {article.image_url ? (
+                          <Image source={{ uri: article.image_url }} style={styles.articleImage} />
+                        ) : (
+                          <View style={styles.articleImagePlaceholder}>
+                            <Text style={styles.articleImageEmoji}>📰</Text>
+                          </View>
+                        )}
+                        <View style={styles.articleContent}>
+                          <Text style={styles.articleChip}>{article.category ?? 'Bài viết'}</Text>
+                          <Text style={styles.articleTitle} numberOfLines={2}>
+                            {article.title}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+            )}
 
             {/* Services heading */}
             <View style={styles.section}>
@@ -252,4 +308,47 @@ const styles = StyleSheet.create({
   emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
   emptyTitle: { ...typography.titleMd, marginBottom: spacing.xs },
   emptyText: { ...typography.bodyMd, textAlign: 'center' },
+
+  // AI Itinerary CTA
+  aiCta: {
+    marginHorizontal: spacing.base,
+    marginTop: spacing.md,
+    backgroundColor: colors.primaryContainer,
+    borderRadius: 16,
+    padding: spacing.base,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  aiCtaLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  aiCtaEmoji: { fontSize: 32 },
+  aiCtaTitle: { ...typography.titleSm, fontWeight: '600', color: colors.white },
+  aiCtaSub: { ...typography.bodySm, color: 'rgba(255,255,255,0.75)' },
+  aiCtaArrow: { fontSize: 20, color: colors.white },
+
+  // Articles section
+  articleRow: { flexDirection: 'row', gap: spacing.md },
+  articleCard: { width: 160, borderRadius: 12, overflow: 'hidden' },
+  articleImage: { width: '100%', height: 100, borderRadius: 12 },
+  articleImagePlaceholder: {
+    width: '100%',
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  articleImageEmoji: { fontSize: 28, opacity: 0.5 },
+  articleContent: { paddingTop: spacing.sm },
+  articleChip: {
+    ...typography.labelSm,
+    color: colors.primary,
+    backgroundColor: colors.primaryFixed,
+    borderRadius: 9999,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 4,
+  },
+  articleTitle: { ...typography.bodySm, fontWeight: '600' },
 })
