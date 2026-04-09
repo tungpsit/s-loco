@@ -1,0 +1,17 @@
+{
+  "project": {
+    "name": "s-local",
+    "created": "2026-03-22"
+  },
+  "ui_design_skill": "ui-ux-pro-max",
+  "ui_design_variant": null,
+  "docs_language": "vi",
+  "docs_output_dir": ".haki/generated/docs/user-guides",
+  "workflow": {
+    "auto_research": true,
+    "auto_commit": true,
+    "tdd_first": true,
+    "plan_review_loops": 3,
+    "parallelization": true
+  }
+}
