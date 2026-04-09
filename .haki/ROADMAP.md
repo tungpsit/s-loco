@@ -209,5 +209,8 @@
 | Tourist | Weather | [.haki/screens/tourist-weather.md](.haki/screens/tourist-weather.md) | ✅ |
 | Tourist | Profile | [.haki/screens/tourist-profile.md](.haki/screens/tourist-profile.md) | ✅ |
 | Tourist | All screens | [.haki/layouts/tourist-screen-flow.md](.haki/layouts/tourist-screen-flow.md) | ✅ |
+| Vendor | Dashboard | [.haki/screens/vendor-dashboard.md](.haki/screens/vendor-dashboard.md) | ✅ |
+| Vendor | Orders | [.haki/screens/vendor-orders.md](.haki/screens/vendor-orders.md) | ✅ |
+| Vendor | QR Scan (Redeem) | [.haki/screens/vendor-scan.md](.haki/screens/vendor-scan.md) | ✅ |
 
-*Last updated: 2026-04-09 after AI/articles/weather/profile docs*
+*Last updated: 2026-04-09 after vendor screen docs*
