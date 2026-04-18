@@ -108,11 +108,63 @@ export const momoGateway: PaymentGateway = {
   },
 
   async processRefund(params: RefundParams): Promise<RefundResult> {
-    console.log(`[Momo] Refund request: ${params.transactionId}, ${params.amount} VND`)
-    return {
-      success: true,
-      refundTransactionId: `MRF${Date.now()}`,
-      message: 'Hoàn tiền qua Momo đã được yêu cầu.',
+    // MoMo refund via API
+    // Refund endpoint: POST /v2/gateway/api/refund
+    const requestId = `MRF${Date.now()}`
+    const rawSignature = [
+      `accessKey=${MOMO_ACCESS_KEY}`,
+      `amount=${params.amount}`,
+      `orderId=${params.transactionId}`,
+      `partnerCode=${MOMO_PARTNER_CODE}`,
+      `requestId=${requestId}`,
+    ].join('&')
+
+    const signature = crypto
+      .createHmac('sha256', MOMO_SECRET_KEY)
+      .update(rawSignature)
+      .digest('hex')
+
+    const body = {
+      partnerCode: MOMO_PARTNER_CODE,
+      partnerName: 'S-Loco',
+      requestId,
+      orderId: params.transactionId,
+      amount: params.amount,
+      lang: 'vi',
+      signature,
+    }
+
+    try {
+      const res = await fetch(MOMO_API_URL.replace('create', 'refund'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      if (!res.ok) {
+        console.error(`[Momo] Refund HTTP error: ${res.status}`)
+        return { success: false, message: `Lỗi HTTP: ${res.status}` }
+      }
+
+      const data = (await res.json()) as { resultCode?: number; message?: string }
+      if (data.resultCode === 0) {
+        return {
+          success: true,
+          refundTransactionId: requestId,
+          message: 'Hoàn tiền qua Momo thành công.',
+        }
+      }
+
+      return {
+        success: false,
+        message: `Momo refund failed: ${data.message ?? data.resultCode}`,
+      }
+    } catch (err) {
+      console.error('[Momo] Refund network error:', err)
+      return {
+        success: false,
+        message: 'Không thể kết nối Momo để hoàn tiền. Vui lòng thử lại.',
+      }
     }
   },
 }

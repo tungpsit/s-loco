@@ -1,4 +1,5 @@
 import { getDb } from '../db'
+import { enqueueWebhookRetry } from './webhook-retry.service'
 import { orderItems, orders, payments, vouchers } from '@S-Loco/db/schema'
 import { and, eq, lt } from 'drizzle-orm'
 import { momoGateway } from '../gateways/momo'
@@ -62,7 +63,7 @@ export async function initiatePayment(
   return { paymentUrl, transactionId }
 }
 
-// ─── Process webhook (idempotent) ──────────────────────
+// ─── Process webhook (idempotent, with retry queue) ──
 export async function processWebhook(
   gateway: string,
   payload: Record<string, unknown>,
@@ -97,14 +98,21 @@ export async function processWebhook(
     return { status: 'already_processed' }
   }
 
-  // 5. Update payment + order + vouchers
-  if (result.success) {
-    await handlePaymentSuccess(payment.id, payment.orderId)
-  } else {
-    await db
-      .update(payments)
-      .set({ status: 'failed', rawWebhook: result.rawData, updatedAt: new Date() })
-      .where(eq(payments.id, payment.id))
+  // 5. Update payment + order + vouchers (wrapped for retry queue)
+  try {
+    if (result.success) {
+      await handlePaymentSuccess(payment.id, payment.orderId)
+    } else {
+      await db
+        .update(payments)
+        .set({ status: 'failed', rawWebhook: result.rawData, updatedAt: new Date() })
+        .where(eq(payments.id, payment.id))
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[Webhook] ${gateway} processing error: ${msg}`)
+    await enqueueWebhookRetry(gateway, payload, signature, msg)
+    throw err
   }
 
   return { status: 'ok' }
@@ -169,6 +177,10 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
     .where(and(eq(payments.orderId, item.orderId), eq(payments.status, 'success')))
     .limit(1)
 
+  // Get order for originalAmount (total paid)
+  const [order] = await db.select().from(orders).where(eq(orders.id, item.orderId)).limit(1)
+  const originalAmount = order ? Math.round(Number(order.finalAmount)) : 0
+
   // Process refund through gateway
   if (payment?.gateway) {
     const gw = gateways[payment.gateway]
@@ -176,6 +188,7 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
       await gw.processRefund({
         transactionId: payment.gatewayTransactionId,
         amount: Math.round(Number(item.unitPrice)),
+        originalAmount,
         reason,
       })
     }

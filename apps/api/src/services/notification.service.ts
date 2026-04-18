@@ -121,42 +121,74 @@ export async function getUnreadCount(userId: string) {
 }
 
 // ─── Notify helpers (fire-and-forget) ──────────────────
+// Creates a DB notification record AND fires a real push notification.
 export async function notifyOrderCreated(userId: string, orderId: string) {
-  return createNotification(
+  const notif = await createNotification(
     userId,
     'order_created',
     'Đặt hàng thành công!',
     `Đơn hàng #${orderId.slice(0, 8)} đã được tạo.`,
     { orderId },
   )
+  fireAndForgetPush(userId, notif.title, notif.body, { orderId })
 }
 
 export async function notifyPaymentSuccess(userId: string, orderId: string) {
-  return createNotification(
+  const notif = await createNotification(
     userId,
     'payment_success',
     'Thanh toán thành công!',
     `Đơn hàng #${orderId.slice(0, 8)} đã được thanh toán. Voucher đã sẵn sàng.`,
     { orderId },
   )
+  fireAndForgetPush(userId, notif.title, notif.body, { orderId })
 }
 
 export async function notifyVendorNewOrder(vendorOwnerId: string, orderId: string) {
-  return createNotification(
+  const notif = await createNotification(
     vendorOwnerId,
     'vendor_new_order',
     'Đơn hàng mới!',
     `Bạn có đơn hàng mới #${orderId.slice(0, 8)}.`,
     { orderId },
   )
+  fireAndForgetPush(vendorOwnerId, notif.title, notif.body, { orderId })
 }
 
 export async function notifyVoucherRedeemed(userId: string, voucherId: string) {
-  return createNotification(
+  const notif = await createNotification(
     userId,
     'voucher_redeemed',
     'Voucher đã được sử dụng',
     `Voucher #${voucherId.slice(0, 8)} đã được đổi thành công.`,
     { voucherId },
   )
+  fireAndForgetPush(userId, notif.title, notif.body, { voucherId })
+}
+
+/** Fire push notification (no await — failures are non-critical) */
+async function fireAndForgetPush(
+  userId: string,
+  title: string,
+  body: string,
+  data: Record<string, unknown>,
+) {
+  try {
+    const pushData = await getPushToken(userId)
+    if (!pushData) return
+
+    const { sendPush } = await import('./push.service')
+    await sendPush({
+      token: pushData.token,
+      platform: pushData.platform as 'android' | 'ios' | 'web',
+      title,
+      body,
+      data: Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, String(v)]),
+      ),
+    })
+  } catch (err) {
+    // Log but never block the caller
+    console.error(`[Push] Failed to send push to user ${userId}:`, err)
+  }
 }

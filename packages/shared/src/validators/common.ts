@@ -18,3 +18,10 @@ export const slugParamSchema = z.object({
   slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
 })
 export type SlugParam = z.infer<typeof slugParamSchema>
+
+// ─── Gift Validators ──────────────────────────────────
+export const giftByPhoneSchema = z.object({
+  recipient_phone: z.string().min(1, 'Số điện thoại không được để trống.'),
+  message: z.string().max(200).optional(),
+})
+export type GiftByPhoneInput = z.infer<typeof giftByPhoneSchema>

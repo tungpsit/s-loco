@@ -1,6 +1,7 @@
 // Schema barrel export
 export * from './audit'
 export * from './content'
+export * from './itinerary'
 export * from './notifications'
 export * from './orders'
 export * from './reviews'

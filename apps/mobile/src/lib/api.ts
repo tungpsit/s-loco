@@ -139,6 +139,22 @@ export const vouchersApi = {
       method: 'POST',
       json: { voucher_id: voucherId, vendor_id: vendorId },
     }),
+  giftByPhone: (voucherId: string, phone: string, message?: string) =>
+    request<{ recipient_id: string; recipient_phone: string; voucher_id: string }>(
+      `/vouchers/${voucherId}/gift/phone`,
+      { method: 'POST', json: { recipient_phone: phone, message } },
+    ),
+  createGiftLink: (voucherId: string) =>
+    request<{ gift_token: string; share_url: string }>(
+      `/vouchers/${voucherId}/gift/link`,
+      { method: 'POST' },
+    ),
+}
+
+// ─── Gift Claim ─────────────────────────────────────────────────────────────────
+export const giftApi = {
+  claim: (token: string) =>
+    request<{ voucher_id: string; claimed: boolean }>(`/gifts/claim/${token}`, { method: 'POST' }),
 }
 
 // ─── Notifications ─────────────────────────────────────────────────────────────
@@ -208,6 +224,20 @@ export const itineraryApi = {
     request<{ itinerary: ItineraryResult }>('/itinerary/generate', {
       method: 'POST',
       json: params,
+    }),
+  save: (data: ItineraryResult) =>
+    request<{ id: string; share_token: string }>('/itinerary/save', {
+      method: 'POST',
+      json: { ...data },
+    }),
+}
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+export const paymentsApi = {
+  initiate: (orderId: string, gateway: 'vnpay' | 'momo' | 'sepay') =>
+    request<{ payment_url: string; payment_token: string }>('/payments/initiate', {
+      method: 'POST',
+      json: { order_id: orderId, gateway },
     }),
 }
 

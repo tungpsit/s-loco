@@ -62,6 +62,19 @@ export default function OtpVerifyScreen() {
       {
         onSuccess: async (data) => {
           await login(data.access_token, data.user)
+
+          // Auto-claim pending gift if user came from a gift link
+          if (global.__pendingGiftToken) {
+            const token = global.__pendingGiftToken
+            global.__pendingGiftToken = undefined
+            try {
+              const { giftApi } = await import('../../lib/api')
+              await giftApi.claim(token)
+            } catch {
+              // Non-critical — just redirect to vouchers
+            }
+          }
+
           router.replace('/(tabs)')
         },
         onError: (err) => {
@@ -264,3 +277,8 @@ const styles = StyleSheet.create({
     color: colors.outline,
   },
 })
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __pendingGiftToken: string | undefined
+}

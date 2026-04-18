@@ -56,9 +56,17 @@ export async function searchServices(filters: ServiceFilterInput) {
     )
   }
 
+  // Distance filter (km from Tây An beach)
+  if (filters.min_distance !== undefined) {
+    conditions.push(gte(vendors.distanceKm, filters.min_distance))
+  }
+  if (filters.max_distance !== undefined) {
+    conditions.push(lte(vendors.distanceKm, filters.max_distance))
+  }
+
   // Rating filter (on vendor)
   if (filters.min_rating !== undefined) {
-    conditions.push(gte(sql`${vendors.ratingAvg}::numeric`, filters.min_rating))
+    conditions.push(gte(sql`COALESCE(${services.averageRating}, ${vendors.ratingAvg})::numeric`, filters.min_rating))
   }
 
   // Build ORDER BY from sort param
@@ -70,20 +78,26 @@ export async function searchServices(filters: ServiceFilterInput) {
       : effectiveSort === 'price_desc'
         ? [desc(priceCol), desc(sql`${vendors.ratingAvg}::numeric`)]
         : effectiveSort === 'rating_desc'
-          ? [desc(sql`${vendors.ratingAvg}::numeric`), desc(sql`${vendors.reviewCount}::int`)]
+          ? [desc(sql`${vendors.ratingAvg}::numeric`), desc(sql`${services.averageRating}::numeric`), desc(sql`${vendors.reviewCount}::int`)]
           : effectiveSort === 'newest'
             ? [desc(services.createdAt)]
-            : [desc(sql`${vendors.ratingAvg}::numeric`), desc(services.createdAt)] // relevance default
+            : effectiveSort === 'distance_asc'
+              ? [asc(sql`COALESCE(${vendors.distanceKm}, 9999)::numeric`)]
+              : [desc(sql`${vendors.ratingAvg}::numeric`), desc(services.createdAt)] // relevance default
 
   const items = await db
     .select({
-      service: services,
+      service: {
+        ...services,
+        averageRating: services.averageRating,
+      },
       vendor: {
         id: vendors.id,
         name: vendors.name,
         slug: vendors.slug,
         ratingAvg: vendors.ratingAvg,
         reviewCount: vendors.reviewCount,
+        distanceKm: vendors.distanceKm,
       },
       category: {
         id: serviceCategories.id,

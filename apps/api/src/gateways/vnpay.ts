@@ -10,8 +10,8 @@ import type {
 const VNPAY_TMN_CODE = process.env.VNPAY_TMN_CODE || 'demo_tmn'
 const VNPAY_HASH_SECRET = process.env.VNPAY_HASH_SECRET || 'demo_secret'
 const VNPAY_URL = process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'
-const VNPAY_API_URL =
-  process.env.VNPAY_API_URL || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'
+const VNPAY_REFUND_URL =
+  process.env.VNPAY_REFUND_URL || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'
 
 export const vnpayGateway: PaymentGateway = {
   async createPaymentUrl(params: CreatePaymentParams) {
@@ -77,12 +77,71 @@ export const vnpayGateway: PaymentGateway = {
   },
 
   async processRefund(params: RefundParams): Promise<RefundResult> {
-    // VNPay refund via API (simplified — production needs full implementation)
-    console.log(`[VNPay] Refund request: ${params.transactionId}, ${params.amount} VND`)
-    return {
-      success: true,
-      refundTransactionId: `RF${Date.now()}`,
-      message: 'Hoàn tiền qua VNPay đã được yêu cầu.',
+    // VNPay refund via HTTPS POST API
+    // Docs: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
+    const createDate = formatDate(new Date())
+    // TransactionType: 02=full refund, 03=partial refund
+    const txnType = '02'
+
+    const refundParams: Record<string, string> = {
+      vnp_Version: '2.1.0',
+      vnp_Command: 'refund',
+      vnp_TmnCode: VNPAY_TMN_CODE,
+      vnp_TransactionType: txnType,
+      vnp_Amount: String(params.amount * 100), // x100
+      vnp_TxnRef: params.transactionId,
+      vnp_TransactionNo: params.gatewayTransactionId || '0',
+      vnp_OrderInfo: `S-Loco refund: ${params.transactionId}`,
+      vnp_CreateDate: createDate,
+      vnp_IpAddr: '127.0.0.1',
+    }
+
+    // Sort and sign with HMAC-SHA512
+    const sortedKeys = Object.keys(refundParams).sort()
+    const queryString = sortedKeys
+      .map((k) => `${k}=${encodeURIComponent(refundParams[k]!)}`)
+      .join('&')
+
+    const hmac = crypto.createHmac('sha512', VNPAY_HASH_SECRET)
+    hmac.update(queryString)
+    refundParams.vnp_SecureHash = hmac.digest('hex')
+
+    try {
+      const res = await fetch(VNPAY_REFUND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(refundParams).toString(),
+      })
+
+      if (!res.ok) {
+        console.error(`[VNPay] Refund HTTP error: ${res.status}`)
+        return { success: false, message: `Lỗi HTTP: ${res.status}` }
+      }
+
+      const text = await res.text()
+      const result = Object.fromEntries(new URLSearchParams(text).entries()) as Record<
+        string,
+        string
+      >
+
+      if (result.vnp_ResponseCode === '00') {
+        return {
+          success: true,
+          refundTransactionId: result.vnp_TransactionNo || `RF${Date.now()}`,
+          message: 'Hoàn tiền qua VNPay thành công.',
+        }
+      }
+
+      return {
+        success: false,
+        message: `VNPay refund failed: ${result.vnp_Message ?? result.vnp_ResponseCode}`,
+      }
+    } catch (err) {
+      console.error('[VNPay] Refund network error:', err)
+      return {
+        success: false,
+        message: 'Không thể kết nối VNPay để hoàn tiền. Vui lòng thử lại.',
+      }
     }
   },
 }

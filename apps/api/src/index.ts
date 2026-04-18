@@ -15,6 +15,7 @@ import serviceRoutes from './routes/services'
 import settlementRoutes from './routes/settlements'
 import vendorRoutes from './routes/vendors'
 import voucherRoutes from './routes/vouchers'
+import giftRoutes from './routes/gifts'
 
 const app = new Hono()
 
@@ -68,6 +69,7 @@ v1.route('/combos', comboRoutes)
 v1.route('/content', contentRoutes)
 v1.route('/itinerary', itineraryRoutes)
 v1.route('/reviews', reviewRoutes)
+v1.route('/gifts', giftRoutes)
 v1.route('/admin', adminRoutes)
 app.route('/api/v1', v1)
 

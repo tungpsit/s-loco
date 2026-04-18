@@ -3,9 +3,10 @@
  */
 import { router } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import ErrorState from '../../components/error-state'
+import GiftModal from '../../components/gift-modal'
 import { VoucherCardSkeleton } from '../../components/loading-skeleton'
 import VoucherCardComponent from '../../components/voucher-card'
 import { useVouchers } from '../../hooks/useQuery'
@@ -22,6 +23,7 @@ const STATUS_TABS = [
 
 export default function VouchersScreen() {
   const [activeTab, setActiveTab] = useState('all')
+  const [giftVoucher, setGiftVoucher] = useState<VoucherItem | null>(null)
 
   const statusParam = activeTab === 'all' ? undefined : activeTab
 
@@ -35,6 +37,14 @@ export default function VouchersScreen() {
     ({ item }: { item: VoucherItem }) => (
       <View style={styles.cardWrap}>
         <VoucherCardComponent item={item} onPress={() => router.push(`/voucher/${item.id}`)} />
+        {item.status === 'paid' && (
+          <Pressable
+            style={styles.giftBtn}
+            onPress={() => setGiftVoucher(item)}
+          >
+            <Text style={styles.giftBtnText}>🎁 Tặng</Text>
+          </Pressable>
+        )}
       </View>
     ),
     [],
@@ -104,6 +114,15 @@ export default function VouchersScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {giftVoucher && (
+        <GiftModal
+          voucher={giftVoucher}
+          visible
+          onClose={() => setGiftVoucher(null)}
+          onSuccess={refetch}
+        />
+      )}
     </SafeAreaView>
   )
 }
@@ -140,6 +159,17 @@ const styles = StyleSheet.create({
   cardWrap: {
     paddingHorizontal: spacing.base,
     marginBottom: spacing.md,
+  },
+  giftBtn: {
+    marginTop: -spacing.sm,
+    paddingVertical: 8,
+    paddingHorizontal: spacing.base,
+    alignSelf: 'flex-end',
+  },
+  giftBtnText: {
+    ...typography.labelMd,
+    color: colors.primary,
+    fontWeight: '600',
   },
   empty: {
     alignItems: 'center',

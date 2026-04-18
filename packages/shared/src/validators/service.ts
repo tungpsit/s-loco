@@ -39,7 +39,9 @@ export const serviceFilterSchema = z.object({
   min_price: z.coerce.number().min(0).optional(),
   max_price: z.coerce.number().min(0).optional(),
   min_rating: z.coerce.number().min(0).max(5).optional(),
-  sort: z.enum(['relevance', 'price_asc', 'price_desc', 'rating_desc', 'newest']).default('relevance'),
+  min_distance: z.coerce.number().min(0).optional(), // km from Tây An beach
+  max_distance: z.coerce.number().min(0).optional(),
+  sort: z.enum(['relevance', 'price_asc', 'price_desc', 'rating_desc', 'newest', 'distance_asc']).default('relevance'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })

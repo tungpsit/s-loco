@@ -1,5 +1,5 @@
 import { getDb } from '../db'
-import { reviews, vendors, vouchers } from '@S-Loco/db/schema'
+import { reviews, services, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 
 /** Non-null assertion for Drizzle scalar selects */
@@ -119,9 +119,17 @@ async function updateVendorRating(vendorId: string) {
 }
 
 async function updateServiceRating(serviceId: string) {
-  // Service-level average rating is computed on-demand from reviews.
-  // No persistent averageRating column on services table — stub for future migration.
-  void serviceId
+  const db = getDb()
+  const where = and(eq(reviews.serviceId, serviceId), eq(reviews.isVisible, true))
+  const rows = await db
+    .select({ avg: sql<string>`ROUND(AVG(${reviews.rating}), 1)`, count: sql<number>`count(*)` })
+    .from(reviews)
+    .where(where)
+  const stats = scalar(rows)
+  await db
+    .update(services)
+    .set({ averageRating: stats.avg || '0' })
+    .where(eq(services.id, serviceId))
 }
 
 export class ReviewError extends Error {

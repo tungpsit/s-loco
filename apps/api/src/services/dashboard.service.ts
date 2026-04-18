@@ -13,7 +13,7 @@ export async function getVendorDashboard(vendorId: string) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Today's orders
+  // Today's orders — join orders to filter by createdAt, not UUID
   const [todayStats] = await db
     .select({
       orderCount: sql<number>`count(DISTINCT ${orderItems.orderId})`,
@@ -21,12 +21,10 @@ export async function getVendorDashboard(vendorId: string) {
       voucherCount: sql<number>`count(${vouchers.id})`,
     })
     .from(orderItems)
+    .leftJoin(orders, eq(orderItems.orderId, orders.id))
     .leftJoin(vouchers, eq(vouchers.orderItemId, orderItems.id))
     .where(
-      and(
-        eq(orderItems.vendorId, vendorId),
-        gte(orderItems.orderId, sql`(SELECT id FROM orders WHERE created_at >= ${today} LIMIT 1)`),
-      ),
+      and(eq(orderItems.vendorId, vendorId), gte(orders.createdAt, today)),
     )
 
   // Total stats

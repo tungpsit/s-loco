@@ -50,6 +50,7 @@ export const vouchers = pgTable('vouchers', {
   serviceId: uuid('service_id').notNull().references(() => services.id),
   code: varchar('code', { length: 20 }).notNull().unique(),
   qrToken: text('qr_token'),
+  giftToken: text('gift_token').unique(),
   status: voucherStatusEnum('status').notNull().default('created'),
   redeemedAt: timestamp('redeemed_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
@@ -60,6 +61,7 @@ export const vouchers = pgTable('vouchers', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   uniqueIndex('vouchers_code_idx').on(table.code),
+  uniqueIndex('vouchers_gift_token_idx').on(table.giftToken),
   index('vouchers_user_id_idx').on(table.userId),
   index('vouchers_vendor_id_idx').on(table.vendorId),
   index('vouchers_status_idx').on(table.status),

@@ -58,6 +58,10 @@ export default function RootLayout() {
             options={{ headerShown: true, title: 'Quét QR' }}
           />
           <Stack.Screen
+            name="gift/[token]"
+            options={{ headerShown: true, title: 'Nhận voucher', animation: 'fade' }}
+          />
+          <Stack.Screen
             name="content/articles"
             options={{ headerShown: true, title: 'Bài viết' }}
           />

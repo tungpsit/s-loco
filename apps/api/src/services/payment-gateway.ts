@@ -37,6 +37,7 @@ export interface WebhookResult {
 export interface RefundParams {
   transactionId: string
   amount: number
+  originalAmount: number
   reason?: string
 }
 
