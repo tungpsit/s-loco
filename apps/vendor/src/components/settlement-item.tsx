@@ -27,15 +27,16 @@ export function SettlementItem({ settlement, onPress }: SettlementItemProps) {
     color: colors.onSurfaceVariant,
   }
 
-  const fmt = (n?: number) =>
-    n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
+  const fmt = (n?: number) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—')
 
   const fmtDate = (d?: string) =>
-    d ? new Date(d).toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }) : '—'
+    d
+      ? new Date(d).toLocaleDateString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
+      : '—'
 
   const periodStart = fmtDate(settlement.period_start)
   const periodEnd = fmtDate(settlement.period_end)
@@ -52,16 +53,12 @@ export function SettlementItem({ settlement, onPress }: SettlementItemProps) {
           <Text style={styles.period}>
             {periodStart} → {periodEnd}
           </Text>
-          <Text style={styles.voucherCount}>
-            {settlement.voucher_count ?? 0} voucher
-          </Text>
+          <Text style={styles.voucherCount}>{settlement.voucher_count ?? 0} voucher</Text>
         </View>
         <View style={styles.rightInfo}>
           <Text style={styles.netAmount}>{fmt(settlement.net_amount)}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: statusCfg.color + '1A' }]}>
-            <Text style={[styles.statusText, { color: statusCfg.color }]}>
-              {statusCfg.label}
-            </Text>
+          <View style={[styles.statusBadge, { backgroundColor: `${statusCfg.color}1A` }]}>
+            <Text style={[styles.statusText, { color: statusCfg.color }]}>{statusCfg.label}</Text>
           </View>
         </View>
       </View>

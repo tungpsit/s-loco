@@ -2,11 +2,13 @@
 
 import { api } from '@/lib/api'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function EditContentPage({ params }: { params: { id: string } }) {
+export default function EditContentPage() {
   const router = useRouter()
+  const params = useParams<{ id: string }>()
+  const articleId = params?.id
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [category, setCategory] = useState('')
@@ -16,9 +18,9 @@ export default function EditContentPage({ params }: { params: { id: string } }) 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-content-detail', params.id],
-    queryFn: () => api(`/content/articles/${params.id}`),
-    enabled: !!params.id,
+    queryKey: ['admin-content-detail', articleId],
+    queryFn: () => api(`/content/articles/${articleId}`),
+    enabled: !!articleId,
   })
 
   // Populate form when data arrives
@@ -30,12 +32,12 @@ export default function EditContentPage({ params }: { params: { id: string } }) 
       setCategory(d.category ?? '')
       setContent(d.content ?? '')
       setCoverImage(d.coverImage ?? d.cover_image ?? '')
-      setIsPublished(!!d.isPublished ?? !!d.is_published)
+      setIsPublished(!!(d.isPublished ?? d.is_published))
     }
   }, [data])
 
   const updateMut = useMutation({
-    mutationFn: (payload: any) => api(`/content/articles/${params.id}`, { method: 'PUT', body: JSON.stringify(payload) }),
+    mutationFn: (payload: any) => api(`/content/articles/${articleId}`, { method: 'PUT', body: JSON.stringify(payload) }),
     onSuccess: () => router.push('/dashboard/content'),
     onError: (err: any) => {
       setErrors({ form: err.message || 'Lỗi khi cập nhật bài viết' })

@@ -8,6 +8,7 @@ function scalar<T>(rows: T[]): T {
 }
 
 const COMMISSION_RATE = 0.08 // 8% total: 5% tourist discount + 3% platform
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 // ─── Create settlement batch for a vendor ──────────────
 export async function createSettlementBatch(vendorId: string, periodStart: Date, periodEnd: Date) {
@@ -148,6 +149,23 @@ export async function listSettlementsByVendor(
     .where(eq(settlements.vendorId, vendorId))
 
   return { items, total: Number(scalar(countRows).count), page, limit }
+}
+
+// ─── Vendor settlement detail ─────────────────────────
+export async function getSettlementByVendor(settlementId: string, vendorId: string) {
+  if (!UUID_RE.test(settlementId)) {
+    throw new SettlementError('NOT_FOUND', 'Settlement không tồn tại.')
+  }
+
+  const db = getDb()
+  const [settlement] = await db
+    .select()
+    .from(settlements)
+    .where(and(eq(settlements.id, settlementId), eq(settlements.vendorId, vendorId)))
+    .limit(1)
+
+  if (!settlement) throw new SettlementError('NOT_FOUND', 'Settlement không tồn tại.')
+  return settlement
 }
 
 // ─── Admin list all settlements ────────────────────────

@@ -54,6 +54,171 @@ async function request<T>(path: string, opts?: RequestInit & { json?: unknown })
   return unwrap<T>(parsed as ApiResponse<{ [key: string]: unknown }>)
 }
 
+function toNumber(value: unknown): number | undefined {
+  if (value == null) return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+type ServiceApiItem =
+  | ServiceItem
+  | {
+      service?: Record<string, unknown>
+      vendor?: Record<string, unknown>
+      category?: Record<string, unknown>
+    }
+
+function normalizeServiceItem(item: ServiceApiItem): ServiceItem {
+  if (!('service' in item)) return item as ServiceItem
+
+  const service = item.service ?? {}
+  const vendor = item.vendor ?? {}
+  const category = item.category ?? {}
+
+  return {
+    id: String(service.id ?? ''),
+    name: String(service.name ?? ''),
+    slug: service.slug ? String(service.slug) : undefined,
+    description: service.description ? String(service.description) : undefined,
+    category: category.name ? String(category.name) : undefined,
+    original_price: toNumber(service.originalPrice),
+    discount_price: toNumber(service.discountPrice),
+    discount_percent: toNumber(service.discountPercent),
+    images: Array.isArray(service.images) ? (service.images as string[]) : [],
+    duration_minutes: toNumber(service.durationMinutes),
+    vendor_id: vendor.id ? String(vendor.id) : undefined,
+    vendor_name: vendor.name ? String(vendor.name) : undefined,
+    rating: toNumber(service.averageRating ?? vendor.ratingAvg),
+    review_count: toNumber(vendor.reviewCount),
+  }
+}
+
+function normalizeVendorItem(item: Record<string, unknown> | VendorCard): VendorCard {
+  const raw = item as Record<string, unknown>
+  return {
+    id: String(raw.id ?? ''),
+    name: String(raw.name ?? ''),
+    slug: raw.slug ? String(raw.slug) : undefined,
+    description: raw.description ? String(raw.description) : undefined,
+    address: raw.address ? String(raw.address) : undefined,
+    phone: raw.phone ? String(raw.phone) : undefined,
+    rating: toNumber(raw.rating ?? raw.ratingAvg),
+    review_count: toNumber(raw.review_count ?? raw.reviewCount),
+    image_url: raw.image_url
+      ? String(raw.image_url)
+      : raw.coverImageUrl
+        ? String(raw.coverImageUrl)
+        : raw.logoUrl
+          ? String(raw.logoUrl)
+          : undefined,
+    category: raw.category ? String(raw.category) : undefined,
+    business_hours:
+      typeof raw.business_hours === 'object' && raw.business_hours
+        ? (raw.business_hours as Record<string, unknown>)
+        : typeof raw.businessHours === 'object' && raw.businessHours
+          ? (raw.businessHours as Record<string, unknown>)
+          : undefined,
+  }
+}
+
+function normalizeUser(user: Record<string, unknown> | UserProfile): UserProfile {
+  const raw = user as Record<string, unknown>
+  return {
+    id: String(raw.id ?? ''),
+    phone: String(raw.phone ?? ''),
+    full_name: raw.full_name
+      ? String(raw.full_name)
+      : raw.fullName
+        ? String(raw.fullName)
+        : undefined,
+    email: raw.email ? String(raw.email) : undefined,
+    role: raw.role ? String(raw.role) : 'tourist',
+    created_at: raw.created_at
+      ? String(raw.created_at)
+      : raw.createdAt
+        ? String(raw.createdAt)
+        : undefined,
+  }
+}
+
+function normalizeVoucherItem(item: Record<string, unknown> | VoucherItem): VoucherItem {
+  const raw = item as Record<string, unknown>
+  const voucher = (raw.voucher ?? raw) as Record<string, unknown>
+  const service = raw.service as Record<string, unknown> | undefined
+  const vendor = raw.vendor as Record<string, unknown> | undefined
+  const orderItem = raw.orderItem as Record<string, unknown> | undefined
+  const snapshot = raw.serviceSnapshot as Record<string, unknown> | undefined
+  return {
+    id: String(voucher.id ?? ''),
+    status: voucher.status ? String(voucher.status) : '',
+    service_name: raw.service_name
+      ? String(raw.service_name)
+      : service?.name
+        ? String(service.name)
+        : snapshot?.name
+          ? String(snapshot.name)
+          : undefined,
+    vendor_name: raw.vendor_name
+      ? String(raw.vendor_name)
+      : vendor?.name
+        ? String(vendor.name)
+        : undefined,
+    quantity: toNumber(raw.quantity ?? voucher.quantity ?? orderItem?.quantity),
+    total_amount: toNumber(
+      raw.total_amount ?? raw.totalAmount ?? raw.totalPrice ?? orderItem?.totalPrice,
+    ),
+    created_at: voucher.created_at
+      ? String(voucher.created_at)
+      : voucher.createdAt
+        ? String(voucher.createdAt)
+        : undefined,
+    qr_token: voucher.qr_token
+      ? String(voucher.qr_token)
+      : voucher.qrToken
+        ? String(voucher.qrToken)
+        : undefined,
+  }
+}
+
+function normalizeOrderDetail(data: {
+  order?: Record<string, unknown> | OrderDetail
+  items?: Array<Record<string, unknown>>
+  vouchers?: Array<Record<string, unknown> | VoucherItem>
+}): { order: OrderDetail } {
+  const raw = (data.order ?? {}) as Record<string, unknown>
+  const items = (data.items ?? []).map((item) => {
+    const snapshot = item.serviceSnapshot as Record<string, unknown> | undefined
+    const quantity = toNumber(item.quantity) ?? 0
+    const price = toNumber(item.unitPrice ?? item.price) ?? 0
+    return {
+      service_name: snapshot?.name ? String(snapshot.name) : String(item.service_name ?? 'Dịch vụ'),
+      quantity,
+      price,
+    }
+  })
+
+  return {
+    order: {
+      id: String(raw.id ?? ''),
+      status: raw.status ? String(raw.status) : '',
+      total_amount: toNumber(raw.total_amount ?? raw.finalAmount ?? raw.totalAmount),
+      created_at: raw.created_at
+        ? String(raw.created_at)
+        : raw.createdAt
+          ? String(raw.createdAt)
+          : undefined,
+      items,
+      vouchers: (data.vouchers ?? []).map(normalizeVoucherItem),
+      note: raw.note ? String(raw.note) : undefined,
+      updated_at: raw.updated_at
+        ? String(raw.updated_at)
+        : raw.updatedAt
+          ? String(raw.updatedAt)
+          : undefined,
+    },
+  }
+}
+
 // ─── Auth ───────────────────────────────────────────────────────────────────
 export const authApi = {
   sendOtp: (phone: string) =>
@@ -61,79 +226,141 @@ export const authApi = {
       method: 'POST',
       json: { phone },
     }),
-  verifyOtp: (phone: string, code: string, fullName?: string, email?: string) =>
-    request<{ access_token: string; refresh_token: string; user: UserProfile }>(
-      '/auth/otp/verify',
-      { method: 'POST', json: { phone, code, full_name: fullName, email } },
-    ),
-  me: () => request<{ user: UserProfile }>('/auth/me'),
+  verifyOtp: async (phone: string, code: string, fullName?: string, email?: string) => {
+    const result = await request<{
+      access_token?: string
+      refresh_token?: string
+      tokens?: { access_token?: string; refresh_token?: string }
+      user: Record<string, unknown> | UserProfile
+    }>('/auth/otp/verify', { method: 'POST', json: { phone, code, full_name: fullName, email } })
+    return {
+      access_token: result.access_token ?? result.tokens?.access_token ?? '',
+      refresh_token: result.refresh_token ?? result.tokens?.refresh_token ?? '',
+      user: normalizeUser(result.user),
+    }
+  },
+  me: async () => {
+    const result = await request<{ user: Record<string, unknown> | UserProfile }>('/auth/me')
+    return { user: normalizeUser(result.user) }
+  },
   logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
 }
 
 // ─── Services ───────────────────────────────────────────────────────────────
 export const servicesApi = {
-  list: (params?: {
-    category?: string
-    q?: string
-    page?: number
-    limit?: number
-  }) => {
+  list: async (params?: { category?: string; q?: string; page?: number; limit?: number }) => {
     const qp = new URLSearchParams()
     if (params?.category) qp.set('category', params.category)
     if (params?.q) qp.set('q', params.q)
     qp.set('page', String(params?.page ?? 1))
     qp.set('limit', String(params?.limit ?? 20))
-    return request<{ items: ServiceItem[]; total: number; page: number; limit: number }>(
-      `/services?${qp}`,
-    )
+    const result = await request<{
+      items: ServiceApiItem[]
+      total: number
+      page: number
+      limit: number
+    }>(`/services?${qp}`)
+    return { ...result, items: result.items.map(normalizeServiceItem) }
   },
   categories: () => request<{ categories: ServiceCategory[] }>('/services/categories'),
   featured: () => request<{ vendors: VendorCard[] }>('/services/featured'),
-  detail: (id: string) => request<{ service: ServiceDetail }>(`/services/${id}`),
+  detail: async (id: string) => {
+    const result = await request<{
+      service: ServiceApiItem
+      vendor?: Record<string, unknown>
+      category?: Record<string, unknown>
+    }>(`/services/${id}`)
+    const source =
+      'service' in result.service
+        ? result.service
+        : {
+            service: result.service as Record<string, unknown>,
+            vendor: result.vendor,
+            category: result.category,
+          }
+    return { ...result, service: normalizeServiceItem(source) as ServiceDetail }
+  },
   vendorServices: (vendorId: string) =>
     request<{ services: ServiceItem[] }>(`/services/vendor/${vendorId}`),
 }
 
 // ─── Vendors ─────────────────────────────────────────────────────────────────
 export const vendorsApi = {
-  list: (params?: { q?: string; category?: string; page?: number }) => {
+  list: async (params?: { q?: string; category?: string; page?: number }) => {
     const qp = new URLSearchParams()
     if (params?.q) qp.set('q', params.q)
     if (params?.category) qp.set('category', params.category)
     qp.set('page', String(params?.page ?? 1))
-    return request<{ items: VendorCard[]; total: number }>(`/vendors?${qp}`)
+    const result = await request<{
+      items: Array<Record<string, unknown> | VendorCard>
+      total: number
+    }>(`/vendors?${qp}`)
+    return { ...result, items: result.items.map(normalizeVendorItem) }
   },
-  detail: (slug: string) =>
-    request<{ vendor: VendorDetail; services: ServiceItem[] }>(`/vendors/${slug}`),
+  detail: async (slug: string) => {
+    const result = await request<{
+      vendor: Record<string, unknown> | VendorDetail
+      services: ServiceApiItem[]
+    }>(`/vendors/${slug}`)
+    return {
+      ...result,
+      vendor: normalizeVendorItem(result.vendor) as VendorDetail,
+      services: result.services.map(normalizeServiceItem),
+    }
+  },
 }
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
 export const ordersApi = {
-  list: (params?: { status?: string; page?: number }) => {
+  list: async (params?: { status?: string; page?: number }) => {
     const qp = new URLSearchParams()
     if (params?.status) qp.set('status', params.status)
     qp.set('page', String(params?.page ?? 1))
-    return request<{ items: OrderItem[]; total: number }>(`/orders?${qp}`)
+    const result = await request<{
+      items: Array<Record<string, unknown> | OrderItem>
+      total: number
+    }>(`/orders?${qp}`)
+    return {
+      ...result,
+      items: result.items.map((item) => normalizeOrderDetail({ order: item }).order),
+    }
   },
   create: (items: { service_id: string; quantity: number }[], note?: string) =>
     request<{ order: OrderDetail }>('/orders', {
       method: 'POST',
       json: { items, note },
     }),
-  detail: (id: string) => request<{ order: OrderDetail }>(`/orders/${id}`),
+  detail: async (id: string) => {
+    const result = await request<{
+      order: Record<string, unknown> | OrderDetail
+      items?: Array<Record<string, unknown>>
+      vouchers?: Array<Record<string, unknown> | VoucherItem>
+    }>(`/orders/${id}`)
+    return normalizeOrderDetail(result)
+  },
   cancel: (id: string) =>
     request<{ order: OrderDetail }>(`/orders/${id}/cancel`, { method: 'POST' }),
 }
 
 // ─── Vouchers ─────────────────────────────────────────────────────────────────
 export const vouchersApi = {
-  list: (params?: { status?: string; page?: number }) => {
+  list: async (params?: { status?: string; page?: number }) => {
     const qp = new URLSearchParams()
     if (params?.status) qp.set('status', params.status)
     qp.set('page', String(params?.page ?? 1))
-    return request<{ items: VoucherItem[]; total: number }>(`/vouchers?${qp}`)
+    const result = await request<{
+      items: Array<Record<string, unknown> | VoucherItem>
+      total: number
+    }>(`/vouchers?${qp}`)
+    return { ...result, items: result.items.map(normalizeVoucherItem) }
   },
-  detail: (id: string) => request<{ voucher: VoucherDetail }>(`/vouchers/${id}`),
+  detail: async (id: string) => {
+    const result = await request<{
+      voucher?: Record<string, unknown> | VoucherDetail
+      service?: Record<string, unknown>
+    }>(`/vouchers/${id}`)
+    return { voucher: normalizeVoucherItem(result as Record<string, unknown>) as VoucherDetail }
+  },
   selfRedeem: (voucherId: string, vendorId: string) =>
     request<{ voucher: VoucherDetail }>('/vouchers/self-redeem', {
       method: 'POST',
@@ -145,10 +372,9 @@ export const vouchersApi = {
       { method: 'POST', json: { recipient_phone: phone, message } },
     ),
   createGiftLink: (voucherId: string) =>
-    request<{ gift_token: string; share_url: string }>(
-      `/vouchers/${voucherId}/gift/link`,
-      { method: 'POST' },
-    ),
+    request<{ gift_token: string; share_url: string }>(`/vouchers/${voucherId}/gift/link`, {
+      method: 'POST',
+    }),
 }
 
 // ─── Gift Claim ─────────────────────────────────────────────────────────────────
@@ -166,10 +392,8 @@ export const notificationsApi = {
     return request<{ items: NotificationItem[]; total: number }>(`/notifications?${qp}`)
   },
   unreadCount: () => request<{ unread: number }>('/notifications/count'),
-  markRead: (id: string) =>
-    request<unknown>(`/notifications/${id}/read`, { method: 'POST' }),
-  markAllRead: () =>
-    request<unknown>('/notifications/read-all', { method: 'POST' }),
+  markRead: (id: string) => request<unknown>(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: () => request<unknown>('/notifications/read-all', { method: 'POST' }),
   registerToken: (token: string, platform: string) =>
     request<unknown>('/notifications/register-token', {
       method: 'POST',
@@ -188,7 +412,10 @@ export interface NotificationItem {
 
 // ─── Reviews ─────────────────────────────────────────────────────────────────
 export const reviewsApi = {
-  create: (voucherId: string, data: { rating: number; comment?: string; vendor_id?: string; service_id?: string }) =>
+  create: (
+    voucherId: string,
+    data: { rating: number; comment?: string; vendor_id?: string; service_id?: string },
+  ) =>
     request<{ review: ReviewItem }>('/reviews', {
       method: 'POST',
       json: { voucher_id: voucherId, ...data },
@@ -202,10 +429,11 @@ export const reviewsApi = {
 
 // ─── Content ──────────────────────────────────────────────────────────────────
 export const contentApi = {
-  articles: (params?: { category?: string; page?: number }) => {
+  articles: (params?: { category?: string; page?: number; limit?: number }) => {
     const qp = new URLSearchParams()
     if (params?.category) qp.set('category', params.category)
     qp.set('page', String(params?.page ?? 1))
+    qp.set('limit', String(params?.limit ?? 20))
     return request<{ items: ArticleItem[]; total: number }>(`/content/articles?${qp}`)
   },
   article: (slug: string) => request<{ article: ArticleDetail }>(`/content/articles/${slug}`),
@@ -215,30 +443,56 @@ export const contentApi = {
 
 // ─── Itinerary ─────────────────────────────────────────────────────────────────
 export const itineraryApi = {
-  generate: (params: {
+  generate: async (params: {
     days?: number
     budget?: number
     preferences?: string[]
     group_type?: string
-  }) =>
-    request<{ itinerary: ItineraryResult }>('/itinerary/generate', {
-      method: 'POST',
-      json: params,
-    }),
-  save: (data: ItineraryResult) =>
-    request<{ id: string; share_token: string }>('/itinerary/save', {
-      method: 'POST',
-      json: { ...data },
-    }),
+  }) => {
+    const result = await request<ItineraryResult | { itinerary: ItineraryResult }>(
+      '/itinerary/generate',
+      {
+        method: 'POST',
+        json: params,
+      },
+    )
+    return 'itinerary' in result ? result : { itinerary: result }
+  },
+  save: async (data: ItineraryResult) => {
+    const result = await request<{ id: string; share_token?: string; shareToken?: string }>(
+      '/itinerary/save',
+      {
+        method: 'POST',
+        json: {
+          title: data.title ?? 'Lịch trình của tôi',
+          days: data.days.length,
+          budget: data.total_estimated_cost ?? 0,
+          result_json: data,
+          is_shared: true,
+        },
+      },
+    )
+    return { id: result.id, share_token: result.share_token ?? result.shareToken ?? '' }
+  },
 }
 
 // ─── Payments ─────────────────────────────────────────────────────────────────
 export const paymentsApi = {
-  initiate: (orderId: string, gateway: 'vnpay' | 'momo' | 'sepay') =>
-    request<{ payment_url: string; payment_token: string }>('/payments/initiate', {
+  initiate: async (orderId: string, gateway: 'vnpay' | 'momo' | 'sepay') => {
+    const result = await request<{
+      payment_url?: string
+      payment_token?: string
+      paymentUrl?: string
+      transactionId?: string
+    }>('/payments/initiate', {
       method: 'POST',
       json: { order_id: orderId, gateway },
-    }),
+    })
+    return {
+      payment_url: result.payment_url ?? result.paymentUrl ?? '',
+      payment_token: result.payment_token ?? result.transactionId ?? '',
+    }
+  },
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -367,6 +621,8 @@ export interface EventItem {
 }
 
 export interface ItineraryResult {
+  title?: string
+  summary?: string
   days: {
     day: number
     date?: string

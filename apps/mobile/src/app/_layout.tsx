@@ -43,32 +43,13 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
-          <Stack.Screen name="auth" options={{ animation: 'fade' }} />
-          <Stack.Screen name="ai" options={{ animation: 'fade' }} />
-          <Stack.Screen name="vendor/[id]" options={{ headerShown: true, title: 'Cửa hàng' }} />
+          <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
           <Stack.Screen name="service/[id]" options={{ headerShown: true, title: 'Dịch vụ' }} />
-          <Stack.Screen name="order/[id]" options={{ headerShown: true, title: 'Đơn hàng' }} />
-          <Stack.Screen
-            name="order/checkout"
-            options={{ headerShown: true, title: 'Thanh toán' }}
-          />
-          <Stack.Screen name="voucher/[id]" options={{ headerShown: true, title: 'Voucher' }} />
-          <Stack.Screen
-            name="voucher/[id]/scan"
-            options={{ headerShown: true, title: 'Quét QR' }}
-          />
+          <Stack.Screen name="checkout" options={{ headerShown: true, title: 'Thanh toán' }} />
+          <Stack.Screen name="voucher/[id]" options={{ headerShown: false }} />
           <Stack.Screen
             name="gift/[token]"
             options={{ headerShown: true, title: 'Nhận voucher', animation: 'fade' }}
-          />
-          <Stack.Screen
-            name="content/articles"
-            options={{ headerShown: true, title: 'Bài viết' }}
-          />
-          <Stack.Screen name="content/[slug]" options={{ headerShown: true, title: '' }} />
-          <Stack.Screen
-            name="content/weather"
-            options={{ headerShown: true, title: 'Thời tiết' }}
           />
         </Stack>
       </AuthGate>

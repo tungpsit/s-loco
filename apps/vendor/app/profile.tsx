@@ -1,3 +1,4 @@
+import { Stack } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
@@ -11,11 +12,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { Stack } from 'expo-router'
-import { vendorApi } from '../src/lib/api'
-import { useAuthStore } from '../src/stores/auth-store'
 import { ErrorState } from '../src/components/error-state'
 import type { VendorProfile } from '../src/lib/api'
+import { vendorApi } from '../src/lib/api'
+import { useResponsiveLayout } from '../src/lib/responsive'
+import { useAuthStore } from '../src/stores/auth-store'
 
 const colors = {
   primary: '#005E97',
@@ -27,8 +28,8 @@ const colors = {
 }
 
 export default function ProfileScreen() {
-  const user = useAuthStore((s) => s.user)
   const setVendorId = useAuthStore((s) => s.setVendorId)
+  const { isDesktop, pageMaxWidth, pagePadding } = useResponsiveLayout()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -47,7 +48,7 @@ export default function ProfileScreen() {
     try {
       const res = await vendorApi.profile()
       if (res.ok && res.data?.data) {
-        const v = res.data.data as VendorProfile
+        const v = res.data.data
         setVendor(v)
         setVendorId(v.id)
         setName(v.name ?? '')
@@ -65,7 +66,9 @@ export default function ProfileScreen() {
     }
   }, [setVendorId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleSave = useCallback(async () => {
     if (!vendor) return
@@ -118,78 +121,84 @@ export default function ProfileScreen() {
         >
           <ScrollView
             style={styles.container}
-            contentContainerStyle={{ paddingBottom: 40 }}
+            contentContainerStyle={[
+              styles.content,
+              { paddingHorizontal: pagePadding, maxWidth: pageMaxWidth },
+              isDesktop && styles.contentDesktop,
+            ]}
             keyboardShouldPersistTaps="handled"
           >
             {/* Vendor */}
-            <Text style={styles.sectionTitle}>Thông tin cửa hàng</Text>
+            <View style={[styles.formCard, isDesktop && styles.formCardDesktop]}>
+              <Text style={styles.sectionTitle}>Thông tin cửa hàng</Text>
 
-            <Text style={styles.label}>Tên cửa hàng *</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="VD: Quán ăn biển Sầm Sơn"
-              placeholderTextColor="#6B7694"
-              maxLength={200}
-            />
+              <Text style={styles.label}>Tên cửa hàng *</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="VD: Quán ăn biển Sầm Sơn"
+                placeholderTextColor="#6B7694"
+                maxLength={200}
+              />
 
-            <Text style={styles.label}>Địa chỉ</Text>
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Đường, phường, thành phố..."
-              placeholderTextColor="#6B7694"
-              maxLength={500}
-            />
+              <Text style={styles.label}>Địa chỉ</Text>
+              <TextInput
+                style={styles.input}
+                value={address}
+                onChangeText={setAddress}
+                placeholder="Đường, phường, thành phố..."
+                placeholderTextColor="#6B7694"
+                maxLength={500}
+              />
 
-            <Text style={styles.label}>Mô tả</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Giới thiệu về cửa hàng của bạn..."
-              placeholderTextColor="#6B7694"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              maxLength={2000}
-            />
+              <Text style={styles.label}>Mô tả</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Giới thiệu về cửa hàng của bạn..."
+                placeholderTextColor="#6B7694"
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+                maxLength={2000}
+              />
+            </View>
 
-            <Text style={styles.sectionTitle}>Liên hệ</Text>
+            <View style={[styles.formCard, isDesktop && styles.formCardDesktop]}>
+              <Text style={styles.sectionTitle}>Liên hệ</Text>
 
-            <Text style={styles.label}>Số điện thoại</Text>
-            <TextInput
-              style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
-              placeholder="0912 345 678"
-              placeholderTextColor="#6B7694"
-              keyboardType="phone-pad"
-            />
+              <Text style={styles.label}>Số điện thoại</Text>
+              <TextInput
+                style={styles.input}
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="0912 345 678"
+                placeholderTextColor="#6B7694"
+                keyboardType="phone-pad"
+              />
 
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="cua-hang@example.com"
-              placeholderTextColor="#6B7694"
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="cua-hang@example.com"
+                placeholderTextColor="#6B7694"
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
 
-            <TouchableOpacity
-              style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
-              onPress={handleSave}
-              disabled={saving}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.saveBtnText}>
-                {saving ? 'Đang lưu...' : 'Lưu thông tin'}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+                onPress={handleSave}
+                disabled={saving}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.saveBtnText}>{saving ? 'Đang lưu...' : 'Lưu thông tin'}</Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       )}
@@ -198,13 +207,59 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface, paddingHorizontal: 16, paddingTop: 20 },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.onSurface, marginTop: 20, marginBottom: 12 },
-  label: { fontSize: 13, fontWeight: '500', color: colors.onSurfaceVariant, marginBottom: 6, marginTop: 10 },
-  input: { backgroundColor: colors.surfaceContainerHighest, borderRadius: 12, padding: 14, fontSize: 15, color: colors.onSurface },
+  container: { flex: 1, backgroundColor: colors.surface },
+  content: {
+    alignSelf: 'center',
+    width: '100%',
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  contentDesktop: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: colors.onSurface,
+    marginTop: 0,
+    marginBottom: 12,
+  },
+  formCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+  },
+  formCardDesktop: { flex: 1 },
+  label: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.onSurfaceVariant,
+    marginBottom: 6,
+    marginTop: 10,
+  },
+  input: {
+    backgroundColor: colors.surfaceContainerHighest,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
+    color: colors.onSurface,
+  },
   textArea: { height: 100, paddingTop: 14 },
-  saveBtn: { backgroundColor: colors.primary, borderRadius: 999, paddingVertical: 16, alignItems: 'center', marginTop: 28 },
+  saveBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 28,
+  },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
 })

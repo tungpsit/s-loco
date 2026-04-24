@@ -1,3 +1,4 @@
+import { router, Stack } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
@@ -9,11 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { router, Stack } from 'expo-router'
-import { serviceApi, vendorApi } from '../../src/lib/api'
-import { useAuthStore } from '../../src/stores/auth-store'
 import { ErrorState } from '../../src/components/error-state'
 import type { Service } from '../../src/lib/api'
+import { serviceApi, vendorApi } from '../../src/lib/api'
+import { useAuthStore } from '../../src/stores/auth-store'
 
 const colors = {
   primary: '#005E97',
@@ -27,7 +27,7 @@ const colors = {
 
 const fmt = (s?: string) => {
   if (!s) return '—'
-  return Number(s).toLocaleString('vi-VN') + '₫'
+  return `${Number(s).toLocaleString('vi-VN')}₫`
 }
 
 export default function ServiceListScreen() {
@@ -44,7 +44,7 @@ export default function ServiceListScreen() {
       if (!vId) {
         const vRes = await vendorApi.profile()
         if (vRes.ok && vRes.data?.data) {
-          const v = vRes.data.data as any
+          const v = vRes.data.data
           vId = v.id
           useAuthStore.getState().setVendorId(v.id)
         }
@@ -63,7 +63,9 @@ export default function ServiceListScreen() {
     }
   }, [vendorId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -71,25 +73,21 @@ export default function ServiceListScreen() {
   }, [load])
 
   const handleDelete = useCallback((service: Service) => {
-    Alert.alert(
-      'Xóa dịch vụ',
-      `Bạn có chắc muốn xóa "${service.name}"?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await serviceApi.delete(service.id)
-              setServices((prev) => prev.filter((s) => s.id !== service.id))
-            } catch {
-              Alert.alert('Lỗi', 'Không thể xóa dịch vụ.')
-            }
-          },
+    Alert.alert('Xóa dịch vụ', `Bạn có chắc muốn xóa "${service.name}"?`, [
+      { text: 'Hủy', style: 'cancel' },
+      {
+        text: 'Xóa',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await serviceApi.delete(service.id)
+            setServices((prev) => prev.filter((s) => s.id !== service.id))
+          } catch {
+            Alert.alert('Lỗi', 'Không thể xóa dịch vụ.')
+          }
         },
-      ],
-    )
+      },
+    ])
   }, [])
 
   const renderItem = useCallback(
@@ -113,9 +111,7 @@ export default function ServiceListScreen() {
             <View style={styles.priceRow}>
               <Text style={styles.price}>{fmt(item.original_price)}</Text>
               {item.discount_price && (
-                <Text style={styles.discountPrice}>
-                  {fmt(item.discount_price)}
-                </Text>
+                <Text style={styles.discountPrice}>{fmt(item.discount_price)}</Text>
               )}
             </View>
           </View>
@@ -144,9 +140,7 @@ export default function ServiceListScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{ title: 'Dịch vụ của tôi' }}
-      />
+      <Stack.Screen options={{ title: 'Dịch vụ của tôi' }} />
       <View style={styles.container}>
         {/* FAB */}
         <TouchableOpacity
@@ -158,7 +152,11 @@ export default function ServiceListScreen() {
         </TouchableOpacity>
 
         {loading && services.length === 0 ? (
-          <ActivityIndicator size="large" color={colors.primary} style={{ flex: 1, paddingVertical: 60 }} />
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            style={{ flex: 1, paddingVertical: 60 }}
+          />
         ) : error ? (
           <ErrorState onRetry={load} />
         ) : services.length === 0 ? (
@@ -181,7 +179,11 @@ export default function ServiceListScreen() {
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.primary}
+              />
             }
           />
         )}
@@ -224,7 +226,11 @@ const styles = StyleSheet.create({
   serviceDesc: { fontSize: 12, color: colors.onSurfaceVariant, marginBottom: 6 },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   price: { fontSize: 15, fontWeight: '700', color: colors.primary },
-  discountPrice: { fontSize: 12, color: colors.onSurfaceVariant, textDecorationLine: 'line-through' },
+  discountPrice: {
+    fontSize: 12,
+    color: colors.onSurfaceVariant,
+    textDecorationLine: 'line-through',
+  },
   cardActions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#F4F7FB' },
   actionBtn: { flex: 1, paddingVertical: 12, alignItems: 'center' },
   actionBtnDanger: { borderLeftWidth: 1, borderLeftColor: '#F4F7FB' },
@@ -233,6 +239,11 @@ const styles = StyleSheet.create({
   emptyEmoji: { fontSize: 56, marginBottom: 16 },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.onSurface, marginBottom: 8 },
   emptySub: { fontSize: 14, color: colors.onSurfaceVariant, textAlign: 'center', marginBottom: 24 },
-  emptyBtn: { backgroundColor: colors.primary, borderRadius: 999, paddingHorizontal: 24, paddingVertical: 12 },
+  emptyBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
   emptyBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
 })

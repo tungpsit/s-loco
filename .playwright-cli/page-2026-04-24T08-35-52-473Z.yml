@@ -1,0 +1,239 @@
+- generic [ref=e1]:
+  - generic [ref=e49]:
+    - generic [ref=e50]:
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57]: Xin chào! 👋
+            - generic [ref=e58]: S-Loco
+          - generic [ref=e60] [cursor=pointer]: 🌤️
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]: Khám phá Sầm Sơn
+              - generic [ref=e66]: S-Loco
+              - generic [ref=e67]: Ẩm thực · Lưu trú · Giải trí
+            - generic [ref=e69]:
+              - generic [ref=e70] [cursor=pointer]:
+                - generic [ref=e71]: 🎆
+                - generic [ref=e72]:
+                  - generic [ref=e73]: Tết Sầm Sơn 2026
+                  - generic [ref=e74]: Ưu đãi lên đến 30%
+              - generic [ref=e75] [cursor=pointer]:
+                - generic [ref=e76]: 🍽️
+                - generic [ref=e77]:
+                  - generic [ref=e78]: Khám phá ẩm thực
+                  - generic [ref=e79]: Top 10 nhà hàng ngon
+            - generic [ref=e80]:
+              - generic [ref=e81]: Danh mục
+              - generic [ref=e82]:
+                - generic [ref=e83] [cursor=pointer]:
+                  - generic [ref=e85]: 🍜
+                  - generic [ref=e86]: Ẩm thực
+                - generic [ref=e87] [cursor=pointer]:
+                  - generic [ref=e89]: 🏨
+                  - generic [ref=e90]: Lưu trú
+                - generic [ref=e91] [cursor=pointer]:
+                  - generic [ref=e93]: 💆
+                  - generic [ref=e94]: Spa & Massage
+                - generic [ref=e95] [cursor=pointer]:
+                  - generic [ref=e97]: 🛺
+                  - generic [ref=e98]: Xe điện
+                - generic [ref=e99] [cursor=pointer]:
+                  - generic [ref=e101]: 🎠
+                  - generic [ref=e102]: Giải trí
+                - generic [ref=e103] [cursor=pointer]:
+                  - generic [ref=e105]: 🛍️
+                  - generic [ref=e106]: Mua sắm
+            - generic [ref=e107]:
+              - generic [ref=e108]: Dành cho bạn
+              - generic [ref=e110] [cursor=pointer]: Xem tất cả →
+          - generic [ref=e112]:
+            - generic [ref=e114] [cursor=pointer]:
+              - generic [ref=e117]: 📍
+              - generic [ref=e121]: Liên hệ
+            - generic [ref=e123] [cursor=pointer]:
+              - generic [ref=e126]: 📍
+              - generic [ref=e130]: Liên hệ
+          - generic [ref=e132]:
+            - generic [ref=e134] [cursor=pointer]:
+              - generic [ref=e137]: 📍
+              - generic [ref=e141]: Liên hệ
+            - generic [ref=e143] [cursor=pointer]:
+              - generic [ref=e146]: 📍
+              - generic [ref=e150]: Liên hệ
+          - generic [ref=e152]:
+            - generic [ref=e154] [cursor=pointer]:
+              - generic [ref=e157]: 📍
+              - generic [ref=e161]: Liên hệ
+            - generic [ref=e163] [cursor=pointer]:
+              - generic [ref=e166]: 📍
+              - generic [ref=e170]: Liên hệ
+          - generic [ref=e172]:
+            - generic [ref=e174] [cursor=pointer]:
+              - generic [ref=e177]: 📍
+              - generic [ref=e181]: Liên hệ
+            - generic [ref=e183] [cursor=pointer]:
+              - generic [ref=e186]: 📍
+              - generic [ref=e190]: Liên hệ
+          - generic [ref=e192]:
+            - generic [ref=e194] [cursor=pointer]:
+              - generic [ref=e197]: 📍
+              - generic [ref=e201]: Liên hệ
+            - generic [ref=e203] [cursor=pointer]:
+              - generic [ref=e206]: 📍
+              - generic [ref=e210]: Liên hệ
+          - generic [ref=e212]:
+            - generic [ref=e214] [cursor=pointer]:
+              - generic [ref=e217]: 📍
+              - generic [ref=e221]: Liên hệ
+            - generic [ref=e223] [cursor=pointer]:
+              - generic [ref=e226]: 📍
+              - generic [ref=e230]: Liên hệ
+          - generic [ref=e232]:
+            - generic [ref=e234] [cursor=pointer]:
+              - generic [ref=e237]: 📍
+              - generic [ref=e241]: Liên hệ
+            - generic [ref=e243] [cursor=pointer]:
+              - generic [ref=e246]: 📍
+              - generic [ref=e250]: Liên hệ
+          - generic [ref=e252]:
+            - generic [ref=e254] [cursor=pointer]:
+              - generic [ref=e257]: 📍
+              - generic [ref=e261]: Liên hệ
+            - generic [ref=e263] [cursor=pointer]:
+              - generic [ref=e266]: 📍
+              - generic [ref=e270]: Liên hệ
+          - generic [ref=e272]:
+            - generic [ref=e274] [cursor=pointer]:
+              - generic [ref=e277]: 📍
+              - generic [ref=e281]: Liên hệ
+            - generic [ref=e283] [cursor=pointer]:
+              - generic [ref=e286]: 📍
+              - generic [ref=e290]: Liên hệ
+          - generic [ref=e292]:
+            - generic [ref=e294] [cursor=pointer]:
+              - generic [ref=e297]: 📍
+              - generic [ref=e301]: Liên hệ
+            - generic [ref=e303] [cursor=pointer]:
+              - generic [ref=e306]: 📍
+              - generic [ref=e310]: Liên hệ
+      - generic [ref=e369]:
+        - generic [ref=e371]: Tìm kiếm
+        - generic [ref=e372]:
+          - generic [ref=e373]: 🔍
+          - textbox "Tìm dịch vụ, cửa hàng..." [ref=e374]
+        - generic [ref=e375]:
+          - generic:
+            - generic [ref=e377] [cursor=pointer]: Tất cả
+            - generic [ref=e379] [cursor=pointer]: Ẩm thực
+            - generic [ref=e381] [cursor=pointer]: Lưu trú
+            - generic [ref=e383] [cursor=pointer]: Spa
+            - generic [ref=e385] [cursor=pointer]: Xe điện
+            - generic [ref=e387] [cursor=pointer]: Giải trí
+            - generic [ref=e389] [cursor=pointer]: Mua sắm
+        - generic [ref=e390]:
+          - generic [ref=e392] [cursor=pointer]: Dịch vụ
+          - generic [ref=e394] [cursor=pointer]: Cửa hàng
+        - generic [ref=e396]:
+          - generic [ref=e398]:
+            - generic [ref=e400] [cursor=pointer]:
+              - generic [ref=e403]: 📍
+              - generic [ref=e407]: Liên hệ
+            - generic [ref=e409] [cursor=pointer]:
+              - generic [ref=e412]: 📍
+              - generic [ref=e416]: Liên hệ
+          - generic [ref=e418]:
+            - generic [ref=e420] [cursor=pointer]:
+              - generic [ref=e423]: 📍
+              - generic [ref=e427]: Liên hệ
+            - generic [ref=e429] [cursor=pointer]:
+              - generic [ref=e432]: 📍
+              - generic [ref=e436]: Liên hệ
+          - generic [ref=e438]:
+            - generic [ref=e440] [cursor=pointer]:
+              - generic [ref=e443]: 📍
+              - generic [ref=e447]: Liên hệ
+            - generic [ref=e449] [cursor=pointer]:
+              - generic [ref=e452]: 📍
+              - generic [ref=e456]: Liên hệ
+          - generic [ref=e458]:
+            - generic [ref=e460] [cursor=pointer]:
+              - generic [ref=e463]: 📍
+              - generic [ref=e467]: Liên hệ
+            - generic [ref=e469] [cursor=pointer]:
+              - generic [ref=e472]: 📍
+              - generic [ref=e476]: Liên hệ
+          - generic [ref=e478]:
+            - generic [ref=e480] [cursor=pointer]:
+              - generic [ref=e483]: 📍
+              - generic [ref=e487]: Liên hệ
+            - generic [ref=e489] [cursor=pointer]:
+              - generic [ref=e492]: 📍
+              - generic [ref=e496]: Liên hệ
+          - generic [ref=e498]:
+            - generic [ref=e500] [cursor=pointer]:
+              - generic [ref=e503]: 📍
+              - generic [ref=e507]: Liên hệ
+            - generic [ref=e509] [cursor=pointer]:
+              - generic [ref=e512]: 📍
+              - generic [ref=e516]: Liên hệ
+          - generic [ref=e518]:
+            - generic [ref=e520] [cursor=pointer]:
+              - generic [ref=e523]: 📍
+              - generic [ref=e527]: Liên hệ
+            - generic [ref=e529] [cursor=pointer]:
+              - generic [ref=e532]: 📍
+              - generic [ref=e536]: Liên hệ
+          - generic [ref=e538]:
+            - generic [ref=e540] [cursor=pointer]:
+              - generic [ref=e543]: 📍
+              - generic [ref=e547]: Liên hệ
+            - generic [ref=e549] [cursor=pointer]:
+              - generic [ref=e552]: 📍
+              - generic [ref=e556]: Liên hệ
+          - generic [ref=e558]:
+            - generic [ref=e560] [cursor=pointer]:
+              - generic [ref=e563]: 📍
+              - generic [ref=e567]: Liên hệ
+            - generic [ref=e569] [cursor=pointer]:
+              - generic [ref=e572]: 📍
+              - generic [ref=e576]: Liên hệ
+          - generic [ref=e578]:
+            - generic [ref=e580] [cursor=pointer]:
+              - generic [ref=e583]: 📍
+              - generic [ref=e587]: Liên hệ
+            - generic [ref=e589] [cursor=pointer]:
+              - generic [ref=e592]: 📍
+              - generic [ref=e596]: Liên hệ
+    - tablist [ref=e314]:
+      - tab "🏠 🏠 Trang chủ" [ref=e316] [cursor=pointer]:
+        - generic [ref=e317]:
+          - generic [ref=e320]: 🏠
+          - generic [ref=e323]: 🏠
+        - generic [ref=e324]: Trang chủ
+      - tab "🔍 🔍 Tìm kiếm" [active] [selected] [ref=e326] [cursor=pointer]:
+        - generic [ref=e327]:
+          - generic [ref=e330]: 🔍
+          - generic [ref=e333]: 🔍
+        - generic [ref=e334]: Tìm kiếm
+      - tab "🎫 🎫 Vé của tôi" [ref=e336] [cursor=pointer]:
+        - generic [ref=e337]:
+          - generic [ref=e340]: 🎫
+          - generic [ref=e343]: 🎫
+        - generic [ref=e344]: Vé của tôi
+      - tab "🤖 🤖 AI" [ref=e346] [cursor=pointer]:
+        - generic [ref=e347]:
+          - generic [ref=e350]: 🤖
+          - generic [ref=e353]: 🤖
+        - generic [ref=e354]: AI
+      - tab "👤 👤 Tài khoản" [ref=e356] [cursor=pointer]:
+        - generic [ref=e357]:
+          - generic [ref=e360]: 👤
+          - generic [ref=e363]: 👤
+        - generic [ref=e364]: Tài khoản
+  - button "! Encountered two children with the same k" [ref=e600] [cursor=pointer]:
+    - generic [ref=e602]: "!"
+    - generic [ref=e603]: Encountered two children with the same k
+    - button [ref=e604]:
+      - img [ref=e606]

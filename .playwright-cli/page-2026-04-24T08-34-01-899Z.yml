@@ -1,0 +1,14 @@
+- generic [ref=e15]:
+  - generic [ref=e16]:
+    - generic [ref=e17]: 🌊
+    - generic [ref=e18]: Chào mừng đến S-Loco
+    - generic [ref=e19]: Nhập số điện thoại để nhận mã đăng nhập qua SMS
+  - generic [ref=e20]:
+    - generic [ref=e21]: Số điện thoại
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]: 🇻🇳
+        - generic [ref=e25]: "+84"
+      - textbox "912 345 678" [ref=e26]: "0912345678"
+    - generic [ref=e28] [cursor=pointer]: Gửi mã OTP
+  - generic [ref=e29]: Bằng cách tiếp tục, bạn đồng ý với Điều khoản sử dụng của S-Loco.

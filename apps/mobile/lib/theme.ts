@@ -1,40 +1,40 @@
 /**
- * S-Loco Design System — The Coastal Editorial
- * Centralized tokens from DESIGN.md
+ * S-Loco Design System — Coastal Premium
+ * Root token file kept for legacy src/components imports.
  */
 import { Platform, StyleSheet } from 'react-native'
 
 /* ─── Color Palette ─── */
 export const colors = {
-  // Primary — Ocean Blue
-  primary: '#005E97',
-  primaryContainer: '#0077B6',
-  primaryFixed: '#90E0EF',
-  primaryFixedDim: '#48CAE4',
+  // Primary — premium coastal ocean
+  primary: '#075985',
+  primaryContainer: '#0E7490',
+  primaryFixed: '#CFFAFE',
+  primaryFixedDim: '#67E8F9',
 
-  // Secondary — Slate Blue
-  secondary: '#3A5A8C',
-  secondaryContainer: '#B8D4F0',
-  onSecondaryContainer: '#1E3A5F',
+  // Secondary — warm sand
+  secondary: '#B7791F',
+  secondaryContainer: '#FEF3C7',
+  onSecondaryContainer: '#5C3A05',
 
-  // Tertiary — Deep Indigo Accent
-  tertiary: '#3F3D99',
-  tertiaryContainer: '#5856D6',
-  tertiaryFixed: '#E0DFFF',
+  // Tertiary — coral sunset
+  tertiary: '#B45309',
+  tertiaryContainer: '#F97316',
+  tertiaryFixed: '#FFEDD5',
 
-  // Surfaces — Cool Blue-Gray Tonal Layering
-  surface: '#F4F7FB',
-  surfaceContainerLow: '#EDF1F8',
-  surfaceContainer: '#E6EBF4',
-  surfaceContainerHigh: '#DEE4EF',
-  surfaceContainerHighest: '#D6DDEA',
+  // Surfaces — resort paper
+  surface: '#FFF8EE',
+  surfaceContainerLow: '#FDF1DD',
+  surfaceContainer: '#F7E6CC',
+  surfaceContainerHigh: '#EED6B6',
+  surfaceContainerHighest: '#E5C49B',
   surfaceContainerLowest: '#FFFFFF',
 
   // Text
-  onSurface: '#161B2E',
-  onSurfaceVariant: '#3B4460',
-  outline: '#6B7694',
-  outlineVariant: 'rgba(181, 190, 212, 0.15)',
+  onSurface: '#1F2933',
+  onSurfaceVariant: '#52616B',
+  outline: '#8A7B68',
+  outlineVariant: '#E4D1B5',
 
   // Error
   error: '#BA1A1A',
@@ -42,8 +42,15 @@ export const colors = {
 
   // Functional
   white: '#FFFFFF',
-  gradientStart: '#005E97',
-  gradientEnd: '#0077B6',
+  transparent: 'transparent',
+  scrim: 'rgba(31, 41, 51, 0.52)',
+  coral: '#EF6F4E',
+  coralContainer: '#FFE4D8',
+  sand: '#FFF3D8',
+  lagoon: '#0F766E',
+  lagoonContainer: '#CCFBF1',
+  gradientStart: '#075985',
+  gradientEnd: '#0E7490',
 } as const
 
 /* ─── Typography ─── */
@@ -74,13 +81,45 @@ export const typography = StyleSheet.create({
 
 /* ─── Spacing Scale ─── */
 export const spacing = {
-  xs: 4,    // spacing.1 — inline icon gap
-  sm: 8,    // spacing.2 — chip padding, tight gaps
-  md: 12,   // spacing.3 — card internal padding
+  xs: 4, // spacing.1 — inline icon gap
+  sm: 8, // spacing.2 — chip padding, tight gaps
+  md: 12, // spacing.3 — card internal padding
   base: 16, // spacing.4 — standard padding
-  lg: 24,   // spacing.6 — section spacing
-  xl: 32,   // spacing.8 — major section breaks
+  lg: 24, // spacing.6 — section spacing
+  xl: 32, // spacing.8 — major section breaks
   '2xl': 48, // spacing.12 — hero section margins
+} as const
+
+export const borderRadius = {
+  sm: 8,
+  md: 14,
+  lg: 20,
+  xl: 28,
+  full: 9999,
+} as const
+
+export const shadows = {
+  card: {
+    shadowColor: '#7C4A18',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 3,
+  },
+  fab: {
+    shadowColor: '#7C4A18',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 32,
+    elevation: 6,
+  },
+  bottomSheet: {
+    shadowColor: '#7C4A18',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 8,
+  },
 } as const
 
 /* ─── Shared Component Styles ─── */

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { colors, spacing, typography } from '../../lib/theme'
+import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
 import type { VoucherItem } from '../lib/api'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -14,8 +14,8 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  created: { bg: '#FEF9C3', text: '#854D0E' },
-  paid: { bg: colors.secondaryContainer, text: colors.onSecondaryContainer },
+  created: { bg: colors.secondaryContainer, text: colors.onSecondaryContainer },
+  paid: { bg: colors.lagoonContainer, text: colors.lagoon },
   redeemed: { bg: colors.primaryFixed, text: colors.primary },
   completed: { bg: '#D1FAE5', text: '#065F46' },
   settled: { bg: '#D1FAE5', text: '#065F46' },
@@ -34,9 +34,10 @@ export default function VoucherCard({ item, onPress }: Props) {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
+      <View style={styles.ticketRail} />
       <View style={styles.header}>
         <View style={styles.iconWrap}>
-          <Text style={styles.icon}>🎫</Text>
+          <Text style={styles.icon}>SL</Text>
         </View>
         <View style={styles.headerText}>
           <Text style={styles.serviceName} numberOfLines={1}>
@@ -68,8 +69,20 @@ export default function VoucherCard({ item, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: borderRadius.lg,
     padding: spacing.base,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    ...shadows.card,
+  },
+  ticketRail: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 5,
+    backgroundColor: colors.coral,
   },
   header: {
     flexDirection: 'row',
@@ -79,13 +92,15 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 12,
-    backgroundColor: colors.primaryFixed,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   icon: {
-    fontSize: 22,
+    ...typography.labelMd,
+    color: colors.white,
+    fontWeight: '800',
   },
   headerText: {
     flex: 1,
@@ -96,6 +111,7 @@ const styles = StyleSheet.create({
   vendorName: {
     ...typography.bodySm,
     marginTop: 2,
+    color: colors.onSurfaceVariant,
   },
   statusBadge: {
     borderRadius: 9999,
@@ -117,9 +133,10 @@ const styles = StyleSheet.create({
   },
   amount: {
     ...typography.titleMd,
-    color: colors.primary,
+    color: colors.coral,
   },
   date: {
     ...typography.bodySm,
+    color: colors.outline,
   },
 })

@@ -1,40 +1,40 @@
 /**
- * S-Loco — Design Tokens from DESIGN.md "The Coastal Editorial"
- * Mobile-specific values from docs/design-mobile.md
+ * S-Loco — Coastal Premium tokens.
+ * Warm resort surfaces, deep ocean primary, coral highlights.
  */
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
 export const colors = {
-  // Primary — Ocean Blue
-  primary: '#005E97',
-  primaryContainer: '#0077B6',
-  primaryFixed: '#90E0EF',
-  primaryFixedDim: '#48CAE4',
+  // Primary — premium coastal ocean
+  primary: '#075985',
+  primaryContainer: '#0E7490',
+  primaryFixed: '#CFFAFE',
+  primaryFixedDim: '#67E8F9',
 
-  // Secondary — Slate Blue
-  secondary: '#3A5A8C',
-  secondaryContainer: '#B8D4F0',
-  onSecondaryContainer: '#1E3A5F',
+  // Secondary — warm sand
+  secondary: '#B7791F',
+  secondaryContainer: '#FEF3C7',
+  onSecondaryContainer: '#5C3A05',
 
-  // Tertiary — Deep Indigo
-  tertiary: '#3F3D99',
-  tertiaryContainer: '#5856D6',
-  tertiaryFixed: '#E0DFFF',
+  // Tertiary — coral sunset
+  tertiary: '#B45309',
+  tertiaryContainer: '#F97316',
+  tertiaryFixed: '#FFEDD5',
 
-  // Surfaces — Cool Blue-Gray
-  surface: '#F4F7FB',
-  surfaceContainerLow: '#EDF1F8',
-  surfaceContainer: '#E6EBF4',
-  surfaceContainerHigh: '#DEE4EF',
-  surfaceContainerHighest: '#D6DDEA',
+  // Surfaces — resort paper, not clinical gray
+  surface: '#FFF8EE',
+  surfaceContainerLow: '#FDF1DD',
+  surfaceContainer: '#F7E6CC',
+  surfaceContainerHigh: '#EED6B6',
+  surfaceContainerHighest: '#E5C49B',
   surfaceContainerLowest: '#FFFFFF',
 
   // Text
-  onSurface: '#161B2E',
-  onSurfaceVariant: '#3B4460',
-  outline: '#6B7694',
-  outlineVariant: '#B5BED4',
+  onSurface: '#1F2933',
+  onSurfaceVariant: '#52616B',
+  outline: '#8A7B68',
+  outlineVariant: '#E4D1B5',
 
   // Error
   error: '#BA1A1A',
@@ -43,10 +43,16 @@ export const colors = {
   // Utility
   white: '#FFFFFF',
   transparent: 'transparent',
+  scrim: 'rgba(31, 41, 51, 0.52)',
+  coral: '#EF6F4E',
+  coralContainer: '#FFE4D8',
+  sand: '#FFF3D8',
+  lagoon: '#0F766E',
+  lagoonContainer: '#CCFBF1',
 
   // Status
-  success: '#2E7D32',
-  warning: '#F57C00',
+  success: '#047857',
+  warning: '#D97706',
   amber: '#F59E0B',
 } as const
 
@@ -87,38 +93,38 @@ export const spacing = {
 
 export const borderRadius = {
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
+  md: 14,
+  lg: 20,
+  xl: 28,
   full: 9999,
 } as const
 
 // ─── Gradients ───────────────────────────────────────────────────────────────
 
 export const gradients = {
-  primary: 'linear-gradient(135deg, #005E97, #0077B6)',
-  hero: 'linear-gradient(135deg, #005E97 0%, #0077B6 50%, #48CAE4 100%)',
+  primary: 'linear-gradient(135deg, #075985, #0E7490)',
+  hero: 'linear-gradient(135deg, #064E3B 0%, #075985 52%, #F97316 140%)',
 } as const
 
 // ─── Shadows (ambient, floating elements only) ──────────────────────────────
 
 export const shadows = {
   card: {
-    shadowColor: '#161B2E',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.06,
+    shadowColor: '#7C4A18',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.08,
     shadowRadius: 24,
-    elevation: 2,
+    elevation: 3,
   },
   fab: {
-    shadowColor: '#161B2E',
+    shadowColor: '#7C4A18',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 32,
     elevation: 6,
   },
   bottomSheet: {
-    shadowColor: '#161B2E',
+    shadowColor: '#7C4A18',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
     shadowRadius: 24,

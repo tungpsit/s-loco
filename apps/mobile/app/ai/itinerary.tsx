@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { colors, spacing, typography } from '../../lib/theme'
+import type { ItineraryResult } from '../../src/lib/api'
 import { itineraryApi } from '../../src/lib/api'
 
 const GROUP_TYPES = [
@@ -57,7 +58,7 @@ export default function ItineraryScreen() {
     },
   })
 
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<ItineraryResult | null>(null)
 
   function togglePref(val: string) {
     setPrefs((p) => (p.includes(val) ? p.filter((x) => x !== val) : [...p, val]))
@@ -175,11 +176,11 @@ export default function ItineraryScreen() {
         {result && (
           <View style={styles.results}>
             <Text style={styles.resultsTitle}>Lịch trình của bạn</Text>
-            {result.days?.map((day: any, i: number) => (
-              <View key={i} style={styles.dayCard}>
+            {result.days?.map((day) => (
+              <View key={`day-${day.day}`} style={styles.dayCard}>
                 <Text style={styles.dayTitle}>Ngày {day.day}</Text>
-                {day.activities?.map((act: any, j: number) => (
-                  <View key={j} style={styles.activityRow}>
+                {day.activities?.map((act) => (
+                  <View key={`${day.day}-${act.time}-${act.title}`} style={styles.activityRow}>
                     <Text style={styles.activityTime}>{act.time}</Text>
                     <View style={styles.activityInfo}>
                       <Text style={styles.activityTitle}>{act.title}</Text>

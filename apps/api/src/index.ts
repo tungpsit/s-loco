@@ -16,18 +16,27 @@ import settlementRoutes from './routes/settlements'
 import vendorRoutes from './routes/vendors'
 import voucherRoutes from './routes/vouchers'
 import giftRoutes from './routes/gifts'
+import { getPostgresClient } from './db'
 
 const app = new Hono()
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS ??
+  'http://localhost:3001,http://localhost:8081'
+).split(',')
+for (const origin of ['http://localhost:3002', 'http://localhost:8082', 'http://localhost:8083']) {
+  if (!allowedOrigins.includes(origin)) allowedOrigins.push(origin)
+}
+const hasConfiguredOrigins = Boolean(process.env.ALLOWED_ORIGINS)
 
 // Global middleware
 app.use('*', logger())
 app.use(
   '*',
   cors({
-    origin: (
-      process.env.ALLOWED_ORIGINS ??
-      'http://localhost:3001,http://localhost:3002,http://localhost:8081'
-    ).split(','),
+    origin: (origin) => {
+      if (!hasConfiguredOrigins) return origin
+      return allowedOrigins.includes(origin) ? origin : allowedOrigins[0]!
+    },
     credentials: true,
     exposeHeaders: ['Content-Disposition'],
   }),
@@ -84,6 +93,21 @@ app.onError((err, c) => {
     500,
   )
 })
+
+console.log('[API] DATABASE_URL:', process.env.DATABASE_URL)
+
+async function checkDatabaseHealth() {
+  try {
+    const client = getPostgresClient()
+    await client`select 1`
+    console.log('[API] Database health check: ok')
+  } catch (err) {
+    console.error('[API] Database health check failed:', err)
+    throw err
+  }
+}
+
+await checkDatabaseHealth()
 
 export default {
   port: Number(process.env.PORT) || 3000,

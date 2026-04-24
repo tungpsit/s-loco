@@ -16,16 +16,13 @@ export async function searchServices(filters: ServiceFilterInput) {
 
   const conditions = [isNull(services.deletedAt), eq(services.isActive, true)]
 
-  // Keyword search — tsvector (GIN) + ILIKE trigram fallback
-  // Use unaccent() + plainto_tsquery so "tôm hùm" → "tom hum" matches search_vector
+  // Keyword search — local-safe ILIKE fallback
   if (filters.q) {
     const q = filters.q.trim()
     if (q.length > 0) {
       conditions.push(
         sql`(
-          services.search_vector @@ plainto_tsquery('simple', unaccent(${q}))
-          OR vendors.search_vector @@ plainto_tsquery('simple', unaccent(${q}))
-          OR ${ilike(services.name, `%${q}%`)}
+          ${ilike(services.name, `%${q}%`)}
           OR ${ilike(services.description, `%${q}%`)}
           OR ${ilike(vendors.name, `%${q}%`)}
         )`,
@@ -58,10 +55,10 @@ export async function searchServices(filters: ServiceFilterInput) {
 
   // Distance filter (km from Tây An beach)
   if (filters.min_distance !== undefined) {
-    conditions.push(gte(vendors.distanceKm, filters.min_distance))
+    conditions.push(gte(vendors.distanceKm, String(filters.min_distance)))
   }
   if (filters.max_distance !== undefined) {
-    conditions.push(lte(vendors.distanceKm, filters.max_distance))
+    conditions.push(lte(vendors.distanceKm, String(filters.max_distance)))
   }
 
   // Rating filter (on vendor)

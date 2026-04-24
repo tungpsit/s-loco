@@ -38,6 +38,7 @@ export interface RefundParams {
   transactionId: string
   amount: number
   originalAmount: number
+  gatewayTransactionId?: string
   reason?: string
 }
 

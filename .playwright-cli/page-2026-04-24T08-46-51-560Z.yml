@@ -1,0 +1,34 @@
+- generic [ref=e568]:
+  - generic:
+    - generic:
+      - generic:
+        - link "Dịch vụ, back" [ref=e570] [cursor=pointer]:
+          - /url: /service/f8e3e6cd-a825-46fe-8502-1685aad04569
+        - heading "Thanh toán" [level=1] [ref=e573]
+  - generic [ref=e576]:
+    - generic [ref=e577]:
+      - generic [ref=e579] [cursor=pointer]: ← Quay lại
+      - generic [ref=e580]: Thanh toán
+    - generic [ref=e582]:
+      - generic [ref=e583]:
+        - generic [ref=e584]: Đơn hàng
+        - generic [ref=e586]: "Mã đơn #9061e923-b81f-4bc4-832a-5f87f31b4af2"
+      - generic [ref=e587]:
+        - generic [ref=e588]: Phương thức thanh toán
+        - generic [ref=e589]: Chọn cổng thanh toán bạn muốn sử dụng
+        - generic [ref=e590] [cursor=pointer]:
+          - generic [ref=e592]: 💳
+          - generic [ref=e593]:
+            - generic [ref=e594]: VNPay
+            - generic [ref=e595]: Thẻ ATM / Internet Banking
+        - generic [ref=e597] [cursor=pointer]:
+          - generic [ref=e599]: 🟣
+          - generic [ref=e600]:
+            - generic [ref=e601]: MoMo
+            - generic [ref=e602]: Ví MoMo
+        - generic [ref=e604] [cursor=pointer]:
+          - generic [ref=e606]: 🔵
+          - generic [ref=e607]:
+            - generic [ref=e608]: SePay
+            - generic [ref=e609]: QR SePay
+    - generic [ref=e612]: Chọn phương thức thanh toán

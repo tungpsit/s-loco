@@ -1,0 +1,11 @@
+[     349ms] Cannot use 'import.meta' outside a module
+[     350ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8082/auth/login:0
+[     449ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8082/favicon.ico:0
+[ 3343728ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:101554
+[ 3343744ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:41163
+[ 3343746ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8082/auth/login:0
+[ 3343757ms] [WARNING] "textShadow*" style props are deprecated. Use "textShadow". @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:24702
+[ 3343881ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8082/auth/login:0

@@ -1,9 +1,9 @@
-import { Alert } from 'react-native'
 import { router } from 'expo-router'
 import { useCallback } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useAuthStore } from '../../src/stores/auth-store'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { authApi } from '../../src/lib/api'
+import { useResponsiveLayout } from '../../src/lib/responsive'
+import { useAuthStore } from '../../src/stores/auth-store'
 
 const colors = {
   primary: '#005E97',
@@ -44,30 +44,36 @@ function MenuItem({ icon, label, sub, onPress, danger }: MenuItemProps) {
 
 export default function SettingsScreen() {
   const { user, logout } = useAuthStore()
+  const { isDesktop, pageMaxWidth, pagePadding } = useResponsiveLayout()
 
   const handleLogout = useCallback(async () => {
-    Alert.alert(
-      'Đăng xuất',
-      'Bạn có chắc muốn đăng xuất?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Đăng xuất',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await authApi.logout()
-            } catch { /* ignore */ }
-            await logout()
-            router.replace('/auth/login')
-          },
+    Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
+      { text: 'Hủy', style: 'cancel' },
+      {
+        text: 'Đăng xuất',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await authApi.logout()
+          } catch {
+            /* ignore */
+          }
+          await logout()
+          router.replace('/auth/login')
         },
-      ],
-    )
+      },
+    ])
   }, [logout])
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingHorizontal: pagePadding, maxWidth: pageMaxWidth },
+        isDesktop && styles.contentDesktop,
+      ]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Cài đặt</Text>
       </View>
@@ -85,36 +91,34 @@ export default function SettingsScreen() {
       </View>
 
       {/* Menu groups */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quản lý</Text>
-        <View style={styles.menuCard}>
-          <MenuItem
-            icon="📝"
-            label="Thông tin cửa hàng"
-            onPress={() => router.push('/profile')}
-          />
-          <MenuItem
-            icon="🎟️"
-            label="Quản lý dịch vụ"
-            onPress={() => router.push('/service/')}
-          />
+      <View style={[styles.sectionsGrid, isDesktop && styles.sectionsGridDesktop]}>
+        <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
+          <Text style={styles.sectionTitle}>Quản lý</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="📝"
+              label="Thông tin cửa hàng"
+              onPress={() => router.push('/profile')}
+            />
+            <MenuItem icon="🎟️" label="Quản lý dịch vụ" onPress={() => router.push('/service/')} />
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Tài khoản</Text>
-        <View style={styles.menuCard}>
-          <MenuItem icon="🔔" label="Thông báo" sub="Bật thông báo đẩy" />
-          <MenuItem icon="🔐" label="Đổi mật khẩu" onPress={() => {}} />
+        <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
+          <Text style={styles.sectionTitle}>Tài khoản</Text>
+          <View style={styles.menuCard}>
+            <MenuItem icon="🔔" label="Thông báo" sub="Bật thông báo đẩy" />
+            <MenuItem icon="🔐" label="Đổi mật khẩu" onPress={() => {}} />
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Hỗ trợ</Text>
-        <View style={styles.menuCard}>
-          <MenuItem icon="📖" label="Hướng dẫn sử dụng" />
-          <MenuItem icon="💬" label="Liên hệ hỗ trợ" />
-          <MenuItem icon="ℹ️" label="Về S-Loco Vendor" sub="Phiên bản 1.0.0" />
+        <View style={[styles.section, isDesktop && styles.sectionDesktop]}>
+          <Text style={styles.sectionTitle}>Hỗ trợ</Text>
+          <View style={styles.menuCard}>
+            <MenuItem icon="📖" label="Hướng dẫn sử dụng" />
+            <MenuItem icon="💬" label="Liên hệ hỗ trợ" />
+            <MenuItem icon="ℹ️" label="Về S-Loco Vendor" sub="Phiên bản 1.0.0" />
+          </View>
         </View>
       </View>
 
@@ -123,17 +127,24 @@ export default function SettingsScreen() {
       </TouchableOpacity>
 
       <Text style={styles.footer}>© 2026 S-Loco · Sầm Sơn</Text>
-    </View>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 },
+  content: {
+    alignSelf: 'center',
+    width: '100%',
+    paddingBottom: 24,
+  },
+  contentDesktop: {
+    paddingTop: 24,
+  },
+  header: { paddingTop: 16, paddingBottom: 12 },
   title: { fontSize: 24, fontWeight: '700', color: colors.onSurface },
   profileCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    marginHorizontal: 16,
     borderRadius: 20,
     padding: 20,
     flexDirection: 'row',
@@ -153,8 +164,22 @@ const styles = StyleSheet.create({
   profileName: { fontSize: 18, fontWeight: '700', color: colors.onSurface, marginBottom: 2 },
   profileEmail: { fontSize: 13, color: colors.onSurfaceVariant, marginBottom: 4 },
   profileRole: { fontSize: 12, color: colors.onSurfaceVariant },
-  section: { paddingHorizontal: 16, marginBottom: 20 },
-  sectionTitle: { fontSize: 12, fontWeight: '600', color: colors.onSurfaceVariant, marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' },
+  sectionsGrid: {},
+  sectionsGridDesktop: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  section: { marginBottom: 20 },
+  sectionDesktop: { flexBasis: '48%', flexGrow: 1 },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.onSurfaceVariant,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
   menuCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
@@ -175,7 +200,6 @@ const styles = StyleSheet.create({
   chevron: { fontSize: 20, color: colors.outline, marginLeft: 8 },
   logoutBtn: {
     backgroundColor: colors.surfaceContainerLowest,
-    marginHorizontal: 16,
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
@@ -183,5 +207,11 @@ const styles = StyleSheet.create({
     borderColor: '#FFEBEE',
   },
   logoutText: { fontSize: 15, fontWeight: '600', color: colors.error },
-  footer: { textAlign: 'center', color: colors.outline, fontSize: 11, marginTop: 24, marginBottom: 24 },
+  footer: {
+    textAlign: 'center',
+    color: colors.outline,
+    fontSize: 11,
+    marginTop: 24,
+    marginBottom: 24,
+  },
 })

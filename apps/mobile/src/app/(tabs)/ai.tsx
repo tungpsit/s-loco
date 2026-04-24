@@ -8,7 +8,6 @@ import { useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,7 +16,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { itineraryApi } from '../../lib/api'
-import { borderRadius, colors, spacing, typography } from '../../lib/theme'
+import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
 
 const DAYS_OPTIONS = [
   { value: 1, label: '1 ngày' },
@@ -56,7 +55,7 @@ interface DayPlan {
 }
 
 interface ItineraryResult {
-  title: string
+  title?: string
   summary?: string
   days: DayPlan[]
   total_estimated_cost?: number
@@ -65,9 +64,7 @@ interface ItineraryResult {
 
 function formatCost(amount: number | undefined): string {
   if (!amount) return ''
-  return amount >= 1000
-    ? `${(amount / 1000).toFixed(0)}K`
-    : String(amount)
+  return amount >= 1000 ? `${(amount / 1000).toFixed(0)}K` : String(amount)
 }
 
 function ActivityCard({ activity }: { activity: Activity }) {
@@ -86,9 +83,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
         <View style={styles.activityContent}>
           <Text style={styles.activityTitle}>{activity.title}</Text>
           {activity.estimated_cost ? (
-            <Text style={styles.activityCost}>
-              ~{formatCost(activity.estimated_cost)}đ
-            </Text>
+            <Text style={styles.activityCost}>~{formatCost(activity.estimated_cost)}đ</Text>
           ) : null}
           {activity.category ? (
             <Text style={styles.activityCategory}>{activity.category}</Text>
@@ -130,15 +125,11 @@ function ItineraryResultView({
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.results}>
       {/* Header */}
       <View style={styles.resultHeader}>
-        <Text style={styles.resultTitle}>{itinerary.title}</Text>
-        {itinerary.summary && (
-          <Text style={styles.resultSummary}>{itinerary.summary}</Text>
-        )}
+        <Text style={styles.resultTitle}>{itinerary.title ?? 'Lịch trình S-Loco'}</Text>
+        {itinerary.summary && <Text style={styles.resultSummary}>{itinerary.summary}</Text>}
         {totalCost && (
           <View style={styles.costBadge}>
-            <Text style={styles.costBadgeText}>
-              Tổng ước tính: {totalCost}đ
-            </Text>
+            <Text style={styles.costBadgeText}>Tổng ước tính: {totalCost}đ</Text>
           </View>
         )}
       </View>
@@ -150,8 +141,11 @@ function ItineraryResultView({
             <Text style={styles.dayNumber}>Ngày {day.day}</Text>
             {day.date && <Text style={styles.dayDate}>{day.date}</Text>}
           </View>
-          {day.activities.map((activity, i) => (
-            <ActivityCard key={i} activity={activity} />
+          {day.activities.map((activity) => (
+            <ActivityCard
+              key={`${day.day}-${activity.time}-${activity.title}`}
+              activity={activity}
+            />
           ))}
         </View>
       ))}
@@ -160,8 +154,8 @@ function ItineraryResultView({
       {itinerary.tips && itinerary.tips.length > 0 && (
         <View style={styles.tipsSection}>
           <Text style={styles.tipsTitle}>💡 Mẹo hữu ích</Text>
-          {itinerary.tips.map((tip, i) => (
-            <View key={i} style={styles.tipItem}>
+          {itinerary.tips.map((tip) => (
+            <View key={tip} style={styles.tipItem}>
               <Text style={styles.tipBullet}>•</Text>
               <Text style={styles.tipText}>{tip}</Text>
             </View>
@@ -249,19 +243,15 @@ export default function AiScreen() {
     try {
       const result = await itineraryApi.save(itinerary)
       setSavedToken(result.share_token)
-      Alert.alert(
-        'Đã lưu!',
-        `Token: ${result.share_token}`,
-        [
-          { text: 'OK' },
-          {
-            text: 'Sao chép link',
-            onPress: () => {
-              void Clipboard.setStringAsync(`sloco://itinerary/${result.share_token}`)
-            },
+      Alert.alert('Đã lưu!', `Token: ${result.share_token}`, [
+        { text: 'OK' },
+        {
+          text: 'Sao chép link',
+          onPress: () => {
+            void Clipboard.setStringAsync(`sloco://itinerary/${result.share_token}`)
           },
-        ],
-      )
+        },
+      ])
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Đã xảy ra lỗi'
       Alert.alert('Lỗi', msg, [{ text: 'OK' }])
@@ -321,6 +311,7 @@ export default function AiScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Header */}
         <View style={styles.header}>
+          <Text style={styles.eyebrow}>Trip studio</Text>
           <Text style={styles.title}>Lịch trình AI</Text>
           <Text style={styles.subtitle}>
             Để AI tạo lịch trình du lịch hoàn hảo cho bạn tại Sầm Sơn
@@ -329,7 +320,7 @@ export default function AiScreen() {
 
         {/* Hero */}
         <View style={styles.hero}>
-          <Text style={styles.heroEmoji}>🤖</Text>
+          <Text style={styles.heroEyebrow}>Sam Son in one plan</Text>
           <Text style={styles.heroTitle}>Lập lịch trình thông minh</Text>
           <Text style={styles.heroSub}>
             Chỉ cần chọn vài tùy chọn, AI sẽ gợi ý lịch trình tối ưu
@@ -431,27 +422,39 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
-  title: { ...typography.headlineMd },
+  eyebrow: {
+    ...typography.labelSm,
+    color: colors.coral,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  title: { ...typography.headlineMd, color: colors.primary },
   subtitle: { ...typography.bodyMd, color: colors.onSurfaceVariant, marginTop: 4 },
   hero: {
     marginHorizontal: spacing.base,
     marginTop: spacing.md,
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     padding: spacing.xl,
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    ...shadows.card,
   },
-  heroEmoji: { fontSize: 48, marginBottom: spacing.md },
+  heroEyebrow: {
+    ...typography.labelSm,
+    color: colors.primaryFixed,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
   heroTitle: {
     ...typography.titleLg,
     color: colors.white,
-    textAlign: 'center',
     marginBottom: spacing.xs,
   },
   heroSub: {
     ...typography.bodyMd,
     color: 'rgba(255,255,255,0.75)',
-    textAlign: 'center',
   },
   section: {
     paddingHorizontal: spacing.base,
@@ -471,9 +474,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.full,
     backgroundColor: colors.surfaceContainerHighest,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   chipActive: {
     backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   chipText: {
     ...typography.labelLg,
@@ -490,6 +496,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    ...shadows.fab,
   },
   ctaDisabled: {
     backgroundColor: colors.outline,
@@ -501,6 +508,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    ...shadows.fab,
   },
   ctaPrimaryText: {
     color: colors.white,
@@ -561,6 +569,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     padding: spacing.xl,
     marginBottom: spacing.lg,
+    borderBottomLeftRadius: borderRadius.xl,
+    borderBottomRightRadius: borderRadius.xl,
   },
   resultTitle: {
     ...typography.headlineMd,

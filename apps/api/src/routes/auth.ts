@@ -15,7 +15,7 @@ import {
   registerOrLoginWithOtp,
 } from '../services/auth.service'
 import { OtpError, sendOtp } from '../services/otp.service'
-import { refreshTokens, revokeSession, TokenError } from '../services/token.service'
+import { refreshTokens, revokeAllSessions, TokenError } from '../services/token.service'
 
 const auth = new Hono()
 
@@ -94,9 +94,9 @@ auth.post('/refresh', zValidator('json', refreshTokenSchema), async (c) => {
 auth.post('/logout', authMiddleware(), async (c) => {
   const userId = c.get('userId')
   if (userId) {
-    // In a more complete implementation, we'd track the specific session ID
-    // For now, revoking based on the current session
-    await revokeSession(userId)
+    // Revoke all sessions for this user (simple approach)
+    // In production, track sessionId in JWT or context for precise revocation
+    await revokeAllSessions(userId)
   }
   return c.json({ success: true, data: { message: 'Đã đăng xuất.' } })
 })

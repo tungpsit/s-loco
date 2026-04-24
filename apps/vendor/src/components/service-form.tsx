@@ -8,7 +8,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
 } from 'react-native'
 import type { CreateServiceInput, UpdateServiceInput } from '../lib/api'
 
@@ -35,13 +34,11 @@ interface ServiceFormProps {
 export function ServiceForm({ initial, onSubmit, loading }: ServiceFormProps) {
   const [name, setName] = useState(initial?.name ?? '')
   const [slug, setSlug] = useState(initial?.slug ?? '')
-  const [categoryId, setCategoryId] = useState(initial?.category_id ?? '')
+  const [categoryId] = useState(initial?.category_id ?? '')
   const [description, setDescription] = useState(initial?.description ?? '')
   const [price, setPrice] = useState(initial?.original_price ?? '')
   const [discountPrice, setDiscountPrice] = useState(initial?.discount_price ?? '')
-  const [duration, setDuration] = useState(
-    initial?.duration_minutes?.toString() ?? '',
-  )
+  const [duration, setDuration] = useState(initial?.duration_minutes?.toString() ?? '')
 
   const isEdit = Boolean(initial?.name)
 

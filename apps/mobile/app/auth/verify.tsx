@@ -9,6 +9,8 @@ import { colors, spacing, typography } from '../../lib/theme'
 import { authApi } from '../../src/lib/api'
 import { useAuthStore } from '../../src/stores/auth-store'
 
+const OTP_FIELDS = ['otp-0', 'otp-1', 'otp-2', 'otp-3'] as const
+
 export default function VerifyScreen() {
   const { phone } = useLocalSearchParams<{ phone: string }>()
   const { login } = useAuthStore()
@@ -90,7 +92,7 @@ export default function VerifyScreen() {
       <View style={styles.otpRow}>
         {code.map((digit, idx) => (
           <TextInput
-            key={idx}
+            key={OTP_FIELDS[idx]}
             ref={(el) => {
               inputs.current[idx] = el
             }}

@@ -38,3 +38,4 @@ rustfs_data/
 # Haki runtime artifacts (do NOT commit)
 /.haki/runtime/
 /.haki/ui/
+graphify-out/

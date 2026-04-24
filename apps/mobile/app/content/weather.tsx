@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { colors, spacing, typography } from '../../lib/theme'
 import ErrorState from '../../src/components/error-state'
+import type { WeatherData } from '../../src/lib/api'
 import { contentApi } from '../../src/lib/api'
 
 const WEATHER_ICONS: Record<string, string> = {
@@ -76,8 +77,8 @@ export default function WeatherScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Dự báo 5 ngày</Text>
           <View style={styles.forecastList}>
-            {forecast.map((day: any, i: number) => (
-              <View key={i} style={styles.forecastDay}>
+            {forecast.map((day: NonNullable<WeatherData['forecast']>[number]) => (
+              <View key={`${day.day ?? 'forecast'}-${day.condition}`} style={styles.forecastDay}>
                 <Text style={styles.forecastDayLabel}>
                   {day.day ??
                     new Date().toLocaleDateString('vi-VN', {

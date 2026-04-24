@@ -17,31 +17,31 @@ import { ServiceCardSkeleton } from '../../components/loading-skeleton'
 import ServiceCard from '../../components/service-card'
 import { useServices } from '../../hooks/useQuery'
 import type { ServiceItem } from '../../lib/api'
-import { borderRadius, colors, glass, spacing, typography } from '../../lib/theme'
+import { borderRadius, colors, glass, shadows, spacing, typography } from '../../lib/theme'
 
 const CATEGORIES = [
-  { slug: 'am-thuc', name: 'Ẩm thực', icon: '🍜' },
-  { slug: 'luu-tru', name: 'Lưu trú', icon: '🏨' },
-  { slug: 'spa-massage', name: 'Spa & Massage', icon: '💆' },
-  { slug: 'xe-dien', name: 'Xe điện', icon: '🛺' },
-  { slug: 'giai-tri', name: 'Giải trí', icon: '🎠' },
-  { slug: 'mua-sam', name: 'Mua sắm', icon: '🛍️' },
+  { slug: 'am-thuc', name: 'Ẩm thực', icon: 'Taste' },
+  { slug: 'luu-tru', name: 'Lưu trú', icon: 'Stay' },
+  { slug: 'spa-massage', name: 'Spa', icon: 'Spa' },
+  { slug: 'xe-dien', name: 'Xe điện', icon: 'Ride' },
+  { slug: 'giai-tri', name: 'Giải trí', icon: 'Play' },
+  { slug: 'mua-sam', name: 'Mua sắm', icon: 'Shop' },
 ]
 
 const BANNERS = [
   {
     id: '1',
-    title: 'Tết Sầm Sơn 2026',
-    subtitle: 'Ưu đãi lên đến 30%',
-    emoji: '🎆',
-    bg: colors.primaryContainer,
+    title: 'Sunset dining pass',
+    subtitle: 'Bữa tối ven biển với ưu đãi chọn lọc',
+    tag: 'Curated',
+    bg: colors.primary,
   },
   {
     id: '2',
-    title: 'Khám phá ẩm thực',
-    subtitle: 'Top 10 nhà hàng ngon',
-    emoji: '🍽️',
-    bg: '#FEF3C7',
+    title: 'AI beach itinerary',
+    subtitle: 'Lịch trình nghỉ dưỡng trong 30 giây',
+    tag: 'Planner',
+    bg: colors.coral,
   },
 ]
 
@@ -77,7 +77,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/content/weather')}
           accessibilityLabel="Thời tiết"
         >
-          <Text style={styles.weatherIcon}>🌤️</Text>
+          <Text style={styles.weatherIcon}>24°</Text>
         </TouchableOpacity>
       </View>
 
@@ -90,14 +90,35 @@ export default function HomeScreen() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            {/* Hero */}
             <View style={styles.hero}>
-              <Text style={styles.heroTagline}>Khám phá Sầm Sơn</Text>
-              <Text style={styles.heroTitle}>S-Loco</Text>
-              <Text style={styles.heroSub}>Ẩm thực · Lưu trú · Giải trí</Text>
+              <View style={styles.heroTopRow}>
+                <View>
+                  <Text style={styles.heroTagline}>Sam Son coastal pass</Text>
+                  <Text style={styles.heroTitle}>Plan less. Enjoy more.</Text>
+                </View>
+                <View style={styles.heroBadge}>
+                  <Text style={styles.heroBadgeText}>Premium</Text>
+                </View>
+              </View>
+              <Text style={styles.heroSub}>
+                Voucher minh bạch cho ẩm thực, lưu trú và trải nghiệm địa phương.
+              </Text>
+              <View style={styles.heroStats}>
+                <View style={styles.heroStat}>
+                  <Text style={styles.heroStatValue}>6</Text>
+                  <Text style={styles.heroStatLabel}>Danh mục</Text>
+                </View>
+                <View style={styles.heroStat}>
+                  <Text style={styles.heroStatValue}>AI</Text>
+                  <Text style={styles.heroStatLabel}>Lịch trình</Text>
+                </View>
+                <View style={styles.heroStat}>
+                  <Text style={styles.heroStatValue}>QR</Text>
+                  <Text style={styles.heroStatLabel}>Voucher</Text>
+                </View>
+              </View>
             </View>
 
-            {/* Banners */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -107,11 +128,13 @@ export default function HomeScreen() {
                 <TouchableOpacity
                   key={b.id}
                   style={[styles.banner, { backgroundColor: b.bg }]}
-                  onPress={() => router.push('/ai')}
+                  onPress={() => router.push('/(tabs)/ai')}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.bannerEmoji}>{b.emoji}</Text>
-                  <View>
+                  <View style={styles.bannerTag}>
+                    <Text style={styles.bannerTagText}>{b.tag}</Text>
+                  </View>
+                  <View style={styles.bannerCopy}>
                     <Text style={styles.bannerTitle}>{b.title}</Text>
                     <Text style={styles.bannerSub}>{b.subtitle}</Text>
                   </View>
@@ -119,9 +142,9 @@ export default function HomeScreen() {
               ))}
             </ScrollView>
 
-            {/* Category grid */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Danh mục</Text>
+              <Text style={styles.sectionEyebrow}>Discover by mood</Text>
+              <Text style={styles.sectionTitle}>Danh mục nổi bật</Text>
               <View style={styles.categoryGrid}>
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
@@ -154,15 +177,17 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Section heading */}
             <View style={styles.sectionHeadRow}>
-              <Text style={styles.sectionTitle}>
-                {category
-                  ? (CATEGORIES.find((c) => c.slug === category)?.name ?? 'Dịch vụ')
-                  : 'Dành cho bạn'}
-              </Text>
+              <View>
+                <Text style={styles.sectionEyebrow}>Curated services</Text>
+                <Text style={styles.sectionTitle}>
+                  {category
+                    ? (CATEGORIES.find((c) => c.slug === category)?.name ?? 'Dịch vụ')
+                    : 'Dành cho bạn'}
+                </Text>
+              </View>
               <TouchableOpacity onPress={() => router.push('/(tabs)/browse')}>
-                <Text style={styles.seeAll}>Xem tất cả →</Text>
+                <Text style={styles.seeAll}>Xem tất cả</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -195,59 +220,100 @@ const styles = StyleSheet.create({
     zIndex: 10,
   } as ViewStyle,
   greeting: { ...typography.bodySm, color: colors.onSurfaceVariant },
-  headerTitle: { ...typography.headlineMd },
+  headerTitle: { ...typography.headlineMd, color: colors.primary },
   weatherBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.primaryFixed,
+    backgroundColor: colors.surfaceContainerLowest,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
-  weatherIcon: { fontSize: 22 },
+  weatherIcon: { ...typography.labelMd, color: colors.primary, fontWeight: '800' },
   list: { paddingBottom: spacing.xl },
   hero: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.base,
+    marginHorizontal: spacing.base,
+    marginTop: spacing.sm,
+    padding: spacing.lg,
     backgroundColor: colors.primary,
-    borderBottomLeftRadius: borderRadius.xl,
-    borderBottomRightRadius: borderRadius.xl,
+    borderRadius: borderRadius.xl,
+    ...shadows.card,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   heroTagline: {
     ...typography.labelMd,
     color: colors.primaryFixed,
-    letterSpacing: 1,
+    textTransform: 'uppercase',
     marginBottom: spacing.xs,
   },
   heroTitle: {
-    fontSize: 36,
+    fontSize: 34,
+    lineHeight: 39,
     fontWeight: '700',
     color: colors.white,
-    marginBottom: spacing.sm,
+    maxWidth: 250,
   },
-  heroSub: { ...typography.bodyMd, color: 'rgba(255,255,255,0.7)' },
+  heroBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  heroBadgeText: { ...typography.labelSm, color: colors.white, fontWeight: '700' },
+  heroSub: { ...typography.bodyMd, color: 'rgba(255,255,255,0.78)', marginBottom: spacing.lg },
+  heroStats: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: borderRadius.lg,
+    padding: spacing.sm,
+    gap: spacing.sm,
+  },
+  heroStat: { flex: 1 },
+  heroStatValue: { ...typography.titleMd, color: colors.white, fontWeight: '800' },
+  heroStatLabel: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)' },
   banners: {
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
     gap: spacing.md,
   },
   banner: {
-    width: 200,
-    borderRadius: borderRadius.md,
+    width: 244,
+    borderRadius: borderRadius.lg,
     padding: spacing.base,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
+    minHeight: 112,
+    justifyContent: 'space-between',
   },
-  bannerEmoji: { fontSize: 32 },
-  bannerTitle: { ...typography.titleSm, fontWeight: '600', color: colors.onSurface },
-  bannerSub: { ...typography.bodySm, color: colors.onSurfaceVariant },
+  bannerTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  bannerTagText: { ...typography.labelSm, color: colors.white, fontWeight: '700' },
+  bannerCopy: { gap: 4 },
+  bannerTitle: { ...typography.titleMd, fontWeight: '700', color: colors.white },
+  bannerSub: { ...typography.bodySm, color: 'rgba(255,255,255,0.78)' },
   section: {
     paddingHorizontal: spacing.base,
     marginTop: spacing.lg,
   },
-  sectionTitle: { ...typography.titleLg, marginBottom: spacing.md },
+  sectionEyebrow: {
+    ...typography.labelSm,
+    color: colors.coral,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  sectionTitle: { ...typography.titleLg, marginBottom: spacing.md, color: colors.onSurface },
   sectionHeadRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -255,7 +321,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     marginTop: spacing.lg,
   },
-  seeAll: { ...typography.bodySm, color: colors.primary, fontWeight: '600' },
+  seeAll: { ...typography.bodySm, color: colors.primary, fontWeight: '800' },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -266,31 +332,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.md,
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   categoryItemActive: {
-    backgroundColor: colors.primaryFixed,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   categoryIconWrap: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.primaryFixed,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.sand,
     alignItems: 'center',
     justifyContent: 'center',
   },
   categoryIconWrapActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.16)',
   },
-  categoryIcon: { fontSize: 24 },
+  categoryIcon: { ...typography.labelSm, color: colors.primary, fontWeight: '800' },
   categoryLabel: {
     ...typography.labelMd,
     color: colors.onSurface,
     textAlign: 'center',
   },
   categoryLabelActive: {
-    color: colors.primary,
+    color: colors.white,
     fontWeight: '600',
   },
   row: { paddingHorizontal: spacing.base, gap: spacing.md },

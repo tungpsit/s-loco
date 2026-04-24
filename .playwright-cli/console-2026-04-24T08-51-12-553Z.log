@@ -1,0 +1,152 @@
+[     224ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:19999
+[     241ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:60205
+[     252ms] [WARNING] "shadow*" style props are deprecated. Use "boxShadow". @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40435
+[     276ms] [WARNING] props.pointerEvents is deprecated. Use style.pointerEvents @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40435
+[     338ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/orders/9061e923-b81f-4bc4-832a-5f87f31b4af2:0
+[     357ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8083/favicon.ico:0
+[    1344ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/orders/9061e923-b81f-4bc4-832a-5f87f31b4af2:0
+[   32635ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:19999
+[   32642ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:60205
+[   32645ms] [WARNING] "shadow*" style props are deprecated. Use "boxShadow". @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40435
+[   32653ms] [WARNING] props.pointerEvents is deprecated. Use style.pointerEvents @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40435
+[   51545ms] [WARNING] Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:55110
+[ 4802633ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:200:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:159:23)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 4838803ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/voucher-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:182:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:166:14)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/voucher-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 4996683ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:200:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:159:23)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 5061890ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:200:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:159:23)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 5072960ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:200:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:159:23)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 5169409ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/voucher-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:182:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:166:14)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/voucher-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 5218686ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/voucher-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:182:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:166:14)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/voucher-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[ 5344794ms] TypeError: Cannot read properties of undefined (reading 'lg')
+    at __d.0 (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:200:44)
+    at loadModuleImplementation (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:254:34)
+    at guardedLoadModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:159:23)
+    at metroRequire (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:79:75)
+    at runUpdatedModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:497:7)
+    at metroHotUpdateModule (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:387:26)
+    at define (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:33:18)
+    at eval (http://localhost:8083/apps/mobile/src/components/service-card.bundle//&platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp&minify=false&modulesOnly=true&runModule=false&shallow=true:1:1)
+    at inject (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81792:7)
+    at Array.forEach (<anonymous>)
+    at injectUpdate (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81797:21)
+    at HMRClient.<anonymous> (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81846:11)
+    at HMRClient.emit (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:82044:29)
+    at HMRClient._ws.onmessage (http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81829:18)
+[10145781ms] [WARNING] Disconnected from Metro (1006)
+To reconnect:
+- Ensure that Metro is running and available on the same network
+- Reload this app (will trigger further help if Metro cannot be connected to) @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:81740
+[11971497ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:19999
+[11971513ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:60211
+[11971524ms] [WARNING] "shadow*" style props are deprecated. Use "boxShadow". @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40441
+[11971561ms] [WARNING] props.pointerEvents is deprecated. Use style.pointerEvents @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40441
+[11971569ms] [WARNING] Animated: `useNativeDriver` is not supported because the native animated module is missing. Falling back to JS-based animation. To resolve this, add `RCTAnimation` module to this app, or remove `useNativeDriver`. Make sure to run `bundle exec pod install` first. Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:55116
+[12046582ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://10.0.2.2:3000/api/v1/services?page=1&limit=20:0
+[12072423ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://10.0.2.2:3000/api/v1/services?page=1&limit=20:0

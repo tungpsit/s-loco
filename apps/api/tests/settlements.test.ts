@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { request } from './helpers'
+import { request, vendorLogin } from './helpers'
 
 describe('Settlements', () => {
   describe('Auth Required', () => {
@@ -26,6 +26,17 @@ describe('Settlements', () => {
     test('POST /settlements/:id/disburse — rejects unauthenticated', async () => {
       const { status } = await request('/api/v1/settlements/fake-id/disburse', { method: 'POST' })
       expect(status).toBe(401)
+    })
+
+    test('GET /settlements/:id — vendor owner reaches settlement detail route', async () => {
+      const token = await vendorLogin()
+      expect(token).toBeTruthy()
+
+      const { status, data } = await request('/api/v1/settlements/not-a-settlement', { token })
+
+      expect(status).toBe(404)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('NOT_FOUND')
     })
   })
 })

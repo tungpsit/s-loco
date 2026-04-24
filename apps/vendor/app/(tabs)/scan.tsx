@@ -1,14 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { QrScanner, ScanResultModal } from '../../src/components/qr-scanner'
 import { voucherApi } from '../../src/lib/api'
-
-const colors = {
-  primary: '#005E97',
-  surface: '#F4F7FB',
-  surfaceContainerLowest: '#FFFFFF',
-  onSurface: '#161B2E',
-}
 
 interface ScannedVoucher {
   id: string
@@ -31,7 +24,7 @@ export default function ScanScreen() {
   const [scannedVoucher, setScannedVoucher] = useState<ScannedVoucher | null>(null)
   const [scanError, setScanError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [completing, setCompleting] = useState(false)
+  const [, setCompleting] = useState(false)
   const [active, setActive] = useState(true)
 
   const handleScanned = useCallback(async (token: string) => {
@@ -51,10 +44,14 @@ export default function ScanScreen() {
       const verified = verifyRes.data.data.voucher as VerifiedVoucher
 
       if (!verified.can_redeem) {
-        const statusLabel = verified.status === 'redeemed' ? 'Đã được đổi rồi'
-          : verified.status === 'completed' ? 'Đã hoàn thành'
-          : verified.status === 'expired' ? 'Đã hết hạn'
-          : `Trạng thái: ${verified.status}`
+        const statusLabel =
+          verified.status === 'redeemed'
+            ? 'Đã được đổi rồi'
+            : verified.status === 'completed'
+              ? 'Đã hoàn thành'
+              : verified.status === 'expired'
+                ? 'Đã hết hạn'
+                : `Trạng thái: ${verified.status}`
         setScanError(`${statusLabel}. Không thể đổi.`)
         return
       }
@@ -77,6 +74,13 @@ export default function ScanScreen() {
     }
   }, [])
 
+  const closeModal = useCallback(() => {
+    setModalVisible(false)
+    setScannedVoucher(null)
+    setScanError(null)
+    setActive(true)
+  }, [])
+
   const handleConfirmRedeem = useCallback(async () => {
     if (!scannedVoucher) return
     setCompleting(true)
@@ -97,14 +101,7 @@ export default function ScanScreen() {
     } finally {
       setCompleting(false)
     }
-  }, [scannedVoucher])
-
-  function closeModal() {
-    setModalVisible(false)
-    setScannedVoucher(null)
-    setScanError(null)
-    setActive(true)
-  }
+  }, [scannedVoucher, closeModal])
 
   return (
     <View style={styles.container}>

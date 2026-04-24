@@ -58,13 +58,13 @@ const styles = StyleSheet.create({
   },
   cardSelected: {
     borderColor: colors.primary,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.primaryFixed,
   },
   iconWrap: {
     width: 44,
     height: 44,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.surfaceContainerHighest,
+    backgroundColor: colors.sand,
     alignItems: 'center',
     justifyContent: 'center',
   },

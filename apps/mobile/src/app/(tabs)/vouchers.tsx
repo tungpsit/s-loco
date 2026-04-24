@@ -3,7 +3,15 @@
  */
 import { router } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import ErrorState from '../../components/error-state'
 import GiftModal from '../../components/gift-modal'
@@ -38,11 +46,8 @@ export default function VouchersScreen() {
       <View style={styles.cardWrap}>
         <VoucherCardComponent item={item} onPress={() => router.push(`/voucher/${item.id}`)} />
         {item.status === 'paid' && (
-          <Pressable
-            style={styles.giftBtn}
-            onPress={() => setGiftVoucher(item)}
-          >
-            <Text style={styles.giftBtnText}>🎁 Tặng</Text>
+          <Pressable style={styles.giftBtn} onPress={() => setGiftVoucher(item)}>
+            <Text style={styles.giftBtnText}>Tặng voucher</Text>
           </Pressable>
         )}
       </View>
@@ -54,6 +59,7 @@ export default function VouchersScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Your coastal wallet</Text>
         <Text style={styles.title}>Vé của tôi</Text>
         <Text style={styles.subtitle}>Xuất trình QR khi sử dụng dịch vụ</Text>
       </View>
@@ -90,7 +96,7 @@ export default function VouchersScreen() {
           ListEmptyComponent={
             !isLoading ? (
               <View style={styles.empty}>
-                <Text style={styles.emptyEmoji}>🎫</Text>
+                <Text style={styles.emptyEmoji}>SL</Text>
                 <Text style={styles.emptyTitle}>Chưa có voucher</Text>
                 <Text style={styles.emptyText}>
                   Mua dịch vụ để nhận voucher và xuất trình QR khi sử dụng.
@@ -134,7 +140,14 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
   },
-  title: { ...typography.headlineMd },
+  eyebrow: {
+    ...typography.labelSm,
+    color: colors.coral,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  title: { ...typography.headlineMd, color: colors.primary },
   subtitle: { ...typography.bodyMd, color: colors.onSurfaceVariant, marginTop: 4 },
   tabs: {
     paddingHorizontal: spacing.base,
@@ -142,13 +155,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   tab: {
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   tabActive: {
-    backgroundColor: colors.primaryContainer,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   tabText: { ...typography.labelMd, color: colors.onSurfaceVariant },
   tabTextActive: {
@@ -168,7 +184,7 @@ const styles = StyleSheet.create({
   },
   giftBtnText: {
     ...typography.labelMd,
-    color: colors.primary,
+    color: colors.coral,
     fontWeight: '600',
   },
   empty: {
@@ -176,7 +192,12 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     paddingHorizontal: spacing.xl,
   },
-  emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
+  emptyEmoji: {
+    ...typography.headlineMd,
+    color: colors.primary,
+    marginBottom: spacing.md,
+    fontWeight: '800',
+  },
   emptyTitle: { ...typography.titleMd, marginBottom: spacing.xs },
   emptyText: {
     ...typography.bodyMd,

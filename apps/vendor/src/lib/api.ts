@@ -22,10 +22,10 @@ export async function setToken(token: string | null) {
 export async function api<T = unknown>(
   path: string,
   opts?: RequestInit & { json?: unknown },
-): Promise<{ ok: boolean; data: T; status: number }> {
+): Promise<ApiResult<T>> {
   const token = await getToken()
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (token) headers['Authorization'] = `Bearer ${token}`
+  if (token) headers.Authorization = `Bearer ${token}`
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...opts,
@@ -40,15 +40,31 @@ export async function api<T = unknown>(
     data = null
   }
 
-  return { ok: res.ok, data: data as T, status: res.status }
+  return { ok: res.ok, data: data as ApiEnvelope<T>, status: res.status }
 }
 
 // ─── Auth ───────────────────────────────────────────────
 export const authApi = {
   login: (email: string, password: string) =>
-    api<{ access_token: string; refresh_token: string; user: VendorUser }>('/auth/login', {
+    api<AuthLoginResult>('/auth/login', {
       method: 'POST',
       json: { email, password },
+    }).then((res) => {
+      const payload = res.data?.data
+      if (payload?.tokens) {
+        return {
+          ...res,
+          data: {
+            ...res.data,
+            data: {
+              access_token: payload.tokens.access_token,
+              refresh_token: payload.tokens.refresh_token,
+              user: payload.user,
+            },
+          },
+        } as ApiResult<AuthLoginLegacyResult>
+      }
+      return res as unknown as ApiResult<AuthLoginLegacyResult>
     }),
   me: () => api<{ user: VendorUser }>('/auth/me'),
   logout: () => api('/auth/logout', { method: 'POST' }),
@@ -79,14 +95,14 @@ export const voucherApi = {
     if (params?.status) q.set('status', params.status)
     q.set('page', String(params?.page ?? 1))
     q.set('limit', String(params?.limit ?? 20))
-    return api<PaginatedResult<Voucher>>(`/vouchers?${q}`)
+    return api<PaginatedResult<Voucher>>(`/vouchers/vendor?${q}`)
   },
+  detail: (id: string) => api<Voucher>(`/vouchers/vendor/${id}`),
 }
 
 // ─── Services ───────────────────────────────────────────
 export const serviceApi = {
-  listByVendor: (vendorId: string) =>
-    api<{ services: Service[] }>(`/services/vendor/${vendorId}`),
+  listByVendor: (vendorId: string) => api<{ services: Service[] }>(`/services/vendor/${vendorId}`),
   create: (vendorId: string, data: CreateServiceInput) =>
     api<{ service: Service }>(`/services/vendor/${vendorId}`, {
       method: 'POST',
@@ -97,13 +113,24 @@ export const serviceApi = {
       method: 'PATCH',
       json: data,
     }),
-  delete: (id: string) =>
-    api(`/services/${id}`, { method: 'DELETE' }),
+  delete: (id: string) => api(`/services/${id}`, { method: 'DELETE' }),
 }
 
 // ─── Vendor Profile ──────────────────────────────────────
 export const vendorApi = {
-  profile: () => api<VendorProfile>('/vendors/me'),
+  profile: () =>
+    api<{ vendor: VendorProfile }>('/vendors/me').then(
+      (res) =>
+        ({
+          ...res,
+          data: res.data
+            ? {
+                ...res.data,
+                data: res.data.data?.vendor,
+              }
+            : res.data,
+        }) as ApiResult<VendorProfile>,
+    ),
   update: (id: string, data: UpdateVendorInput) =>
     api<{ vendor: VendorProfile }>(`/vendors/${id}`, {
       method: 'PATCH',
@@ -120,10 +147,8 @@ export const notificationsApi = {
     return api<PaginatedResult<NotifItem>>(`/notifications?${q}`)
   },
   unreadCount: () => api<{ unread: number }>('/notifications/count'),
-  markRead: (id: string) =>
-    api(`/notifications/${id}/read`, { method: 'POST' }),
-  markAllRead: () =>
-    api('/notifications/read-all', { method: 'POST' }),
+  markRead: (id: string) => api(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: () => api('/notifications/read-all', { method: 'POST' }),
   registerToken: (token: string, platform: string) =>
     api('/notifications/register-token', {
       method: 'POST',
@@ -138,6 +163,34 @@ export interface NotifItem {
   body: string
   is_read: boolean
   created_at: string
+}
+
+export interface ApiEnvelope<T> {
+  success: boolean
+  data?: T
+  error?: { code: string; message: string }
+}
+
+export interface ApiResult<T> {
+  ok: boolean
+  data: ApiEnvelope<T> | null
+  status: number
+}
+
+export interface AuthLoginResult {
+  user: VendorUser
+  tokens: {
+    access_token: string
+    refresh_token: string
+    token_type?: string
+    expires_in?: number
+  }
+}
+
+export interface AuthLoginLegacyResult {
+  access_token: string
+  refresh_token: string
+  user: VendorUser
 }
 
 // ─── Settlements ─────────────────────────────────────────

@@ -1,0 +1,13 @@
+- generic [ref=e33]:
+  - generic [ref=e34]:
+    - generic [ref=e35]: Nhập mã OTP
+    - generic [ref=e36]: Mã 4 chữ số đã được gửi đến 0912345679
+  - generic [ref=e37]:
+    - textbox [active] [ref=e38]
+    - textbox [ref=e39]
+    - textbox [ref=e40]
+    - textbox [ref=e41]
+  - generic [ref=e42]: Xác minh
+  - generic [ref=e43]:
+    - generic [ref=e44]: Không nhận được mã?
+    - generic [ref=e45]: Gửi lại sau 59s

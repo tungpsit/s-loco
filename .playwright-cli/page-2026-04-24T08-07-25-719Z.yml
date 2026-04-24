@@ -1,0 +1,110 @@
+- generic [ref=e135]:
+  - generic [ref=e136]:
+    - generic [ref=e137] [cursor=pointer]:
+      - generic [ref=e138]: 🏠
+      - generic [ref=e139]: Tổng quan
+    - generic [ref=e140] [cursor=pointer]:
+      - generic [ref=e141]: 📷
+      - generic [ref=e142]: Quét QR
+    - generic [ref=e143] [cursor=pointer]:
+      - generic [ref=e144]: 🧾
+      - generic [ref=e145]: Đơn hàng
+    - generic [ref=e146] [cursor=pointer]:
+      - generic [ref=e147]: 💰
+      - generic [ref=e148]: Thu nhập
+    - generic [active] [ref=e149] [cursor=pointer]:
+      - generic [ref=e150]: ⚙️
+      - generic [ref=e151]: Cài đặt
+  - generic [ref=e152]:
+    - generic [ref=e154]:
+      - heading [level=1] [ref=e207]: Tổng quan
+      - generic [ref=e160]:
+        - generic [ref=e162]:
+          - generic [ref=e163]:
+            - generic [ref=e164]: Chào buổi chiều
+            - generic [ref=e165]: Chủ cửa hàng
+          - generic [ref=e167]: 🏪
+        - generic [ref=e168]:
+          - generic [ref=e170]:
+            - generic [ref=e172]: 🛒
+            - generic [ref=e173]: Đơn hôm nay
+            - generic [ref=e174]: "0"
+          - generic [ref=e176]:
+            - generic [ref=e178]: 💰
+            - generic [ref=e179]: Doanh thu hôm nay
+            - generic [ref=e180]: 0₫
+          - generic [ref=e182]:
+            - generic [ref=e184]: ⏳
+            - generic [ref=e185]: Chờ giải ngân
+            - generic [ref=e186]: 0₫
+          - generic [ref=e188]:
+            - generic [ref=e190]: ✅
+            - generic [ref=e191]: Đã thanh toán
+            - generic [ref=e192]: 0₫
+        - generic [ref=e193]:
+          - generic [ref=e194]:
+            - generic [ref=e195]: Tổng doanh thu
+            - generic [ref=e196]: 52.180.000₫
+          - generic [ref=e197]: 📊
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - generic [ref=e200]: Đơn hàng gần đây
+            - generic [ref=e201] [cursor=pointer]: Xem tất cả ›
+          - generic [ref=e202]:
+            - generic [ref=e203]: 📋
+            - generic [ref=e204]: Chưa có đơn hàng nào
+            - generic [ref=e205]: Đơn hàng sẽ xuất hiện khi có khách đặt dịch vụ
+    - generic [ref=e209]:
+      - heading "Cài đặt" [level=1] [ref=e211]
+      - generic [ref=e214]:
+        - generic [ref=e216]: Cài đặt
+        - generic [ref=e217]:
+          - generic [ref=e219]: 🏪
+          - generic [ref=e220]:
+            - generic [ref=e221]: Chủ cửa hàng
+            - generic [ref=e222]: vendor1@slocal.vn
+            - generic [ref=e223]: 👤 Chủ cửa hàng
+        - generic [ref=e224]:
+          - generic [ref=e225]:
+            - generic [ref=e226]: Quản lý
+            - generic [ref=e227]:
+              - generic [ref=e228] [cursor=pointer]:
+                - generic [ref=e229]: 📝
+                - generic [ref=e231]: Thông tin cửa hàng
+                - generic [ref=e232]: ›
+              - generic [ref=e233] [cursor=pointer]:
+                - generic [ref=e234]: 🎟️
+                - generic [ref=e236]: Quản lý dịch vụ
+                - generic [ref=e237]: ›
+          - generic [ref=e238]:
+            - generic [ref=e239]: Tài khoản
+            - generic [ref=e240]:
+              - generic:
+                - generic [ref=e241]: 🔔
+                - generic [ref=e242]:
+                  - generic [ref=e243]: Thông báo
+                  - generic [ref=e244]: Bật thông báo đẩy
+                - generic [ref=e245]: ›
+              - generic [ref=e246] [cursor=pointer]:
+                - generic [ref=e247]: 🔐
+                - generic [ref=e249]: Đổi mật khẩu
+                - generic [ref=e250]: ›
+          - generic [ref=e251]:
+            - generic [ref=e252]: Hỗ trợ
+            - generic [ref=e253]:
+              - generic:
+                - generic [ref=e254]: 📖
+                - generic [ref=e256]: Hướng dẫn sử dụng
+                - generic [ref=e257]: ›
+              - generic:
+                - generic [ref=e258]: 💬
+                - generic [ref=e260]: Liên hệ hỗ trợ
+                - generic [ref=e261]: ›
+              - generic:
+                - generic [ref=e262]: ℹ️
+                - generic [ref=e263]:
+                  - generic [ref=e264]: Về S-Loco Vendor
+                  - generic [ref=e265]: Phiên bản 1.0.0
+                - generic [ref=e266]: ›
+        - generic [ref=e268] [cursor=pointer]: Đăng xuất
+        - generic [ref=e269]: © 2026 S-Loco · Sầm Sơn

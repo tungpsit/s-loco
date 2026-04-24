@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { request } from './helpers'
+import { request, vendorLogin } from './helpers'
 
 describe('Vendor & Service Management', () => {
   // ─── Public Endpoints ───
@@ -39,6 +39,18 @@ describe('Vendor & Service Management', () => {
         json: { name: 'Test Vendor', phone: '0901234567' },
       })
       expect(status).toBe(401)
+    })
+
+    test('GET /vendors/me — vendor owner gets own vendor profile', async () => {
+      const token = await vendorLogin()
+      expect(token).toBeTruthy()
+
+      const { status, data } = await request('/api/v1/vendors/me', { token })
+
+      expect(status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.vendor.id).toBeTruthy()
+      expect(data.data.vendor.ownerId).toBeTruthy()
     })
   })
 

@@ -3,11 +3,11 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev": "bun run --env-file=.env src/index.ts",
+    "dev": "bun run --env-file=../../.env src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=./dist",
     "check": "tsc --noEmit",
     "lint": "biome check src/",
-    "test": "bun test tests/"
+    "test": "bun test tests/ --env-file=../../.env"
   },
   "dependencies": {
     "@S-Loco/db": "workspace:*",

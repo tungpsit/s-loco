@@ -98,8 +98,14 @@ export const contentApi = {
     q.set('page', String(params?.page || 1))
     return api(`/content/articles?${q}`)
   },
-  create: (data: { title: string; slug: string; content?: string; category: string; isPublished?: boolean }) =>
-    api('/content/articles', { method: 'POST', body: JSON.stringify(data) }),
+  create: (data: { title: string; slug: string; content?: string; category: string; coverImage?: string; isPublished?: boolean }) =>
+    api('/content/articles', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...data,
+        coverImageUrl: data.coverImage,
+      }),
+    }),
   update: (id: string, data: Record<string, any>) =>
     api(`/content/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: string) => api(`/content/articles/${id}`, { method: 'DELETE' }),

@@ -6,11 +6,11 @@ import { Platform, Text, View } from 'react-native'
 import { colors, glass, spacing } from '../../lib/theme'
 
 const TAB_ICONS: Record<string, string> = {
-  index: '🏠',
-  browse: '🔍',
-  vouchers: '🎫',
-  ai: '🤖',
-  profile: '👤',
+  index: 'SL',
+  browse: 'EX',
+  vouchers: 'QR',
+  ai: 'AI',
+  profile: 'ME',
 }
 
 export default function TabLayout() {
@@ -24,12 +24,19 @@ export default function TabLayout() {
               width: 44,
               height: 44,
               borderRadius: 22,
-              backgroundColor: focused ? colors.primaryFixed : 'transparent',
+              backgroundColor: focused ? colors.primary : 'transparent',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.55 }}>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: '800',
+                color: focused ? colors.white : colors.outline,
+                opacity: focused ? 1 : 0.72,
+              }}
+            >
               {TAB_ICONS[route.name] ?? '●'}
             </Text>
           </View>

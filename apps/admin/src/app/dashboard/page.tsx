@@ -18,6 +18,10 @@ import {
 
 const fmt = (n?: number | string) => n != null ? Number(n).toLocaleString('vi-VN') : '—'
 const fmtVND = (n?: number | string) => n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—'
+const tooltipNumber = (value: number | string | readonly (string | number)[] | undefined) => {
+  if (Array.isArray(value)) return Number(value[0] ?? 0)
+  return Number(value ?? 0)
+}
 
 // Chart color tokens matching S-Loco palette
 const CHART_COLORS = {
@@ -178,7 +182,7 @@ export default function DashboardPage() {
                   <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`} />
                   <Tooltip
                     contentStyle={customTooltipStyle}
-                    formatter={(value: number) => [value.toLocaleString('vi-VN') + '₫', 'Doanh thu']}
+                    formatter={(value) => [`${tooltipNumber(value).toLocaleString('vi-VN')}₫`, 'Doanh thu']}
                     labelStyle={{ color: '#374151', fontWeight: 600 }}
                   />
                   <Bar dataKey='revenue' fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} maxBarSize={40} />
@@ -217,7 +221,7 @@ export default function DashboardPage() {
                   </Pie>
                   <Tooltip
                     contentStyle={customTooltipStyle}
-                    formatter={(value: number, name: string) => [`${value} đơn`, name]}
+                    formatter={(value, name) => [`${tooltipNumber(value)} đơn`, String(name)]}
                     labelStyle={{ color: '#374151' }}
                   />
                   <Legend
@@ -250,7 +254,7 @@ export default function DashboardPage() {
                 <YAxis type='category' dataKey='name' tick={{ fontSize: 12, fill: '#374151' }} axisLine={false} tickLine={false} width={130} />
                 <Tooltip
                   contentStyle={customTooltipStyle}
-                  formatter={(value: number) => [value.toLocaleString('vi-VN') + '₫', 'Doanh thu']}
+                  formatter={(value) => [`${tooltipNumber(value).toLocaleString('vi-VN')}₫`, 'Doanh thu']}
                   labelStyle={{ color: '#374151', fontWeight: 600 }}
                 />
                 <Bar dataKey='revenue' radius={[0, 4, 4, 0]} maxBarSize={28}>

@@ -9,7 +9,15 @@ const giftRoutes = new Hono<{ Variables: { userId: string | null; userRole: stri
 giftRoutes.post('/claim/:token', authMiddleware(), async (c) => {
   try {
     const token = c.req.param('token')
-    const userId = c.get('userId')!
+    if (!token) {
+      return c.json({ success: false, error: { code: 'INVALID_TOKEN', message: 'Token không hợp lệ.' } }, 400)
+    }
+
+    const userId = c.get('userId')
+    if (!userId) {
+      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, 401)
+    }
+
     const result = await giftSvc.claimGiftLink(token, userId)
     return c.json({ success: true, data: result })
   } catch (err) {

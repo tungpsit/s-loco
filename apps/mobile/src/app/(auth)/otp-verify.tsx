@@ -64,9 +64,9 @@ export default function OtpVerifyScreen() {
           await login(data.access_token, data.user)
 
           // Auto-claim pending gift if user came from a gift link
-          if (global.__pendingGiftToken) {
-            const token = global.__pendingGiftToken
-            global.__pendingGiftToken = undefined
+          if (globalThis.__pendingGiftToken) {
+            const token = globalThis.__pendingGiftToken
+            globalThis.__pendingGiftToken = undefined
             try {
               const { giftApi } = await import('../../lib/api')
               await giftApi.claim(token)

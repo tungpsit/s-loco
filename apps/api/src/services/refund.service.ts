@@ -51,6 +51,8 @@ export async function requestPartialRefund(
       await gw.processRefund({
         transactionId: payment.gatewayTransactionId,
         amount: refundAmount,
+        originalAmount: Number(payment.amount),
+        gatewayTransactionId: payment.gatewayTransactionId,
         reason,
       })
     }
@@ -61,7 +63,7 @@ export async function requestPartialRefund(
     await db.insert(refunds).values({
       voucherId,
       paymentId: payment.id,
-      amount: refundAmount,
+      amount: String(refundAmount),
       gateway: payment.gateway,
       status: 'success',
       reason,

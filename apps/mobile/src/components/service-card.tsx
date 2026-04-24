@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { colors, spacing, typography } from '../../lib/theme'
+import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
 import type { ServiceItem } from '../lib/api'
 
 interface Props {
@@ -23,13 +23,19 @@ export default function ServiceCard({ item, onPress }: Props) {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
-      {/* Image */}
       <View style={styles.imageWrap}>
         {item.images?.[0] ? (
           <Image source={{ uri: item.images[0] }} style={styles.image} resizeMode="cover" />
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Text style={styles.imageEmoji}>📍</Text>
+            <Text style={styles.imageKicker}>S-Loco</Text>
+            <Text style={styles.imagePlaceholderText}>Coastal experience</Text>
+          </View>
+        )}
+        <View style={styles.imageShade} />
+        {item.category && (
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>{item.category}</Text>
           </View>
         )}
         {hasDiscount && (
@@ -39,7 +45,6 @@ export default function ServiceCard({ item, onPress }: Props) {
         )}
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.name} numberOfLines={2}>
           {item.name}
@@ -73,36 +78,65 @@ export default function ServiceCard({ item, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(228, 209, 181, 0.7)',
+    ...shadows.card,
   },
   imageWrap: {
     position: 'relative',
-    height: 140,
+    height: 148,
+    backgroundColor: colors.primary,
   },
   image: {
     width: '100%',
     height: '100%',
   },
+  imageShade: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(7, 89, 133, 0.1)',
+  },
   imagePlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.surfaceContainerLow,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    justifyContent: 'flex-end',
+    padding: spacing.md,
   },
-  imageEmoji: {
-    fontSize: 36,
-    opacity: 0.5,
+  imageKicker: {
+    ...typography.labelSm,
+    color: colors.primaryFixed,
+    textTransform: 'uppercase',
+    fontWeight: '700',
+  },
+  imagePlaceholderText: {
+    ...typography.titleSm,
+    color: colors.white,
+    marginTop: 2,
+  },
+  categoryBadge: {
+    position: 'absolute',
+    left: spacing.sm,
+    top: spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: borderRadius.full,
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+  },
+  categoryText: {
+    ...typography.labelSm,
+    color: colors.primary,
+    fontWeight: '700',
   },
   discountBadge: {
     position: 'absolute',
     top: spacing.sm,
     right: spacing.sm,
-    backgroundColor: colors.tertiaryContainer,
-    borderRadius: 8,
+    backgroundColor: colors.coral,
+    borderRadius: borderRadius.full,
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 9,
   },
   discountText: {
     color: colors.white,
@@ -118,6 +152,7 @@ const styles = StyleSheet.create({
   },
   vendor: {
     ...typography.bodySm,
+    color: colors.onSurfaceVariant,
     marginBottom: spacing.sm,
   },
   footer: {
@@ -136,12 +171,16 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   discountedPrice: {
-    color: colors.error,
+    color: colors.coral,
   },
   rating: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
+    backgroundColor: colors.sand,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   ratingStar: {
     fontSize: 12,

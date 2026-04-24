@@ -6,6 +6,7 @@ import * as schema from './schema'
 // Create the database client
 export function createDb(url?: string) {
   const databaseUrl = url || process.env.DATABASE_URL
+  console.debug('Database URL:', databaseUrl)
   if (!databaseUrl) {
     throw new Error('DATABASE_URL is required')
   }

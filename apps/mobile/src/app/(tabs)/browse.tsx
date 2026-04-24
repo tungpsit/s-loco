@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   FlatList,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,7 +18,7 @@ import ErrorState from '../../components/error-state'
 import ServiceCard from '../../components/service-card'
 import { useServices, useVendors } from '../../hooks/useQuery'
 import type { ServiceItem, VendorCard } from '../../lib/api'
-import { borderRadius, colors, spacing, typography } from '../../lib/theme'
+import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
 
 const CATEGORIES = [
   { slug: '', label: 'Tất cả' },
@@ -79,7 +78,7 @@ export default function BrowseScreen() {
           {item.image_url ? (
             <View style={styles.vendorImageInner} />
           ) : (
-            <Text style={styles.vendorEmoji}>🏪</Text>
+            <Text style={styles.vendorEmoji}>Local</Text>
           )}
         </View>
         <View style={styles.vendorContent}>
@@ -104,12 +103,13 @@ export default function BrowseScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Explore Sam Son</Text>
         <Text style={styles.title}>Tìm kiếm</Text>
+        <Text style={styles.subtitle}>Chọn trải nghiệm, so sánh giá và giữ voucher trên máy.</Text>
       </View>
 
-      {/* Search bar */}
       <View style={styles.searchWrap}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Text style={styles.searchIcon}>Search</Text>
         <TextInput
           style={styles.searchInput}
           placeholder="Tìm dịch vụ, cửa hàng..."
@@ -120,17 +120,12 @@ export default function BrowseScreen() {
         />
         {query.length > 0 && (
           <TouchableOpacity onPress={() => setQuery('')}>
-            <Text style={{ fontSize: 16 }}>✕</Text>
+            <Text style={styles.clearText}>×</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Category filter */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categories}
-      >
+      <View style={styles.categories}>
         {CATEGORIES.map((cat) => (
           <TouchableOpacity
             key={cat.slug}
@@ -143,9 +138,8 @@ export default function BrowseScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
-      {/* Tab toggle */}
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tab, view === 'services' && styles.tabActive]}
@@ -170,6 +164,7 @@ export default function BrowseScreen() {
         <ErrorState onRetry={svcRefetch} />
       ) : view === 'services' ? (
         <FlatList
+          key="services-grid"
           data={services}
           renderItem={renderService}
           keyExtractor={(item) => item.id}
@@ -187,6 +182,7 @@ export default function BrowseScreen() {
         />
       ) : (
         <FlatList
+          key="vendors-list"
           data={vendors}
           renderItem={renderVendor}
           keyExtractor={(item) => item.id}
@@ -208,41 +204,59 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: {
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
-  title: { ...typography.headlineMd },
+  eyebrow: {
+    ...typography.labelSm,
+    color: colors.coral,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  title: { ...typography.headlineMd, color: colors.primary },
+  subtitle: { ...typography.bodySm, color: colors.onSurfaceVariant, marginTop: 4, maxWidth: 300 },
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: spacing.base,
     marginBottom: spacing.md,
-    backgroundColor: colors.surfaceContainerHighest,
-    borderRadius: borderRadius.full,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: 12,
     gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
-  searchIcon: { fontSize: 18 },
+  searchIcon: { ...typography.labelSm, color: colors.primary, fontWeight: '800' },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: colors.onSurface,
     ...Platform.select({ web: { border: 'none' } }),
   } as object,
+  clearText: { fontSize: 20, color: colors.outline, fontWeight: '600' },
   categories: {
     paddingHorizontal: spacing.base,
     gap: spacing.sm,
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: spacing.md,
   },
   chip: {
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceContainerHighest,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   chipActive: {
     backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   chipText: {
     ...typography.labelMd,
@@ -256,17 +270,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: spacing.base,
     marginBottom: spacing.md,
-    gap: spacing.sm,
+    padding: 4,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surfaceContainerLow,
   },
   tab: {
     flex: 1,
     paddingVertical: 10,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.surfaceContainerLowest,
     alignItems: 'center',
   },
   tabActive: {
-    backgroundColor: colors.primaryFixed,
+    backgroundColor: colors.surfaceContainerLowest,
+    ...shadows.card,
   },
   tabText: { ...typography.labelLg, color: colors.onSurfaceVariant },
   tabTextActive: { color: colors.primary, fontWeight: '600' },
@@ -279,19 +295,22 @@ const styles = StyleSheet.create({
   vendorCard: {
     flexDirection: 'row',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     marginHorizontal: spacing.base,
     marginBottom: spacing.md,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
   vendorImage: {
-    width: 100,
-    height: 100,
+    width: 108,
+    height: 112,
     alignItems: 'center',
     justifyContent: 'center',
   },
   vendorImageInner: { width: '100%', height: '100%' },
-  vendorEmoji: { fontSize: 36, opacity: 0.5 },
+  vendorEmoji: { ...typography.labelMd, color: colors.primary, fontWeight: '800' },
   vendorContent: {
     flex: 1,
     padding: spacing.md,
@@ -300,7 +319,7 @@ const styles = StyleSheet.create({
   },
   vendorName: { ...typography.titleMd },
   vendorAddress: { ...typography.bodySm, color: colors.onSurfaceVariant },
-  vendorRating: { ...typography.labelMd, color: '#F59E0B' },
+  vendorRating: { ...typography.labelMd, color: colors.amber, fontWeight: '800' },
   empty: {
     alignItems: 'center',
     paddingVertical: 60,

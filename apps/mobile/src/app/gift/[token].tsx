@@ -7,8 +7,8 @@ import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { giftApi } from '../../lib/api'
-import { useAuthStore } from '../../stores/auth-store'
 import { colors, spacing, typography } from '../../lib/theme'
+import { useAuthStore } from '../../stores/auth-store'
 
 export default function GiftClaimScreen() {
   const { isLoggedIn } = useAuthStore()
@@ -35,7 +35,7 @@ export default function GiftClaimScreen() {
 
     const runClaim = async () => {
       if (!isLoggedIn) {
-        global.__pendingGiftToken = token
+        globalThis.__pendingGiftToken = token
         router.replace('/(auth)/login')
         return
       }
@@ -44,8 +44,9 @@ export default function GiftClaimScreen() {
         await giftApi.claim(token)
         setPhase('success')
         setTimeout(() => router.replace('/(tabs)/vouchers'), 2000)
-      } catch (err: any) {
-        setErrorMsg(err.message ?? 'Không thể nhận voucher.')
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Không thể nhận voucher.'
+        setErrorMsg(msg)
         setPhase('error')
       }
     }

@@ -1,0 +1,64 @@
+- generic [ref=e8]:
+  - generic [ref=e11]:
+    - heading "Tổng quan" [level=1] [ref=e13]
+    - generic [ref=e17]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: Chào buổi chiều
+          - generic [ref=e22]: Chủ cửa hàng
+        - generic [ref=e24]: 🏪
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e28]: 🛒
+          - generic [ref=e29]: Đơn hôm nay
+          - generic [ref=e30]: "0"
+        - generic [ref=e31]:
+          - generic [ref=e33]: 💰
+          - generic [ref=e34]: Doanh thu hôm nay
+          - generic [ref=e35]: 0₫
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e39]: ⏳
+          - generic [ref=e40]: Chờ giải ngân
+          - generic [ref=e41]: 0₫
+        - generic [ref=e42]:
+          - generic [ref=e44]: ✅
+          - generic [ref=e45]: Đã thanh toán
+          - generic [ref=e46]: 0₫
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: Tổng doanh thu
+          - generic [ref=e50]: 0₫
+        - generic [ref=e51]: 📊
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - generic [ref=e54]: Đơn hàng gần đây
+          - generic [ref=e55] [cursor=pointer]: Xem tất cả ›
+        - progressbar [ref=e56]:
+          - img [ref=e58]
+  - tablist [ref=e63]:
+    - tab "🏠 🏠 Tổng quan" [selected] [ref=e65] [cursor=pointer]:
+      - generic [ref=e66]:
+        - generic [ref=e68]: 🏠
+        - generic [ref=e70]: 🏠
+      - generic: Tổng quan
+    - tab "📷 📷 Quét QR" [ref=e72] [cursor=pointer]:
+      - generic [ref=e73]:
+        - generic [ref=e75]: 📷
+        - generic [ref=e77]: 📷
+      - generic: Quét QR
+    - tab "🧾 🧾 Đơn hàng" [ref=e79] [cursor=pointer]:
+      - generic [ref=e80]:
+        - generic [ref=e82]: 🧾
+        - generic [ref=e84]: 🧾
+      - generic: Đơn hàng
+    - tab "💰 💰 Thu nhập" [ref=e86] [cursor=pointer]:
+      - generic [ref=e87]:
+        - generic [ref=e89]: 💰
+        - generic [ref=e91]: 💰
+      - generic: Thu nhập
+    - tab "⚙️ ⚙️ Cài đặt" [ref=e93] [cursor=pointer]:
+      - generic [ref=e94]:
+        - generic [ref=e96]: ⚙️
+        - generic [ref=e98]: ⚙️
+      - generic: Cài đặt

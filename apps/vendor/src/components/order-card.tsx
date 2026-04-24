@@ -16,8 +16,6 @@ const colors = {
   warning: '#E65100',
 }
 
-type VoucherStatus = Voucher['status']
-
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   created: { label: 'Mới tạo', bg: '#E3F2FD', color: '#1565C0' },
   paid: { label: 'Đã thanh toán', bg: '#E8F5E9', color: '#2E7D32' },
@@ -43,7 +41,7 @@ export function OrderCard({ voucher, onPress }: OrderCardProps) {
 
   const fmtAmount = (n?: number | string) => {
     if (n == null) return '—'
-    return Number(n).toLocaleString('vi-VN') + '₫'
+    return `${Number(n).toLocaleString('vi-VN')}₫`
   }
 
   const fmtDate = (d?: string) => {
@@ -73,16 +71,12 @@ export function OrderCard({ voucher, onPress }: OrderCardProps) {
           )}
         </View>
         <View style={[styles.badge, { backgroundColor: statusCfg.bg }]}>
-          <Text style={[styles.badgeText, { color: statusCfg.color }]}>
-            {statusCfg.label}
-          </Text>
+          <Text style={[styles.badgeText, { color: statusCfg.color }]}>{statusCfg.label}</Text>
         </View>
       </View>
 
       <View style={styles.bottomRow}>
-        <Text style={styles.date}>
-          {fmtDate(voucher.redeemed_at ?? voucher.created_at)}
-        </Text>
+        <Text style={styles.date}>{fmtDate(voucher.redeemed_at ?? voucher.created_at)}</Text>
         <Text style={styles.amount}>{fmtAmount(voucher.final_amount)}</Text>
       </View>
     </TouchableOpacity>

@@ -13,8 +13,8 @@ import {
   TextInput,
   View,
 } from 'react-native'
-import { vouchersApi } from '../lib/api'
 import type { VoucherItem } from '../lib/api'
+import { vouchersApi } from '../lib/api'
 import { borderRadius, colors, spacing, typography } from '../lib/theme'
 
 const { width } = Dimensions.get('window')
@@ -47,7 +47,13 @@ export default function GiftModal({ voucher, visible, onClose, onSuccess }: Prop
     try {
       await vouchersApi.giftByPhone(voucher.id, phone.trim(), message.trim() || undefined)
       Alert.alert('Thành công', `Đã tặng voucher cho ${phone.trim()}!`, [
-        { text: 'OK', onPress: () => { onSuccess(); onClose() } },
+        {
+          text: 'OK',
+          onPress: () => {
+            onSuccess()
+            onClose()
+          },
+        },
       ])
     } catch (err: any) {
       Alert.alert('Lỗi', err.message ?? 'Không thể tặng voucher. Vui lòng thử lại.')
@@ -160,7 +166,8 @@ export default function GiftModal({ voucher, visible, onClose, onSuccess }: Prop
               {!giftLink ? (
                 <>
                   <Text style={styles.linkDesc}>
-                    Link tặng sẽ có hiệu lực trong 24h. Người nhận cần đăng nhập S-Loco để nhận voucher.
+                    Link tặng sẽ có hiệu lực trong 24h. Người nhận cần đăng nhập S-Loco để nhận
+                    voucher.
                   </Text>
                   <Pressable
                     style={[styles.primaryBtn, loadingLink && styles.primaryBtnDisabled]}
@@ -178,7 +185,9 @@ export default function GiftModal({ voucher, visible, onClose, onSuccess }: Prop
                 <>
                   <Text style={styles.label}>Link tặng của bạn</Text>
                   <View style={styles.linkBox}>
-                    <Text style={styles.linkText} numberOfLines={2}>{giftLink}</Text>
+                    <Text style={styles.linkText} numberOfLines={2}>
+                      {giftLink}
+                    </Text>
                   </View>
                   <View style={styles.linkActions}>
                     <Pressable style={styles.secondaryBtn} onPress={handleCopyLink}>

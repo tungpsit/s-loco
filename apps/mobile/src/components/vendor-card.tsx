@@ -1,9 +1,9 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { colors, spacing, typography } from '../../lib/theme'
-import type { VendorCard } from '../lib/api'
+import type { VendorCard as VendorCardItem } from '../lib/api'
 
 interface Props {
-  item: VendorCard
+  item: VendorCardItem
   onPress?: () => void
 }
 

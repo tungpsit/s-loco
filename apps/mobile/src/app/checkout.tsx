@@ -15,11 +15,11 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import type { PaymentGateway } from '../components/payment-method-card'
 import PaymentMethodCard, { PAYMENT_GATEWAYS } from '../components/payment-method-card'
 import { useOrderDetail } from '../hooks/useQuery'
-import type { PaymentGateway } from '../components/payment-method-card'
 import { paymentsApi } from '../lib/api'
-import { borderRadius, colors, spacing, typography } from '../lib/theme'
+import { borderRadius, colors, shadows, spacing, typography } from '../lib/theme'
 
 export default function CheckoutScreen() {
   const { orderId } = useLocalSearchParams<{ orderId?: string; serviceId?: string }>()
@@ -57,9 +57,7 @@ export default function CheckoutScreen() {
   }
 
   const order = data?.order
-  const totalAmount = order?.total_amount
-    ? order.total_amount.toLocaleString('vi-VN')
-    : null
+  const totalAmount = order?.total_amount ? order.total_amount.toLocaleString('vi-VN') : null
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -73,6 +71,14 @@ export default function CheckoutScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <View style={styles.hero}>
+          <Text style={styles.heroEyebrow}>Secure checkout</Text>
+          <Text style={styles.heroTitle}>Xác nhận voucher</Text>
+          <Text style={styles.heroText}>
+            Thanh toán qua cổng bảo mật, nhận voucher QR trong ví.
+          </Text>
+        </View>
+
         {/* Order summary */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Đơn hàng</Text>
@@ -84,15 +90,16 @@ export default function CheckoutScreen() {
             </View>
           ) : order ? (
             <View style={styles.orderCard}>
-              <Text style={styles.orderId}>Mã đơn #{order.id}</Text>
-              {order.items?.map((item, i) => (
-                <View key={i} style={styles.orderItem}>
+              <Text style={styles.orderId}>Mã đơn #{order.id.slice(0, 8).toUpperCase()}</Text>
+              {order.items?.map((item) => (
+                <View
+                  key={`${item.service_name}-${item.quantity}-${item.price}`}
+                  style={styles.orderItem}
+                >
                   <Text style={styles.orderItemName}>
                     {item.quantity}x {item.service_name}
                   </Text>
-                  <Text style={styles.orderItemPrice}>
-                    {item.price.toLocaleString('vi-VN')}đ
-                  </Text>
+                  <Text style={styles.orderItemPrice}>{item.price.toLocaleString('vi-VN')}đ</Text>
                 </View>
               ))}
               {totalAmount && (
@@ -163,6 +170,22 @@ const styles = StyleSheet.create({
   backBtnText: { ...typography.labelLg, color: colors.primary, fontWeight: '600' },
   title: { ...typography.titleMd, color: colors.onSurface },
   body: { paddingBottom: spacing.xl },
+  hero: {
+    margin: spacing.base,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    ...shadows.card,
+  },
+  heroEyebrow: {
+    ...typography.labelSm,
+    color: colors.primaryFixed,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  heroTitle: { ...typography.headlineMd, color: colors.white, marginBottom: spacing.xs },
+  heroText: { ...typography.bodySm, color: 'rgba(255,255,255,0.76)' },
   section: {
     paddingHorizontal: spacing.base,
     marginTop: spacing.lg,
@@ -171,10 +194,11 @@ const styles = StyleSheet.create({
   sectionSub: { ...typography.bodySm, color: colors.onSurfaceVariant, marginBottom: spacing.md },
   orderCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    padding: spacing.base,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
   orderId: { ...typography.labelMd, color: colors.outline, marginBottom: spacing.sm },
   orderItem: {
@@ -212,6 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    ...shadows.fab,
   },
   payBtnDisabled: {
     backgroundColor: colors.outline,

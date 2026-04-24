@@ -1,27 +1,28 @@
 /**
- * Test helpers — creates a Hono app instance for testing
- * without actually starting the HTTP server.
+ * Test helpers — send HTTP requests to running local API.
  */
-import app from '../src/index';
 
-// Re-export the app's fetch for Bun test
-export const testFetch = app.fetch
-
-/** Make a request to the test app */
+/** Make a request to the test API */
 export async function request(path: string, opts?: RequestInit & { json?: any; token?: string }) {
   const url = new URL(path, 'http://localhost:3000')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (opts?.token) headers['Authorization'] = `Bearer ${opts.token}`
-  if (opts?.headers) Object.assign(headers, opts.headers)
+  if (opts?.headers) Object.assign(headers, opts.headers as Record<string, string>)
 
-  const res = await testFetch(
-    new Request(url.toString(), {
-      method: opts?.method || 'GET',
-      headers,
-      body: opts?.json ? JSON.stringify(opts.json) : opts?.body,
-    }),
-  )
-  const data = await res.json()
+  const res = await fetch(url.toString(), {
+    method: opts?.method || 'GET',
+    headers,
+    body: opts?.json ? JSON.stringify(opts.json) : (opts?.body as BodyInit | null | undefined),
+  })
+
+  let data: any = null
+  const text = await res.text()
+  try {
+    data = text ? JSON.parse(text) : null
+  } catch {
+    data = text
+  }
+
   return { status: res.status, data }
 }
 
@@ -29,18 +30,18 @@ export async function request(path: string, opts?: RequestInit & { json?: any; t
 export async function adminLogin() {
   const { data } = await request('/api/v1/auth/login', {
     method: 'POST',
-    json: { email: 'admin@s-loco.vn', password: 'admin123' },
+    json: { email: 'admin@slocal.vn', password: 'admin123' },
   })
-  return data?.data?.access_token || null
+  return data?.data?.tokens?.access_token || data?.data?.access_token || null
 }
 
 /** Vendor login helper */
 export async function vendorLogin() {
   const { data } = await request('/api/v1/auth/login', {
     method: 'POST',
-    json: { email: 'vendor@test.vn', password: 'vendor123' },
+    json: { email: 'vendor1@slocal.vn', password: 'vendor123' },
   })
-  return data?.data?.access_token || null
+  return data?.data?.tokens?.access_token || data?.data?.access_token || null
 }
 
 /** Generate a random phone number for OTP tests */

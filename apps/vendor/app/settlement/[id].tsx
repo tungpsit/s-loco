@@ -1,15 +1,9 @@
-import { useEffect, useState, useCallback } from 'react'
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
 import { Stack, useLocalSearchParams } from 'expo-router'
-import { settlementApi } from '../../src/lib/api'
+import { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { ErrorState } from '../../src/components/error-state'
 import type { Settlement } from '../../src/lib/api'
+import { settlementApi } from '../../src/lib/api'
 
 const colors = {
   primary: '#005E97',
@@ -27,8 +21,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   rejected: { label: 'Từ chối', color: '#C62828' },
 }
 
-const fmt = (n?: number) =>
-  n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
+const fmt = (n?: number) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—')
 
 const fmtDate = (d?: string) =>
   d
@@ -62,7 +55,9 @@ export default function SettlementDetailScreen() {
     }
   }, [id])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   if (loading) {
     return (
@@ -93,10 +88,8 @@ export default function SettlementDetailScreen() {
       <ScrollView style={styles.container}>
         {/* Status */}
         <View style={styles.statusCard}>
-          <View style={[styles.statusBadge, { backgroundColor: statusCfg.color + '1A' }]}>
-            <Text style={[styles.statusText, { color: statusCfg.color }]}>
-              {statusCfg.label}
-            </Text>
+          <View style={[styles.statusBadge, { backgroundColor: `${statusCfg.color}1A` }]}>
+            <Text style={[styles.statusText, { color: statusCfg.color }]}>{statusCfg.label}</Text>
           </View>
           <Text style={styles.netAmount}>{fmt(settlement.net_amount)}</Text>
           <Text style={styles.netLabel}>Số tiền thực nhận</Text>
@@ -126,15 +119,9 @@ export default function SettlementDetailScreen() {
           <InfoRow label="Từ ngày" value={fmtDate(settlement.period_start)} />
           <InfoRow label="Đến ngày" value={fmtDate(settlement.period_end)} />
           <InfoRow label="Số voucher" value={String(settlement.voucher_count ?? 0)} />
-          <InfoRow
-            label="Ngày tạo"
-            value={fmtDate(settlement.created_at)}
-          />
+          <InfoRow label="Ngày tạo" value={fmtDate(settlement.created_at)} />
           {settlement.disbursed_at && (
-            <InfoRow
-              label="Ngày giải ngân"
-              value={fmtDate(settlement.disbursed_at)}
-            />
+            <InfoRow label="Ngày giải ngân" value={fmtDate(settlement.disbursed_at)} />
           )}
         </View>
 
@@ -182,7 +169,12 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
   statusCard: {
     backgroundColor: colors.primary,
     marginHorizontal: 16,

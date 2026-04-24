@@ -1,0 +1,34 @@
+- generic [ref=e456]:
+  - generic:
+    - generic:
+      - generic:
+        - link "(tabs), back" [ref=e458] [cursor=pointer]:
+          - /url: /
+        - heading "Dịch vụ" [level=1] [ref=e461]
+  - generic [ref=e464]:
+    - generic [ref=e467] [cursor=pointer]: ← Quay lại
+    - generic [ref=e469]:
+      - generic [ref=e470]:
+        - generic [ref=e472]: 📍
+        - generic [ref=e474]: "-17%"
+      - generic [ref=e475]:
+        - generic [ref=e476]: Mô Tô Nước 15 Phút
+        - generic [ref=e477]: 🏪 Karaoke Star Sầm Sơn
+        - generic [ref=e478]: ★ 0.0
+        - generic [ref=e479]:
+          - generic [ref=e480]: 300.000₫
+          - generic [ref=e481]: 250.000₫
+        - generic [ref=e482]:
+          - generic [ref=e483]: Mô tả
+          - generic [ref=e484]: Lái jet ski trên biển Sầm Sơn
+        - generic [ref=e485]:
+          - generic [ref=e486]: Thời lượng
+          - generic [ref=e487]: 15 phút
+    - generic [ref=e488]:
+      - generic [ref=e489]:
+        - generic [ref=e490]: Số lượng
+        - generic [ref=e491]:
+          - generic [ref=e493] [cursor=pointer]: −
+          - generic [ref=e494]: "1"
+          - generic [ref=e496] [cursor=pointer]: +
+      - generic [ref=e498] [cursor=pointer]: Mua ngay

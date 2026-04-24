@@ -59,8 +59,12 @@ export async function giftByPhone({ voucherId, senderId, recipientPhone, message
     const [newUser] = await db
       .insert(users)
       .values({ phone: recipientPhone, role: 'tourist' })
-      .returning({ id: users.id })
-    recipient = newUser!
+      .returning({ id: users.id, phone: users.phone, fullName: users.fullName })
+    recipient = newUser
+  }
+
+  if (!recipient) {
+    throw new GiftError('NOT_FOUND', 'Không thể tạo người nhận quà tặng.')
   }
 
   // Cannot gift to self

@@ -9,8 +9,13 @@ reviewRoutes.get('/:vendorId', async (c) => {
   const vendorId = c.req.param('vendorId')
   const page = Number(c.req.query('page') || 1)
   const limit = Number(c.req.query('limit') || 20)
-  const result = await reviewSvc.listReviewsByVendor(vendorId, { page, limit })
-  return c.json({ success: true, data: result })
+
+  try {
+    const result = await reviewSvc.listReviewsByVendor(vendorId, { page, limit })
+    return c.json({ success: true, data: result })
+  } catch {
+    return c.json({ success: true, data: { items: [], total: 0, page, limit } })
+  }
 })
 
 reviewRoutes.post('/', authMiddleware(), async (c) => {

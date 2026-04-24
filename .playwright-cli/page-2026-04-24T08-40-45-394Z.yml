@@ -1,0 +1,105 @@
+- generic [ref=e9]:
+  - generic [ref=e14]:
+    - generic [ref=e16]: Tìm kiếm
+    - generic [ref=e17]:
+      - generic [ref=e18]: 🔍
+      - textbox "Tìm dịch vụ, cửa hàng..." [ref=e19]
+    - generic [ref=e20]:
+      - generic:
+        - generic [ref=e22] [cursor=pointer]: Tất cả
+        - generic [ref=e24] [cursor=pointer]: Ẩm thực
+        - generic [ref=e26] [cursor=pointer]: Lưu trú
+        - generic [ref=e28] [cursor=pointer]: Spa
+        - generic [ref=e30] [cursor=pointer]: Xe điện
+        - generic [ref=e32] [cursor=pointer]: Giải trí
+        - generic [ref=e34] [cursor=pointer]: Mua sắm
+    - generic [ref=e35]:
+      - generic [ref=e37] [cursor=pointer]: Dịch vụ
+      - generic [ref=e39] [cursor=pointer]: Cửa hàng
+    - generic [ref=e457]:
+      - generic [ref=e459] [cursor=pointer]:
+        - generic [ref=e461]: 🏪
+        - generic [ref=e462]:
+          - generic [ref=e463]: Quán Ốc Sầm Sơn
+          - generic [ref=e464]: 📍 45 Nguyễn Du, Trường Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e465]: ★ 4.4
+      - generic [ref=e467] [cursor=pointer]:
+        - generic [ref=e469]: 🏪
+        - generic [ref=e470]:
+          - generic [ref=e471]: Nhà Hàng Thanh Lịch
+          - generic [ref=e472]: 📍 67 Trần Hưng Đạo, Bắc Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e473]: ★ 4.6
+      - generic [ref=e475] [cursor=pointer]:
+        - generic [ref=e477]: 🏪
+        - generic [ref=e478]:
+          - generic [ref=e479]: Quán Bún Cá Sầm Sơn
+          - generic [ref=e480]: 📍 89 Lê Lợi, Trung Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e481]: ★ 4.8
+      - generic [ref=e483] [cursor=pointer]:
+        - generic [ref=e485]: 🏪
+        - generic [ref=e486]:
+          - generic [ref=e487]: The Beach House Restaurant
+          - generic [ref=e488]: 📍 Bãi tắm B, Sầm Sơn, Thanh Hóa
+          - generic [ref=e489]: ★ 4.0
+      - generic [ref=e491] [cursor=pointer]:
+        - generic [ref=e493]: 🏪
+        - generic [ref=e494]:
+          - generic [ref=e495]: FLC Grand Hotel Sầm Sơn
+          - generic [ref=e496]: 📍 Khu du lịch FLC, Quảng Cư, Sầm Sơn, Thanh Hóa
+          - generic [ref=e497]: ★ 4.7
+      - generic [ref=e499] [cursor=pointer]:
+        - generic [ref=e501]: 🏪
+        - generic [ref=e502]:
+          - generic [ref=e503]: Ánh Phương Hotel
+          - generic [ref=e504]: 📍 234 Hồ Xuân Hương, Trung Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e505]: ★ 4.0
+      - generic [ref=e507] [cursor=pointer]:
+        - generic [ref=e509]: 🏪
+        - generic [ref=e510]:
+          - generic [ref=e511]: Sầm Sơn Paradise Resort
+          - generic [ref=e512]: 📍 56 Trần Phú, Trường Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e513]: ★ 4.4
+      - generic [ref=e515] [cursor=pointer]:
+        - generic [ref=e517]: 🏪
+        - generic [ref=e518]:
+          - generic [ref=e519]: Homestay Biển Xanh Sầm Sơn
+          - generic [ref=e520]: 📍 12 Ngõ 3, Trung Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e521]: ★ 4.6
+      - generic [ref=e523] [cursor=pointer]:
+        - generic [ref=e525]: 🏪
+        - generic [ref=e526]:
+          - generic [ref=e527]: Mường Thanh Luxury Sầm Sơn
+          - generic [ref=e528]: 📍 118 Lê Lợi, Trung Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e529]: ★ 4.4
+      - generic [ref=e531] [cursor=pointer]:
+        - generic [ref=e533]: 🏪
+        - generic [ref=e534]:
+          - generic [ref=e535]: Golden Lotus Spa
+          - generic [ref=e536]: 📍 78 Nguyễn Du, Trường Sơn, Sầm Sơn, Thanh Hóa
+          - generic [ref=e537]: ★ 4.1
+  - tablist [ref=e405]:
+    - tab "🏠 🏠 Trang chủ" [ref=e407] [cursor=pointer]:
+      - generic [ref=e408]:
+        - generic [ref=e411]: 🏠
+        - generic [ref=e414]: 🏠
+      - generic [ref=e415]: Trang chủ
+    - tab "🔍 🔍 Tìm kiếm" [selected] [ref=e417] [cursor=pointer]:
+      - generic [ref=e418]:
+        - generic [ref=e421]: 🔍
+        - generic [ref=e424]: 🔍
+      - generic [ref=e425]: Tìm kiếm
+    - tab "🎫 🎫 Vé của tôi" [ref=e427] [cursor=pointer]:
+      - generic [ref=e428]:
+        - generic [ref=e431]: 🎫
+        - generic [ref=e434]: 🎫
+      - generic [ref=e435]: Vé của tôi
+    - tab "🤖 🤖 AI" [ref=e437] [cursor=pointer]:
+      - generic [ref=e438]:
+        - generic [ref=e441]: 🤖
+        - generic [ref=e444]: 🤖
+      - generic [ref=e445]: AI
+    - tab "👤 👤 Tài khoản" [ref=e447] [cursor=pointer]:
+      - generic [ref=e448]:
+        - generic [ref=e451]: 👤
+        - generic [ref=e454]: 👤
+      - generic [ref=e455]: Tài khoản

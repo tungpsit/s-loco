@@ -1,11 +1,12 @@
-import { useEffect, useState, useCallback } from 'react'
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
-import { dashboardApi } from '../../src/lib/api'
-import { useAuthStore } from '../../src/stores/auth-store'
-import { RevenueCard } from '../../src/components/revenue-card'
-import { OrderCard } from '../../src/components/order-card'
+import { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { ErrorState } from '../../src/components/error-state'
+import { OrderCard } from '../../src/components/order-card'
+import { RevenueCard } from '../../src/components/revenue-card'
+import { dashboardApi } from '../../src/lib/api'
+import { useResponsiveLayout } from '../../src/lib/responsive'
+import { useAuthStore } from '../../src/stores/auth-store'
 
 const colors = {
   primary: '#005E97',
@@ -33,8 +34,7 @@ interface DashData {
   }>
 }
 
-const fmt = (n?: number) =>
-  n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '0₫'
+const fmt = (n?: number) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '0₫')
 
 export default function DashboardScreen() {
   const [data, setData] = useState<DashData | null>(null)
@@ -42,6 +42,7 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(false)
   const user = useAuthStore((s) => s.user)
+  const { isDesktop, pageMaxWidth, pagePadding } = useResponsiveLayout()
 
   const load = useCallback(async () => {
     try {
@@ -60,7 +61,9 @@ export default function DashboardScreen() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -77,6 +80,11 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingHorizontal: pagePadding, maxWidth: pageMaxWidth },
+        isDesktop && styles.contentDesktop,
+      ]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
       }
@@ -95,34 +103,39 @@ export default function DashboardScreen() {
       </View>
 
       {/* Stats */}
-      <View style={styles.statsRow}>
-        <RevenueCard
-          label="Đơn hôm nay"
-          value={String(data?.today?.orders ?? 0)}
-          icon="🛒"
-          accentColor={colors.primary}
-        />
-        <RevenueCard
-          label="Doanh thu hôm nay"
-          value={fmt(data?.today?.revenue)}
-          icon="💰"
-          accentColor="#2E7D32"
-        />
-      </View>
-
-      <View style={styles.statsRow}>
-        <RevenueCard
-          label="Chờ giải ngân"
-          value={fmt(data?.settlement?.pending)}
-          icon="⏳"
-          accentColor="#E65100"
-        />
-        <RevenueCard
-          label="Đã thanh toán"
-          value={fmt(data?.settlement?.settled)}
-          icon="✅"
-          accentColor="#2E7D32"
-        />
+      <View style={[styles.statsGrid, isDesktop && styles.statsGridDesktop]}>
+        <View style={[styles.statCell, isDesktop && styles.statCellDesktop]}>
+          <RevenueCard
+            label="Đơn hôm nay"
+            value={String(data?.today?.orders ?? 0)}
+            icon="🛒"
+            accentColor={colors.primary}
+          />
+        </View>
+        <View style={[styles.statCell, isDesktop && styles.statCellDesktop]}>
+          <RevenueCard
+            label="Doanh thu hôm nay"
+            value={fmt(data?.today?.revenue)}
+            icon="💰"
+            accentColor="#2E7D32"
+          />
+        </View>
+        <View style={[styles.statCell, isDesktop && styles.statCellDesktop]}>
+          <RevenueCard
+            label="Chờ giải ngân"
+            value={fmt(data?.settlement?.pending)}
+            icon="⏳"
+            accentColor="#E65100"
+          />
+        </View>
+        <View style={[styles.statCell, isDesktop && styles.statCellDesktop]}>
+          <RevenueCard
+            label="Đã thanh toán"
+            value={fmt(data?.settlement?.settled)}
+            icon="✅"
+            accentColor="#2E7D32"
+          />
+        </View>
       </View>
 
       {/* Total */}
@@ -138,10 +151,7 @@ export default function DashboardScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Đơn hàng gần đây</Text>
-          <Text
-            style={styles.viewAllBtn}
-            onPress={() => router.push('/(tabs)/orders')}
-          >
+          <Text style={styles.viewAllBtn} onPress={() => router.push('/(tabs)/orders')}>
             Xem tất cả ›
           </Text>
         </View>
@@ -150,9 +160,7 @@ export default function DashboardScreen() {
           <ActivityIndicator size="large" color={colors.primary} style={{ paddingVertical: 32 }} />
         )}
 
-        {error && !loading && (
-          <ErrorState onRetry={load} />
-        )}
+        {error && !loading && <ErrorState onRetry={load} />}
 
         {!loading && !error && (!data?.recentOrders || data.recentOrders.length === 0) && (
           <View style={styles.emptyCard}>
@@ -162,15 +170,15 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        {!loading && !error && data?.recentOrders && data.recentOrders.length > 0 && (
-          data.recentOrders.slice(0, 5).map((o) => (
-            <OrderCard
-              key={o.id}
-              voucher={o}
-              onPress={() => router.push(`/voucher/${o.id}`)}
-            />
-          ))
-        )}
+        {!loading &&
+          !error &&
+          data?.recentOrders &&
+          data.recentOrders.length > 0 &&
+          data.recentOrders
+            .slice(0, 5)
+            .map((o) => (
+              <OrderCard key={o.id} voucher={o} onPress={() => router.push(`/voucher/${o.id}`)} />
+            ))}
       </View>
 
       <View style={{ height: 24 }} />
@@ -180,6 +188,14 @@ export default function DashboardScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
+  content: {
+    alignSelf: 'center',
+    width: '100%',
+    paddingBottom: 24,
+  },
+  contentDesktop: {
+    paddingTop: 24,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -195,6 +211,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     paddingBottom: 24,
+    marginBottom: 16,
   },
   badge: {
     width: 48,
@@ -205,12 +222,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: { fontSize: 22 },
-  statsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 10 },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 10,
+  },
+  statsGridDesktop: {
+    gap: 14,
+    marginBottom: 14,
+  },
+  statCell: { flexBasis: '48%', flexGrow: 1 },
+  statCellDesktop: { flexBasis: '23%' },
   totalCard: {
     backgroundColor: colors.primary,
     borderRadius: 20,
     padding: 20,
-    marginHorizontal: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -220,7 +247,7 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 4 },
   totalValue: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
   totalIcon: { fontSize: 36 },
-  section: { paddingHorizontal: 16 },
+  section: {},
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -18,6 +18,27 @@ vendorRoutes.get('/', optionalAuth(), async (c) => {
   return c.json({ success: true, data: result })
 })
 
+// ─── POST /vendors — create vendor (admin only for now) ────
+vendorRoutes.post('/', authMiddleware(), requireRole('admin'), async (c) => {
+  return c.json({ success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Not implemented yet.' } }, 501)
+})
+
+// ─── GET /vendors/me — current vendor owner profile ────
+vendorRoutes.get('/me', authMiddleware(), requireRole('vendor_owner'), async (c) => {
+  const ownerId = c.get('userId')!
+  const vendorList = await vendorSvc.getVendorByOwnerId(ownerId)
+  const vendor = vendorList[0]
+
+  if (!vendor) {
+    return c.json(
+      { success: false, error: { code: 'NO_VENDOR', message: 'Bạn chưa có cửa hàng.' } },
+      404,
+    )
+  }
+
+  return c.json({ success: true, data: { vendor } })
+})
+
 // ─── GET /vendors/:slug — vendor detail with services ────
 vendorRoutes.get('/:slug', async (c) => {
   try {

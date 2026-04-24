@@ -28,6 +28,22 @@ serviceRoutes.get('/', async (c) => {
   return c.json({ success: true, data: result })
 })
 
+// ─── GET /services/search — explicit search endpoint ────
+serviceRoutes.get('/search', async (c) => {
+  const filters = serviceFilterSchema.parse({
+    q: c.req.query('q'),
+    category: c.req.query('category'),
+    min_price: c.req.query('min_price'),
+    max_price: c.req.query('max_price'),
+    min_rating: c.req.query('min_rating'),
+    sort: c.req.query('sort'),
+    page: c.req.query('page'),
+    limit: c.req.query('limit'),
+  })
+  const result = await discoverySvc.searchServices(filters)
+  return c.json({ success: true, data: result })
+})
+
 // ─── GET /services/categories — list all categories ────
 serviceRoutes.get('/categories', async (c) => {
   const categories = await discoverySvc.listCategories()

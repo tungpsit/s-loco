@@ -1,0 +1,9 @@
+[     225ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:19999
+[     242ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:60205
+[     258ms] [WARNING] "shadow*" style props are deprecated. Use "boxShadow". @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40435
+[     287ms] [WARNING] props.pointerEvents is deprecated. Use style.pointerEvents @ http://localhost:8083/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=src%2Fapp:40435
+[     389ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8083/favicon.ico:0
+[   36129ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/orders:0

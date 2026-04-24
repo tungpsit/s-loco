@@ -1,0 +1,65 @@
+- generic [ref=e131]:
+  - tablist [ref=e133]:
+    - tab "🏠 🏠 Tổng quan" [selected] [ref=e135] [cursor=pointer]:
+      - generic [ref=e136]:
+        - generic [ref=e138]: 🏠
+        - generic [ref=e140]: 🏠
+      - generic [ref=e141]: Tổng quan
+    - tab "📷 📷 Quét QR" [ref=e143] [cursor=pointer]:
+      - generic [ref=e144]:
+        - generic [ref=e146]: 📷
+        - generic [ref=e148]: 📷
+      - generic [ref=e149]: Quét QR
+    - tab "🧾 🧾 Đơn hàng" [ref=e151] [cursor=pointer]:
+      - generic [ref=e152]:
+        - generic [ref=e154]: 🧾
+        - generic [ref=e156]: 🧾
+      - generic [ref=e157]: Đơn hàng
+    - tab "💰 💰 Thu nhập" [ref=e159] [cursor=pointer]:
+      - generic [ref=e160]:
+        - generic [ref=e162]: 💰
+        - generic [ref=e164]: 💰
+      - generic [ref=e165]: Thu nhập
+    - tab "⚙️ ⚙️ Cài đặt" [ref=e167] [cursor=pointer]:
+      - generic [ref=e168]:
+        - generic [ref=e170]: ⚙️
+        - generic [ref=e172]: ⚙️
+      - generic [ref=e173]: Cài đặt
+  - generic [ref=e176]:
+    - heading "Tổng quan" [level=1] [ref=e178]
+    - generic [ref=e182]:
+      - generic [ref=e184]:
+        - generic [ref=e185]:
+          - generic [ref=e186]: Chào buổi chiều
+          - generic [ref=e187]: Chủ cửa hàng
+        - generic [ref=e189]: 🏪
+      - generic [ref=e190]:
+        - generic [ref=e192]:
+          - generic [ref=e194]: 🛒
+          - generic [ref=e195]: Đơn hôm nay
+          - generic [ref=e196]: "0"
+        - generic [ref=e198]:
+          - generic [ref=e200]: 💰
+          - generic [ref=e201]: Doanh thu hôm nay
+          - generic [ref=e202]: 0₫
+        - generic [ref=e204]:
+          - generic [ref=e206]: ⏳
+          - generic [ref=e207]: Chờ giải ngân
+          - generic [ref=e208]: 0₫
+        - generic [ref=e210]:
+          - generic [ref=e212]: ✅
+          - generic [ref=e213]: Đã thanh toán
+          - generic [ref=e214]: 0₫
+      - generic [ref=e215]:
+        - generic [ref=e216]:
+          - generic [ref=e217]: Tổng doanh thu
+          - generic [ref=e218]: 52.180.000₫
+        - generic [ref=e219]: 📊
+      - generic [ref=e220]:
+        - generic [ref=e221]:
+          - generic [ref=e222]: Đơn hàng gần đây
+          - generic [ref=e223] [cursor=pointer]: Xem tất cả ›
+        - generic [ref=e224]:
+          - generic [ref=e225]: 📋
+          - generic [ref=e226]: Chưa có đơn hàng nào
+          - generic [ref=e227]: Đơn hàng sẽ xuất hiện khi có khách đặt dịch vụ

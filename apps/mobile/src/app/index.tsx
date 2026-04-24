@@ -14,7 +14,7 @@ export default function Index() {
     if (token) {
       router.replace('/(tabs)')
     } else {
-      router.replace('/auth/login')
+      router.replace('/(auth)/login')
     }
   }, [isHydrated, token])
 

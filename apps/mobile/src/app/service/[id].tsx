@@ -14,9 +14,9 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useCreateOrder, useServiceDetail } from '../../hooks/useQuery'
-import { borderRadius, colors, spacing, typography } from '../../lib/theme'
 import { formatVND } from '../../components/service-card'
+import { useCreateOrder, useServiceDetail } from '../../hooks/useQuery'
+import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
 
 export default function ServiceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -81,13 +81,19 @@ export default function ServiceDetailScreen() {
             <Image source={{ uri: service.images[0] }} style={styles.image} resizeMode="cover" />
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Text style={styles.imageEmoji}>📍</Text>
+              <Text style={styles.imageKicker}>S-Loco</Text>
+              <Text style={styles.imagePlaceholderText}>Premium coastal service</Text>
             </View>
           )}
+          <View style={styles.imageShade} />
           {hasDiscount && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>
-                -{Math.round((1 - (service.discount_price ?? 0) / (service.original_price ?? 1)) * 100)}%
+                -
+                {Math.round(
+                  (1 - (service.discount_price ?? 0) / (service.original_price ?? 1)) * 100,
+                )}
+                %
               </Text>
             </View>
           )}
@@ -96,12 +102,12 @@ export default function ServiceDetailScreen() {
         {/* Info */}
         <View style={styles.info}>
           <Text style={styles.name}>{service.name}</Text>
-          {service.vendor_name && (
-            <Text style={styles.vendor}>🏪 {service.vendor_name}</Text>
-          )}
-          {service.rating != null && (
-            <Text style={styles.rating}>★ {service.rating.toFixed(1)}</Text>
-          )}
+          <View style={styles.metaRow}>
+            {service.vendor_name && <Text style={styles.vendor}>{service.vendor_name}</Text>}
+            {service.rating != null && (
+              <Text style={styles.rating}>★ {service.rating.toFixed(1)}</Text>
+            )}
+          </View>
 
           {/* Price */}
           <View style={styles.priceRow}>
@@ -144,10 +150,7 @@ export default function ServiceDetailScreen() {
               <Text style={styles.stepBtnText}>−</Text>
             </TouchableOpacity>
             <Text style={styles.qtyValue}>{quantity}</Text>
-            <TouchableOpacity
-              style={styles.stepBtn}
-              onPress={() => setQuantity(quantity + 1)}
-            >
+            <TouchableOpacity style={styles.stepBtn} onPress={() => setQuantity(quantity + 1)}>
               <Text style={styles.stepBtnText}>+</Text>
             </TouchableOpacity>
           </View>
@@ -185,41 +188,73 @@ const styles = StyleSheet.create({
   errorText: { ...typography.bodyMd, color: colors.error },
   retryLink: { ...typography.labelLg, color: colors.primary },
   body: { paddingBottom: spacing.xl },
-  imageWrap: { height: 260, position: 'relative' },
+  imageWrap: { height: 286, position: 'relative', backgroundColor: colors.primary },
   image: { width: '100%', height: '100%' },
+  imageShade: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(7, 89, 133, 0.12)',
+  },
   imagePlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.surfaceContainerLow,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    justifyContent: 'flex-end',
+    padding: spacing.lg,
   },
-  imageEmoji: { fontSize: 64, opacity: 0.5 },
+  imageKicker: {
+    ...typography.labelSm,
+    color: colors.primaryFixed,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  imagePlaceholderText: { ...typography.titleLg, color: colors.white, marginTop: spacing.xs },
   discountBadge: {
     position: 'absolute',
     top: spacing.sm,
     right: spacing.sm,
-    backgroundColor: colors.tertiaryContainer,
-    borderRadius: borderRadius.sm,
+    backgroundColor: colors.coral,
+    borderRadius: borderRadius.full,
     paddingVertical: 4,
     paddingHorizontal: 10,
   },
   discountText: { color: colors.white, fontSize: 13, fontWeight: '600' },
   info: { padding: spacing.base },
-  name: { ...typography.headlineSm, marginBottom: spacing.xs },
-  vendor: { ...typography.bodyMd, color: colors.onSurfaceVariant, marginBottom: 4 },
-  rating: { ...typography.labelLg, color: '#F59E0B', marginBottom: spacing.md },
-  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, marginBottom: spacing.lg },
+  name: { ...typography.headlineSm, marginBottom: spacing.sm, color: colors.onSurface },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  vendor: {
+    ...typography.labelLg,
+    color: colors.primary,
+    backgroundColor: colors.primaryFixed,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    overflow: 'hidden',
+  },
+  rating: {
+    ...typography.labelLg,
+    color: colors.onSecondaryContainer,
+    backgroundColor: colors.secondaryContainer,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    overflow: 'hidden',
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
   originalPrice: {
     ...typography.bodyMd,
     textDecorationLine: 'line-through',
     color: colors.outline,
   },
   price: { ...typography.headlineSm, color: colors.primary },
-  discountedPrice: { color: colors.error },
+  discountedPrice: { color: colors.coral },
   section: { marginBottom: spacing.lg },
   sectionTitle: { ...typography.titleSm, marginBottom: spacing.xs },
-  desc: { ...typography.bodyMd, color: colors.onSurfaceVariant },
+  desc: { ...typography.bodyMd, color: colors.onSurfaceVariant, lineHeight: 22 },
   footer: {
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
@@ -246,6 +281,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    ...shadows.fab,
   },
   buyBtnDisabled: { backgroundColor: colors.outline },
   buyBtnText: { color: colors.white, fontSize: 16, fontWeight: '600' },

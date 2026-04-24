@@ -1,3 +1,4 @@
+import { router } from 'expo-router'
 import { useState } from 'react'
 import {
   Alert,
@@ -10,8 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { router } from 'expo-router'
 import { authApi, vendorApi } from '../../src/lib/api'
+import { useResponsiveLayout } from '../../src/lib/responsive'
 import { useAuthStore } from '../../src/stores/auth-store'
 
 const colors = {
@@ -32,6 +33,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const login = useAuthStore((s) => s.login)
+  const { isDesktop } = useResponsiveLayout()
 
   async function handleLogin() {
     if (!email.trim()) {
@@ -56,7 +58,9 @@ export default function LoginScreen() {
             const v = vendorRes.data.data as { id: string }
             useAuthStore.getState().setVendorId(v.id)
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         router.replace('/(tabs)/')
       } else {
         const msg = res.data?.error?.message ?? 'Đăng nhập thất bại. Vui lòng thử lại.'
@@ -76,52 +80,52 @@ export default function LoginScreen() {
     >
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.headerSection}>
-          <Text style={styles.logoEmoji}>🏪</Text>
-          <Text style={styles.appName}>S-Loco Vendor</Text>
-          <Text style={styles.tagline}>Quản lý cửa hàng của bạn</Text>
-        </View>
+        <View style={[styles.authPanel, isDesktop && styles.authPanelDesktop]}>
+          <View style={[styles.headerSection, isDesktop && styles.headerSectionDesktop]}>
+            <Text style={styles.logoEmoji}>🏪</Text>
+            <Text style={styles.appName}>S-Loco Vendor</Text>
+            <Text style={styles.tagline}>Quản lý cửa hàng của bạn</Text>
+          </View>
 
-        <View style={styles.formCard}>
-          <Text style={styles.formTitle}>Đăng nhập</Text>
+          <View style={[styles.formCard, isDesktop && styles.formCardDesktop]}>
+            <Text style={styles.formTitle}>Đăng nhập</Text>
 
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="vendor@samson.vn"
-            placeholderTextColor={colors.outline}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            textContentType="emailAddress"
-          />
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="vendor@samson.vn"
+              placeholderTextColor={colors.outline}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              textContentType="emailAddress"
+            />
 
-          <Text style={styles.label}>Mật khẩu</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="••••••••"
-            placeholderTextColor={colors.outline}
-            secureTextEntry
-            textContentType="password"
-          />
+            <Text style={styles.label}>Mật khẩu</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              placeholderTextColor={colors.outline}
+              secureTextEntry
+              textContentType="password"
+            />
 
-          <TouchableOpacity
-            style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.loginBtnText}>
-              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.loginBtnText}>{loading ? 'Đang đăng nhập...' : 'Đăng nhập'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <Text style={styles.footer}>© 2026 S-Loco · Sầm Sơn</Text>
@@ -132,7 +136,22 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
+  content: { flexGrow: 1 },
+  contentDesktop: {
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 32,
+  },
+  authPanel: { width: '100%' },
+  authPanelDesktop: {
+    alignSelf: 'center',
+    maxWidth: 960,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 32,
+  },
   headerSection: { alignItems: 'center', paddingTop: 80, paddingBottom: 40 },
+  headerSectionDesktop: { flex: 1, paddingTop: 0, paddingBottom: 0 },
   logoEmoji: { fontSize: 64, marginBottom: 12 },
   appName: { fontSize: 26, fontWeight: '700', color: colors.primary },
   tagline: { fontSize: 14, color: colors.onSurfaceVariant, marginTop: 6 },
@@ -142,8 +161,19 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
   },
+  formCardDesktop: {
+    flex: 1,
+    marginHorizontal: 0,
+    maxWidth: 440,
+  },
   formTitle: { fontSize: 22, fontWeight: '700', color: colors.onSurface, marginBottom: 20 },
-  label: { fontSize: 13, fontWeight: '500', color: colors.onSurfaceVariant, marginBottom: 6, marginTop: 12 },
+  label: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.onSurfaceVariant,
+    marginBottom: 6,
+    marginTop: 12,
+  },
   input: {
     backgroundColor: colors.surfaceContainerHighest,
     borderRadius: 12,
@@ -160,5 +190,11 @@ const styles = StyleSheet.create({
   },
   loginBtnDisabled: { opacity: 0.6 },
   loginBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
-  footer: { textAlign: 'center', color: colors.outline, fontSize: 12, marginTop: 32, marginBottom: 16 },
+  footer: {
+    textAlign: 'center',
+    color: colors.outline,
+    fontSize: 12,
+    marginTop: 32,
+    marginBottom: 16,
+  },
 })

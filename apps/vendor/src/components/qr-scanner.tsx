@@ -1,6 +1,6 @@
-import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera'
+import { type BarcodeScanningResult, CameraView, useCameraPermissions } from 'expo-camera'
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const colors = {
   primary: '#005E97',
@@ -56,7 +56,11 @@ export function QrScanner({ onScanned, active = true }: QrScannerProps) {
         <Text style={styles.statusText}>
           S-Loco cần quyền camera để quét mã QR trên voucher của khách.
         </Text>
-        <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.permissionBtn}
+          onPress={requestPermission}
+          activeOpacity={0.8}
+        >
           <Text style={styles.permissionBtnText}>Cho phép truy cập</Text>
         </TouchableOpacity>
       </View>
@@ -119,8 +123,7 @@ export function ScanResultModal({
   onConfirm,
   onClose,
 }: ScanResultModalProps) {
-  const fmt = (n?: number) =>
-    n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
+  const fmt = (n?: number) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—')
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -158,9 +161,7 @@ export function ScanResultModal({
 
               <View style={modalStyles.fieldRow}>
                 <Text style={modalStyles.fieldLabel}>Khách hàng</Text>
-                <Text style={modalStyles.fieldValue}>
-                  {voucher.customer_name ?? '—'}
-                </Text>
+                <Text style={modalStyles.fieldValue}>{voucher.customer_name ?? '—'}</Text>
               </View>
 
               <View style={modalStyles.fieldRow}>
@@ -180,8 +181,8 @@ export function ScanResultModal({
                         voucher.status === 'paid'
                           ? '#FFF3E0'
                           : voucher.status === 'redeemed'
-                          ? '#E8F5E9'
-                          : '#ECEFF1',
+                            ? '#E8F5E9'
+                            : '#ECEFF1',
                     },
                   ]}
                 >
@@ -193,8 +194,8 @@ export function ScanResultModal({
                           voucher.status === 'paid'
                             ? '#E65100'
                             : voucher.status === 'redeemed'
-                            ? '#2E7D32'
-                            : '#546E7A',
+                              ? '#2E7D32'
+                              : '#546E7A',
                       },
                     ]}
                   >
@@ -321,8 +322,20 @@ const styles = StyleSheet.create({
   },
   topLeft: { top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 12 },
   topRight: { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 12 },
-  bottomLeft: { bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 12 },
-  bottomRight: { bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 12 },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderBottomLeftRadius: 12,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderBottomRightRadius: 12,
+  },
   hint: {
     color: '#FFFFFF',
     fontSize: 14,
@@ -332,7 +345,12 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
   emoji: { fontSize: 56, marginBottom: 16 },
   statusTitle: { fontSize: 18, fontWeight: '700', color: colors.onSurface, marginBottom: 8 },
   statusText: { fontSize: 14, color: colors.onSurfaceVariant, textAlign: 'center', lineHeight: 20 },

@@ -34,20 +34,22 @@ paymentRoutes.post(
   },
 )
 
-// ─── POST /payments/webhook/vnpay — VNPay IPN ────
-paymentRoutes.post('/webhook/vnpay', async (c) => {
+// ─── GET/POST /payments/webhook/vnpay — VNPay IPN ────
+async function handleVnpayWebhook(c: any) {
   try {
-    const payload = await c.req.json()
-    const result = await paymentSvc.processWebhook('vnpay', payload, '')
-    // VNPay expects specific response format
+    const payload = c.req.method === 'GET' ? c.req.query() : await c.req.json()
+    await paymentSvc.processWebhook('vnpay', payload, '')
     return c.json({ RspCode: '00', Message: 'success' })
   } catch (err) {
     if (err instanceof PaymentError) {
-      return c.json({ RspCode: '99', Message: err.message })
+      return c.json({ RspCode: '99', Message: err.message }, 400)
     }
-    return c.json({ RspCode: '99', Message: 'Internal error' })
+    return c.json({ RspCode: '99', Message: 'Internal error' }, 500)
   }
-})
+}
+
+paymentRoutes.get('/webhook/vnpay', handleVnpayWebhook)
+paymentRoutes.post('/webhook/vnpay', handleVnpayWebhook)
 
 // ─── POST /payments/webhook/momo — Momo callback ────
 paymentRoutes.post('/webhook/momo', async (c) => {

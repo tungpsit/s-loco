@@ -1,0 +1,119 @@
+- generic [active] [ref=e1]:
+  - button "! Changing numColumns on the fly is not su" [ref=e457] [cursor=pointer]:
+    - generic [ref=e459]: "!"
+    - generic [ref=e460]: Changing numColumns on the fly is not su
+    - button [ref=e461]:
+      - img [ref=e463]
+  - generic [ref=e468]:
+    - generic [ref=e470]:
+      - generic [ref=e471]:
+        - generic [ref=e472]:
+          - button "Dismiss error" [ref=e473] [cursor=pointer]:
+            - img [ref=e474]
+          - button "Minimize errors" [ref=e476] [cursor=pointer]:
+            - img [ref=e477]
+        - generic [ref=e480]:
+          - button "Previous error" [disabled] [ref=e481]:
+            - img [ref=e482]
+          - generic [ref=e484]: 1/1
+          - button "Next error" [disabled] [ref=e485]:
+            - img [ref=e486]
+      - generic [ref=e488]:
+        - button "Reload application" [ref=e489] [cursor=pointer]:
+          - img [ref=e490]
+        - button "Copy error" [ref=e492] [cursor=pointer]:
+          - img [ref=e493]
+        - generic [ref=e498]:
+          - img [ref=e499]
+          - generic [ref=e501]: Expo 55.0.0
+    - generic [ref=e502]:
+      - generic [ref=e503]:
+        - generic [ref=e505]: Uncaught Error
+        - generic [ref=e506]: Changing numColumns on the fly is not supported. Change the key prop on FlatList when changing the number of columns to force a fresh render of the component.
+      - generic [ref=e507]:
+        - generic [ref=e508]:
+          - banner [ref=e509]:
+            - generic [ref=e511]:
+              - img [ref=e513]
+              - generic [ref=e515]: apps/mobile/src/app/(tabs)/browse.tsx (172:9)
+            - button "Copy content" [ref=e516] [cursor=pointer]:
+              - paragraph [ref=e517]: Open
+              - img [ref=e518]
+          - generic [ref=e521]:
+            - generic [ref=e522]:
+              - generic [ref=e524]: 170 |
+              - generic [ref=e526]: <
+              - generic [ref=e527]: ErrorState
+              - generic [ref=e528]: onRetry
+              - generic [ref=e529]: =
+              - generic [ref=e530]: "{svcRefetch}"
+              - generic [ref=e531]: /
+              - generic [ref=e532]: ">"
+            - generic [ref=e533]:
+              - generic [ref=e535]: 171 |
+              - generic [ref=e536]: )
+              - generic [ref=e537]: ":"
+              - generic [ref=e538]: view
+              - generic [ref=e539]: ===
+              - generic [ref=e541]: "'services'"
+              - generic [ref=e543]: "?"
+              - generic [ref=e544]: (
+            - generic [ref=e545]:
+              - generic [ref=e546]: ">"
+              - generic [ref=e547]: 172 |
+              - generic [ref=e549]: <
+              - generic [ref=e550]: FlatList
+            - generic [ref=e551]:
+              - generic [ref=e553]: "|"
+              - generic [ref=e555]: ^
+            - generic [ref=e556]:
+              - generic [ref=e558]: 173 |
+              - generic [ref=e559]: data
+              - generic [ref=e560]: =
+              - generic [ref=e561]: "{services}"
+            - generic [ref=e562]:
+              - generic [ref=e564]: 174 |
+              - generic [ref=e565]: renderItem
+              - generic [ref=e566]: =
+              - generic [ref=e567]: "{renderService}"
+            - generic [ref=e568]:
+              - generic [ref=e570]: 175 |
+              - generic [ref=e571]: keyExtractor
+              - generic [ref=e572]: =
+              - generic [ref=e573]: "{(item)"
+              - generic [ref=e574]: =>
+              - generic [ref=e575]: item
+              - generic [ref=e576]: .
+              - generic [ref=e577]: "id}"
+        - generic [ref=e578]:
+          - generic [ref=e579]:
+            - generic [ref=e580]:
+              - img [ref=e581]
+              - heading "Component Stack" [level=3] [ref=e583]
+              - generic [ref=e584]: "38"
+            - button "Show 35 ignored-listed frames" [ref=e585] [cursor=pointer]:
+              - generic "Show 35 ignored-listed frames" [ref=e586]:
+                - generic [ref=e587]: Show 35 ignored-listed frames
+                - img [ref=e588]
+          - generic [ref=e592]:
+            - generic [ref=e594] [cursor=pointer]:
+              - code [ref=e595]: BrowseScreen
+              - code [ref=e596]: apps/mobile/src/app/(tabs)/browse.tsx:172:9
+            - generic [ref=e598] [cursor=pointer]:
+              - code [ref=e599]: WrappedScreenComponent
+              - code [ref=e600]: node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/build/useScreens.js:194:16
+            - generic [ref=e602] [cursor=pointer]:
+              - code [ref=e603]: BaseRoute
+              - code [ref=e604]: node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/build/useScreens.js:239:13
+            - generic [ref=e606] [cursor=pointer]:
+              - code [ref=e607]: SceneView
+              - code [ref=e608]: node_modules/.bun/@react-navigation+core@7.16.2+b1ab299f0a400331/node_modules/@react-navigation/core/lib/module/SceneView.js:125:72
+        - generic [ref=e610]:
+          - generic [ref=e611]:
+            - img [ref=e612]
+            - heading "Call Stack" [level=3] [ref=e614]
+            - generic [ref=e615]: "35"
+          - button "Show all 35 ignore-listed frames" [ref=e616] [cursor=pointer]:
+            - generic "Show all 35 ignore-listed frames" [ref=e617]:
+              - generic [ref=e618]: Show all 35 ignore-listed frames
+              - img [ref=e619]

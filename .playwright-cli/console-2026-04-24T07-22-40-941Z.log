@@ -1,0 +1,20 @@
+[     258ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:101554
+[     276ms] [LOG] Running application "main" with appParams:
+ {rootTag: #root, hydrate: undefined} 
+Development-level warnings: ON.
+Performance optimizations: OFF. @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:41163
+[     277ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8082/auth/login:0
+[     289ms] [WARNING] "textShadow*" style props are deprecated. Use "textShadow". @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:24702
+[     394ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8082/favicon.ico:0
+[     420ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:8082/auth/login:0
+[   11819ms] [WARNING] props.pointerEvents is deprecated. Use style.pointerEvents @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:24702
+[   11836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/api/v1/auth/login:0
+[   52887ms] [ERROR] Access to fetch at 'http://localhost:3000/api/v1/auth/login' from origin 'http://localhost:8082' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:8082/auth/login:0
+[   52887ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3000/api/v1/auth/login:0
+[   91093ms] [ERROR] Access to fetch at 'http://localhost:3000/api/v1/auth/login' from origin 'http://localhost:8082' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:8082/auth/login:0
+[   91093ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:3000/api/v1/auth/login:0
+[  243063ms] [WARNING] "shadow*" style props are deprecated. Use "boxShadow". @ http://localhost:8082/node_modules/.bun/expo-router@55.0.7+6d9ae645932f5313/node_modules/expo-router/entry.bundle?platform=web&dev=true&hot=false&lazy=true&transform.routerRoot=app:24702
+[ 2223804ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/dashboard/vendor:0
+[ 2223804ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/settlements?page=1&limit=20:0
+[ 2309794ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/dashboard/vendor:0
+[ 2309794ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:3000/api/v1/settlements?page=1&limit=20:0

@@ -47,7 +47,8 @@ export const queryKeys = {
   notificationCount: ['notification-count'] as const,
 
   // Content
-  articles: (params?: { category?: string; page?: number }) => ['articles', params] as const,
+  articles: (params?: { category?: string; page?: number; limit?: number }) =>
+    ['articles', params] as const,
   article: (slug: string) => ['article', slug] as const,
   weather: ['weather'] as const,
   events: ['events'] as const,
@@ -169,8 +170,15 @@ export function useOrderDetail(id: string) {
 export function useCreateOrder() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (items: { service_id: string; quantity: number }[], note?: string) =>
-      ordersApi.create(items, note),
+    mutationFn: (
+      payload:
+        | { service_id: string; quantity: number }[]
+        | { items: { service_id: string; quantity: number }[]; note?: string },
+    ) => {
+      const items = Array.isArray(payload) ? payload : payload.items
+      const note = Array.isArray(payload) ? undefined : payload.note
+      return ordersApi.create(items, note)
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] })
       qc.invalidateQueries({ queryKey: ['vouchers'] })
@@ -256,7 +264,7 @@ export function useMarkAllRead() {
 
 // ─── Content ─────────────────────────────────────────────────────────────────
 
-export function useArticles(params?: { category?: string; page?: number }) {
+export function useArticles(params?: { category?: string; page?: number; limit?: number }) {
   return useQuery({
     queryKey: queryKeys.articles(params),
     queryFn: () => contentApi.articles(params),

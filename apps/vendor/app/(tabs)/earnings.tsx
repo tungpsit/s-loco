@@ -1,18 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
 import { router } from 'expo-router'
-import { dashboardApi, settlementApi } from '../../src/lib/api'
-import { SettlementItem } from '../../src/components/settlement-item'
+import { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { ErrorState } from '../../src/components/error-state'
+import { SettlementItem } from '../../src/components/settlement-item'
 import type { Settlement } from '../../src/lib/api'
+import { dashboardApi, settlementApi } from '../../src/lib/api'
+import { useResponsiveLayout } from '../../src/lib/responsive'
 
 const colors = {
   primary: '#005E97',
@@ -22,8 +15,7 @@ const colors = {
   onSurfaceVariant: '#3B4460',
 }
 
-const fmt = (n?: number) =>
-  n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '0₫'
+const fmt = (n?: number) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '0₫')
 
 export default function EarningsScreen() {
   const [dashData, setDashData] = useState<{
@@ -34,6 +26,7 @@ export default function EarningsScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState(false)
+  const { isDesktop, pageMaxWidth, pagePadding } = useResponsiveLayout()
 
   const load = useCallback(async () => {
     try {
@@ -46,8 +39,7 @@ export default function EarningsScreen() {
         setDashData(dashRes.data.data as typeof dashData)
       }
       if (settleRes.ok && settleRes.data?.data) {
-        const items: Settlement[] =
-          settleRes.data.data?.items ?? settleRes.data.data?.data ?? []
+        const items: Settlement[] = settleRes.data.data?.items ?? settleRes.data.data?.data ?? []
         setSettlements(items)
       }
       setError(false)
@@ -59,7 +51,9 @@ export default function EarningsScreen() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -68,52 +62,65 @@ export default function EarningsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Thu nhập</Text>
-      </View>
+      <View
+        style={[
+          styles.contentShell,
+          { paddingHorizontal: pagePadding, maxWidth: pageMaxWidth },
+          isDesktop && styles.contentShellDesktop,
+        ]}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Thu nhập</Text>
+        </View>
 
-      {/* Summary */}
-      <View style={styles.summaryCard}>
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Tổng doanh thu</Text>
-            <Text style={styles.summaryValue}>{fmt(dashData?.total?.revenue)}</Text>
+        {/* Summary */}
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Tổng doanh thu</Text>
+              <Text style={styles.summaryValue}>{fmt(dashData?.total?.revenue)}</Text>
+            </View>
+          </View>
+          <View style={styles.summaryDivider} />
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Đã thanh toán</Text>
+              <Text style={[styles.summaryValue, { color: '#2E7D32' }]}>
+                {fmt(dashData?.settlement?.settled)}
+              </Text>
+            </View>
+            <View style={styles.summaryDividerVertical} />
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Chờ giải ngân</Text>
+              <Text style={[styles.summaryValue, { color: '#E65100' }]}>
+                {fmt(dashData?.settlement?.pending)}
+              </Text>
+            </View>
           </View>
         </View>
-        <View style={styles.summaryDivider} />
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Đã thanh toán</Text>
-            <Text style={[styles.summaryValue, { color: '#2E7D32' }]}>
-              {fmt(dashData?.settlement?.settled)}
-            </Text>
-          </View>
-          <View style={styles.summaryDividerVertical} />
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Chờ giải ngân</Text>
-            <Text style={[styles.summaryValue, { color: '#E65100' }]}>
-              {fmt(dashData?.settlement?.pending)}
-            </Text>
-          </View>
+
+        {/* Commission note */}
+        <View style={styles.commissionNote}>
+          <Text style={styles.commissionNoteText}>💡 Hoa hồng nền tảng: 8%</Text>
+          <Text style={styles.commissionNoteSub}>
+            Nền tảng giữ lại 8% hoa hồng. Phần còn lại được giải ngân theo chu kỳ 3 ngày hoặc tức
+            thời.
+          </Text>
         </View>
-      </View>
 
-      {/* Commission note */}
-      <View style={styles.commissionNote}>
-        <Text style={styles.commissionNoteText}>💡 Hoa hồng nền tảng: 8%</Text>
-        <Text style={styles.commissionNoteSub}>
-          Nền tảng giữ lại 8% hoa hồng. Phần còn lại được giải ngân theo chu kỳ 3 ngày hoặc tức thời.
-        </Text>
-      </View>
-
-      {/* Settlement list */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Lịch sử thanh toán</Text>
+        {/* Settlement list */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Lịch sử thanh toán</Text>
+        </View>
       </View>
 
       {loading && settlements.length === 0 ? (
-        <ActivityIndicator size="large" color={colors.primary} style={{ flex: 1, paddingVertical: 40 }} />
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={{ flex: 1, paddingVertical: 40 }}
+        />
       ) : error && settlements.length === 0 ? (
         <ErrorState onRetry={load} />
       ) : settlements.length === 0 ? (
@@ -131,9 +138,16 @@ export default function EarningsScreen() {
               onPress={() => router.push(`/settlement/${item.id}`)}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingHorizontal: pagePadding, maxWidth: pageMaxWidth },
+          ]}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+            />
           }
         />
       )}
@@ -143,12 +157,18 @@ export default function EarningsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 },
+  contentShell: {
+    alignSelf: 'center',
+    width: '100%',
+  },
+  contentShellDesktop: {
+    paddingTop: 24,
+  },
+  header: { paddingTop: 16, paddingBottom: 12 },
   title: { fontSize: 24, fontWeight: '700', color: colors.onSurface },
   summaryCard: {
     backgroundColor: colors.primary,
     borderRadius: 20,
-    marginHorizontal: 16,
     padding: 20,
     marginBottom: 12,
   },
@@ -157,9 +177,12 @@ const styles = StyleSheet.create({
   summaryLabel: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 4 },
   summaryValue: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
   summaryDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginVertical: 12 },
-  summaryDividerVertical: { width: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginHorizontal: 12 },
+  summaryDividerVertical: {
+    width: 1,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    marginHorizontal: 12,
+  },
   commissionNote: {
-    marginHorizontal: 16,
     backgroundColor: '#EDF1F8',
     borderRadius: 12,
     padding: 12,
@@ -167,9 +190,9 @@ const styles = StyleSheet.create({
   },
   commissionNoteText: { fontSize: 13, fontWeight: '600', color: colors.onSurface, marginBottom: 4 },
   commissionNoteSub: { fontSize: 12, color: colors.onSurfaceVariant, lineHeight: 17 },
-  sectionHeader: { paddingHorizontal: 16, marginBottom: 10 },
+  sectionHeader: { marginBottom: 10 },
   sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.onSurface },
-  listContent: { paddingHorizontal: 16, paddingBottom: 24 },
+  listContent: { alignSelf: 'center', width: '100%', paddingBottom: 24 },
   emptyCard: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
   emptyEmoji: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 15, color: colors.onSurfaceVariant },

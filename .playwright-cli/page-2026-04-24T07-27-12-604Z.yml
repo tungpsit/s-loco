@@ -1,0 +1,239 @@
+- generic [ref=e56]:
+  - generic [ref=e57]:
+    - generic [ref=e59]:
+      - heading [level=1] [ref=e151]: Tổng quan
+      - generic [ref=e65]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e69]: Chào buổi chiều
+            - generic [ref=e70]: Chủ cửa hàng
+          - generic [ref=e72]: 🏪
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - generic [ref=e76]: 🛒
+            - generic [ref=e77]: Đơn hôm nay
+            - generic [ref=e78]: "0"
+          - generic [ref=e79]:
+            - generic [ref=e81]: 💰
+            - generic [ref=e82]: Doanh thu hôm nay
+            - generic [ref=e83]: 0₫
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - generic [ref=e87]: ⏳
+            - generic [ref=e88]: Chờ giải ngân
+            - generic [ref=e89]: 0₫
+          - generic [ref=e90]:
+            - generic [ref=e92]: ✅
+            - generic [ref=e93]: Đã thanh toán
+            - generic [ref=e94]: 0₫
+        - generic [ref=e95]:
+          - generic [ref=e96]:
+            - generic [ref=e97]: Tổng doanh thu
+            - generic [ref=e98]: 12.165.000₫
+          - generic [ref=e99]: 📊
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - generic [ref=e102]: Đơn hàng gần đây
+            - generic [ref=e103] [cursor=pointer]: Xem tất cả ›
+          - generic [ref=e104]:
+            - generic [ref=e105]: 📋
+            - generic [ref=e106]: Chưa có đơn hàng nào
+            - generic [ref=e107]: Đơn hàng sẽ xuất hiện khi có khách đặt dịch vụ
+    - generic [ref=e153]:
+      - heading [level=1] [ref=e373]: Đơn hàng
+      - generic [ref=e157]:
+        - generic [ref=e159]: Đơn hàng
+        - generic [ref=e161]:
+          - generic [ref=e163] [cursor=pointer]: Tất cả
+          - generic [ref=e165] [cursor=pointer]: Chờ đổi
+          - generic [ref=e167] [cursor=pointer]: Đã đổi
+          - generic [ref=e169] [cursor=pointer]: Hoàn thành
+        - generic [ref=e172]:
+          - generic [ref=e174] [cursor=pointer]:
+            - generic [ref=e175]:
+              - generic [ref=e176]:
+                - generic [ref=e177]: Combo Ốc Hương + Bia
+                - generic [ref=e178]: 👤 Đặng Thị Thảo
+              - generic [ref=e180]: Mới tạo
+            - generic [ref=e182]: 270.000₫
+          - generic [ref=e184] [cursor=pointer]:
+            - generic [ref=e185]:
+              - generic [ref=e186]:
+                - generic [ref=e187]: Massage Toàn Thân 90 Phút
+                - generic [ref=e188]: 👤 Đặng Thị Thảo
+              - generic [ref=e190]: Đã đổi
+            - generic [ref=e192]: 280.000₫
+          - generic [ref=e194] [cursor=pointer]:
+            - generic [ref=e195]:
+              - generic [ref=e196]:
+                - generic [ref=e197]: Combo Ốc Hương + Bia
+                - generic [ref=e198]: 👤 Đỗ Quang Huy
+              - generic [ref=e200]: Đã thanh toán
+            - generic [ref=e202]: 270.000₫
+          - generic [ref=e204] [cursor=pointer]:
+            - generic [ref=e205]:
+              - generic [ref=e206]:
+                - generic [ref=e207]: Combo Ốc Hương + Bia
+                - generic [ref=e208]: 👤 Ngô Văn Sơn
+              - generic [ref=e210]: Hoàn thành
+            - generic [ref=e212]: 270.000₫
+          - generic [ref=e214] [cursor=pointer]:
+            - generic [ref=e215]:
+              - generic [ref=e216]:
+                - generic [ref=e217]: Phòng Gia Đình 4 Người
+                - generic [ref=e218]: 👤 Đỗ Quang Huy
+              - generic [ref=e220]: Hoàn tiền
+            - generic [ref=e222]: 2.000.000₫
+          - generic [ref=e224] [cursor=pointer]:
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - generic [ref=e227]: Phòng Gia Đình 4 Người
+                - generic [ref=e228]: 👤 Đỗ Quang Huy
+              - generic [ref=e230]: Hoàn tiền
+            - generic [ref=e232]: 2.000.000₫
+          - generic [ref=e234] [cursor=pointer]:
+            - generic [ref=e235]:
+              - generic [ref=e236]:
+                - generic [ref=e237]: Combo Ốc Hương + Bia
+                - generic [ref=e238]: 👤 Bùi Thị Ngọc
+              - generic [ref=e240]: Đã thanh toán
+            - generic [ref=e242]: 540.000₫
+          - generic [ref=e244] [cursor=pointer]:
+            - generic [ref=e245]:
+              - generic [ref=e246]:
+                - generic [ref=e247]: Combo Ốc Hương + Bia
+                - generic [ref=e248]: 👤 Bùi Thị Ngọc
+              - generic [ref=e250]: Hoàn thành
+            - generic [ref=e252]: 540.000₫
+          - generic [ref=e254] [cursor=pointer]:
+            - generic [ref=e255]:
+              - generic [ref=e256]:
+                - generic [ref=e257]: Vé Vào Cổng Trẻ Em
+                - generic [ref=e258]: 👤 Cao Đức Thành
+              - generic [ref=e260]: Mới tạo
+            - generic [ref=e262]: 190.000₫
+          - generic [ref=e264] [cursor=pointer]:
+            - generic [ref=e265]:
+              - generic [ref=e266]:
+                - generic [ref=e267]: Vé Vào Cổng Trẻ Em
+                - generic [ref=e268]: 👤 Cao Đức Thành
+              - generic [ref=e270]: Mới tạo
+            - generic [ref=e272]: 190.000₫
+          - generic [ref=e274] [cursor=pointer]:
+            - generic [ref=e275]:
+              - generic [ref=e276]:
+                - generic [ref=e277]: Nem Chua Thanh Hóa (20 cái)
+                - generic [ref=e278]: 👤 Cao Đức Thành
+              - generic [ref=e280]: Mới tạo
+            - generic [ref=e282]: 99.000₫
+          - generic [ref=e284] [cursor=pointer]:
+            - generic [ref=e285]:
+              - generic [ref=e286]:
+                - generic [ref=e287]: Massage Toàn Thân 90 Phút
+                - generic [ref=e288]: 👤 Dương Thị Linh
+              - generic [ref=e290]: Đã thanh toán
+            - generic [ref=e292]: 560.000₫
+          - generic [ref=e294] [cursor=pointer]:
+            - generic [ref=e295]:
+              - generic [ref=e296]:
+                - generic [ref=e297]: Massage Toàn Thân 90 Phút
+                - generic [ref=e298]: 👤 Dương Thị Linh
+              - generic [ref=e300]: Đã thanh toán
+            - generic [ref=e302]: 560.000₫
+          - generic [ref=e304] [cursor=pointer]:
+            - generic [ref=e305]:
+              - generic [ref=e306]:
+                - generic [ref=e307]: Vé Vào Cổng Trẻ Em
+                - generic [ref=e308]: 👤 Hà Văn Long
+              - generic [ref=e310]: Đã đổi
+            - generic [ref=e312]: 95.000₫
+          - generic [ref=e314] [cursor=pointer]:
+            - generic [ref=e315]:
+              - generic [ref=e316]:
+                - generic [ref=e317]: Nem Chua Thanh Hóa (20 cái)
+                - generic [ref=e318]: 👤 Đặng Thị Thảo
+              - generic [ref=e320]: Mới tạo
+            - generic [ref=e322]: 99.000₫
+          - generic [ref=e324] [cursor=pointer]:
+            - generic [ref=e325]:
+              - generic [ref=e326]:
+                - generic [ref=e327]: Phòng Gia Đình 4 Người
+                - generic [ref=e328]: 👤 Đặng Thị Thảo
+              - generic [ref=e330]: Mới tạo
+            - generic [ref=e332]: 1.000.000₫
+          - generic [ref=e334] [cursor=pointer]:
+            - generic [ref=e335]:
+              - generic [ref=e336]:
+                - generic [ref=e337]: Set Hải Sản 2 Người
+                - generic [ref=e338]: 👤 Tô Thị Bích
+              - generic [ref=e340]: Đã thanh toán
+            - generic [ref=e342]: 380.000₫
+          - generic [ref=e344] [cursor=pointer]:
+            - generic [ref=e345]:
+              - generic [ref=e346]:
+                - generic [ref=e347]: Combo Ốc Hương + Bia
+                - generic [ref=e348]: 👤 Tô Thị Bích
+              - generic [ref=e350]: Hoàn thành
+            - generic [ref=e352]: 540.000₫
+          - generic [ref=e354] [cursor=pointer]:
+            - generic [ref=e355]:
+              - generic [ref=e356]:
+                - generic [ref=e357]: Combo Ốc Hương + Bia
+                - generic [ref=e358]: 👤 Tô Thị Bích
+              - generic [ref=e360]: Đã thanh toán
+            - generic [ref=e362]: 540.000₫
+          - generic [ref=e364] [cursor=pointer]:
+            - generic [ref=e365]:
+              - generic [ref=e366]:
+                - generic [ref=e367]: Combo Ốc Hương + Bia
+                - generic [ref=e368]: 👤 Phạm Thị Mai
+              - generic [ref=e370]: Đã hủy
+            - generic [ref=e372]: 540.000₫
+    - generic [ref=e375]:
+      - heading "Thu nhập" [level=1] [ref=e377]
+      - generic [ref=e379]:
+        - generic [ref=e381]: Thu nhập
+        - generic [ref=e382]:
+          - generic [ref=e384]:
+            - generic [ref=e385]: Tổng doanh thu
+            - generic [ref=e386]: 12.165.000₫
+          - generic [ref=e388]:
+            - generic [ref=e389]:
+              - generic [ref=e390]: Đã thanh toán
+              - generic [ref=e391]: 0₫
+            - generic [ref=e393]:
+              - generic [ref=e394]: Chờ giải ngân
+              - generic [ref=e395]: 0₫
+        - generic [ref=e396]:
+          - generic [ref=e397]: "💡 Hoa hồng nền tảng: 8%"
+          - generic [ref=e398]: Nền tảng giữ lại 8% hoa hồng. Phần còn lại được giải ngân theo chu kỳ 3 ngày hoặc tức thời.
+        - generic [ref=e400]: Lịch sử thanh toán
+        - generic [ref=e401]:
+          - generic [ref=e402]: 💳
+          - generic [ref=e403]: Chưa có thanh toán nào
+  - tablist [ref=e110]:
+    - tab "🏠 🏠 Tổng quan" [ref=e112] [cursor=pointer]:
+      - generic [ref=e113]:
+        - generic [ref=e115]: 🏠
+        - generic [ref=e117]: 🏠
+      - generic [ref=e118]: Tổng quan
+    - tab "📷 📷 Quét QR" [ref=e120] [cursor=pointer]:
+      - generic [ref=e121]:
+        - generic [ref=e123]: 📷
+        - generic [ref=e125]: 📷
+      - generic [ref=e126]: Quét QR
+    - tab "🧾 🧾 Đơn hàng" [ref=e128] [cursor=pointer]:
+      - generic [ref=e129]:
+        - generic [ref=e131]: 🧾
+        - generic [ref=e133]: 🧾
+      - generic [ref=e134]: Đơn hàng
+    - tab "💰 💰 Thu nhập" [active] [selected] [ref=e136] [cursor=pointer]:
+      - generic [ref=e137]:
+        - generic [ref=e139]: 💰
+        - generic [ref=e141]: 💰
+      - generic [ref=e142]: Thu nhập
+    - tab "⚙️ ⚙️ Cài đặt" [ref=e144] [cursor=pointer]:
+      - generic [ref=e145]:
+        - generic [ref=e147]: ⚙️
+        - generic [ref=e149]: ⚙️
+      - generic [ref=e150]: Cài đặt

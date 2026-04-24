@@ -1,11 +1,11 @@
+import { router, Stack, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native'
-import { Stack, useLocalSearchParams, router } from 'expo-router'
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native'
+import { ErrorState } from '../../src/components/error-state'
+import { ServiceForm } from '../../src/components/service-form'
+import type { CreateServiceInput, Service, UpdateServiceInput } from '../../src/lib/api'
 import { serviceApi, vendorApi } from '../../src/lib/api'
 import { useAuthStore } from '../../src/stores/auth-store'
-import { ServiceForm } from '../../src/components/service-form'
-import { ErrorState } from '../../src/components/error-state'
-import type { Service, CreateServiceInput, UpdateServiceInput } from '../../src/lib/api'
 
 const colors = {
   surface: '#F4F7FB',
@@ -28,7 +28,7 @@ export default function ServiceFormScreen() {
         if (!vendorId) {
           const vRes = await vendorApi.profile()
           if (vRes.ok && vRes.data?.data) {
-            const v = vRes.data.data as any
+            const v = vRes.data.data
             vendorId = v.id
             useAuthStore.getState().setVendorId(v.id)
           }
@@ -67,9 +67,14 @@ export default function ServiceFormScreen() {
             Alert.alert('Lỗi', 'Không tìm được thông tin cửa hàng.')
             return
           }
-          const v = vRes.data.data as any
+          const v = vRes.data.data
           vendorId = v.id
           useAuthStore.getState().setVendorId(v.id)
+        }
+
+        if (!vendorId) {
+          Alert.alert('Lỗi', 'Không tìm được thông tin cửa hàng.')
+          return
         }
 
         if (isNew) {
@@ -118,11 +123,7 @@ export default function ServiceFormScreen() {
       ) : error ? (
         <ErrorState onRetry={() => router.back()} />
       ) : (
-        <ServiceForm
-          initial={initialData}
-          onSubmit={handleSubmit}
-          loading={saving}
-        />
+        <ServiceForm initial={initialData} onSubmit={handleSubmit} loading={saving} />
       )}
     </>
   )

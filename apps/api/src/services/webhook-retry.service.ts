@@ -51,7 +51,7 @@ export async function enqueueWebhookRetry(
     lastError: errorMessage,
   }
 
-  const delay = RETRY_DELAYS_MS[0] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1]
+  const delay = RETRY_DELAYS_MS[0] ?? 30_000
   const score = Date.now() + delay
 
   await redis.zadd(QUEUE_KEY, score, JSON.stringify(entry))
@@ -102,7 +102,7 @@ export async function processRetryQueue(): Promise<{ processed: number; failed: 
       }
 
       // Re-queue with exponential backoff
-      const delay = RETRY_DELAYS_MS[nextRetryCount] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1]
+      const delay = RETRY_DELAYS_MS[nextRetryCount] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1] ?? 30_000
       const updated: RetryEntry = {
         ...entry,
         retryCount: nextRetryCount,

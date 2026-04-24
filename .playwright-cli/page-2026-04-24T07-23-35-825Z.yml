@@ -1,0 +1,13 @@
+- generic [ref=e39]:
+  - generic [ref=e40]:
+    - generic [ref=e41]: 🏪
+    - generic [ref=e42]: S-Loco Vendor
+    - generic [ref=e43]: Quản lý cửa hàng của bạn
+  - generic [ref=e44]:
+    - generic [ref=e45]: Đăng nhập
+    - generic [ref=e46]: Email
+    - textbox "vendor@samson.vn" [ref=e47]: vendor1@slocal.vn
+    - generic [ref=e48]: Mật khẩu
+    - textbox "••••••••" [ref=e49]: vendor123
+    - generic [ref=e51] [cursor=pointer]: Đăng nhập
+  - generic [ref=e52]: © 2026 S-Loco · Sầm Sơn

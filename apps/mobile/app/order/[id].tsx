@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import { colors, spacing, typography } from '../../lib/theme'
 import ErrorState from '../../src/components/error-state'
+import type { OrderItem, VoucherItem } from '../../src/lib/api'
 import { ordersApi } from '../../src/lib/api'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -88,8 +89,8 @@ export default function OrderDetailScreen() {
       {/* Items */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Dịch vụ đã đặt</Text>
-        {order.items?.map((item: any, i: number) => (
-          <View key={i} style={styles.itemRow}>
+        {order.items?.map((item: NonNullable<OrderItem['items']>[number]) => (
+          <View key={`${item.service_name}-${item.quantity}-${item.price}`} style={styles.itemRow}>
             <View style={styles.itemInfo}>
               <Text style={styles.itemName}>{item.service_name ?? 'Dịch vụ'}</Text>
               <Text style={styles.itemQty}>x{item.quantity}</Text>
@@ -113,7 +114,7 @@ export default function OrderDetailScreen() {
       {!!(order.vouchers && order.vouchers.length > 0) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Voucher</Text>
-          {(order.vouchers ?? []).map((v: any) => (
+          {(order.vouchers ?? []).map((v: VoucherItem) => (
             <TouchableOpacity
               key={v.id}
               style={styles.voucherRow}

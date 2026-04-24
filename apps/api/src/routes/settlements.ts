@@ -39,49 +39,6 @@ settlementRoutes.get('/reconciliation', requireRole('admin'), async (c) => {
   return c.json({ success: true, data: result })
 })
 
-// ─── POST /settlements/:id/approve — admin ────
-settlementRoutes.post('/:id/approve', requireRole('admin'), async (c) => {
-  try {
-    const adminId = c.get('userId')!
-    const result = await settlementSvc.approveSettlement(c.req.param('id')!, adminId)
-    return c.json({ success: true, data: { settlement: result } })
-  } catch (err) {
-    if (err instanceof SettlementError)
-      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
-    throw err
-  }
-})
-
-// ─── POST /settlements/:id/reject — admin ────
-settlementRoutes.post('/:id/reject', requireRole('admin'), async (c) => {
-  try {
-    const result = await settlementSvc.rejectSettlement(c.req.param('id')!)
-    return c.json({ success: true, data: { settlement: result } })
-  } catch (err) {
-    if (err instanceof SettlementError)
-      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
-    throw err
-  }
-})
-
-// ─── POST /settlements/:id/disburse — admin ────
-settlementRoutes.post('/:id/disburse', requireRole('admin'), async (c) => {
-  try {
-    const result = await settlementSvc.disburseSettlement(c.req.param('id')!)
-    return c.json({ success: true, data: { settlement: result } })
-  } catch (err) {
-    if (err instanceof SettlementError)
-      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
-    throw err
-  }
-})
-
-// ─── POST /settlements/batch — admin trigger batch ────
-settlementRoutes.post('/batch', requireRole('admin'), async (c) => {
-  const days = Number(c.req.query('days') || 3)
-  const result = await runSettlementBatch(days)
-  return c.json({ success: true, data: result })
-})
 // ─── GET /settlements/export — download CSV report ────
 settlementRoutes.get('/export', requireRole('admin'), async (c) => {
   const result = await settlementSvc.listAllSettlements({ page: 1, limit: 1000 })
@@ -145,6 +102,72 @@ settlementRoutes.get('/export', requireRole('admin'), async (c) => {
       'Content-Disposition': `attachment; filename="${filename}"`,
     },
   })
+})
+
+// ─── GET /settlements/:id — vendor settlement detail ────
+settlementRoutes.get('/:id', requireRole('vendor_owner'), async (c) => {
+  try {
+    const userId = c.get('userId')!
+    const vendorList = await getVendorByOwnerId(userId)
+    const vendor = vendorList[0]
+    if (!vendor) {
+      return c.json(
+        { success: false, error: { code: 'NO_VENDOR', message: 'Bạn chưa có cửa hàng.' } },
+        404,
+      )
+    }
+    const result = await settlementSvc.getSettlementByVendor(c.req.param('id')!, vendor.id)
+    return c.json({ success: true, data: result })
+  } catch (err) {
+    if (err instanceof SettlementError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+    }
+    throw err
+  }
+})
+
+// ─── POST /settlements/:id/approve — admin ────
+settlementRoutes.post('/:id/approve', requireRole('admin'), async (c) => {
+  try {
+    const adminId = c.get('userId')!
+    const result = await settlementSvc.approveSettlement(c.req.param('id')!, adminId)
+    return c.json({ success: true, data: { settlement: result } })
+  } catch (err) {
+    if (err instanceof SettlementError)
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+    throw err
+  }
+})
+
+// ─── POST /settlements/:id/reject — admin ────
+settlementRoutes.post('/:id/reject', requireRole('admin'), async (c) => {
+  try {
+    const result = await settlementSvc.rejectSettlement(c.req.param('id')!)
+    return c.json({ success: true, data: { settlement: result } })
+  } catch (err) {
+    if (err instanceof SettlementError)
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+    throw err
+  }
+})
+
+// ─── POST /settlements/:id/disburse — admin ────
+settlementRoutes.post('/:id/disburse', requireRole('admin'), async (c) => {
+  try {
+    const result = await settlementSvc.disburseSettlement(c.req.param('id')!)
+    return c.json({ success: true, data: { settlement: result } })
+  } catch (err) {
+    if (err instanceof SettlementError)
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+    throw err
+  }
+})
+
+// ─── POST /settlements/batch — admin trigger batch ────
+settlementRoutes.post('/batch', requireRole('admin'), async (c) => {
+  const days = Number(c.req.query('days') || 3)
+  const result = await runSettlementBatch(days)
+  return c.json({ success: true, data: result })
 })
 
 export default settlementRoutes

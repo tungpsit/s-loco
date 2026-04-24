@@ -9,15 +9,16 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "check": "tsc --noEmit",
-    "lint": "biome check app/ components/ hooks/"
+    "lint": "biome check src/app/ src/components/ src/hooks/"
   },
   "dependencies": {
+    "@S-Loco/shared": "workspace:*",
     "@react-native-async-storage/async-storage": "3.0.1",
     "@react-navigation/bottom-tabs": "^7.0.0",
-    "@S-Loco/shared": "workspace:*",
     "@tanstack/react-query": "^5.62.0",
     "expo": "55.0.8",
     "expo-asset": "55.0.10",
+    "expo-clipboard": "55.0.13",
     "expo-constants": "55.0.9",
     "expo-linking": "55.0.8",
     "expo-router": "55.0.7",

@@ -9,6 +9,7 @@ import type { UserProfile } from '../lib/api'
 interface AuthState {
   token: string | null
   user: UserProfile | null
+  isLoggedIn: boolean
   isLoading: boolean
   isHydrated: boolean
 
@@ -21,6 +22,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   user: null,
+  isLoggedIn: false,
   isLoading: false,
   isHydrated: false,
 
@@ -30,7 +32,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (raw) {
         const { token, user } = JSON.parse(raw) as { token: string; user: UserProfile }
         await setToken(token)
-        set({ token, user, isHydrated: true })
+        set({ token, user, isLoggedIn: Boolean(token), isHydrated: true })
       } else {
         set({ isHydrated: true })
       }
@@ -42,13 +44,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (token, user) => {
     await setToken(token)
     await AsyncStorage.setItem('auth_state', JSON.stringify({ token, user }))
-    set({ token, user })
+    set({ token, user, isLoggedIn: true })
   },
 
   logout: async () => {
     await setToken(null)
     await AsyncStorage.removeItem('auth_state')
-    set({ token: null, user: null })
+    set({ token: null, user: null, isLoggedIn: false })
   },
 
   setUser: (user) => {

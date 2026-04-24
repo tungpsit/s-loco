@@ -17,6 +17,7 @@ import { colors, spacing, typography } from '../../lib/theme'
 import ErrorState from '../../src/components/error-state'
 import ReviewItemComponent from '../../src/components/review-item'
 import { formatVND } from '../../src/components/service-card'
+import type { ReviewItem } from '../../src/lib/api'
 import { servicesApi } from '../../src/lib/api'
 import { useOrderStore } from '../../src/stores/order-store'
 
@@ -71,14 +72,17 @@ export default function ServiceDetailScreen() {
                 setSelectedImg(Math.round(e.nativeEvent.contentOffset.x / 340))
               }}
             >
-              {images.map((uri: string, i: number) => (
-                <Image key={i} source={{ uri }} style={styles.heroImage} />
+              {images.map((uri: string) => (
+                <Image key={uri} source={{ uri }} style={styles.heroImage} />
               ))}
             </ScrollView>
             {images.length > 1 && (
               <View style={styles.pagination}>
-                {images.map((_: any, i: number) => (
-                  <View key={i} style={[styles.dot, i === selectedImg && styles.dotActive]} />
+                {images.map((uri: string, i: number) => (
+                  <View
+                    key={`dot-${uri}`}
+                    style={[styles.dot, i === selectedImg && styles.dotActive]}
+                  />
                 ))}
               </View>
             )}
@@ -150,7 +154,7 @@ export default function ServiceDetailScreen() {
           )}
 
           {/* Reviews */}
-          {service.reviews?.map((r: any) => (
+          {service.reviews?.map((r: ReviewItem) => (
             <View key={r.id} style={styles.section}>
               <ReviewItemComponent review={r} />
             </View>

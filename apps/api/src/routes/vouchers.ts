@@ -25,6 +25,36 @@ voucherRoutes.get('/', async (c) => {
   return c.json({ success: true, data: result })
 })
 
+// ─── GET /vouchers/vendor — vendor-owned voucher list ────
+voucherRoutes.get('/vendor', requireRole('vendor_owner'), async (c) => {
+  const userId = c.get('userId')!
+  const { getVendorByOwnerId } = await import('../services/vendor.service')
+  const vendorList = await getVendorByOwnerId(userId)
+  const vendorIds = vendorList.map((vendor) => vendor.id)
+  const status = c.req.query('status') || undefined
+  const page = Number(c.req.query('page') || 1)
+  const limit = Number(c.req.query('limit') || 20)
+  const result = await voucherSvc.listVouchersByVendorIds(vendorIds, { status, page, limit })
+  return c.json({ success: true, data: result })
+})
+
+// ─── GET /vouchers/vendor/:id — vendor-owned voucher detail ────
+voucherRoutes.get('/vendor/:id', requireRole('vendor_owner'), async (c) => {
+  try {
+    const userId = c.get('userId')!
+    const { getVendorByOwnerId } = await import('../services/vendor.service')
+    const vendorList = await getVendorByOwnerId(userId)
+    const vendorIds = vendorList.map((vendor) => vendor.id)
+    const result = await voucherSvc.getVoucherDetailForVendor(c.req.param('id')!, vendorIds)
+    return c.json({ success: true, data: result })
+  } catch (err) {
+    if (err instanceof VoucherError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+    }
+    throw err
+  }
+})
+
 // ─── GET /vouchers/:id — voucher detail with QR ────
 voucherRoutes.get('/:id', async (c) => {
   try {
@@ -202,7 +232,15 @@ voucherRoutes.post('/:id/gift/phone', requireRole('tourist'), zValidator('json',
 voucherRoutes.post('/:id/gift/link', requireRole('tourist'), async (c) => {
   try {
     const voucherId = c.req.param('id')
-    const senderId = c.get('userId')!
+    if (!voucherId) {
+      return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Voucher ID không hợp lệ.' } }, 400)
+    }
+
+    const senderId = c.get('userId')
+    if (!senderId) {
+      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, 401)
+    }
+
     const result = await giftSvc.createGiftLink({ voucherId, senderId })
     return c.json({ success: true, data: result })
   } catch (err) {
@@ -224,7 +262,15 @@ voucherRoutes.post('/auto-confirm', requireRole('admin'), async (c) => {
 voucherRoutes.post('/:id/refund', requireRole('tourist'), async (c) => {
   try {
     const voucherId = c.req.param('id')
-    const userId = c.get('userId')!
+    if (!voucherId) {
+      return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Voucher ID không hợp lệ.' } }, 400)
+    }
+
+    const userId = c.get('userId')
+    if (!userId) {
+      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, 401)
+    }
+
     const body = (await c.req.json()) as { reason?: string }
     const result = await requestPartialRefund(voucherId, userId, body.reason)
     return c.json({ success: true, data: result })

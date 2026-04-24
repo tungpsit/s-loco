@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
+import { Stack, useLocalSearchParams } from 'expo-router'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -8,10 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { Stack, useLocalSearchParams, router } from 'expo-router'
-import { voucherApi } from '../../src/lib/api'
 import { ErrorState } from '../../src/components/error-state'
 import type { Voucher } from '../../src/lib/api'
+import { voucherApi } from '../../src/lib/api'
 
 const colors = {
   primary: '#005E97',
@@ -33,8 +33,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }
   cancelled: { label: 'Đã hủy', bg: '#FFEBEE', color: '#C62828' },
 }
 
-const fmt = (n?: number) =>
-  n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
+const fmt = (n?: number) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—')
 
 const fmtDate = (d?: string) =>
   d
@@ -74,7 +73,9 @@ export default function VoucherDetailScreen() {
     }
   }, [id])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   const handleComplete = useCallback(async () => {
     if (!voucher) return
@@ -133,9 +134,7 @@ export default function VoucherDetailScreen() {
       <ScrollView style={styles.container}>
         {/* Status */}
         <View style={[styles.statusCard, { backgroundColor: statusCfg.bg }]}>
-          <Text style={[styles.statusText, { color: statusCfg.color }]}>
-            {statusCfg.label}
-          </Text>
+          <Text style={[styles.statusText, { color: statusCfg.color }]}>{statusCfg.label}</Text>
         </View>
 
         {/* Info card */}
@@ -204,7 +203,12 @@ function InfoRow({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
   statusCard: {
     marginHorizontal: 16,
     marginTop: 16,
