@@ -603,11 +603,54 @@ export interface ArticleDetail extends ArticleItem {
 }
 
 export interface WeatherData {
+  location?: {
+    name: string
+    latitude: number
+    longitude: number
+    timezone: string
+    source: string
+  }
+  updated_at?: string
   temperature: number
+  apparent_temperature?: number
   condition: string
+  condition_code?: number
+  is_day?: boolean
   humidity: number
   wind_speed: number
-  forecast?: { day: string; high: number; low: number; condition: string }[]
+  wind_direction?: number
+  wind_gusts?: number
+  uv_index?: number
+  rain_probability?: number
+  precipitation?: number
+  rain?: number
+  cloud_cover?: number
+  beach?: {
+    wave_height?: number
+    wave_period?: number
+    sea_surface_temperature?: number
+    current_velocity?: number
+    safety_label?: string
+    safety_tip?: string
+  }
+  travel_tip?: string
+  forecast?: {
+    date?: string
+    day: string
+    high: number
+    low: number
+    condition: string
+    condition_code?: number
+    rain_probability?: number
+    precipitation?: number
+    uv_index?: number
+    wind_speed?: number
+    wind_gusts?: number
+    sunrise?: string
+    sunset?: string
+    wave_height?: number
+    wave_period?: number
+  }[]
 }
 
 export interface EventItem {

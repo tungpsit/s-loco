@@ -59,9 +59,21 @@ struct DashboardView: View {
                         .foregroundStyle(.white.opacity(0.86))
                 }
                 Spacer()
-                Image(systemName: "map.fill")
-                    .font(.system(size: 42, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.9))
+                Button {
+                    state.route = .weather
+                } label: {
+                    VStack(spacing: 2) {
+                        Image(systemName: "cloud.sun.fill")
+                            .font(.title2)
+                        Text(state.weather.map { "\($0.temperature)°" } ?? "Thời tiết")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(.plain)
             }
 
             HStack(spacing: 10) {
@@ -70,6 +82,9 @@ struct DashboardView: View {
                 }
                 HeroPill(icon: "sparkles", text: "AI itinerary") {
                     state.tab = .ai
+                }
+                HeroPill(icon: "cloud.sun", text: "Thời tiết") {
+                    state.route = .weather
                 }
             }
         }
@@ -118,6 +133,160 @@ struct DashboardView: View {
                     .font(.subheadline.weight(.semibold))
             }
         }
+    }
+}
+
+struct WeatherView: View {
+    @EnvironmentObject private var state: AppState
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if let weather = state.weather {
+                        currentCard(weather)
+                        travelCard(weather)
+                        beachCard(weather.beach)
+                        forecastList(weather.forecast ?? [])
+                    } else {
+                        ContentUnavailableView("Chưa có dữ liệu thời tiết", systemImage: "cloud.sun", description: Text("Kéo để tải lại dữ liệu Sầm Sơn."))
+                    }
+                }
+                .padding(16)
+            }
+            .background(TouristTheme.surface.ignoresSafeArea())
+            .navigationTitle("Thời tiết Sầm Sơn")
+            .refreshable { await state.loadWeather() }
+            .task {
+                if state.weather == nil {
+                    await state.loadWeather()
+                }
+            }
+        }
+    }
+
+    private func currentCard(_ weather: TouristWeather) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(weather.location?.name ?? "Bãi biển Sầm Sơn, Thanh Hóa")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.78))
+            HStack(alignment: .center) {
+                Image(systemName: "cloud.sun.fill")
+                    .font(.system(size: 52))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(weather.temperature)°C")
+                        .font(.system(size: 44, weight: .bold))
+                    Text(weather.condition)
+                        .font(.headline)
+                    if let apparent = weather.apparentTemperature {
+                        Text("Cảm giác như \(apparent)°C")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.76))
+                    }
+                }
+                Spacer()
+            }
+            HStack {
+                WeatherMetric("Độ ẩm", "\(weather.humidity)%")
+                WeatherMetric("Gió", "\(weather.windSpeed) km/h")
+                WeatherMetric("UV", weather.uvIndex.map { String(format: "%.1f", $0) } ?? "--")
+                WeatherMetric("Mưa", weather.rainProbability.map { "\($0)%" } ?? "--")
+            }
+        }
+        .foregroundStyle(.white)
+        .padding(18)
+        .background(TouristTheme.primary, in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private func travelCard(_ weather: TouristWeather) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Gợi ý cho khách du lịch")
+                .font(.headline)
+            Text(weather.travelTip ?? "Theo dõi thời tiết trước khi đặt hoạt động ngoài trời.")
+                .font(.subheadline)
+                .foregroundStyle(TouristTheme.muted)
+        }
+        .padding(16)
+        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(TouristTheme.border))
+    }
+
+    @ViewBuilder
+    private func beachCard(_ beach: BeachWeather?) -> some View {
+        if let beach {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Biển Sầm Sơn")
+                        .font(.headline)
+                    Spacer()
+                    Text(beach.safetyLabel ?? "Đang cập nhật")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(TouristTheme.primary)
+                }
+                HStack {
+                    WeatherMetric("Sóng", beach.waveHeight.map { "\($0) m" } ?? "--", dark: true)
+                    WeatherMetric("Nước biển", beach.seaSurfaceTemperature.map { "\($0)°C" } ?? "--", dark: true)
+                    WeatherMetric("Chu kỳ", beach.wavePeriod.map { "\($0) s" } ?? "--", dark: true)
+                }
+                Text(beach.safetyTip ?? "")
+                    .font(.subheadline)
+                    .foregroundStyle(TouristTheme.muted)
+            }
+            .padding(16)
+            .background(.white, in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(TouristTheme.border))
+        }
+    }
+
+    private func forecastList(_ forecast: [WeatherForecastDay]) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Dự báo 7 ngày")
+                .font(.headline)
+            ForEach(forecast) { day in
+                HStack(spacing: 12) {
+                    Text(day.day)
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 66, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(day.condition)
+                            .font(.subheadline.weight(.semibold))
+                        Text("Mưa \(day.rainProbability.map { "\($0)%" } ?? "--") · UV \(day.uvIndex.map { String(format: "%.1f", $0) } ?? "--")")
+                            .font(.caption)
+                            .foregroundStyle(TouristTheme.muted)
+                    }
+                    Spacer()
+                    Text("\(day.high)°/\(day.low)°")
+                        .font(.subheadline.bold())
+                }
+                .padding(12)
+                .background(.white, in: RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+            }
+        }
+    }
+}
+
+private struct WeatherMetric: View {
+    let label: String
+    let value: String
+    let dark: Bool
+
+    init(_ label: String, _ value: String, dark: Bool = false) {
+        self.label = label
+        self.value = value
+        self.dark = dark
+    }
+
+    var body: some View {
+        VStack(spacing: 3) {
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(dark ? TouristTheme.muted : .white.opacity(0.7))
+            Text(value)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(dark ? TouristTheme.text : .white)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

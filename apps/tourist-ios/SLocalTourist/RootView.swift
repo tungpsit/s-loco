@@ -60,6 +60,8 @@ private struct RouteSheet: View {
             CheckoutView(orderId: id)
         case .voucher(let voucher):
             VoucherDetailView(voucher: voucher)
+        case .weather:
+            WeatherView()
         case .login(let redirect):
             LoginView(redirect: redirect)
         case .otp(let phone, let redirect):

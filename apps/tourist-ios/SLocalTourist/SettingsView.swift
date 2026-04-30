@@ -14,6 +14,9 @@ struct SettingsView: View {
                     menuRow(icon: "sparkles", title: "AI Planner", subtitle: "Gợi ý lịch trình theo ngân sách") {
                         state.tab = .ai
                     }
+                    menuRow(icon: "cloud.sun", title: "Thời tiết Sầm Sơn", subtitle: "UV, mưa, gió, sóng và nhiệt độ biển") {
+                        state.route = .weather
+                    }
                     menuRow(icon: "questionmark.circle", title: "Hỗ trợ", subtitle: "Chat với S-Loco support") {}
 
                     if state.isAuthenticated {

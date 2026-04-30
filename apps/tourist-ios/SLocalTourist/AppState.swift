@@ -12,6 +12,7 @@ final class AppState: ObservableObject {
     @Published var user: TouristUser?
     @Published var currentOrder: Order?
     @Published var itinerary: GeneratedItinerary?
+    @Published var weather: TouristWeather?
     @Published var loadingTask: AppLoadingTask?
     @Published var message: String?
 
@@ -35,6 +36,7 @@ final class AppState: ObservableObject {
             }
         }
         await refreshHome()
+        await loadWeather()
         if isAuthenticated { await loadVouchers() }
     }
 
@@ -124,6 +126,12 @@ final class AppState: ObservableObject {
     func createItinerary(days: Int, budget: Int, preferences: String) async {
         await run(.ai) {
             itinerary = try await api.itinerary(days: days, budget: budget, preferences: preferences)
+        }
+    }
+
+    func loadWeather() async {
+        await run(.weather) {
+            weather = try await api.weather()
         }
     }
 
@@ -222,6 +230,7 @@ indirect enum AppRoute: Identifiable {
     case vendor(Vendor)
     case checkout(String)
     case voucher(Voucher)
+    case weather
     case login(redirect: AppRoute?)
     case otp(phone: String, redirect: AppRoute?)
 
@@ -231,6 +240,7 @@ indirect enum AppRoute: Identifiable {
         case .vendor(let vendor): "vendor-\(vendor.id)"
         case .checkout(let id): "checkout-\(id)"
         case .voucher(let voucher): "voucher-\(voucher.id)"
+        case .weather: "weather"
         case .login: "login"
         case .otp(let phone, _): "otp-\(phone)"
         }
@@ -238,7 +248,7 @@ indirect enum AppRoute: Identifiable {
 }
 
 enum AppLoadingTask {
-    case home, login, checkout, vouchers, ai
+    case home, login, checkout, vouchers, ai, weather
     var message: String {
         switch self {
         case .home: "Đang tải dữ liệu..."
@@ -246,6 +256,7 @@ enum AppLoadingTask {
         case .checkout: "Đang xử lý đơn hàng..."
         case .vouchers: "Đang tải voucher..."
         case .ai: "Đang tạo lịch trình..."
+        case .weather: "Đang tải thời tiết..."
         }
     }
 }

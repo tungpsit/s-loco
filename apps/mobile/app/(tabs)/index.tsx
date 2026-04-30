@@ -1,17 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useCallback, useState } from 'react'
-import {
-  FlatList,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
+import { colors, shadows, spacing, typography } from '../../lib/theme'
 import { ServiceCardSkeleton } from '../../src/components/loading-skeleton'
 import ServiceCard from '../../src/components/service-card'
 import { contentApi, servicesApi } from '../../src/lib/api'
@@ -55,8 +47,15 @@ export default function HomeScreen() {
     queryFn: () => contentApi.articles({ limit: 3 }),
   })
 
+  const { data: weatherData } = useQuery({
+    queryKey: ['home-weather'],
+    queryFn: () => contentApi.weather(),
+    staleTime: 1000 * 60 * 10,
+  })
+
   const items = data?.items ?? []
   const articles = articlesData?.items ?? []
+  const weather = weatherData?.weather
 
   const renderService = useCallback(
     ({ item, index }: { item: any; index: number }) => (
@@ -88,11 +87,16 @@ export default function HomeScreen() {
                   style={styles.weatherBtn}
                   onPress={() => router.push('/content/weather')}
                 >
-                  <Text style={styles.weatherText}>24°</Text>
+                  <Text style={styles.weatherText}>
+                    {weather?.temperature != null ? `${weather.temperature}°` : '🌤️'}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.searchPill} onPress={() => router.push('/(tabs)/search')}>
+              <TouchableOpacity
+                style={styles.searchPill}
+                onPress={() => router.push('/(tabs)/search')}
+              >
                 <Text style={styles.searchIcon}>🔍</Text>
                 <Text style={styles.searchText}>Tìm dịch vụ, nhà hàng, khách sạn...</Text>
               </TouchableOpacity>
@@ -103,14 +107,20 @@ export default function HomeScreen() {
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
                     key={cat.slug}
-                    style={[styles.categoryItem, category === cat.slug && styles.categoryItemActive]}
+                    style={[
+                      styles.categoryItem,
+                      category === cat.slug && styles.categoryItemActive,
+                    ]}
                     onPress={() => setCategory(category === cat.slug ? null : cat.slug)}
                   >
                     <View style={styles.categoryIconWrap}>
                       <Text style={styles.categoryIcon}>{cat.icon}</Text>
                     </View>
                     <Text
-                      style={[styles.categoryName, category === cat.slug && styles.categoryNameActive]}
+                      style={[
+                        styles.categoryName,
+                        category === cat.slug && styles.categoryNameActive,
+                      ]}
                       numberOfLines={1}
                     >
                       {cat.name}

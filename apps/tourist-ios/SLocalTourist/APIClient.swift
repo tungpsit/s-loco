@@ -124,6 +124,58 @@ final class APIClient {
         return try await request("/itinerary/generate", method: "POST", body: body)
     }
 
+    func weather() async throws -> TouristWeather {
+        let data: WeatherEnvelope = try await request("/content/weather", authenticated: false)
+        if data.weather.lacksTravelMetrics {
+            return try await fetchOpenMeteoWeather()
+        }
+        return data.weather
+    }
+
+    private func fetchOpenMeteoWeather() async throws -> TouristWeather {
+        var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: "19.75"),
+            URLQueryItem(name: "longitude", value: "105.90"),
+            URLQueryItem(name: "timezone", value: "Asia/Ho_Chi_Minh"),
+            URLQueryItem(name: "forecast_days", value: "7"),
+            URLQueryItem(
+                name: "current",
+                value: [
+                    "temperature_2m",
+                    "relative_humidity_2m",
+                    "apparent_temperature",
+                    "weather_code",
+                    "cloud_cover",
+                    "wind_speed_10m",
+                    "wind_gusts_10m",
+                    "precipitation",
+                ].joined(separator: ",")
+            ),
+            URLQueryItem(
+                name: "daily",
+                value: [
+                    "weather_code",
+                    "temperature_2m_max",
+                    "temperature_2m_min",
+                    "precipitation_sum",
+                    "precipitation_probability_max",
+                    "uv_index_max",
+                ].joined(separator: ",")
+            ),
+        ]
+
+        guard let url = components.url else {
+            throw ClientError.message("Không thể tạo URL thời tiết.")
+        }
+        let (data, response) = try await session.data(from: url)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(statusCode) else {
+            throw ClientError.message("Không thể tải thời tiết từ Open-Meteo.")
+        }
+        return try decoder.decode(WeatherEnvelope.self, from: data).weather
+    }
+
     private func mapService(_ item: ServiceWire) -> TouristService? {
         guard let service = item.service else { return nil }
         let original = service.originalPrice.intValue

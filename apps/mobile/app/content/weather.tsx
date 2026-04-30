@@ -46,36 +46,85 @@ export default function WeatherScreen() {
 
   const forecast = weather.forecast ?? []
   const icon = getWeatherIcon(weather.condition ?? '')
+  const beach = weather.beach
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Current */}
       <View style={styles.currentCard}>
-        <Text style={styles.city}>Sầm Sơn, Thanh Hóa</Text>
+        <Text style={styles.city}>{weather.location?.name ?? 'Sầm Sơn, Thanh Hóa'}</Text>
         <View style={styles.currentMain}>
           <Text style={styles.currentIcon}>{icon}</Text>
           <View>
             <Text style={styles.currentTemp}>{weather.temperature ?? '—'}°C</Text>
             <Text style={styles.currentCondition}>{weather.condition ?? '—'}</Text>
+            {weather.apparent_temperature != null && (
+              <Text style={styles.currentMeta}>Cảm giác như {weather.apparent_temperature}°C</Text>
+            )}
           </View>
         </View>
         <View style={styles.currentStats}>
-          <View style={styles.stat}>
-            <Text style={styles.statLabel}>Độ ẩm</Text>
-            <Text style={styles.statValue}>{weather.humidity ?? '—'}%</Text>
-          </View>
+          <WeatherStat label="Độ ẩm" value={`${weather.humidity ?? '—'}%`} />
           <View style={styles.statDivider} />
-          <View style={styles.stat}>
-            <Text style={styles.statLabel}>Gió</Text>
-            <Text style={styles.statValue}>{weather.wind_speed ?? '—'} km/h</Text>
-          </View>
+          <WeatherStat label="Gió" value={`${weather.wind_speed ?? '—'} km/h`} />
         </View>
       </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Thông tin cho chuyến đi</Text>
+        <View style={styles.infoGrid}>
+          <InfoTile
+            label="UV cao nhất"
+            value={formatNumber(weather.uv_index)}
+            helper="Chống nắng"
+          />
+          <InfoTile
+            label="Khả năng mưa"
+            value={formatPercent(weather.rain_probability)}
+            helper={`${weather.precipitation ?? 0} mm hiện tại`}
+          />
+          <InfoTile
+            label="Gió giật"
+            value={`${weather.wind_gusts ?? '—'} km/h`}
+            helper={weather.wind_direction != null ? `${weather.wind_direction}°` : 'Hướng gió'}
+          />
+          <InfoTile
+            label="Mây phủ"
+            value={formatPercent(weather.cloud_cover)}
+            helper="Quan sát bầu trời"
+          />
+        </View>
+      </View>
+
+      {beach && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Biển Sầm Sơn</Text>
+          <View style={styles.beachCard}>
+            <View style={styles.beachHead}>
+              <Text style={styles.beachLabel}>Điều kiện tắm biển</Text>
+              <Text style={styles.beachBadge}>{beach.safety_label ?? 'Đang cập nhật'}</Text>
+            </View>
+            <View style={styles.beachStats}>
+              <WeatherStat label="Sóng" value={`${beach.wave_height ?? '—'} m`} />
+              <WeatherStat label="Nước biển" value={`${beach.sea_surface_temperature ?? '—'}°C`} />
+              <WeatherStat label="Chu kỳ sóng" value={`${beach.wave_period ?? '—'} s`} />
+            </View>
+            <Text style={styles.tipText}>{beach.safety_tip}</Text>
+          </View>
+        </View>
+      )}
+
+      {weather.travel_tip && (
+        <View style={styles.tipCard}>
+          <Text style={styles.tipTitle}>Gợi ý nhanh</Text>
+          <Text style={styles.tipText}>{weather.travel_tip}</Text>
+        </View>
+      )}
 
       {/* Forecast */}
       {forecast.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Dự báo 5 ngày</Text>
+          <Text style={styles.sectionTitle}>Dự báo 7 ngày</Text>
           <View style={styles.forecastList}>
             {forecast.map((day: NonNullable<WeatherData['forecast']>[number]) => (
               <View key={`${day.day ?? 'forecast'}-${day.condition}`} style={styles.forecastDay}>
@@ -88,8 +137,18 @@ export default function WeatherScreen() {
                     })}
                 </Text>
                 <Text style={styles.forecastIcon}>{getWeatherIcon(day.condition ?? '')}</Text>
-                <Text style={styles.forecastHigh}>{day.high ?? '—'}°</Text>
-                <Text style={styles.forecastLow}>{day.low ?? '—'}°</Text>
+                <View style={styles.forecastDetails}>
+                  <Text style={styles.forecastCondition} numberOfLines={1}>
+                    {day.condition}
+                  </Text>
+                  <Text style={styles.forecastMeta}>
+                    Mưa {formatPercent(day.rain_probability)} · UV {formatNumber(day.uv_index)}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.forecastHigh}>{day.high ?? '—'}°</Text>
+                  <Text style={styles.forecastLow}>{day.low ?? '—'}°</Text>
+                </View>
               </View>
             ))}
           </View>
@@ -99,6 +158,33 @@ export default function WeatherScreen() {
       <Text style={styles.disclaimer}>Dữ liệu thời tiết chỉ mang tính chất tham khảo.</Text>
     </ScrollView>
   )
+}
+
+function WeatherStat({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statValue}>{value}</Text>
+    </View>
+  )
+}
+
+function InfoTile({ label, value, helper }: { label: string; value: string; helper: string }) {
+  return (
+    <View style={styles.infoTile}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+      <Text style={styles.infoHelper}>{helper}</Text>
+    </View>
+  )
+}
+
+function formatPercent(value: number | undefined) {
+  return value == null ? '—' : `${value}%`
+}
+
+function formatNumber(value: number | undefined) {
+  return value == null ? '—' : String(value)
 }
 
 const styles = StyleSheet.create({
@@ -121,6 +207,7 @@ const styles = StyleSheet.create({
   currentIcon: { fontSize: 72 },
   currentTemp: { fontSize: 48, fontWeight: '700', color: colors.white },
   currentCondition: { ...typography.bodyMd, color: 'rgba(255,255,255,0.8)' },
+  currentMeta: { ...typography.bodySm, color: 'rgba(255,255,255,0.72)', marginTop: 2 },
   currentStats: { flexDirection: 'row', alignItems: 'center' },
   stat: { flex: 1, alignItems: 'center' },
   statLabel: { ...typography.bodySm, color: 'rgba(255,255,255,0.6)' },
@@ -128,6 +215,34 @@ const styles = StyleSheet.create({
   statDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.2)' },
   section: { marginBottom: spacing.lg },
   sectionTitle: { ...typography.titleLg, marginBottom: spacing.md },
+  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  infoTile: {
+    width: '48%',
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 14,
+    padding: spacing.base,
+  },
+  infoLabel: { ...typography.labelSm, color: colors.outline, marginBottom: 4 },
+  infoValue: { ...typography.titleMd, color: colors.onSurface },
+  infoHelper: { ...typography.bodySm, color: colors.outline, marginTop: 2 },
+  beachCard: {
+    backgroundColor: colors.primaryContainer,
+    borderRadius: 18,
+    padding: spacing.base,
+    gap: spacing.md,
+  },
+  beachHead: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm },
+  beachLabel: { ...typography.labelMd, color: 'rgba(255,255,255,0.72)' },
+  beachBadge: { ...typography.labelMd, color: colors.white, fontWeight: '800' },
+  beachStats: { flexDirection: 'row', gap: spacing.sm },
+  tipCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: spacing.base,
+    marginBottom: spacing.lg,
+  },
+  tipTitle: { ...typography.titleMd, color: colors.onSurface, marginBottom: 4 },
+  tipText: { ...typography.bodyMd, color: colors.onSurfaceVariant },
   forecastList: { gap: spacing.sm },
   forecastDay: {
     flexDirection: 'row',
@@ -140,6 +255,9 @@ const styles = StyleSheet.create({
   },
   forecastDayLabel: { flex: 1, ...typography.bodyMd },
   forecastIcon: { fontSize: 22 },
+  forecastDetails: { flex: 1.3 },
+  forecastCondition: { ...typography.labelMd, color: colors.onSurface },
+  forecastMeta: { ...typography.labelSm, color: colors.outline, marginTop: 2 },
   forecastHigh: { ...typography.titleMd, minWidth: 40, textAlign: 'right' },
   forecastLow: { ...typography.bodySm, color: colors.outline, minWidth: 40, textAlign: 'right' },
   disclaimer: {

@@ -134,6 +134,7 @@ private fun TouristApp(context: Context) {
 	                    is Screen.Checkout -> CheckoutScreen(state, screen.orderId)
                     is Screen.OrderDetail -> OrderDetailScreen(state, screen.orderId)
                     is Screen.VoucherDetail -> VoucherDetailScreen(state, screen.voucher)
+                    Screen.Weather -> WeatherScreen(state)
                     is Screen.Login -> LoginScreen(state, screen.redirect)
                     is Screen.Otp -> OtpScreen(state, screen.phone, screen.redirect)
                     is Screen.Article -> TextShell("Bài viết", screen.title, state::back)
@@ -199,11 +200,12 @@ private fun HomeScreen(state: AppState) {
             HeroHeader(
                 title = "Bạn muốn đi đâu?",
                 subtitle = "Sầm Sơn, Thanh Hóa",
-                trailing = "24°",
+                trailing = state.weather?.let { "${it.temperature}°" } ?: "🌤️",
                 searchText = "Tìm dịch vụ, nhà hàng, khách sạn...",
                 onSearch = { state.tab = AppTab.Browse }
             )
             CategoryPanel(state)
+            WeatherSummaryCard(state.weather) { state.screen = Screen.Weather }
             SectionTitle("Ưu đãi nổi bật")
             Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OfferCard("✨", "AI beach itinerary", "Tạo lịch trình Sầm Sơn trong 30 giây") {
@@ -697,7 +699,7 @@ private fun ProfileScreen(state: AppState) {
             }
             MenuRow("🎫", "Voucher của tôi") { state.tab = AppTab.Vouchers }
             MenuRow("🤖", "Lịch trình AI") { state.tab = AppTab.AI }
-            MenuRow("🌤️", "Thời tiết") { state.message = "Màn thời tiết dùng /content/weather và sẵn sàng nối chi tiết." }
+            MenuRow("🌤️", "Thời tiết") { state.screen = Screen.Weather }
         }
     }
 }
@@ -737,6 +739,137 @@ private fun TextShell(title: String, body: String, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         TopBack(title, onBack)
         Text(body, Modifier.padding(16.dp), color = TextMain)
+    }
+}
+
+@Composable
+private fun WeatherSummaryCard(weather: Weather?, onClick: () -> Unit) {
+    AppCard {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Thời tiết Sầm Sơn", color = TextMain, fontWeight = FontWeight.ExtraBold)
+                Text(
+                    weather?.travelTip ?: "UV, mưa, gió, sóng và nhiệt độ biển cho chuyến đi.",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Text(weather?.let { "${it.temperature}°C" } ?: "Xem", color = Blue, fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+@Composable
+private fun WeatherScreen(state: AppState) {
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        if (state.weather == null) state.loadWeather()
+    }
+
+    LazyColumn(Modifier.fillMaxSize()) {
+        item {
+            TopBack("Thời tiết", state::back)
+            state.weather?.let { weather ->
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    BlueCard(
+                        "BÃI BIỂN SẦM SƠN",
+                        "${weather.temperature}°C · ${weather.condition}",
+                        "Cảm giác như ${weather.apparentTemperature ?: weather.temperature}°C"
+                    )
+                    WeatherMetricGrid(weather)
+                    weather.beach?.let { BeachWeatherCard(it) }
+                    AppCard {
+                        Text("Gợi ý cho khách du lịch", color = TextMain, fontWeight = FontWeight.ExtraBold)
+                        Text(weather.travelTip, color = TextMuted)
+                    }
+                    Text("Dự báo 7 ngày", color = TextMain, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            } ?: AppCard {
+                Text("Chưa có dữ liệu thời tiết", color = TextMain, fontWeight = FontWeight.ExtraBold)
+                TextButton(onClick = { scope.launch { state.loadWeather() } }) {
+                    Text("Tải lại", color = Blue, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+        items(state.weather?.forecast.orEmpty()) { day ->
+            WeatherForecastRow(day)
+        }
+        item { Spacer(Modifier.height(40.dp)) }
+    }
+}
+
+@Composable
+private fun WeatherMetricGrid(weather: Weather) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WeatherMetric("Độ ẩm", "${weather.humidity}%", Modifier.weight(1f))
+        WeatherMetric("Gió", "${weather.windSpeed} km/h", Modifier.weight(1f))
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        WeatherMetric("UV", weather.uvIndex?.toString() ?: "--", Modifier.weight(1f))
+        WeatherMetric("Mưa", weather.rainProbability?.let { "$it%" } ?: "--", Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun WeatherMetric(label: String, value: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border)
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(label, color = TextMuted, fontSize = 12.sp)
+            Text(value, color = TextMain, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+@Composable
+private fun BeachWeatherCard(beach: BeachWeather) {
+    AppCard {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Biển Sầm Sơn", color = TextMain, fontWeight = FontWeight.ExtraBold)
+            Text(beach.safetyLabel, color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            WeatherMetric("Sóng", beach.waveHeight?.let { "$it m" } ?: "--", Modifier.weight(1f))
+            WeatherMetric("Nước biển", beach.seaSurfaceTemperature?.let { "$it°C" } ?: "--", Modifier.weight(1f))
+        }
+        Text(beach.safetyTip, color = TextMuted)
+    }
+}
+
+@Composable
+private fun WeatherForecastRow(day: WeatherForecastDay) {
+    Card(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 5.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border)
+    ) {
+        Row(
+            Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(day.day, color = TextMain, fontWeight = FontWeight.Bold, modifier = Modifier.width(64.dp))
+            Column(Modifier.weight(1f)) {
+                Text(day.condition, color = TextMain, fontWeight = FontWeight.SemiBold)
+                Text("Mưa ${day.rainProbability ?: 0}% · UV ${day.uvIndex ?: 0.0}", color = TextMuted, fontSize = 12.sp)
+            }
+            Text("${day.high}°/${day.low}°", color = Blue, fontWeight = FontWeight.ExtraBold)
+        }
     }
 }
 
@@ -1145,6 +1278,7 @@ private class AppState(context: Context) {
     var vouchers by mutableStateOf(emptyList<Voucher>())
     var currentOrder by mutableStateOf<Order?>(null)
     var itinerary by mutableStateOf<GeneratedItinerary?>(null)
+    var weather by mutableStateOf<Weather?>(null)
     private var refreshJob: Job? = null
     private val stack = mutableListOf<Screen>()
 
@@ -1152,6 +1286,7 @@ private class AppState(context: Context) {
         startTokenRefreshLoop()
         if (api.hasRefreshToken()) refreshSessionIfNeeded()
         loadServices()
+        loadWeather()
         search("", "")
         if (token != null) loadVouchers()
     }
@@ -1230,6 +1365,12 @@ private class AppState(context: Context) {
 
     suspend fun createItinerary(days: String, budget: String, preferences: String) = run("Đang tạo lịch trình...") {
         itinerary = api.itinerary(days.toIntOrNull() ?: 2, budget.toIntOrNull() ?: 2_000_000, preferences)
+    }
+
+    fun loadWeather() {
+        run("Đang tải thời tiết...") {
+            weather = api.weather()
+        }
     }
 
     fun logout() {
@@ -1386,6 +1527,11 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
         return parseItinerary(data.obj("itinerary") ?: data)
     }
 
+    suspend fun weather(): Weather {
+        val data = request("/content/weather", canRefresh = false).obj("data") ?: JsonObject(emptyMap())
+        return parseWeather(data.obj("weather") ?: data)
+    }
+
     suspend fun refreshAccessTokenIfNeeded(force: Boolean = false): Boolean = withContext(Dispatchers.IO) {
         val refreshToken = prefs.getString("refresh_token", null).orEmpty()
         if (refreshToken.isBlank()) {
@@ -1532,6 +1678,42 @@ private fun parseItinerary(obj: JsonObject): GeneratedItinerary {
     )
 }
 
+private fun parseWeather(obj: JsonObject): Weather {
+    val beach = obj.obj("beach")?.let {
+        BeachWeather(
+            waveHeight = it.num("wave_height").takeIf { value -> value > 0 },
+            wavePeriod = it.num("wave_period").takeIf { value -> value > 0 },
+            seaSurfaceTemperature = it.num("sea_surface_temperature").takeIf { value -> value > 0 },
+            safetyLabel = it.str("safety_label").ifBlank { "Đang cập nhật" },
+            safetyTip = it.str("safety_tip")
+        )
+    }
+    return Weather(
+        temperature = obj.int("temperature"),
+        apparentTemperature = obj.int("apparent_temperature").takeIf { it > 0 },
+        condition = obj.str("condition").ifBlank { "Đang cập nhật" },
+        humidity = obj.int("humidity"),
+        windSpeed = obj.int("wind_speed"),
+        windGusts = obj.int("wind_gusts").takeIf { it > 0 },
+        uvIndex = obj.num("uv_index").takeIf { it > 0 },
+        rainProbability = obj.int("rain_probability").takeIf { it >= 0 },
+        cloudCover = obj.int("cloud_cover").takeIf { it >= 0 },
+        travelTip = obj.str("travel_tip").ifBlank { "Theo dõi thời tiết trước khi đặt hoạt động ngoài trời." },
+        beach = beach,
+        forecast = obj.array("forecast").map { item ->
+            val day = item.jsonObject
+            WeatherForecastDay(
+                day = day.str("day").ifBlank { day.str("date") },
+                high = day.int("high"),
+                low = day.int("low"),
+                condition = day.str("condition").ifBlank { "Đang cập nhật" },
+                rainProbability = day.int("rain_probability").takeIf { it >= 0 },
+                uvIndex = day.num("uv_index").takeIf { it > 0 }
+            )
+        }
+    )
+}
+
 private enum class AppTab(val label: String, val icon: String) {
     Home("Trang chủ", "⌂"),
     Browse("Tìm kiếm", "🔍"),
@@ -1550,6 +1732,7 @@ private sealed class Screen {
     data class Login(val redirect: Screen?) : Screen()
     data class Otp(val phone: String, val redirect: Screen?) : Screen()
     data class Article(val title: String) : Screen()
+    data object Weather : Screen()
 }
 
 private data class Service(
@@ -1570,6 +1753,35 @@ private data class Voucher(val id: String, val status: String, val serviceName: 
 private data class Order(val id: String, val status: String, val totalAmount: Int, val items: List<OrderLine>)
 private data class OrderLine(val name: String, val quantity: Int, val price: Int)
 private data class AuthResult(val token: String, val refreshToken: String, val expiresIn: Int, val name: String)
+private data class Weather(
+    val temperature: Int,
+    val apparentTemperature: Int?,
+    val condition: String,
+    val humidity: Int,
+    val windSpeed: Int,
+    val windGusts: Int?,
+    val uvIndex: Double?,
+    val rainProbability: Int?,
+    val cloudCover: Int?,
+    val travelTip: String,
+    val beach: BeachWeather?,
+    val forecast: List<WeatherForecastDay>,
+)
+private data class BeachWeather(
+    val waveHeight: Double?,
+    val wavePeriod: Double?,
+    val seaSurfaceTemperature: Double?,
+    val safetyLabel: String,
+    val safetyTip: String,
+)
+private data class WeatherForecastDay(
+    val day: String,
+    val high: Int,
+    val low: Int,
+    val condition: String,
+    val rainProbability: Int?,
+    val uvIndex: Double?,
+)
 private data class GeneratedItinerary(val title: String, val summary: String, val days: List<ItineraryDay>, val totalEstimatedCost: Int, val tips: List<String>)
 private data class ItineraryDay(val day: Int, val title: String, val activities: List<ItineraryActivity>)
 private data class ItineraryActivity(val time: String, val title: String, val description: String, val serviceId: String, val estimatedCost: Int)

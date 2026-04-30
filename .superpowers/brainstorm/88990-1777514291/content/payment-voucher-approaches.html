@@ -1,0 +1,66 @@
+<h2>Payment & Voucher Policy Options</h2>
+<p class="subtitle">Dựa trên lựa chọn đã chốt: voucher không hết hạn, hoàn tiền gốc trong 30 ngày, sau đó hoàn credit, đối soát sau COMPLETED.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Giữ gần như hiện tại</h3>
+      <p>Chỉ sửa tài liệu cho nhất quán, giữ checkout/mock payment và hạn 30 ngày trong code sẽ xử lý sau.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Nhanh, ít thay đổi.</li><li>Không ảnh hưởng roadmap ngắn hạn.</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Mâu thuẫn voucher không hết hạn vẫn còn trong schema/code.</li><li>Dễ sai khi triển khai payment thật.</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Chuẩn hóa MVP theo chính sách mới</h3>
+      <p>Checkout tạo order CREATED, initiate payment, webhook mới kích hoạt voucher PAID. Voucher không hết hạn; QR token có hạn ngắn và refresh được. Refund: 30 ngày về gateway, sau đó credit.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Khớp mô hình kinh doanh đã chốt.</li><li>Giảm rủi ro tài chính và trạng thái voucher sai.</li><li>Đủ rõ để viết plan triển khai.</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Cần chỉnh schema/service/API/mobile.</li><li>Credit cần scope tối giản cho MVP.</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Mở rộng vận hành đầy đủ</h3>
+      <p>Thêm wallet ledger, dispute state, admin case workflow, policy theo vendor, nhiều loại settlement hold.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Hoàn chỉnh cho vận hành lâu dài.</li><li>Kiểm soát tranh chấp chi tiết.</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Quá rộng cho MVP.</li><li>Tăng số màn hình, trạng thái và test case đáng kể.</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Recommended Flow</h3>
+  <div class="mockup">
+    <div class="mockup-header">Option B: MVP flow</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:center;text-align:center">
+        <div class="placeholder">Checkout<br>CREATED</div>
+        <div>→</div>
+        <div class="placeholder">Gateway<br>payment</div>
+        <div>→</div>
+        <div class="placeholder">Webhook<br>PAID + QR</div>
+        <div class="placeholder">Refund<br>≤30d gateway</div>
+        <div>↕</div>
+        <div class="placeholder">Voucher<br>no expiry</div>
+        <div>↕</div>
+        <div class="placeholder">Refund<br>>30d credit</div>
+        <div class="placeholder">Redeem<br>REDEEMED</div>
+        <div>→</div>
+        <div class="placeholder">Complete<br>or 24h auto</div>
+        <div>→</div>
+        <div class="placeholder">Settlement<br>vendor payout</div>
+      </div>
+    </div>
+  </div>
+</div>

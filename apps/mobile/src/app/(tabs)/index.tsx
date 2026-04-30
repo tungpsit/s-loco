@@ -7,7 +7,7 @@ import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ServiceCardSkeleton } from '../../components/loading-skeleton'
 import ServiceCard from '../../components/service-card'
-import { useServices } from '../../hooks/useQuery'
+import { useServices, useWeather } from '../../hooks/useQuery'
 import type { ServiceItem } from '../../lib/api'
 import { colors, shadows, spacing, typography } from '../../lib/theme'
 
@@ -44,8 +44,10 @@ export default function HomeScreen() {
     category: category ?? undefined,
     limit: 20,
   })
+  const { data: weatherData } = useWeather()
 
   const items: ServiceItem[] = data?.items ?? []
+  const weather = weatherData?.weather
 
   const renderService = useCallback(
     ({ item, index }: { item: ServiceItem; index: number }) => (
@@ -78,7 +80,9 @@ export default function HomeScreen() {
                   onPress={() => router.push('/content/weather')}
                   accessibilityLabel="Thời tiết"
                 >
-                  <Text style={styles.weatherText}>24°</Text>
+                  <Text style={styles.weatherText}>
+                    {weather?.temperature != null ? `${weather.temperature}°` : '🌤️'}
+                  </Text>
                 </TouchableOpacity>
               </View>
 

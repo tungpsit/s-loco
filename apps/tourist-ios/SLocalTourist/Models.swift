@@ -259,6 +259,250 @@ struct OrderItemLite: Decodable {
     }
 }
 
+struct WeatherEnvelope: Decodable {
+    let weather: TouristWeather
+
+    enum CodingKeys: String, CodingKey {
+        case weather
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let weather = try container.decodeIfPresent(TouristWeather.self, forKey: .weather) {
+            self.weather = weather
+            return
+        }
+        weather = try TouristWeather(from: decoder)
+    }
+}
+
+struct TouristWeather: Decodable {
+    let location: WeatherLocation?
+    let updatedAt: String?
+    let temperature: Int
+    let apparentTemperature: Int?
+    let condition: String
+    let humidity: Int
+    let windSpeed: Int
+    let windGusts: Int?
+    let uvIndex: Double?
+    let rainProbability: Int?
+    let precipitation: Double?
+    let cloudCover: Int?
+    let beach: BeachWeather?
+    let travelTip: String?
+    let forecast: [WeatherForecastDay]?
+
+    var lacksTravelMetrics: Bool {
+        humidity <= 0 || windSpeed <= 0 || uvIndex == nil || rainProbability == nil
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case location, temperature, condition, humidity, precipitation, beach, forecast
+        case updatedAt = "updated_at"
+        case apparentTemperature = "apparent_temperature"
+        case windSpeed = "wind_speed"
+        case windGusts = "wind_gusts"
+        case uvIndex = "uv_index"
+        case rainProbability = "rain_probability"
+        case cloudCover = "cloud_cover"
+        case travelTip = "travel_tip"
+    }
+
+    enum LegacyRootKeys: String, CodingKey {
+        case timezone, current, daily
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let temperature = container.decodeIntIfPresent(.temperature) {
+            location = try container.decodeIfPresent(WeatherLocation.self, forKey: .location)
+            updatedAt = container.decodeStringIfPresent(.updatedAt)
+            self.temperature = temperature
+            apparentTemperature = container.decodeIntIfPresent(.apparentTemperature)
+            condition = container.decodeStringIfPresent(.condition) ?? "Đang cập nhật"
+            humidity = container.decodeIntIfPresent(.humidity) ?? 0
+            windSpeed = container.decodeIntIfPresent(.windSpeed) ?? 0
+            windGusts = container.decodeIntIfPresent(.windGusts)
+            uvIndex = container.decodeDoubleIfPresent(.uvIndex)
+            rainProbability = container.decodeIntIfPresent(.rainProbability)
+            precipitation = container.decodeDoubleIfPresent(.precipitation)
+            cloudCover = container.decodeIntIfPresent(.cloudCover)
+            beach = try container.decodeIfPresent(BeachWeather.self, forKey: .beach)
+            travelTip = container.decodeStringIfPresent(.travelTip)
+            forecast = try container.decodeIfPresent([WeatherForecastDay].self, forKey: .forecast)
+            return
+        }
+
+        let legacy = try decoder.container(keyedBy: LegacyRootKeys.self)
+        let current = try legacy.decodeIfPresent(LegacyWeatherCurrent.self, forKey: .current)
+        let daily = try legacy.decodeIfPresent(LegacyWeatherDaily.self, forKey: .daily)
+        let dailyHigh = daily?.temperatureMax.first
+        let dailyLow = daily?.temperatureMin.first
+        let code = current?.weatherCode ?? daily?.weatherCodes.first ?? -1
+
+        location = WeatherLocation(name: "Bãi biển Sầm Sơn, Thanh Hóa")
+        updatedAt = current?.time ?? daily?.dates.first
+        temperature = Int((current?.temperature ?? dailyHigh ?? dailyLow ?? 0).rounded())
+        apparentTemperature = current?.apparentTemperature.map { Int($0.rounded()) }
+        condition = WeatherCode.label(code)
+        humidity = current?.humidity ?? 0
+        windSpeed = Int((current?.windSpeed ?? 0).rounded())
+        windGusts = current?.windGusts.map { Int($0.rounded()) }
+        uvIndex = daily?.uvIndex.first
+        rainProbability = daily?.rainProbability.first.map { Int($0.rounded()) }
+        precipitation = current?.precipitation ?? daily?.precipitation.first
+        cloudCover = current?.cloudCover
+        beach = nil
+        travelTip = "Theo dõi thời tiết trước khi đặt hoạt động ngoài trời."
+        forecast = daily?.forecastDays
+    }
+}
+
+struct WeatherLocation: Decodable {
+    let name: String
+}
+
+struct BeachWeather: Decodable {
+    let waveHeight: Double?
+    let wavePeriod: Double?
+    let seaSurfaceTemperature: Double?
+    let currentVelocity: Double?
+    let safetyLabel: String?
+    let safetyTip: String?
+
+    enum CodingKeys: String, CodingKey {
+        case waveHeight = "wave_height"
+        case wavePeriod = "wave_period"
+        case seaSurfaceTemperature = "sea_surface_temperature"
+        case currentVelocity = "current_velocity"
+        case safetyLabel = "safety_label"
+        case safetyTip = "safety_tip"
+    }
+}
+
+struct WeatherForecastDay: Decodable, Identifiable {
+    let date: String?
+    let day: String
+    let high: Int
+    let low: Int
+    let condition: String
+    let rainProbability: Int?
+    let uvIndex: Double?
+    let windSpeed: Int?
+    let waveHeight: Double?
+
+    var id: String { date ?? day }
+
+    enum CodingKeys: String, CodingKey {
+        case date, day, high, low, condition
+        case rainProbability = "rain_probability"
+        case uvIndex = "uv_index"
+        case windSpeed = "wind_speed"
+        case waveHeight = "wave_height"
+    }
+}
+
+private struct LegacyWeatherCurrent: Decodable {
+    let time: String?
+    let temperature: Double?
+    let apparentTemperature: Double?
+    let humidity: Int?
+    let precipitation: Double?
+    let weatherCode: Int?
+    let cloudCover: Int?
+    let windSpeed: Double?
+    let windGusts: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case time
+        case temperature = "temperature_2m"
+        case apparentTemperature = "apparent_temperature"
+        case humidity = "relative_humidity_2m"
+        case precipitation
+        case weatherCode = "weather_code"
+        case cloudCover = "cloud_cover"
+        case windSpeed = "wind_speed_10m"
+        case windGusts = "wind_gusts_10m"
+    }
+}
+
+private struct LegacyWeatherDaily: Decodable {
+    let dates: [String]
+    let temperatureMax: [Double]
+    let temperatureMin: [Double]
+    let precipitation: [Double]
+    let weatherCodes: [Int]
+    let rainProbability: [Double]
+    let uvIndex: [Double]
+
+    enum CodingKeys: String, CodingKey {
+        case dates = "time"
+        case temperatureMax = "temperature_2m_max"
+        case temperatureMin = "temperature_2m_min"
+        case precipitation = "precipitation_sum"
+        case weatherCode = "weather_code"
+        case weathercode
+        case rainProbability = "precipitation_probability_max"
+        case uvIndex = "uv_index_max"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        dates = (try? container.decode([String].self, forKey: .dates)) ?? []
+        temperatureMax = container.decodeDoubleArray(.temperatureMax)
+        temperatureMin = container.decodeDoubleArray(.temperatureMin)
+        precipitation = container.decodeDoubleArray(.precipitation)
+        rainProbability = container.decodeDoubleArray(.rainProbability)
+        uvIndex = container.decodeDoubleArray(.uvIndex)
+        weatherCodes = container.decodeIntArray(.weatherCode).isEmpty
+            ? container.decodeIntArray(.weathercode)
+            : container.decodeIntArray(.weatherCode)
+    }
+
+    var forecastDays: [WeatherForecastDay] {
+        dates.enumerated().map { index, date in
+            WeatherForecastDay(
+                date: date,
+                day: LegacyWeatherDaily.formatDay(date),
+                high: Int((temperatureMax[safe: index] ?? 0).rounded()),
+                low: Int((temperatureMin[safe: index] ?? 0).rounded()),
+                condition: WeatherCode.label(weatherCodes[safe: index] ?? -1),
+                rainProbability: rainProbability[safe: index].map { Int($0.rounded()) },
+                uvIndex: uvIndex[safe: index],
+                windSpeed: nil,
+                waveHeight: nil
+            )
+        }
+    }
+
+    private static func formatDay(_ date: String) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "vi_VN")
+        formatter.timeZone = TimeZone(identifier: "Asia/Ho_Chi_Minh")
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let parsed = formatter.date(from: date) else { return date }
+        formatter.dateFormat = "E, dd/MM"
+        return formatter.string(from: parsed)
+    }
+}
+
+private enum WeatherCode {
+    static func label(_ code: Int) -> String {
+        switch code {
+        case 0: "Trời quang"
+        case 1, 2: "Ít mây"
+        case 3: "Nhiều mây"
+        case 45, 48: "Sương mù"
+        case 51, 53, 55, 56, 57, 61, 80: "Mưa nhẹ"
+        case 63, 65, 66, 67, 81, 82: "Mưa vừa đến to"
+        case 71, 73, 75, 77, 85, 86: "Mưa tuyết"
+        case 95, 96, 99: "Dông"
+        default: "Đang cập nhật"
+        }
+    }
+}
+
 struct ItineraryRequest: Encodable {
     let days: Int
     let budget: Int
@@ -358,5 +602,50 @@ private extension KeyedDecodingContainer {
             return Int(Double(value) ?? 0)
         }
         return nil
+    }
+
+    func decodeDoubleIfPresent(_ key: Key) -> Double? {
+        if let value = try? decodeIfPresent(Double.self, forKey: key) {
+            return value
+        }
+        if let value = try? decodeIfPresent(Int.self, forKey: key) {
+            return Double(value)
+        }
+        if let value = try? decodeIfPresent(String.self, forKey: key) {
+            return Double(value)
+        }
+        return nil
+    }
+
+    func decodeDoubleArray(_ key: Key) -> [Double] {
+        if let values = try? decodeIfPresent([Double].self, forKey: key) {
+            return values
+        }
+        if let values = try? decodeIfPresent([Int].self, forKey: key) {
+            return values.map(Double.init)
+        }
+        if let values = try? decodeIfPresent([String].self, forKey: key) {
+            return values.compactMap(Double.init)
+        }
+        return []
+    }
+
+    func decodeIntArray(_ key: Key) -> [Int] {
+        if let values = try? decodeIfPresent([Int].self, forKey: key) {
+            return values
+        }
+        if let values = try? decodeIfPresent([Double].self, forKey: key) {
+            return values.map { Int($0.rounded()) }
+        }
+        if let values = try? decodeIfPresent([String].self, forKey: key) {
+            return values.compactMap { Int(Double($0) ?? 0) }
+        }
+        return []
+    }
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

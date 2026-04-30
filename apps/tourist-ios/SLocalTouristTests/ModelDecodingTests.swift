@@ -106,6 +106,111 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertNil(json?["group_size"])
     }
 
+    func testWeatherDecodesCurrentApiShape() throws {
+        let raw = """
+        {
+          "success": true,
+          "data": {
+            "weather": {
+              "temperature": 29,
+              "apparent_temperature": 34,
+              "condition": "Mưa nhẹ",
+              "humidity": 78,
+              "wind_speed": 18,
+              "uv_index": 9.2,
+              "rain_probability": 80,
+              "travel_tip": "Có khả năng mưa cao",
+              "beach": {
+                "wave_height": 1.2,
+                "sea_surface_temperature": 28.7,
+                "safety_label": "Theo dõi thêm",
+                "safety_tip": "Quan sát cờ cảnh báo"
+              },
+              "forecast": [
+                {
+                  "date": "2026-04-30",
+                  "day": "Th 5, 30/04",
+                  "high": 31,
+                  "low": 27,
+                  "condition": "Mưa nhẹ",
+                  "rain_probability": 80,
+                  "uv_index": 9.2
+                }
+              ]
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let envelope = try JSONDecoder().decode(ApiEnvelope<WeatherEnvelope>.self, from: raw)
+        let weather = try XCTUnwrap(envelope.data?.weather)
+
+        XCTAssertEqual(weather.temperature, 29)
+        XCTAssertEqual(weather.beach?.seaSurfaceTemperature, 28.7)
+        XCTAssertEqual(weather.forecast?.first?.high, 31)
+    }
+
+    func testWeatherDecodesLegacyOpenMeteoShape() throws {
+        let raw = """
+        {
+          "success": true,
+          "data": {
+            "latitude": 19.75,
+            "longitude": 105.9,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "daily": {
+              "time": ["2026-04-30"],
+              "temperature_2m_max": [31.2],
+              "temperature_2m_min": [26.8],
+              "precipitation_sum": [6.5],
+              "weathercode": [61]
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let envelope = try JSONDecoder().decode(ApiEnvelope<WeatherEnvelope>.self, from: raw)
+        let weather = try XCTUnwrap(envelope.data?.weather)
+
+        XCTAssertEqual(weather.temperature, 31)
+        XCTAssertEqual(weather.condition, "Mưa nhẹ")
+        XCTAssertEqual(weather.forecast?.first?.low, 27)
+    }
+
+    func testWeatherDecodesOpenMeteoCurrentAndDailyMetrics() throws {
+        let raw = """
+        {
+          "current": {
+            "time": "2026-04-30T08:00",
+            "temperature_2m": 27.4,
+            "relative_humidity_2m": 84,
+            "apparent_temperature": 31.2,
+            "weather_code": 3,
+            "cloud_cover": 92,
+            "wind_speed_10m": 11.5,
+            "wind_gusts_10m": 21.4
+          },
+          "daily": {
+            "time": ["2026-04-30"],
+            "temperature_2m_max": [31.2],
+            "temperature_2m_min": [26.8],
+            "precipitation_sum": [6.5],
+            "precipitation_probability_max": [70],
+            "uv_index_max": [8.4],
+            "weather_code": [61]
+          }
+        }
+        """.data(using: .utf8)!
+
+        let weather = try JSONDecoder().decode(WeatherEnvelope.self, from: raw).weather
+
+        XCTAssertEqual(weather.humidity, 84)
+        XCTAssertEqual(weather.windSpeed, 12)
+        XCTAssertEqual(weather.uvIndex, 8.4)
+        XCTAssertEqual(weather.rainProbability, 70)
+        XCTAssertFalse(weather.lacksTravelMetrics)
+    }
+
     func testGeneratedItineraryDecodesAndFormatsForDisplay() throws {
         let raw = """
         {
