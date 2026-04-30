@@ -20,15 +20,24 @@ import PaymentMethodCard, { PAYMENT_GATEWAYS } from '../components/payment-metho
 import { useOrderDetail } from '../hooks/useQuery'
 import { paymentsApi } from '../lib/api'
 import { borderRadius, colors, shadows, spacing, typography } from '../lib/theme'
+import { useAuthStore } from '../stores/auth-store'
 
 export default function CheckoutScreen() {
   const { orderId } = useLocalSearchParams<{ orderId?: string; serviceId?: string }>()
+  const { isLoggedIn } = useAuthStore()
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null)
   const [paying, setPaying] = useState(false)
 
-  const { data, isLoading, error } = useOrderDetail(orderId ?? '')
+  const { data, isLoading, error } = useOrderDetail(orderId ?? '', { enabled: isLoggedIn })
 
   async function handlePay() {
+    if (!isLoggedIn) {
+      router.push({
+        pathname: '/(auth)/login',
+        params: { redirectTo: orderId ? `/checkout?orderId=${orderId}` : '/checkout' },
+      })
+      return
+    }
     if (!selectedGateway) {
       Alert.alert('Chưa chọn phương thức', 'Vui lòng chọn phương thức thanh toán.')
       return
@@ -80,76 +89,101 @@ export default function CheckoutScreen() {
         </View>
 
         {/* Order summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Đơn hàng</Text>
-          {isLoading ? (
-            <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
-          ) : error ? (
+        {!isLoggedIn ? (
+          <View style={styles.section}>
             <View style={styles.errorBox}>
-              <Text style={styles.errorText}>Không tải được đơn hàng.</Text>
+              <Text style={styles.errorText}>
+                Đăng nhập để tiếp tục thanh toán và nhận voucher QR.
+              </Text>
+              <TouchableOpacity
+                style={styles.loginBtn}
+                onPress={() =>
+                  router.push({
+                    pathname: '/(auth)/login',
+                    params: { redirectTo: orderId ? `/checkout?orderId=${orderId}` : '/checkout' },
+                  })
+                }
+              >
+                <Text style={styles.loginBtnText}>Đăng nhập</Text>
+              </TouchableOpacity>
             </View>
-          ) : order ? (
-            <View style={styles.orderCard}>
-              <Text style={styles.orderId}>Mã đơn #{order.id.slice(0, 8).toUpperCase()}</Text>
-              {order.items?.map((item) => (
-                <View
-                  key={`${item.service_name}-${item.quantity}-${item.price}`}
-                  style={styles.orderItem}
-                >
-                  <Text style={styles.orderItemName}>
-                    {item.quantity}x {item.service_name}
-                  </Text>
-                  <Text style={styles.orderItemPrice}>{item.price.toLocaleString('vi-VN')}đ</Text>
-                </View>
-              ))}
-              {totalAmount && (
-                <View style={styles.orderTotal}>
-                  <Text style={styles.orderTotalLabel}>Tổng cộng</Text>
-                  <Text style={styles.orderTotalAmount}>{totalAmount}đ</Text>
-                </View>
-              )}
-            </View>
-          ) : (
-            <View style={styles.errorBox}>
-              <Text style={styles.errorText}>Không tìm thấy đơn hàng.</Text>
-            </View>
-          )}
-        </View>
+          </View>
+        ) : (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Đơn hàng</Text>
+            {isLoading ? (
+              <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
+            ) : error ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>Không tải được đơn hàng.</Text>
+              </View>
+            ) : order ? (
+              <View style={styles.orderCard}>
+                <Text style={styles.orderId}>Mã đơn #{order.id.slice(0, 8).toUpperCase()}</Text>
+                {order.items?.map((item) => (
+                  <View
+                    key={`${item.service_name}-${item.quantity}-${item.price}`}
+                    style={styles.orderItem}
+                  >
+                    <Text style={styles.orderItemName}>
+                      {item.quantity}x {item.service_name}
+                    </Text>
+                    <Text style={styles.orderItemPrice}>{item.price.toLocaleString('vi-VN')}đ</Text>
+                  </View>
+                ))}
+                {totalAmount && (
+                  <View style={styles.orderTotal}>
+                    <Text style={styles.orderTotalLabel}>Tổng cộng</Text>
+                    <Text style={styles.orderTotalAmount}>{totalAmount}đ</Text>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>Không tìm thấy đơn hàng.</Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Payment method */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
-          <Text style={styles.sectionSub}>Chọn cổng thanh toán bạn muốn sử dụng</Text>
-          {PAYMENT_GATEWAYS.map((gw) => (
-            <PaymentMethodCard
-              key={gw.id}
-              gateway={gw}
-              selected={selectedGateway?.id === gw.id}
-              onSelect={setSelectedGateway}
-            />
-          ))}
-        </View>
+        {isLoggedIn && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
+            <Text style={styles.sectionSub}>Chọn cổng thanh toán bạn muốn sử dụng</Text>
+            {PAYMENT_GATEWAYS.map((gw) => (
+              <PaymentMethodCard
+                key={gw.id}
+                gateway={gw}
+                selected={selectedGateway?.id === gw.id}
+                onSelect={setSelectedGateway}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       {/* Pay button */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.payBtn, (!selectedGateway || paying) && styles.payBtnDisabled]}
-          onPress={handlePay}
-          disabled={!selectedGateway || paying}
-          activeOpacity={0.75}
-        >
-          {paying ? (
-            <ActivityIndicator color={colors.white} size="small" />
-          ) : (
-            <Text style={styles.payBtnText}>
-              {selectedGateway
-                ? `Thanh toán qua ${selectedGateway.label}`
-                : 'Chọn phương thức thanh toán'}
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
+      {isLoggedIn && (
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[styles.payBtn, (!selectedGateway || paying) && styles.payBtnDisabled]}
+            onPress={handlePay}
+            disabled={!selectedGateway || paying}
+            activeOpacity={0.75}
+          >
+            {paying ? (
+              <ActivityIndicator color={colors.white} size="small" />
+            ) : (
+              <Text style={styles.payBtnText}>
+                {selectedGateway
+                  ? `Thanh toán qua ${selectedGateway.label}`
+                  : 'Chọn phương thức thanh toán'}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   )
 }
@@ -224,6 +258,14 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   errorText: { ...typography.bodySm, color: colors.error },
+  loginBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    marginTop: spacing.md,
+  },
+  loginBtnText: { color: colors.white, fontSize: 15, fontWeight: '600' },
   footer: {
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,

@@ -12,7 +12,7 @@ import { useAuthStore } from '../../stores/auth-store'
 const OTP_LENGTH = 4
 
 export default function OtpVerifyScreen() {
-  const { phone } = useLocalSearchParams<{ phone: string }>()
+  const { phone, redirectTo } = useLocalSearchParams<{ phone: string; redirectTo?: string }>()
 
   const { login } = useAuthStore()
 
@@ -75,7 +75,7 @@ export default function OtpVerifyScreen() {
             }
           }
 
-          router.replace('/(tabs)')
+          router.replace(redirectTo?.startsWith('/') ? redirectTo : '/(tabs)')
         },
         onError: (err) => {
           setError(err.message ?? 'Mã OTP không đúng. Vui lòng thử lại.')
@@ -98,6 +98,7 @@ export default function OtpVerifyScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>OTP VERIFICATION</Text>
         <Text style={styles.title}>Nhập mã OTP</Text>
         <Text style={styles.subtitle}>
           Mã 4 chữ số đã được gửi đến <Text style={styles.phone}>{phone}</Text>
@@ -194,38 +195,51 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.lg,
-    paddingTop: Platform.OS === 'web' ? spacing['2xl'] : spacing['2xl'],
   },
   header: {
-    marginBottom: spacing.xl,
-    marginTop: spacing.lg,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+    paddingTop: Platform.OS === 'web' ? 56 : 72,
+    paddingBottom: 72,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    marginBottom: -32,
   },
+  eyebrow: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
   title: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '800',
+    color: colors.white,
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
   subtitle: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: 'rgba(255,255,255,0.78)',
   },
   phone: {
     ...typography.bodyMd,
     fontWeight: '600',
-    color: colors.onSurface,
+    color: colors.white,
   },
   otpRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.md,
+    backgroundColor: colors.white,
+    marginHorizontal: spacing.lg,
+    padding: spacing.base,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
     marginBottom: spacing.lg,
   },
   otpInput: {
     width: 60,
     height: 64,
     borderRadius: 16,
-    backgroundColor: colors.surfaceContainerHighest,
+    backgroundColor: colors.surfaceContainerLow,
     fontSize: 24,
     fontWeight: '700',
     color: colors.onSurface,
@@ -248,6 +262,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: 'center',
     marginTop: spacing.md,
+    marginHorizontal: spacing.lg,
     // boxShadow works cross-platform (CSS on web, ignored on native where shadow*+elevation apply)
     boxShadow: '0 8px 32px rgba(22, 27, 46, 0.12)',
   },
@@ -263,6 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.xl,
+    paddingHorizontal: spacing.lg,
   },
   resendText: {
     ...typography.bodyMd,

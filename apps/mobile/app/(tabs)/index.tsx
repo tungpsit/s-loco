@@ -1,8 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
-/**
- * Home Screen — Trang chủ: categories grid, featured services, banners, articles, AI CTA
- */
 import { useCallback, useState } from 'react'
 import {
   FlatList,
@@ -12,11 +9,9 @@ import {
   Text,
   TouchableOpacity,
   View,
-  type ViewStyle,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { colors, spacing, typography } from '../../lib/theme'
-import CategoryChip from '../../src/components/category-chip'
+import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
 import { ServiceCardSkeleton } from '../../src/components/loading-skeleton'
 import ServiceCard from '../../src/components/service-card'
 import { contentApi, servicesApi } from '../../src/lib/api'
@@ -24,38 +19,38 @@ import { contentApi, servicesApi } from '../../src/lib/api'
 const CATEGORIES = [
   { slug: 'am-thuc', name: 'Ẩm thực', icon: '🍜' },
   { slug: 'luu-tru', name: 'Lưu trú', icon: '🏨' },
-  { slug: 'spa-massage', name: 'Spa & Massage', icon: '💆' },
+  { slug: 'spa-massage', name: 'Spa', icon: '💆' },
   { slug: 'xe-dien', name: 'Xe điện', icon: '🛺' },
   { slug: 'giai-tri', name: 'Giải trí', icon: '🎠' },
   { slug: 'mua-sam', name: 'Mua sắm', icon: '🛍️' },
 ]
 
-const BANNERS = [
+const OFFERS = [
   {
-    id: '1',
-    title: 'Tết Sầm Sơn 2026',
-    subtitle: 'Ưu đãi lên đến 30%',
-    emoji: '🎆',
-    color: colors.primaryContainer,
+    id: 'ai',
+    title: 'AI beach itinerary',
+    subtitle: 'Tạo lịch trình Sầm Sơn trong 30 giây',
+    icon: '✨',
+    route: '/ai/itinerary',
   },
   {
-    id: '2',
-    title: 'Khám phá ẩm thực',
-    subtitle: 'Top 10 nhà hàng ngon',
-    emoji: '🍽️',
-    color: '#FEF3C7',
+    id: 'voucher',
+    title: 'Voucher minh bạch',
+    subtitle: 'Mua trước, quét QR, dùng ngay',
+    icon: '🎫',
+    route: '/(tabs)/vouchers',
   },
 ]
 
 export default function HomeScreen() {
   const [category, setCategory] = useState<string | null>(null)
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['services', category],
     queryFn: () => servicesApi.list({ category: category ?? undefined, limit: 20 }),
   })
 
-  const { data: articlesData, isLoading: articlesLoading } = useQuery({
+  const { data: articlesData } = useQuery({
     queryKey: ['home-articles'],
     queryFn: () => contentApi.articles({ limit: 3 }),
   })
@@ -74,133 +69,127 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Floating header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Xin chào! 👋</Text>
-          <Text style={styles.headerTitle}>S-Loco</Text>
-        </View>
-        <TouchableOpacity style={styles.weatherBtn} onPress={() => router.push('/content/weather')}>
-          <Text style={styles.weatherIcon}>🌤️</Text>
-        </TouchableOpacity>
-      </View>
-
       <FlatList
-        data={isLoading ? Array(4).fill(null) : items}
+        data={isLoading ? Array(6).fill(null) : items}
         renderItem={isLoading ? () => <ServiceCardSkeleton /> : renderService}
-        keyExtractor={(item: any) => item?.id ?? Math.random().toString()}
+        keyExtractor={(item: any, index) => item?.id ?? `loading-${index}`}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            {/* Hero */}
             <View style={styles.hero}>
-              <Text style={styles.heroTagline}>Khám phá Sầm Sơn</Text>
-              <Text style={styles.heroTitle}>S-Loco</Text>
-              <Text style={styles.heroSub}>Ẩm thực · Lưu trú · Giải trí</Text>
+              <View style={styles.heroTop}>
+                <View>
+                  <Text style={styles.location}>Sầm Sơn, Thanh Hóa</Text>
+                  <Text style={styles.heroTitle}>Bạn muốn đi đâu?</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.weatherBtn}
+                  onPress={() => router.push('/content/weather')}
+                >
+                  <Text style={styles.weatherText}>24°</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity style={styles.searchPill} onPress={() => router.push('/(tabs)/search')}>
+                <Text style={styles.searchIcon}>🔍</Text>
+                <Text style={styles.searchText}>Tìm dịch vụ, nhà hàng, khách sạn...</Text>
+              </TouchableOpacity>
             </View>
 
-            {/* Banners */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.banners}
-            >
-              {BANNERS.map((b) => (
-                <TouchableOpacity
-                  key={b.id}
-                  style={[styles.banner, { backgroundColor: b.color }]}
-                  onPress={() => router.push('/ai/itinerary')}
-                >
-                  <Text style={styles.bannerEmoji}>{b.emoji}</Text>
-                  <View>
-                    <Text style={styles.bannerTitle}>{b.title}</Text>
-                    <Text style={styles.bannerSub}>{b.subtitle}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <View style={styles.categoryPanel}>
+              <View style={styles.categoryGrid}>
+                {CATEGORIES.map((cat) => (
+                  <TouchableOpacity
+                    key={cat.slug}
+                    style={[styles.categoryItem, category === cat.slug && styles.categoryItemActive]}
+                    onPress={() => setCategory(category === cat.slug ? null : cat.slug)}
+                  >
+                    <View style={styles.categoryIconWrap}>
+                      <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                    </View>
+                    <Text
+                      style={[styles.categoryName, category === cat.slug && styles.categoryNameActive]}
+                      numberOfLines={1}
+                    >
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
-            {/* Categories */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Danh mục</Text>
+              <View style={styles.sectionHead}>
+                <Text style={styles.sectionTitle}>Ưu đãi nổi bật</Text>
+              </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.chips}>
-                  {CATEGORIES.map((cat) => (
-                    <CategoryChip
-                      key={cat.slug}
-                      label={cat.name}
-                      icon={cat.icon}
-                      active={category === cat.slug}
-                      onPress={() => setCategory(category === cat.slug ? null : cat.slug)}
-                    />
+                <View style={styles.offerRow}>
+                  {OFFERS.map((offer) => (
+                    <TouchableOpacity
+                      key={offer.id}
+                      style={styles.offerCard}
+                      onPress={() => router.push(offer.route as any)}
+                    >
+                      <Text style={styles.offerIcon}>{offer.icon}</Text>
+                      <Text style={styles.offerTitle}>{offer.title}</Text>
+                      <Text style={styles.offerSub}>{offer.subtitle}</Text>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </ScrollView>
             </View>
 
-            {/* AI Itinerary CTA */}
-            <TouchableOpacity style={styles.aiCta} onPress={() => router.push('/ai/itinerary')}>
-              <View style={styles.aiCtaLeft}>
-                <Text style={styles.aiCtaEmoji}>🤖</Text>
-                <View>
-                  <Text style={styles.aiCtaTitle}>Lên lịch trình</Text>
-                  <Text style={styles.aiCtaSub}>AI gợi ý lịch trình cho bạn</Text>
-                </View>
-              </View>
-              <Text style={styles.aiCtaArrow}>→</Text>
-            </TouchableOpacity>
-
-            {/* Articles */}
             {articles.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHead}>
-                  <Text style={styles.sectionTitle}>Tin tức & Sự kiện</Text>
+                  <Text style={styles.sectionTitle}>Cảm hứng du lịch</Text>
                   <TouchableOpacity onPress={() => router.push('/content/articles')}>
-                    <Text style={styles.seeAll}>Xem tất cả →</Text>
+                    <Text style={styles.seeAll}>Xem tất cả</Text>
                   </TouchableOpacity>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.articleRow}>
-                    {articles.map((article: any) => (
-                      <TouchableOpacity
-                        key={article.id}
-                        style={styles.articleCard}
-                        onPress={() => router.push(`/content/${article.slug}`)}
-                      >
-                        {article.image_url ? (
-                          <Image source={{ uri: article.image_url }} style={styles.articleImage} />
-                        ) : (
-                          <View style={styles.articleImagePlaceholder}>
-                            <Text style={styles.articleImageEmoji}>📰</Text>
-                          </View>
-                        )}
-                        <View style={styles.articleContent}>
-                          <Text style={styles.articleChip}>{article.category ?? 'Bài viết'}</Text>
+                    {articles.map((article: any) => {
+                      const image = article.image_url ?? article.coverImageUrl
+                      return (
+                        <TouchableOpacity
+                          key={article.id}
+                          style={styles.articleCard}
+                          onPress={() => router.push(`/content/${article.slug}`)}
+                        >
+                          {image ? (
+                            <Image source={{ uri: image }} style={styles.articleImage} />
+                          ) : (
+                            <View style={styles.articleImagePlaceholder}>
+                              <Text style={styles.articleImageEmoji}>📰</Text>
+                            </View>
+                          )}
+                          <Text style={styles.articleChip}>{article.category ?? 'Guide'}</Text>
                           <Text style={styles.articleTitle} numberOfLines={2}>
                             {article.title}
                           </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
+                        </TouchableOpacity>
+                      )
+                    })}
                   </View>
                 </ScrollView>
               </View>
             )}
 
-            {/* Services heading */}
             <View style={styles.section}>
               <View style={styles.sectionHead}>
                 <Text style={styles.sectionTitle}>
                   {category
                     ? (CATEGORIES.find((c) => c.slug === category)?.name ?? 'Dịch vụ')
-                    : 'Dành cho bạn'}
+                    : 'Phổ biến gần bạn'}
                 </Text>
                 <TouchableOpacity onPress={() => router.push('/(tabs)/search')}>
-                  <Text style={styles.seeAll}>Xem tất cả →</Text>
+                  <Text style={styles.seeAll}>Xem tất cả</Text>
                 </TouchableOpacity>
               </View>
+              {error && <Text style={styles.errorText}>Không tải được dữ liệu. Thử lại sau.</Text>}
             </View>
           </>
         }
@@ -213,7 +202,7 @@ export default function HomeScreen() {
             </View>
           ) : null
         }
-        ListFooterComponent={isLoading ? null : <View style={{ height: 100 }} />}
+        ListFooterComponent={<View style={{ height: 108 }} />}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -222,133 +211,147 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: {
+  list: { paddingBottom: spacing.xl },
+  hero: {
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+    paddingBottom: 76,
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  heroTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.lg,
+  },
+  location: {
+    ...typography.labelMd,
+    color: 'rgba(255,255,255,0.78)',
+    marginBottom: 4,
+  },
+  heroTitle: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: '800',
+    color: colors.white,
+  },
+  weatherBtn: {
+    minWidth: 52,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weatherText: { color: colors.white, fontWeight: '800' },
+  searchPill: {
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.white,
+    flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    backgroundColor: 'rgba(244,247,251,0.85)',
-    top: 0,
-    zIndex: 10,
-  } as ViewStyle,
-  greeting: { ...typography.bodySm, color: colors.onSurfaceVariant },
-  headerTitle: { ...typography.headlineMd, fontSize: 22 },
-  weatherBtn: {
-    width: 44,
-    height: 44,
+    gap: spacing.sm,
+  },
+  searchIcon: { fontSize: 16 },
+  searchText: { ...typography.bodyMd, color: colors.onSurfaceVariant },
+  categoryPanel: {
+    marginHorizontal: spacing.base,
+    marginTop: -48,
+    backgroundColor: colors.white,
     borderRadius: 22,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    ...shadows.card,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: spacing.md,
+  },
+  categoryItem: {
+    width: '33.333%',
+    alignItems: 'center',
+    gap: 7,
+  },
+  categoryItemActive: {
+    opacity: 1,
+  },
+  categoryIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  weatherIcon: { fontSize: 22 },
-  list: { paddingBottom: spacing.xl },
-  hero: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.base,
-    backgroundColor: colors.primary,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-  },
-  heroTagline: {
+  categoryIcon: { fontSize: 24 },
+  categoryName: {
     ...typography.labelMd,
-    color: colors.primaryFixed,
-    letterSpacing: 1,
-    marginBottom: spacing.xs,
+    color: colors.onSurface,
+    maxWidth: 86,
   },
-  heroTitle: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: colors.white,
-    marginBottom: spacing.sm,
-  },
-  heroSub: {
-    ...typography.bodyMd,
-    color: 'rgba(255,255,255,0.7)',
-  },
-  banners: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-  },
-  banner: {
-    width: 200,
-    borderRadius: 16,
-    padding: spacing.base,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  bannerEmoji: { fontSize: 32 },
-  bannerTitle: { ...typography.titleSm, fontWeight: '600' },
-  bannerSub: { ...typography.bodySm, color: colors.onSurfaceVariant },
+  categoryNameActive: { color: colors.primary, fontWeight: '800' },
   section: { paddingHorizontal: spacing.base, marginTop: spacing.lg },
   sectionHead: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
-  sectionTitle: { ...typography.titleLg, marginBottom: spacing.md },
-  chips: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  seeAll: { ...typography.bodySm, color: colors.primary, fontWeight: '600' },
-  row: { paddingHorizontal: spacing.base, gap: spacing.md },
-  cardWrap: { flex: 1 },
-  cardLeft: { marginRight: spacing.xs },
-  cardRight: { marginLeft: spacing.xs },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: spacing.xl,
-  },
-  emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
-  emptyTitle: { ...typography.titleMd, marginBottom: spacing.xs },
-  emptyText: { ...typography.bodyMd, textAlign: 'center' },
-
-  // AI Itinerary CTA
-  aiCta: {
-    marginHorizontal: spacing.base,
-    marginTop: spacing.md,
-    backgroundColor: colors.primaryContainer,
-    borderRadius: 16,
+  sectionTitle: { ...typography.titleLg },
+  seeAll: { ...typography.labelMd, color: colors.primary, fontWeight: '700' },
+  offerRow: { flexDirection: 'row', gap: spacing.md, paddingRight: spacing.base },
+  offerCard: {
+    width: 230,
+    minHeight: 118,
+    borderRadius: 18,
     padding: spacing.base,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
-  aiCtaLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  aiCtaEmoji: { fontSize: 32 },
-  aiCtaTitle: { ...typography.titleSm, fontWeight: '600', color: colors.white },
-  aiCtaSub: { ...typography.bodySm, color: 'rgba(255,255,255,0.75)' },
-  aiCtaArrow: { fontSize: 20, color: colors.white },
-
-  // Articles section
-  articleRow: { flexDirection: 'row', gap: spacing.md },
-  articleCard: { width: 160, borderRadius: 12, overflow: 'hidden' },
-  articleImage: { width: '100%', height: 100, borderRadius: 12 },
+  offerIcon: { fontSize: 26, marginBottom: spacing.sm },
+  offerTitle: { ...typography.titleMd, color: colors.onSurface },
+  offerSub: { ...typography.bodySm, color: colors.onSurfaceVariant, marginTop: 3 },
+  articleRow: { flexDirection: 'row', gap: spacing.md, paddingRight: spacing.base },
+  articleCard: {
+    width: 172,
+    borderRadius: 16,
+    backgroundColor: colors.white,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+  },
+  articleImage: { width: '100%', height: 92, borderRadius: 12 },
   articleImagePlaceholder: {
     width: '100%',
-    height: 100,
+    height: 92,
     borderRadius: 12,
     backgroundColor: colors.surfaceContainerLow,
     alignItems: 'center',
     justifyContent: 'center',
   },
   articleImageEmoji: { fontSize: 28, opacity: 0.5 },
-  articleContent: { paddingTop: spacing.sm },
   articleChip: {
     ...typography.labelSm,
     color: colors.primary,
-    backgroundColor: colors.primaryFixed,
-    borderRadius: 9999,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    alignSelf: 'flex-start',
+    marginTop: spacing.sm,
     marginBottom: 4,
+    textTransform: 'uppercase',
   },
-  articleTitle: { ...typography.bodySm, fontWeight: '600' },
+  articleTitle: { ...typography.labelMd, color: colors.onSurface },
+  row: { paddingHorizontal: spacing.base, gap: spacing.md, marginBottom: spacing.md },
+  cardWrap: { flex: 1 },
+  cardLeft: { marginRight: spacing.xs },
+  cardRight: { marginLeft: spacing.xs },
+  empty: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: spacing.xl },
+  emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
+  emptyTitle: { ...typography.titleMd, marginBottom: spacing.xs },
+  emptyText: { ...typography.bodyMd, textAlign: 'center', color: colors.onSurfaceVariant },
+  errorText: { ...typography.bodySm, color: colors.error },
 })

@@ -1,7 +1,7 @@
 /**
  * Auth — Login: phone number input → send OTP.
  */
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import {
   Alert,
@@ -21,6 +21,7 @@ import { borderRadius, colors, shadows, spacing, typography } from '../../lib/th
 const vnPhoneRegex = /^(0|\+84)\d{9,10}$/
 
 export default function LoginScreen() {
+  const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>()
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
 
@@ -35,7 +36,7 @@ export default function LoginScreen() {
     setError('')
     sendOtp(clean, {
       onSuccess: () => {
-        router.push({ pathname: '/(auth)/otp-verify', params: { phone: clean } })
+        router.push({ pathname: '/(auth)/otp-verify', params: { phone: clean, redirectTo } })
       },
       onError: (err) => {
         Alert.alert('Lỗi', err.message ?? 'Không thể gửi mã OTP. Vui lòng thử lại.')
@@ -54,9 +55,8 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Hero */}
           <View style={styles.hero}>
-            <Text style={styles.heroEmoji}>🌊</Text>
+            <Text style={styles.heroKicker}>S-LOCO ACCOUNT</Text>
             <Text style={styles.heroTitle}>Chào mừng đến S-Loco</Text>
             <Text style={styles.heroSubtitle}>Nhập số điện thoại để nhận mã đăng nhập qua SMS</Text>
           </View>
@@ -120,30 +120,32 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   hero: {
-    alignItems: 'center',
+    backgroundColor: colors.primary,
+    marginHorizontal: -spacing.lg,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing['2xl'],
-    paddingBottom: spacing.xl,
+    paddingBottom: 72,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
-  heroEmoji: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
+  heroKicker: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
   heroTitle: {
-    ...typography.headlineMd,
-    textAlign: 'center',
-    color: colors.onSurface,
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '800',
+    color: colors.white,
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
   heroSubtitle: {
     ...typography.bodyMd,
-    textAlign: 'center',
-    color: colors.onSurfaceVariant,
-    paddingHorizontal: spacing.lg,
+    color: 'rgba(255,255,255,0.78)',
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.lg,
+    borderRadius: 22,
     padding: spacing.lg,
+    marginTop: -32,
     ...shadows.card,
   },
   label: {
@@ -159,8 +161,8 @@ const styles = StyleSheet.create({
   prefix: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceContainerHighest,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 16,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     marginRight: spacing.sm,
@@ -176,8 +178,8 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: colors.surfaceContainerHighest,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 16,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     fontSize: 16,

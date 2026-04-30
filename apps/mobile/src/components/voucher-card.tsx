@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  created: { bg: colors.secondaryContainer, text: colors.onSecondaryContainer },
+  created: { bg: colors.sand, text: '#D97706' },
   paid: { bg: colors.lagoonContainer, text: colors.lagoon },
   redeemed: { bg: colors.primaryFixed, text: colors.primary },
   completed: { bg: '#D1FAE5', text: '#065F46' },
@@ -69,7 +69,7 @@ export default function VoucherCard({ item, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.lg,
+    borderRadius: 18,
     padding: spacing.base,
     overflow: 'hidden',
     borderWidth: 1,
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    width: 5,
-    backgroundColor: colors.coral,
+    width: 6,
+    backgroundColor: colors.primary,
   },
   header: {
     flexDirection: 'row',
@@ -93,13 +93,13 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
   },
   icon: {
     ...typography.labelMd,
-    color: colors.white,
+    color: colors.primary,
     fontWeight: '800',
   },
   headerText: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   amount: {
     ...typography.titleMd,
-    color: colors.coral,
+    color: colors.primary,
   },
   date: {
     ...typography.bodySm,

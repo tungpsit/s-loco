@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native'
 import { colors, spacing, typography } from '../../lib/theme'
 import ErrorState from '../../src/components/error-state'
@@ -8,6 +8,7 @@ import { vendorsApi } from '../../src/lib/api'
 
 export default function VendorDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const router = useRouter()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['vendor', id],
@@ -50,6 +51,7 @@ export default function VendorDetailScreen() {
 
           {/* Vendor Info */}
           <View style={styles.info}>
+            <Text style={styles.eyebrow}>LOCAL PARTNER</Text>
             <Text style={styles.name}>{vendor.name}</Text>
             {vendor.address && <Text style={styles.address}>📍 {vendor.address}</Text>}
             <View style={styles.ratingRow}>
@@ -83,7 +85,7 @@ export default function VendorDetailScreen() {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <View style={styles.cardWrap}>
-          <ServiceCard item={item} onPress={() => {}} />
+          <ServiceCard item={item} onPress={() => router.push(`/service/${item.id}`)} />
         </View>
       )}
       ListFooterComponent={<View style={{ height: spacing.xl }} />}
@@ -96,18 +98,18 @@ const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingBottom: spacing.xl },
   heroWrap: {
-    height: 220,
+    height: 260,
     position: 'relative',
   },
   heroImage: { width: '100%', height: '100%' },
   heroPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroEmoji: { fontSize: 60, opacity: 0.4 },
+  heroEmoji: { fontSize: 64 },
   heroGradient: {
     position: 'absolute',
     bottom: 0,
@@ -119,11 +121,12 @@ const styles = StyleSheet.create({
   info: {
     padding: spacing.base,
     backgroundColor: colors.surfaceContainerLowest,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -24,
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    marginTop: -28,
   },
-  name: { ...typography.headlineMd, marginBottom: spacing.xs },
+  eyebrow: { ...typography.labelSm, color: colors.primary, fontWeight: '800', marginBottom: 4 },
+  name: { ...typography.headlineMd, fontWeight: '800', marginBottom: spacing.xs },
   address: { ...typography.bodyMd, color: colors.onSurfaceVariant, marginBottom: spacing.sm },
   ratingRow: {
     flexDirection: 'row',
@@ -136,12 +139,12 @@ const styles = StyleSheet.create({
   ratingText: { ...typography.titleSm, color: colors.onSurface },
   reviewCount: { ...typography.bodySm, color: colors.outline },
   chip: {
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: colors.primaryFixed,
     borderRadius: 9999,
     paddingVertical: 4,
     paddingHorizontal: 12,
   },
-  chipText: { ...typography.labelMd, color: colors.onSecondaryContainer },
+  chipText: { ...typography.labelMd, color: colors.primary },
   description: { ...typography.bodyMd, color: colors.onSurfaceVariant, lineHeight: 22 },
   section: { padding: spacing.base, paddingBottom: 0 },
   sectionTitle: { ...typography.titleLg },

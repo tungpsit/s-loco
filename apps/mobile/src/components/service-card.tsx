@@ -78,16 +78,16 @@ export default function ServiceCard({ item, onPress }: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.lg,
+    borderRadius: 18,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(228, 209, 181, 0.7)',
+    borderColor: colors.outlineVariant,
     ...shadows.card,
   },
   imageWrap: {
     position: 'relative',
-    height: 148,
-    backgroundColor: colors.primary,
+    height: 132,
+    backgroundColor: colors.primaryContainer,
   },
   image: {
     width: '100%',
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   imageShade: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(7, 89, 133, 0.1)',
+    backgroundColor: 'rgba(0, 109, 204, 0.08)',
   },
   imagePlaceholder: {
     width: '100%',
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   imageKicker: {
     ...typography.labelSm,
-    color: colors.primaryFixed,
+    color: 'rgba(255,255,255,0.72)',
     textTransform: 'uppercase',
     fontWeight: '700',
   },
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.sm,
     top: spacing.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
     borderRadius: borderRadius.full,
     paddingVertical: 4,
     paddingHorizontal: 9,
@@ -144,22 +144,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   content: {
-    padding: spacing.md,
+    padding: 12,
   },
   name: {
-    ...typography.titleMd,
+    ...typography.titleSm,
+    lineHeight: 20,
     marginBottom: 4,
   },
   vendor: {
     ...typography.bodySm,
     color: colors.onSurfaceVariant,
-    marginBottom: spacing.sm,
+    marginBottom: 6,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginTop: spacing.sm,
+    marginTop: 6,
   },
   originalPrice: {
     ...typography.bodySm,
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     color: colors.outline,
   },
   price: {
-    ...typography.titleMd,
+    ...typography.titleSm,
     color: colors.primary,
   },
   discountedPrice: {

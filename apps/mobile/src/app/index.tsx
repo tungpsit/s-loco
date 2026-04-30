@@ -1,5 +1,5 @@
 /**
- * Root redirect — checks auth then redirects to login or home.
+ * Root redirect — hydrate auth then open the guest-first home flow.
  */
 
 import { router } from 'expo-router'
@@ -7,16 +7,12 @@ import { useEffect } from 'react'
 import { useAuthStore } from '../stores/auth-store'
 
 export default function Index() {
-  const { token, isHydrated } = useAuthStore()
+  const { isHydrated } = useAuthStore()
 
   useEffect(() => {
     if (!isHydrated) return
-    if (token) {
-      router.replace('/(tabs)')
-    } else {
-      router.replace('/(auth)/login')
-    }
-  }, [isHydrated, token])
+    router.replace('/(tabs)')
+  }, [isHydrated])
 
   return null
 }

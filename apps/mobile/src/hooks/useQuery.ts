@@ -159,11 +159,11 @@ export function useOrders(params?: { status?: string; page?: number }) {
   })
 }
 
-export function useOrderDetail(id: string) {
+export function useOrderDetail(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.orderDetail(id),
     queryFn: () => ordersApi.detail(id),
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   })
 }
 
@@ -199,10 +199,14 @@ export function useCancelOrder() {
 
 // ─── Vouchers ─────────────────────────────────────────────────────────────────
 
-export function useVouchers(params?: { status?: string; page?: number }) {
+export function useVouchers(
+  params?: { status?: string; page?: number },
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: queryKeys.vouchers(params),
     queryFn: () => vouchersApi.list(params),
+    enabled: options?.enabled ?? true,
   })
 }
 

@@ -48,7 +48,7 @@ const MENU_ITEMS = [
 ]
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuthStore()
+  const { isLoggedIn, user, logout } = useAuthStore()
 
   async function handleLogout() {
     try {
@@ -57,7 +57,7 @@ export default function ProfileScreen() {
       /* ignore API errors on logout */
     }
     await logout()
-    router.replace('/(auth)/login')
+    router.replace('/(tabs)')
   }
 
   const initials = (user?.full_name ?? user?.phone ?? '?')[0]?.toUpperCase() ?? '?'
@@ -67,7 +67,9 @@ export default function ProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
+          <Text style={styles.eyebrow}>ACCOUNT</Text>
           <Text style={styles.title}>Tài khoản</Text>
+          <Text style={styles.subtitle}>Quản lý voucher, lịch trình và ưu đãi S-Loco</Text>
         </View>
 
         {/* Profile card */}
@@ -77,16 +79,33 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>
-              {user?.full_name || user?.phone || 'Người dùng S-Loco'}
+              {user?.full_name || user?.phone || 'Khách S-Loco'}
             </Text>
-            <Text style={styles.profilePhone}>{user?.phone ?? user?.email ?? ''}</Text>
+            <Text style={styles.profilePhone}>
+              {user?.phone ?? user?.email ?? 'Đăng nhập để lưu voucher và theo dõi đơn hàng'}
+            </Text>
             <View style={styles.roleBadge}>
               <Text style={styles.roleText}>
-                {user?.role === 'tourist' ? '🌊 Du khách' : 'Người dùng'}
+                {isLoggedIn ? (user?.role === 'tourist' ? '🌊 Du khách' : 'Người dùng') : 'Khách'}
               </Text>
             </View>
           </View>
         </View>
+
+        {!isLoggedIn && (
+          <TouchableOpacity
+            style={styles.loginBtn}
+            onPress={() =>
+              router.push({
+                pathname: '/(auth)/login',
+                params: { redirectTo: '/(tabs)/profile' },
+              })
+            }
+            activeOpacity={0.75}
+          >
+            <Text style={styles.loginText}>Đăng nhập để cá nhân hóa trải nghiệm</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Menu */}
         <View style={styles.section}>
@@ -112,14 +131,16 @@ export default function ProfileScreen() {
         </View>
 
         {/* Logout */}
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-          activeOpacity={0.7}
-          accessibilityLabel="Đăng xuất"
-        >
-          <Text style={styles.logoutText}>Đăng xuất</Text>
-        </TouchableOpacity>
+        {isLoggedIn && (
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={handleLogout}
+            activeOpacity={0.7}
+            accessibilityLabel="Đăng xuất"
+          >
+            <Text style={styles.logoutText}>Đăng xuất</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={{ height: spacing.xl }} />
       </ScrollView>
@@ -130,25 +151,33 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: {
+    backgroundColor: colors.primary,
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingTop: spacing.base,
+    paddingBottom: 54,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  title: { ...typography.headlineMd },
+  eyebrow: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white, marginTop: 4 },
+  subtitle: { ...typography.bodyMd, color: 'rgba(255,255,255,0.78)', marginTop: 4 },
   profileCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.md,
+    borderRadius: 22,
     marginHorizontal: spacing.base,
+    marginTop: -34,
     padding: spacing.base,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryContainer,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -172,14 +201,29 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   roleText: { ...typography.labelSm, color: colors.primary },
+  loginBtn: {
+    marginHorizontal: spacing.base,
+    marginTop: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  loginText: {
+    color: colors.white,
+    fontSize: 15,
+    fontWeight: '600',
+  },
   section: {
     paddingHorizontal: spacing.base,
     marginTop: spacing.lg,
   },
   menuCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.md,
+    borderRadius: 20,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   menuRow: {
     flexDirection: 'row',
@@ -191,7 +235,7 @@ const styles = StyleSheet.create({
   menuIcon: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',

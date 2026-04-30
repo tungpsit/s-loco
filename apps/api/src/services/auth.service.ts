@@ -15,8 +15,7 @@ export async function registerOrLoginWithOtp(
   ipAddress?: string,
 ) {
   // Verify OTP first
-  // TODO: verify otp
-  // await verifyOtp(phone, code)
+  await verifyOtp(phone, code)
 
   const db = getDb()
 

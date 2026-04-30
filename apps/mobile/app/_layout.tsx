@@ -5,6 +5,7 @@ import { Stack } from 'expo-router'
  */
 import type React from 'react'
 import { useEffect } from 'react'
+import { colors } from '../lib/theme'
 import { useAuthStore } from '../src/stores/auth-store'
 
 const queryClient = new QueryClient({
@@ -17,7 +18,7 @@ const queryClient = new QueryClient({
 })
 
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { token, isHydrated, hydrate } = useAuthStore()
+  const { isHydrated, hydrate } = useAuthStore()
 
   useEffect(() => {
     hydrate()
@@ -34,13 +35,16 @@ export default function RootLayout() {
       <AuthGate>
         <Stack
           screenOptions={{
-            headerShown: false,
             animation: 'slide_from_right',
+            headerStyle: { backgroundColor: colors.white },
+            headerShadowVisible: false,
+            headerTintColor: colors.primary,
+            headerTitleStyle: { color: colors.onSurface, fontWeight: '700' },
           }}
         >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
-          <Stack.Screen name="auth" options={{ animation: 'fade' }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ animation: 'none', headerShown: false }} />
+          <Stack.Screen name="auth" options={{ animation: 'fade', headerShown: false }} />
           <Stack.Screen name="vendor/[id]" options={{ headerShown: true, title: 'Cửa hàng' }} />
           <Stack.Screen name="service/[id]" options={{ headerShown: true, title: 'Dịch vụ' }} />
           <Stack.Screen name="order/[id]" options={{ headerShown: true, title: 'Đơn hàng' }} />

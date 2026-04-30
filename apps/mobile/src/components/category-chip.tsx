@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native'
-import { colors, spacing } from '../../lib/theme'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { borderRadius, colors, spacing, typography } from '../../lib/theme'
 
 interface Props {
   label: string
@@ -15,7 +15,11 @@ export default function CategoryChip({ label, icon, active, onPress }: Props) {
       onPress={onPress}
       activeOpacity={0.7}
     >
-      {icon && <Text style={styles.icon}>{icon}</Text>}
+      {icon && (
+        <View style={[styles.iconWrap, active && styles.iconWrapActive]}>
+          <Text style={styles.icon}>{icon}</Text>
+        </View>
+      )}
       <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
     </TouchableOpacity>
   )
@@ -25,24 +29,39 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.secondaryContainer,
-    borderRadius: 9999,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    gap: spacing.xs,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.full,
+    paddingVertical: 7,
+    paddingLeft: 8,
+    paddingRight: 14,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   chipActive: {
-    backgroundColor: colors.primaryContainer,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  iconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.primaryFixed,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   icon: {
     fontSize: 14,
   },
   label: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.onSecondaryContainer,
+    ...typography.labelMd,
+    color: colors.onSurface,
   },
   labelActive: {
     color: colors.white,
+    fontWeight: '700',
   },
 })

@@ -1,4 +1,4 @@
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 /**
  * Auth — Enter phone number → send OTP
  */
@@ -11,6 +11,7 @@ import { authApi } from '../../src/lib/api'
 const vnPhoneRegex = /^(0|\+84)\d{9,10}$/
 
 export default function OtpScreen() {
+  const { redirectTo } = useLocalSearchParams<{ redirectTo?: string }>()
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,7 +26,7 @@ export default function OtpScreen() {
     setLoading(true)
     try {
       await authApi.sendOtp(clean)
-      router.replace({ pathname: '/auth/verify', params: { phone: clean } })
+      router.replace({ pathname: '/auth/verify', params: { phone: clean, redirectTo } })
     } catch (e: any) {
       Alert.alert('Lỗi', e.message ?? 'Không thể gửi mã OTP. Vui lòng thử lại.')
     } finally {
@@ -37,7 +38,7 @@ export default function OtpScreen() {
     <SafeAreaView style={styles.container}>
       {/* Hero */}
       <View style={styles.hero}>
-        <Text style={styles.heroEmoji}>🌊</Text>
+        <Text style={styles.heroKicker}>S-LOCO ACCOUNT</Text>
         <Text style={styles.heroTitle}>Chào mừng đến S-Loco</Text>
         <Text style={styles.heroSubtitle}>Nhập số điện thoại để nhận mã đăng nhập qua SMS</Text>
       </View>
@@ -82,38 +83,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.lg,
   },
   hero: {
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'web' ? 48 : 80,
-    paddingBottom: spacing.xl,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+    paddingTop: Platform.OS === 'web' ? 56 : 80,
+    paddingBottom: 72,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
-  heroEmoji: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
+  heroKicker: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
   heroTitle: {
-    ...typography.headlineMd,
-    textAlign: 'center',
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: '800',
+    color: colors.white,
     marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   heroSubtitle: {
     ...typography.bodyMd,
-    textAlign: 'center',
-    color: colors.onSurfaceVariant,
-    paddingHorizontal: spacing.xl,
+    color: 'rgba(255,255,255,0.78)',
   },
   form: {
+    marginHorizontal: spacing.lg,
+    marginTop: -32,
+    backgroundColor: colors.white,
+    borderRadius: 22,
+    padding: spacing.base,
     gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   label: {
     ...typography.labelLg,
     marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: colors.surfaceContainerHighest,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 16,
     paddingVertical: spacing.base,
     paddingHorizontal: spacing.base,
     fontSize: 16,
@@ -163,6 +171,7 @@ const styles = StyleSheet.create({
     color: colors.outline,
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.lg,
+    marginHorizontal: spacing.lg,
     marginTop: 'auto',
   },
   link: {

@@ -42,6 +42,12 @@ export default function VoucherDetailScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>VOUCHER</Text>
+        <Text style={styles.title}>Mã sử dụng dịch vụ</Text>
+        <Text style={styles.subtitle}>Đưa QR này cho cửa hàng để xác nhận voucher</Text>
+      </View>
+
       {isLoading ? (
         <ActivityIndicator size="large" color={colors.primary} style={{ paddingVertical: 60 }} />
       ) : error || !voucher ? (
@@ -136,10 +142,22 @@ export default function VoucherDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  content: { padding: spacing.base, paddingBottom: spacing.xl },
+  content: { paddingBottom: spacing.xl },
+  header: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.xl,
+    paddingBottom: 54,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    marginBottom: -24,
+  },
+  eyebrow: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white, marginTop: 4 },
+  subtitle: { ...typography.bodyMd, color: 'rgba(255,255,255,0.78)', marginTop: 4 },
   statusBadge: {
     alignSelf: 'center',
-    backgroundColor: colors.primaryFixed,
+    backgroundColor: colors.white,
     borderRadius: 9999,
     paddingVertical: 6,
     paddingHorizontal: 20,
@@ -149,9 +167,12 @@ const styles = StyleSheet.create({
   qrSection: {
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 20,
+    borderRadius: 24,
     padding: spacing.xl,
+    marginHorizontal: spacing.base,
     marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   scanHint: {
     ...typography.bodySm,
@@ -161,9 +182,12 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
+    marginHorizontal: spacing.base,
     marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   infoRow: {
     flexDirection: 'row',
@@ -179,7 +203,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: { ...typography.bodyMd, color: colors.outline },
   infoValue: { ...typography.titleSm, color: colors.onSurface },
-  actions: { gap: spacing.md },
+  actions: { gap: spacing.md, paddingHorizontal: spacing.base },
   scanBtn: {
     backgroundColor: colors.primary,
     borderRadius: 48,

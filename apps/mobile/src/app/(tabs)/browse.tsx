@@ -101,28 +101,26 @@ export default function BrowseScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>Explore Sam Son</Text>
-        <Text style={styles.title}>Tìm kiếm</Text>
+        <Text style={styles.eyebrow}>EXPLORE SẦM SƠN</Text>
+        <Text style={styles.title}>Tìm trải nghiệm</Text>
         <Text style={styles.subtitle}>Chọn trải nghiệm, so sánh giá và giữ voucher trên máy.</Text>
-      </View>
-
-      <View style={styles.searchWrap}>
-        <Text style={styles.searchIcon}>Search</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Tìm dịch vụ, cửa hàng..."
-          placeholderTextColor={colors.outline}
-          value={query}
-          onChangeText={setQuery}
-          returnKeyType="search"
-        />
-        {query.length > 0 && (
-          <TouchableOpacity onPress={() => setQuery('')}>
-            <Text style={styles.clearText}>×</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.searchWrap}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm dịch vụ, cửa hàng..."
+            placeholderTextColor="rgba(255,255,255,0.72)"
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+          />
+          {query.length > 0 && (
+            <TouchableOpacity onPress={() => setQuery('')}>
+              <Text style={styles.clearText}>×</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <View style={styles.categories}>
@@ -203,41 +201,42 @@ export default function BrowseScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: {
+    backgroundColor: colors.primary,
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingTop: spacing.base,
+    paddingBottom: 34,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   eyebrow: {
     ...typography.labelSm,
-    color: colors.coral,
+    color: 'rgba(255,255,255,0.72)',
     fontWeight: '800',
     textTransform: 'uppercase',
     marginBottom: 4,
   },
-  title: { ...typography.headlineMd, color: colors.primary },
-  subtitle: { ...typography.bodySm, color: colors.onSurfaceVariant, marginTop: 4, maxWidth: 300 },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white, marginTop: 4 },
+  subtitle: { ...typography.bodySm, color: 'rgba(255,255,255,0.78)', marginTop: 4, maxWidth: 300 },
   searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.md,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.lg,
+    marginTop: spacing.lg,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 25,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    ...shadows.card,
+    borderColor: 'rgba(255,255,255,0.25)',
   },
-  searchIcon: { ...typography.labelSm, color: colors.primary, fontWeight: '800' },
+  searchIcon: { fontSize: 16 },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: colors.onSurface,
+    color: colors.white,
     ...Platform.select({ web: { border: 'none' } }),
   } as object,
-  clearText: { fontSize: 20, color: colors.outline, fontWeight: '600' },
+  clearText: { fontSize: 20, color: colors.white, fontWeight: '600' },
   categories: {
     paddingHorizontal: spacing.base,
     gap: spacing.sm,

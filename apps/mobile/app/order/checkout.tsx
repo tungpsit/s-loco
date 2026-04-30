@@ -16,6 +16,7 @@ import {
 } from 'react-native'
 import { colors, spacing, typography } from '../../lib/theme'
 import { ordersApi } from '../../src/lib/api'
+import { useAuthStore } from '../../src/stores/auth-store'
 import { useOrderStore } from '../../src/stores/order-store'
 
 const GATEWAYS = [
@@ -25,6 +26,7 @@ const GATEWAYS = [
 ]
 
 export default function CheckoutScreen() {
+  const { isLoggedIn } = useAuthStore()
   const { items, total, clear } = useOrderStore()
   const qc = useQueryClient()
   const [gateway, setGateway] = useState<string>('vnpay')
@@ -60,12 +62,22 @@ export default function CheckoutScreen() {
       Alert.alert('Giỏ hàng trống', 'Vui lòng thêm dịch vụ trước.')
       return
     }
+    if (!isLoggedIn) {
+      router.push({ pathname: '/auth/otp', params: { redirectTo: '/order/checkout' } })
+      return
+    }
     createMutation.mutate()
   }
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>CHECKOUT</Text>
+          <Text style={styles.title}>Xác nhận đơn hàng</Text>
+          <Text style={styles.subtitle}>Kiểm tra dịch vụ và chọn phương thức thanh toán</Text>
+        </View>
+
         {/* Order Summary */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Đơn hàng của bạn</Text>
@@ -144,12 +156,27 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   scroll: { flex: 1 },
-  content: { padding: spacing.base, paddingBottom: 120 },
+  content: { paddingBottom: 120 },
+  header: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.xl,
+    paddingBottom: 54,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    marginBottom: -30,
+  },
+  eyebrow: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white, marginTop: 4 },
+  subtitle: { ...typography.bodyMd, color: 'rgba(255,255,255,0.78)', marginTop: 4 },
   section: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: spacing.base,
+    marginHorizontal: spacing.base,
     marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   sectionTitle: { ...typography.titleMd, marginBottom: spacing.md },
   itemRow: {
@@ -172,8 +199,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
-    borderRadius: 12,
-    backgroundColor: colors.surfaceContainer,
+    borderRadius: 16,
+    backgroundColor: colors.surfaceContainerLow,
     gap: spacing.md,
   },
   gatewayActive: {
@@ -190,8 +217,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: spacing.base,
+    marginHorizontal: spacing.base,
     marginBottom: spacing.lg,
   },
   totalLabel: { ...typography.titleLg },
@@ -202,7 +230,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: spacing.base,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: colors.outlineVariant,
   },

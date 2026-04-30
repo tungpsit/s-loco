@@ -20,6 +20,7 @@ import VoucherCardComponent from '../../components/voucher-card'
 import { useVouchers } from '../../hooks/useQuery'
 import type { VoucherItem } from '../../lib/api'
 import { borderRadius, colors, spacing, typography } from '../../lib/theme'
+import { useAuthStore } from '../../stores/auth-store'
 
 const STATUS_TABS = [
   { key: 'all', label: 'Tất cả' },
@@ -30,14 +31,18 @@ const STATUS_TABS = [
 ]
 
 export default function VouchersScreen() {
+  const { isLoggedIn } = useAuthStore()
   const [activeTab, setActiveTab] = useState('all')
   const [giftVoucher, setGiftVoucher] = useState<VoucherItem | null>(null)
 
   const statusParam = activeTab === 'all' ? undefined : activeTab
 
-  const { data, isLoading, error, refetch } = useVouchers({
-    status: statusParam,
-  })
+  const { data, isLoading, error, refetch } = useVouchers(
+    {
+      status: statusParam,
+    },
+    { enabled: isLoggedIn },
+  )
 
   const items: VoucherItem[] = data?.items ?? []
 
@@ -59,33 +64,56 @@ export default function VouchersScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>Your coastal wallet</Text>
-        <Text style={styles.title}>Vé của tôi</Text>
+        <Text style={styles.eyebrow}>MY PASSES</Text>
+        <Text style={styles.title}>Voucher của tôi</Text>
         <Text style={styles.subtitle}>Xuất trình QR khi sử dụng dịch vụ</Text>
       </View>
 
-      {/* Status tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
-      >
-        {STATUS_TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            style={[styles.tab, activeTab === tab.key && styles.tabActive]}
-            onPress={() => setActiveTab(tab.key)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {isLoggedIn && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabs}
+        >
+          {STATUS_TABS.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+              onPress={() => setActiveTab(tab.key)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
 
       {/* List */}
-      {error ? (
+      {!isLoggedIn ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyEmoji}>SL</Text>
+          <Text style={styles.emptyTitle}>Đăng nhập để xem voucher</Text>
+          <Text style={styles.emptyText}>
+            Bạn vẫn có thể khám phá dịch vụ trước, tài khoản chỉ cần khi đặt đơn và nhận voucher.
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyBtn}
+            onPress={() =>
+              router.push({
+                pathname: '/(auth)/login',
+                params: { redirectTo: '/(tabs)/vouchers' },
+              })
+            }
+          >
+            <Text style={styles.emptyBtnText}>Đăng nhập</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.browseBtn} onPress={() => router.push('/(tabs)/browse')}>
+            <Text style={styles.browseBtnText}>Tiếp tục khám phá</Text>
+          </TouchableOpacity>
+        </View>
+      ) : error ? (
         <ErrorState onRetry={refetch} />
       ) : (
         <FlatList
@@ -136,29 +164,33 @@ export default function VouchersScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: {
+    backgroundColor: colors.primary,
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingTop: spacing.base,
+    paddingBottom: spacing.xl,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   eyebrow: {
     ...typography.labelSm,
-    color: colors.coral,
+    color: 'rgba(255,255,255,0.72)',
     fontWeight: '800',
     textTransform: 'uppercase',
     marginBottom: 4,
   },
-  title: { ...typography.headlineMd, color: colors.primary },
-  subtitle: { ...typography.bodyMd, color: colors.onSurfaceVariant, marginTop: 4 },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white, marginTop: 4 },
+  subtitle: { ...typography.bodyMd, color: 'rgba(255,255,255,0.78)', marginTop: 4 },
   tabs: {
     paddingHorizontal: spacing.base,
     gap: spacing.sm,
-    marginBottom: spacing.md,
+    marginTop: -18,
+    marginBottom: spacing.lg,
   },
   tab: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
   },
@@ -213,6 +245,16 @@ const styles = StyleSheet.create({
   },
   emptyBtnText: {
     color: colors.white,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  browseBtn: {
+    marginTop: spacing.sm,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.xl,
+  },
+  browseBtnText: {
+    color: colors.primary,
     fontWeight: '600',
     fontSize: 14,
   },

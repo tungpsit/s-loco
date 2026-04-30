@@ -3,14 +3,14 @@
  */
 import { Tabs } from 'expo-router'
 import { Platform, Text, View } from 'react-native'
-import { colors, glass, spacing } from '../../lib/theme'
+import { colors, spacing } from '../../lib/theme'
 
 const TAB_ICONS: Record<string, string> = {
-  index: 'SL',
-  browse: 'EX',
-  vouchers: 'QR',
+  index: '⌂',
+  browse: '🔍',
+  vouchers: '🎫',
   ai: 'AI',
-  profile: 'ME',
+  profile: '☺',
 }
 
 export default function TabLayout() {
@@ -21,20 +21,19 @@ export default function TabLayout() {
         tabBarIcon: ({ focused }) => (
           <View
             style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: focused ? colors.primary : 'transparent',
+              width: 34,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: focused ? colors.primaryFixed : colors.transparent,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
             <Text
               style={{
-                fontSize: 11,
+                fontSize: route.name === 'ai' ? 12 : 19,
                 fontWeight: '800',
-                color: focused ? colors.white : colors.outline,
-                opacity: focused ? 1 : 0.72,
+                color: focused ? colors.primary : colors.outline,
               }}
             >
               {TAB_ICONS[route.name] ?? '●'}
@@ -42,21 +41,22 @@ export default function TabLayout() {
           </View>
         ),
         tabBarStyle: {
-          backgroundColor: glass.tabBar.backgroundColor,
-          borderTopWidth: 0,
+          backgroundColor: colors.white,
+          borderTopWidth: 1,
+          borderTopColor: colors.outlineVariant,
           elevation: 0,
           boxShadow: 'none',
           height: Platform.OS === 'web' ? 72 : 88,
           paddingBottom: Platform.OS === 'web' ? 8 : 24,
           paddingTop: spacing.sm,
-          ...(Platform.OS !== 'web' ? { backdropFilter: 'blur(20px)' } : {}),
+          ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)' } : {}),
         } as object,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.outline,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '500',
-          marginTop: -4,
+          fontWeight: '600',
+          marginTop: -2,
         },
       })}
     >

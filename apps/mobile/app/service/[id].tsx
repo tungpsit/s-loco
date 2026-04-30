@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native'
 import { colors, spacing, typography } from '../../lib/theme'
 import ErrorState from '../../src/components/error-state'
@@ -24,6 +25,7 @@ import { useOrderStore } from '../../src/stores/order-store'
 export default function ServiceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const { width } = useWindowDimensions()
   const { addItem } = useOrderStore()
   const [qty, setQty] = useState(1)
   const [selectedImg, setSelectedImg] = useState(0)
@@ -69,11 +71,11 @@ export default function ServiceDetailScreen() {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={(e) => {
-                setSelectedImg(Math.round(e.nativeEvent.contentOffset.x / 340))
+                setSelectedImg(Math.round(e.nativeEvent.contentOffset.x / width))
               }}
             >
               {images.map((uri: string) => (
-                <Image key={uri} source={{ uri }} style={styles.heroImage} />
+                <Image key={uri} source={{ uri }} style={[styles.heroImage, { width }]} />
               ))}
             </ScrollView>
             {images.length > 1 && (
@@ -89,7 +91,8 @@ export default function ServiceDetailScreen() {
           </View>
         ) : (
           <View style={styles.heroPlaceholder}>
-            <Text style={styles.heroEmoji}>📍</Text>
+            <Text style={styles.heroKicker}>S-LOCO EXPERIENCE</Text>
+            <Text style={styles.heroEmoji}>🌊</Text>
           </View>
         )}
 
@@ -190,14 +193,15 @@ export default function ServiceDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  heroImage: { width: 340, height: 240 },
+  heroImage: { height: 280 },
   heroPlaceholder: {
-    height: 200,
-    backgroundColor: colors.surfaceContainerLow,
+    height: 280,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroEmoji: { fontSize: 60, opacity: 0.4 },
+  heroKicker: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
+  heroEmoji: { fontSize: 68, marginTop: spacing.md },
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -211,7 +215,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.outlineVariant,
   },
   dotActive: { backgroundColor: colors.primary, width: 18 },
-  info: { padding: spacing.base, backgroundColor: colors.surfaceContainerLowest },
+  info: {
+    padding: spacing.base,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    marginTop: -24,
+  },
   categoryChip: {
     backgroundColor: colors.primaryFixed,
     borderRadius: 9999,
@@ -221,8 +231,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   categoryText: { ...typography.labelMd, color: colors.primary },
-  name: { ...typography.headlineMd, marginBottom: spacing.xs },
-  vendor: { ...typography.bodyMd, color: colors.secondary, marginBottom: spacing.sm },
+  name: { ...typography.headlineMd, fontWeight: '800', marginBottom: spacing.xs },
+  vendor: { ...typography.bodyMd, color: colors.primary, marginBottom: spacing.sm },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: spacing.md },
   star: { fontSize: 14, color: '#F59E0B' },
   ratingText: { ...typography.titleSm },
@@ -239,9 +249,9 @@ const styles = StyleSheet.create({
     color: colors.outline,
   },
   price: { ...typography.headlineMd, color: colors.primary },
-  discountedPrice: { color: colors.error },
+  discountedPrice: { color: colors.coral },
   discountBadge: {
-    backgroundColor: colors.tertiaryContainer,
+    backgroundColor: colors.coral,
     borderRadius: 8,
     paddingVertical: 4,
     paddingHorizontal: 8,
@@ -263,7 +273,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.base,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: colors.outlineVariant,
     gap: spacing.md,
@@ -273,11 +283,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyBtnText: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
+  qtyBtnText: { fontSize: 18, fontWeight: '800', color: colors.primary },
   qtyText: { ...typography.titleMd, minWidth: 24, textAlign: 'center' },
   addBtn: {
     flex: 1,

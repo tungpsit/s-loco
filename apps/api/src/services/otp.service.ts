@@ -1,10 +1,10 @@
-import { getDb } from '../db'
 import { otpCodes } from '@S-Loco/db/schema'
 import { APP_CONSTANTS } from '@S-Loco/shared'
 import { and, eq, gt, sql } from 'drizzle-orm'
-import { ConsoleSMSProvider, type SMSProvider } from '../lib/sms-provider'
+import { getDb } from '../db'
+import { createSMSProvider, type SMSProvider } from '../lib/sms-provider'
 
-const smsProvider: SMSProvider = new ConsoleSMSProvider()
+const smsProvider: SMSProvider = createSMSProvider()
 
 export async function sendOtp(phone: string) {
   const db = getDb()
@@ -29,17 +29,24 @@ export async function sendOtp(phone: string) {
   await db.insert(otpCodes).values({ phone, code, expiresAt })
 
   // Send via SMS provider (console in dev)
-  const isDev = process.env.NODE_ENV !== 'production'
-  if (isDev) {
+  const isDevMock = process.env.SMS_PROVIDER === 'mock'
+  if (isDevMock) {
     console.log(`\n╔════════════════════════════════════╗`)
     console.log(`║  OTP for ${phone}: ${code}             ║`)
     console.log(`║  Expires in 5 minutes             ║`)
     console.log(`╚════════════════════════════════════╝\n`)
   } else {
-    await smsProvider.send(phone, `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`)
+    await sendOtpMessage(smsProvider, phone, code)
   }
 
   return { success: true, expires_in: APP_CONSTANTS.OTP_EXPIRY_SECONDS }
+}
+
+export async function sendOtpMessage(provider: SMSProvider, phone: string, code: string) {
+  const sent = await provider.send(phone, `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`)
+  if (!sent) {
+    throw new OtpError('SMS_SEND_FAILED', 'Không thể gửi mã OTP. Vui lòng thử lại sau.')
+  }
 }
 
 export async function verifyOtp(phone: string, code: string) {

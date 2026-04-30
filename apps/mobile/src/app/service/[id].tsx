@@ -17,9 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { formatVND } from '../../components/service-card'
 import { useCreateOrder, useServiceDetail } from '../../hooks/useQuery'
 import { borderRadius, colors, shadows, spacing, typography } from '../../lib/theme'
+import { useAuthStore } from '../../stores/auth-store'
 
 export default function ServiceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const { isLoggedIn } = useAuthStore()
   const [quantity, setQuantity] = useState(1)
 
   const { data, isLoading, error } = useServiceDetail(id ?? '')
@@ -29,6 +31,10 @@ export default function ServiceDetailScreen() {
 
   async function handleBuy() {
     if (!id) return
+    if (!isLoggedIn) {
+      router.push({ pathname: '/(auth)/login', params: { redirectTo: `/service/${id}` } })
+      return
+    }
     try {
       const result = await createOrder.mutateAsync([{ service_id: id, quantity }])
       const orderId = result.order.id

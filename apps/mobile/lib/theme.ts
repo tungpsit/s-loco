@@ -1,40 +1,40 @@
 /**
- * S-Loco Design System — Coastal Premium
+ * S-Loco Design System — Klook-inspired Coastal Blue
  * Root token file kept for legacy src/components imports.
  */
 import { Platform, StyleSheet } from 'react-native'
 
 /* ─── Color Palette ─── */
 export const colors = {
-  // Primary — premium coastal ocean
-  primary: '#075985',
-  primaryContainer: '#0E7490',
-  primaryFixed: '#CFFAFE',
-  primaryFixedDim: '#67E8F9',
+  // Primary — coastal marketplace blue
+  primary: '#006DCC',
+  primaryContainer: '#0B8FEF',
+  primaryFixed: '#E0F2FE',
+  primaryFixedDim: '#7DD3FC',
 
-  // Secondary — warm sand
-  secondary: '#B7791F',
-  secondaryContainer: '#FEF3C7',
-  onSecondaryContainer: '#5C3A05',
+  // Secondary — aqua utility
+  secondary: '#0891B2',
+  secondaryContainer: '#DFF7FF',
+  onSecondaryContainer: '#075985',
 
-  // Tertiary — coral sunset
-  tertiary: '#B45309',
-  tertiaryContainer: '#F97316',
-  tertiaryFixed: '#FFEDD5',
+  // Tertiary — warm deal accent
+  tertiary: '#EA580C',
+  tertiaryContainer: '#FF7A1A',
+  tertiaryFixed: '#FFF1E6',
 
-  // Surfaces — resort paper
-  surface: '#FFF8EE',
-  surfaceContainerLow: '#FDF1DD',
-  surfaceContainer: '#F7E6CC',
-  surfaceContainerHigh: '#EED6B6',
-  surfaceContainerHighest: '#E5C49B',
+  // Surfaces — clean travel marketplace
+  surface: '#F5FAFF',
+  surfaceContainerLow: '#EFF7FF',
+  surfaceContainer: '#E6F2FB',
+  surfaceContainerHigh: '#D7EAF8',
+  surfaceContainerHighest: '#C7E0F3',
   surfaceContainerLowest: '#FFFFFF',
 
   // Text
-  onSurface: '#1F2933',
-  onSurfaceVariant: '#52616B',
-  outline: '#8A7B68',
-  outlineVariant: '#E4D1B5',
+  onSurface: '#102033',
+  onSurfaceVariant: '#5D6B7A',
+  outline: '#8AA0B5',
+  outlineVariant: '#D9E7F2',
 
   // Error
   error: '#BA1A1A',
@@ -43,14 +43,14 @@ export const colors = {
   // Functional
   white: '#FFFFFF',
   transparent: 'transparent',
-  scrim: 'rgba(31, 41, 51, 0.52)',
-  coral: '#EF6F4E',
-  coralContainer: '#FFE4D8',
-  sand: '#FFF3D8',
-  lagoon: '#0F766E',
+  scrim: 'rgba(16, 32, 51, 0.54)',
+  coral: '#FF6B35',
+  coralContainer: '#FFE7DC',
+  sand: '#FFF7E8',
+  lagoon: '#0E7490',
   lagoonContainer: '#CCFBF1',
-  gradientStart: '#075985',
-  gradientEnd: '#0E7490',
+  gradientStart: '#005AAE',
+  gradientEnd: '#00A3FF',
 } as const
 
 /* ─── Typography ─── */
@@ -100,21 +100,21 @@ export const borderRadius = {
 
 export const shadows = {
   card: {
-    shadowColor: '#7C4A18',
+    shadowColor: '#174B72',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 3,
+    shadowRadius: 18,
+    elevation: 2,
   },
   fab: {
-    shadowColor: '#7C4A18',
+    shadowColor: '#174B72',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 32,
     elevation: 6,
   },
   bottomSheet: {
-    shadowColor: '#7C4A18',
+    shadowColor: '#174B72',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
     shadowRadius: 24,

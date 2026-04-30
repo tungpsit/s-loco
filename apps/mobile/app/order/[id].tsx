@@ -63,6 +63,11 @@ export default function OrderDetailScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>ORDER</Text>
+        <Text style={styles.title}>Chi tiết đơn hàng</Text>
+      </View>
+
       {/* Status */}
       <View
         style={[
@@ -157,22 +162,39 @@ export default function OrderDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  content: { padding: spacing.base, paddingBottom: spacing.xl },
+  content: { paddingBottom: spacing.xl },
+  header: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.xl,
+    paddingBottom: 54,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    marginBottom: -30,
+  },
+  eyebrow: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)', fontWeight: '800' },
+  title: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white, marginTop: 4 },
   statusCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 20,
     borderLeftWidth: 4,
     padding: spacing.base,
+    marginHorizontal: spacing.base,
     marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   statusLabel: { ...typography.titleLg, marginBottom: spacing.xs },
   orderId: { ...typography.bodySm, color: colors.outline, fontFamily: 'monospace' },
   orderDate: { ...typography.bodySm, color: colors.outline, marginTop: 2 },
   section: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: spacing.base,
+    marginHorizontal: spacing.base,
     marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
   },
   sectionTitle: { ...typography.titleMd, marginBottom: spacing.md },
   itemRow: {
@@ -201,8 +223,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: spacing.base,
+    marginHorizontal: spacing.base,
     marginBottom: spacing.lg,
   },
   totalLabel: { ...typography.titleLg },

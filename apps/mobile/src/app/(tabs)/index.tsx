@@ -1,47 +1,39 @@
 /**
- * Home Screen — Trang chủ: hero banner, category grid, featured vendors.
+ * Home Screen — Klook-inspired tourist marketplace home.
  */
 import { router } from 'expo-router'
 import { useCallback, useState } from 'react'
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  type ViewStyle,
-} from 'react-native'
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { ServiceCardSkeleton } from '../../components/loading-skeleton'
 import ServiceCard from '../../components/service-card'
 import { useServices } from '../../hooks/useQuery'
 import type { ServiceItem } from '../../lib/api'
-import { borderRadius, colors, glass, shadows, spacing, typography } from '../../lib/theme'
+import { colors, shadows, spacing, typography } from '../../lib/theme'
 
 const CATEGORIES = [
-  { slug: 'am-thuc', name: 'Ẩm thực', icon: 'Taste' },
-  { slug: 'luu-tru', name: 'Lưu trú', icon: 'Stay' },
-  { slug: 'spa-massage', name: 'Spa', icon: 'Spa' },
-  { slug: 'xe-dien', name: 'Xe điện', icon: 'Ride' },
-  { slug: 'giai-tri', name: 'Giải trí', icon: 'Play' },
-  { slug: 'mua-sam', name: 'Mua sắm', icon: 'Shop' },
+  { slug: 'am-thuc', name: 'Ẩm thực', icon: '🍜' },
+  { slug: 'luu-tru', name: 'Lưu trú', icon: '🏨' },
+  { slug: 'spa-massage', name: 'Spa', icon: '💆' },
+  { slug: 'xe-dien', name: 'Xe điện', icon: '🛺' },
+  { slug: 'giai-tri', name: 'Giải trí', icon: '🎠' },
+  { slug: 'mua-sam', name: 'Mua sắm', icon: '🛍️' },
 ]
 
-const BANNERS = [
+const OFFERS = [
   {
-    id: '1',
-    title: 'Sunset dining pass',
-    subtitle: 'Bữa tối ven biển với ưu đãi chọn lọc',
-    tag: 'Curated',
-    bg: colors.primary,
+    id: 'ai',
+    title: 'AI beach itinerary',
+    subtitle: 'Tạo lịch trình Sầm Sơn trong 30 giây',
+    icon: '✨',
+    route: '/(tabs)/ai',
   },
   {
-    id: '2',
-    title: 'AI beach itinerary',
-    subtitle: 'Lịch trình nghỉ dưỡng trong 30 giây',
-    tag: 'Planner',
-    bg: colors.coral,
+    id: 'voucher',
+    title: 'Voucher minh bạch',
+    subtitle: 'Mua trước, quét QR, dùng ngay',
+    icon: '🎫',
+    route: '/(tabs)/vouchers',
   },
 ]
 
@@ -66,95 +58,47 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Floating header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Xin chào! 👋</Text>
-          <Text style={styles.headerTitle}>S-Loco</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.weatherBtn}
-          onPress={() => router.push('/content/weather')}
-          accessibilityLabel="Thời tiết"
-        >
-          <Text style={styles.weatherIcon}>24°</Text>
-        </TouchableOpacity>
-      </View>
-
       <FlatList
-        data={isLoading ? Array(4).fill(null) : items}
+        data={isLoading ? Array(6).fill(null) : items}
         renderItem={isLoading ? () => <ServiceCardSkeleton /> : renderService}
-        keyExtractor={(item: ServiceItem | null) => item?.id ?? String(Math.random())}
+        keyExtractor={(item: ServiceItem | null, index) => item?.id ?? `loading-${index}`}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
             <View style={styles.hero}>
-              <View style={styles.heroTopRow}>
+              <View style={styles.heroTop}>
                 <View>
-                  <Text style={styles.heroTagline}>Sam Son coastal pass</Text>
-                  <Text style={styles.heroTitle}>Plan less. Enjoy more.</Text>
+                  <Text style={styles.location}>Sầm Sơn, Thanh Hóa</Text>
+                  <Text style={styles.heroTitle}>Bạn muốn đi đâu?</Text>
                 </View>
-                <View style={styles.heroBadge}>
-                  <Text style={styles.heroBadgeText}>Premium</Text>
-                </View>
+                <TouchableOpacity
+                  style={styles.weatherBtn}
+                  onPress={() => router.push('/content/weather')}
+                  accessibilityLabel="Thời tiết"
+                >
+                  <Text style={styles.weatherText}>24°</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.heroSub}>
-                Voucher minh bạch cho ẩm thực, lưu trú và trải nghiệm địa phương.
-              </Text>
-              <View style={styles.heroStats}>
-                <View style={styles.heroStat}>
-                  <Text style={styles.heroStatValue}>6</Text>
-                  <Text style={styles.heroStatLabel}>Danh mục</Text>
-                </View>
-                <View style={styles.heroStat}>
-                  <Text style={styles.heroStatValue}>AI</Text>
-                  <Text style={styles.heroStatLabel}>Lịch trình</Text>
-                </View>
-                <View style={styles.heroStat}>
-                  <Text style={styles.heroStatValue}>QR</Text>
-                  <Text style={styles.heroStatLabel}>Voucher</Text>
-                </View>
-              </View>
+
+              <TouchableOpacity
+                style={styles.searchPill}
+                onPress={() => router.push('/(tabs)/browse')}
+              >
+                <Text style={styles.searchIcon}>🔍</Text>
+                <Text style={styles.searchText}>Tìm dịch vụ, nhà hàng, khách sạn...</Text>
+              </TouchableOpacity>
             </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.banners}
-            >
-              {BANNERS.map((b) => (
-                <TouchableOpacity
-                  key={b.id}
-                  style={[styles.banner, { backgroundColor: b.bg }]}
-                  onPress={() => router.push('/(tabs)/ai')}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.bannerTag}>
-                    <Text style={styles.bannerTagText}>{b.tag}</Text>
-                  </View>
-                  <View style={styles.bannerCopy}>
-                    <Text style={styles.bannerTitle}>{b.title}</Text>
-                    <Text style={styles.bannerSub}>{b.subtitle}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionEyebrow}>Discover by mood</Text>
-              <Text style={styles.sectionTitle}>Danh mục nổi bật</Text>
+            <View style={styles.categoryPanel}>
               <View style={styles.categoryGrid}>
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
                     key={cat.slug}
-                    style={[
-                      styles.categoryItem,
-                      category === cat.slug && styles.categoryItemActive,
-                    ]}
+                    style={styles.categoryItem}
                     onPress={() => setCategory(category === cat.slug ? null : cat.slug)}
-                    activeOpacity={0.7}
+                    activeOpacity={0.75}
                   >
                     <View
                       style={[
@@ -166,9 +110,10 @@ export default function HomeScreen() {
                     </View>
                     <Text
                       style={[
-                        styles.categoryLabel,
-                        category === cat.slug && styles.categoryLabelActive,
+                        styles.categoryName,
+                        category === cat.slug && styles.categoryNameActive,
                       ]}
+                      numberOfLines={1}
                     >
                       {cat.name}
                     </Text>
@@ -177,13 +122,32 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            <View style={styles.sectionHeadRow}>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Ưu đãi nổi bật</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={styles.offerRow}>
+                  {OFFERS.map((offer) => (
+                    <TouchableOpacity
+                      key={offer.id}
+                      style={styles.offerCard}
+                      onPress={() => router.push(offer.route as never)}
+                    >
+                      <Text style={styles.offerIcon}>{offer.icon}</Text>
+                      <Text style={styles.offerTitle}>{offer.title}</Text>
+                      <Text style={styles.offerSub}>{offer.subtitle}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            <View style={styles.sectionHead}>
               <View>
-                <Text style={styles.sectionEyebrow}>Curated services</Text>
+                <Text style={styles.sectionKicker}>CURATED SERVICES</Text>
                 <Text style={styles.sectionTitle}>
                   {category
                     ? (CATEGORIES.find((c) => c.slug === category)?.name ?? 'Dịch vụ')
-                    : 'Dành cho bạn'}
+                    : 'Phổ biến gần bạn'}
                 </Text>
               </View>
               <TouchableOpacity onPress={() => router.push('/(tabs)/browse')}>
@@ -201,7 +165,7 @@ export default function HomeScreen() {
             </View>
           ) : null
         }
-        ListFooterComponent={<View style={{ height: 100 }} />}
+        ListFooterComponent={<View style={{ height: 108 }} />}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -210,168 +174,103 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    backgroundColor: glass.header.backgroundColor,
-    zIndex: 10,
-  } as ViewStyle,
-  greeting: { ...typography.bodySm, color: colors.onSurfaceVariant },
-  headerTitle: { ...typography.headlineMd, color: colors.primary },
-  weatherBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.surfaceContainerLowest,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  weatherIcon: { ...typography.labelMd, color: colors.primary, fontWeight: '800' },
   list: { paddingBottom: spacing.xl },
   hero: {
-    marginHorizontal: spacing.base,
-    marginTop: spacing.sm,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.base,
+    paddingBottom: 76,
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.xl,
-    ...shadows.card,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  heroTopRow: {
+  heroTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: spacing.md,
-    marginBottom: spacing.md,
+    alignItems: 'flex-start',
+    marginBottom: spacing.lg,
   },
-  heroTagline: {
-    ...typography.labelMd,
-    color: colors.primaryFixed,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  heroTitle: {
-    fontSize: 34,
-    lineHeight: 39,
-    fontWeight: '700',
-    color: colors.white,
-    maxWidth: 250,
-  },
-  heroBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    borderRadius: borderRadius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  heroBadgeText: { ...typography.labelSm, color: colors.white, fontWeight: '700' },
-  heroSub: { ...typography.bodyMd, color: 'rgba(255,255,255,0.78)', marginBottom: spacing.lg },
-  heroStats: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: borderRadius.lg,
-    padding: spacing.sm,
-    gap: spacing.sm,
-  },
-  heroStat: { flex: 1 },
-  heroStatValue: { ...typography.titleMd, color: colors.white, fontWeight: '800' },
-  heroStatLabel: { ...typography.labelSm, color: 'rgba(255,255,255,0.72)' },
-  banners: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-  },
-  banner: {
-    width: 244,
-    borderRadius: borderRadius.lg,
-    padding: spacing.base,
-    minHeight: 112,
-    justifyContent: 'space-between',
-  },
-  bannerTag: {
-    alignSelf: 'flex-start',
+  location: { ...typography.labelMd, color: 'rgba(255,255,255,0.78)', marginBottom: 4 },
+  heroTitle: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.white },
+  weatherBtn: {
+    minWidth: 52,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: borderRadius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  bannerTagText: { ...typography.labelSm, color: colors.white, fontWeight: '700' },
-  bannerCopy: { gap: 4 },
-  bannerTitle: { ...typography.titleMd, fontWeight: '700', color: colors.white },
-  bannerSub: { ...typography.bodySm, color: 'rgba(255,255,255,0.78)' },
-  section: {
-    paddingHorizontal: spacing.base,
-    marginTop: spacing.lg,
-  },
-  sectionEyebrow: {
-    ...typography.labelSm,
-    color: colors.coral,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  sectionTitle: { ...typography.titleLg, marginBottom: spacing.md, color: colors.onSurface },
-  sectionHeadRow: {
+  weatherText: { color: colors.white, fontWeight: '800' },
+  searchPill: {
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.white,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing.base,
-    marginTop: spacing.lg,
-  },
-  seeAll: { ...typography.bodySm, color: colors.primary, fontWeight: '800' },
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  categoryItem: {
-    width: '30%',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.lg,
-    gap: spacing.sm,
+  searchIcon: { fontSize: 16 },
+  searchText: { ...typography.bodyMd, color: colors.onSurfaceVariant },
+  categoryPanel: {
+    marginHorizontal: spacing.base,
+    marginTop: -48,
+    backgroundColor: colors.white,
+    borderRadius: 22,
+    padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
-  categoryItemActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
+  categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md },
+  categoryItem: { width: '33.333%', alignItems: 'center', gap: 7 },
   categoryIconWrap: {
     width: 48,
     height: 48,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.sand,
+    borderRadius: 16,
+    backgroundColor: colors.primaryFixed,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  categoryIconWrapActive: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
+  categoryIconWrapActive: { backgroundColor: colors.primary },
+  categoryIcon: { fontSize: 24 },
+  categoryName: { ...typography.labelMd, color: colors.onSurface, maxWidth: 86 },
+  categoryNameActive: { color: colors.primary, fontWeight: '800' },
+  section: { paddingHorizontal: spacing.base, marginTop: spacing.lg },
+  sectionHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.base,
+    marginTop: spacing.lg,
   },
-  categoryIcon: { ...typography.labelSm, color: colors.primary, fontWeight: '800' },
-  categoryLabel: {
-    ...typography.labelMd,
-    color: colors.onSurface,
-    textAlign: 'center',
+  sectionKicker: {
+    ...typography.labelSm,
+    color: colors.coral,
+    fontWeight: '800',
+    marginBottom: 2,
   },
-  categoryLabelActive: {
-    color: colors.white,
-    fontWeight: '600',
+  sectionTitle: { ...typography.titleLg, color: colors.onSurface, marginBottom: spacing.md },
+  seeAll: { ...typography.labelMd, color: colors.primary, fontWeight: '700' },
+  offerRow: { flexDirection: 'row', gap: spacing.md, paddingRight: spacing.base },
+  offerCard: {
+    width: 230,
+    minHeight: 118,
+    borderRadius: 18,
+    padding: spacing.base,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
-  row: { paddingHorizontal: spacing.base, gap: spacing.md },
+  offerIcon: { fontSize: 26, marginBottom: spacing.sm },
+  offerTitle: { ...typography.titleMd, color: colors.onSurface },
+  offerSub: { ...typography.bodySm, color: colors.onSurfaceVariant, marginTop: 3 },
+  row: { paddingHorizontal: spacing.base, gap: spacing.md, marginBottom: spacing.md },
   cardWrap: { flex: 1 },
   cardLeft: { marginRight: spacing.xs },
   cardRight: { marginLeft: spacing.xs },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: spacing.xl,
-  },
+  empty: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: spacing.xl },
   emptyEmoji: { fontSize: 48, marginBottom: spacing.md },
   emptyTitle: { ...typography.titleMd, marginBottom: spacing.xs },
-  emptyText: { ...typography.bodyMd, textAlign: 'center' },
+  emptyText: { ...typography.bodyMd, textAlign: 'center', color: colors.onSurfaceVariant },
 })
