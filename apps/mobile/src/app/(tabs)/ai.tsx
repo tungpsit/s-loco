@@ -67,42 +67,70 @@ function formatCost(amount: number | undefined): string {
   return amount >= 1000 ? `${(amount / 1000).toFixed(0)}K` : String(amount)
 }
 
-function ActivityCard({ activity }: { activity: Activity }) {
+function ActivityTimelineItem({
+  activity,
+  isFirst,
+  isLast,
+}: {
+  activity: Activity
+  isFirst: boolean
+  isLast: boolean
+}) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <TouchableOpacity
-      style={styles.activityCard}
-      onPress={() => activity.service_id && setExpanded(!expanded)}
-      activeOpacity={activity.service_id ? 0.7 : 1}
-    >
-      <View style={styles.activityHeader}>
-        <View style={styles.activityTimeWrap}>
-          <Text style={styles.activityTime}>{activity.time}</Text>
+    <View style={styles.timelineItem}>
+      <View style={styles.timelineRail}>
+        {!isFirst && <View style={styles.timelineLineTop} />}
+        <View style={[styles.timelineDot, activity.service_id && styles.timelineDotLinked]}>
+          <View style={styles.timelineDotCore} />
         </View>
-        <View style={styles.activityContent}>
-          <Text style={styles.activityTitle}>{activity.title}</Text>
+        {!isLast && <View style={styles.timelineLineBottom} />}
+      </View>
+
+      <TouchableOpacity
+        style={styles.timelineCard}
+        onPress={() => activity.service_id && setExpanded(!expanded)}
+        activeOpacity={activity.service_id ? 0.72 : 1}
+      >
+        <View style={styles.timelineCardTop}>
+          <View style={styles.activityTimeWrap}>
+            <Text style={styles.activityTime}>{activity.time}</Text>
+          </View>
           {activity.estimated_cost ? (
             <Text style={styles.activityCost}>~{formatCost(activity.estimated_cost)}đ</Text>
           ) : null}
+        </View>
+
+        <View style={styles.activityBody}>
+          <Text style={styles.activityTitle}>{activity.title}</Text>
           {activity.category ? (
             <Text style={styles.activityCategory}>{activity.category}</Text>
           ) : null}
+          {activity.description && (
+            <Text
+              style={styles.activityDesc}
+              numberOfLines={expanded || !activity.service_id ? undefined : 2}
+            >
+              {activity.description}
+            </Text>
+          )}
         </View>
+
         {activity.service_id && (
-          <TouchableOpacity
-            style={styles.bookBtn}
-            onPress={() => router.push(`/service/${activity.service_id}`)}
-            activeOpacity={0.75}
-          >
-            <Text style={styles.bookBtnText}>Đặt</Text>
-          </TouchableOpacity>
+          <View style={styles.activityFooter}>
+            <Text style={styles.expandHint}>{expanded ? 'Thu gọn' : 'Xem thêm'}</Text>
+            <TouchableOpacity
+              style={styles.bookBtn}
+              onPress={() => router.push(`/service/${activity.service_id}`)}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.bookBtnText}>Đặt</Text>
+            </TouchableOpacity>
+          </View>
         )}
-      </View>
-      {expanded && activity.description && (
-        <Text style={styles.activityDesc}>{activity.description}</Text>
-      )}
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   )
 }
 
@@ -141,12 +169,16 @@ function ItineraryResultView({
             <Text style={styles.dayNumber}>Ngày {day.day}</Text>
             {day.date && <Text style={styles.dayDate}>{day.date}</Text>}
           </View>
-          {day.activities.map((activity) => (
-            <ActivityCard
-              key={`${day.day}-${activity.time}-${activity.title}`}
-              activity={activity}
-            />
-          ))}
+          <View style={styles.timelineList}>
+            {day.activities.map((activity, index) => (
+              <ActivityTimelineItem
+                key={`${day.day}-${activity.time}-${activity.title}`}
+                activity={activity}
+                isFirst={index === 0}
+                isLast={index === day.activities.length - 1}
+              />
+            ))}
+          </View>
         </View>
       ))}
 
@@ -406,9 +438,7 @@ export default function AiScreen() {
           )}
         </TouchableOpacity>
 
-        <Text style={styles.note}>
-          * Lịch trình AI sử dụng Gemini API — gợi ý dịch vụ có sẵn trên S-Loco
-        </Text>
+        <Text style={styles.note}>* Lịch trình AI gợi ý dịch vụ có sẵn trên S-Loco</Text>
       </ScrollView>
     </SafeAreaView>
   )
@@ -611,25 +641,76 @@ const styles = StyleSheet.create({
     ...typography.bodySm,
     color: colors.outline,
   },
-  activityCard: {
+  timelineList: {
+    gap: 0,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    minHeight: 104,
+  },
+  timelineRail: {
+    width: 32,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  timelineLineTop: {
+    position: 'absolute',
+    top: 0,
+    width: 2,
+    height: 12,
+    backgroundColor: colors.outlineVariant,
+  },
+  timelineLineBottom: {
+    position: 'absolute',
+    top: 30,
+    bottom: 0,
+    width: 2,
+    backgroundColor: colors.outlineVariant,
+  },
+  timelineDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    marginTop: 12,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 2,
+    borderColor: colors.primaryFixedDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timelineDotLinked: {
+    borderColor: colors.primary,
+  },
+  timelineDotCore: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.primary,
+  },
+  timelineCard: {
+    flex: 1,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
+    ...shadows.card,
   },
-  activityHeader: {
+  timelineCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   activityTimeWrap: {
     backgroundColor: colors.primaryFixed,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.full,
     paddingVertical: 4,
     paddingHorizontal: spacing.sm,
-    minWidth: 48,
+    minWidth: 56,
     alignItems: 'center',
   },
   activityTime: {
@@ -637,15 +718,17 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-  activityContent: { flex: 1 },
+  activityBody: {
+    gap: 2,
+  },
   activityTitle: {
-    ...typography.titleSm,
+    ...typography.titleMd,
     color: colors.onSurface,
   },
   activityCost: {
-    ...typography.bodySm,
-    color: colors.primary,
-    marginTop: 2,
+    ...typography.labelMd,
+    color: colors.tertiary,
+    fontWeight: '700',
   },
   activityCategory: {
     ...typography.labelSm,
@@ -656,13 +739,26 @@ const styles = StyleSheet.create({
     ...typography.bodySm,
     color: colors.onSurfaceVariant,
     marginTop: spacing.sm,
-    marginLeft: 48 + spacing.md,
+  },
+  activityFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  expandHint: {
+    ...typography.labelMd,
+    color: colors.primary,
+    fontWeight: '600',
   },
   bookBtn: {
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.full,
     paddingVertical: 6,
     paddingHorizontal: spacing.md,
+    minWidth: 64,
+    alignItems: 'center',
   },
   bookBtnText: {
     ...typography.labelMd,

@@ -1,16 +1,31 @@
-import { getDb } from '../db'
 import { serviceCategories, services, vendors } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
+import { getDb } from '../db'
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
-const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1'
+const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
 
 interface ItineraryInput {
   days: number
   budget: number
   preferences: string[]
   groupType: string
+}
+
+interface AvailableService {
+  id: string
+  name: string
+  category: string | null
+  price: string | null
+  originalPrice: string
+  vendorName: string
+}
+
+interface ChatCompletionResponse {
+  choices?: Array<{
+    message?: { content?: string }
+    text?: string
+  }>
 }
 
 export async function generateItinerary(input: ItineraryInput) {
@@ -71,32 +86,44 @@ Trả về JSON (không markdown) theo format:
   "tips": ["Mẹo 1", "Mẹo 2"]
 }`
 
-  if (!GEMINI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY || ''
+  if (!apiKey) {
     return generateMockItinerary(input, availableServices)
   }
 
   try {
-    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+    const baseUrl = (process.env.OPENAI_BASE_URL || DEFAULT_OPENAI_BASE_URL).replace(/\/+$/, '')
+    const model = process.env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL
+    const res = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     })
 
-    const data = (await res.json()) as any
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    if (!res.ok) {
+      throw new Error(`OpenAI-compatible API returned ${res.status}`)
+    }
+
+    const data = (await res.json()) as ChatCompletionResponse
+    const text = data.choices?.[0]?.message?.content || data.choices?.[0]?.text || ''
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) return JSON.parse(jsonMatch[0])
   } catch (err) {
-    console.error('[Itinerary] Gemini API error:', err)
+    console.error('[Itinerary] AI API error:', err)
   }
 
   return generateMockItinerary(input, availableServices)
 }
 
-function generateMockItinerary(input: ItineraryInput, availableServices: any[]) {
+function generateMockItinerary(input: ItineraryInput, availableServices: AvailableService[]) {
   const days = []
   for (let d = 1; d <= input.days; d++) {
     const activities = availableServices.slice((d - 1) * 3, d * 3).map((s, i) => ({
