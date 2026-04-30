@@ -1,7 +1,8 @@
-import { getDb } from '../db'
 import { orderItems, orders, services, vouchers } from '@S-Loco/db/schema'
 import type { CreateOrderInput } from '@S-Loco/shared/validators'
 import { and, eq, sql } from 'drizzle-orm'
+import { getDb } from '../db'
+import { notifyOrderPaid } from './notification.service'
 import { generateQrToken, generateVoucherCode } from './voucher.service'
 
 /** Non-null assertion for Drizzle scalar selects */
@@ -183,6 +184,10 @@ export async function mockPayOrder(orderId: string, userId: string) {
         .set({ status: 'paid', qrToken, updatedAt: new Date() })
         .where(eq(vouchers.id, v.id))
     }
+  })
+
+  void notifyOrderPaid(orderId).catch((err) => {
+    console.error(`[Notification] Failed to notify paid order ${orderId}:`, err)
   })
 
   return { success: true, message: 'Đơn hàng đã được thanh toán (mock).' }

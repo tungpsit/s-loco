@@ -1,13 +1,14 @@
-import { getDb } from '../db'
-import { enqueueWebhookRetry } from './webhook-retry.service'
 import { orderItems, orders, payments, vouchers } from '@S-Loco/db/schema'
 import { and, eq, lt } from 'drizzle-orm'
+import { getDb } from '../db'
 import { momoGateway } from '../gateways/momo'
 import { sepayGateway } from '../gateways/sepay'
 import { vnpayGateway } from '../gateways/vnpay'
+import { notifyOrderPaid } from './notification.service'
 import type { PaymentGateway } from './payment-gateway'
-import { assertTransition } from './voucher-state'
 import { generateQrToken } from './voucher.service'
+import { assertTransition } from './voucher-state'
+import { enqueueWebhookRetry } from './webhook-retry.service'
 
 const APP_URL = process.env.APP_URL || 'http://localhost:3000'
 
@@ -149,6 +150,10 @@ async function handlePaymentSuccess(paymentId: string, orderId: string) {
         .set({ status: 'paid', qrToken, updatedAt: new Date() })
         .where(eq(vouchers.id, v.id))
     }
+  })
+
+  void notifyOrderPaid(orderId).catch((err) => {
+    console.error(`[Notification] Failed to notify paid order ${orderId}:`, err)
   })
 }
 

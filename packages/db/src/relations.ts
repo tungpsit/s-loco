@@ -3,6 +3,7 @@ import { articles } from './schema/content'
 import { comboItems, combos, serviceCategories, services, vendorQrSecrets, vendors } from './schema/vendors'
 import { notifications } from './schema/notifications'
 import { orderItems, orders, paymentEvents, payments, refunds, voucherAuditLog, vouchers } from './schema/orders'
+import { iposWebhookEvents, reservationDiscountVouchers, reservations } from './schema/reservations'
 import { reviews } from './schema/reviews'
 import { settlementItems, settlements } from './schema/settlements'
 import { userSessions, users } from './schema/users'
@@ -13,6 +14,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(userSessions),
   orders: many(orders),
   vouchers: many(vouchers),
+  reservations: many(reservations),
   reviews: many(reviews),
   notifications: many(notifications),
   articles: many(articles),
@@ -28,6 +30,7 @@ export const vendorsRelations = relations(vendors, ({ one, many }) => ({
   services: many(services),
   combos: many(combos),
   vouchers: many(vouchers),
+  reservations: many(reservations),
   settlements: many(settlements),
   reviews: many(reviews),
   qrSecrets: many(vendorQrSecrets),
@@ -43,6 +46,7 @@ export const servicesRelations = relations(services, ({ one, many }) => ({
   orderItems: many(orderItems),
   comboItems: many(comboItems),
   vouchers: many(vouchers),
+  reservations: many(reservations),
 }))
 
 export const combosRelations = relations(combos, ({ one, many }) => ({
@@ -101,6 +105,40 @@ export const voucherAuditLogRelations = relations(voucherAuditLog, ({ one }) => 
 
 export const paymentEventsRelations = relations(paymentEvents, ({ one }) => ({
   order: one(orders, { fields: [paymentEvents.orderId], references: [orders.id] }),
+}))
+
+// ─── Reservation Relations ────────────────────────────
+export const reservationsRelations = relations(reservations, ({ one, many }) => ({
+  user: one(users, { fields: [reservations.userId], references: [users.id] }),
+  vendor: one(vendors, { fields: [reservations.vendorId], references: [vendors.id] }),
+  service: one(services, { fields: [reservations.serviceId], references: [services.id] }),
+  discountVouchers: many(reservationDiscountVouchers),
+}))
+
+export const reservationDiscountVouchersRelations = relations(
+  reservationDiscountVouchers,
+  ({ one, many }) => ({
+    reservation: one(reservations, {
+      fields: [reservationDiscountVouchers.reservationId],
+      references: [reservations.id],
+    }),
+    user: one(users, {
+      fields: [reservationDiscountVouchers.userId],
+      references: [users.id],
+    }),
+    vendor: one(vendors, {
+      fields: [reservationDiscountVouchers.vendorId],
+      references: [vendors.id],
+    }),
+    webhookEvents: many(iposWebhookEvents),
+  }),
+)
+
+export const iposWebhookEventsRelations = relations(iposWebhookEvents, ({ one }) => ({
+  reservationVoucher: one(reservationDiscountVouchers, {
+    fields: [iposWebhookEvents.reservationVoucherId],
+    references: [reservationDiscountVouchers.id],
+  }),
 }))
 
 // ─── Settlement Relations ──────────────────────────────

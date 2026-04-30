@@ -1,18 +1,16 @@
 /**
- * Push Notification Service — FCM (Android) + APNs (iOS)
+ * Push Notification Service — Expo Push, FCM (Android/Web), APNs (iOS)
  *
  * Usage:
  *   import { sendPush } from './push.service'
  *   await sendPush({ token, platform, title, body, data })
  *
- * Required env vars:
+ * Required env vars for native tokens:
  *   FCM_SERVICE_ACCOUNT_PATH  — path to Firebase service account JSON (or FIREBASE_PROJECT_ID + FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY)
  *   APNS_KEY_ID               — Apple developer key ID
  *   APNS_TEAM_ID              — Apple developer team ID
  *   APNS_KEY_PATH             — path to .p8 private key file (or APNS_PRIVATE_KEY inline)
  */
-
-import { readFileSync } from 'fs'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,6 +27,45 @@ export interface PushResult {
   success: boolean
   messageId?: string
   error?: string
+}
+
+// ─── Expo Push Service — Expo managed apps ───────────────────────────────────
+
+export function isExpoPushToken(token: string): boolean {
+  return /^(Expo|Exponent)PushToken\[[^\]]+\]$/.test(token)
+}
+
+async function sendExpoPush(payload: PushPayload): Promise<PushResult> {
+  const res = await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Accept-Encoding': 'gzip, deflate',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: payload.token,
+      title: payload.title,
+      body: payload.body,
+      data: payload.data,
+      sound: 'default',
+      badge: payload.badge,
+    }),
+  })
+
+  const data = (await res.json()) as {
+    data?: { status?: string; id?: string; message?: string }
+    errors?: Array<{ message?: string }>
+  }
+
+  if (!res.ok || data.data?.status === 'error') {
+    return {
+      success: false,
+      error: data.data?.message ?? data.errors?.[0]?.message ?? `Expo ${res.status}`,
+    }
+  }
+
+  return { success: true, messageId: data.data?.id }
 }
 
 // ─── FCM (Firebase Cloud Messaging) — Android / Web ───────────────────────────
@@ -55,14 +92,12 @@ async function getFcmAccessToken(): Promise<string> {
     exp: now + 3600,
   }
 
-  // Decode base64 from PEM-like key
-  const jwtHeader = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
-  const jwtPayload = btoa(JSON.stringify(payload))
-  const signingInput = `${jwtHeader}.${jwtPayload}`
-
   const { SignJWT } = await import('jose')
   const privateKeyParsed = await import('jose').then((j) =>
-    j.importPKCS8(privateKey.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g, ''), 'RS256'),
+    j.importPKCS8(
+      privateKey.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g, ''),
+      'RS256',
+    ),
   )
   const jwt = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'RS256' })
@@ -105,24 +140,19 @@ async function sendFcm(payload: PushPayload): Promise<PushResult> {
         fcm_options: { link: process.env.PUSH_DEEP_LINK || 'sloco://app' },
       },
       ...(payload.data && {
-        data: Object.fromEntries(
-          Object.entries(payload.data).map(([k, v]) => [k, String(v)]),
-        ),
+        data: Object.fromEntries(Object.entries(payload.data).map(([k, v]) => [k, String(v)])),
       }),
     },
   }
 
-  const res = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(fcmPayload),
+  const res = await fetch(`https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
     },
-  )
+    body: JSON.stringify(fcmPayload),
+  })
 
   const data = (await res.json()) as { name?: string; error?: { message?: string } }
   if (!res.ok || data.error) {
@@ -138,12 +168,6 @@ async function getApnsAuthToken(): Promise<string> {
   const teamId = process.env.APNS_TEAM_ID!
   const privateKey = (process.env.APNS_PRIVATE_KEY || '').replace(/\\n/g, '\n')
   const now = Math.floor(Date.now() / 1000)
-
-  const header = btoa(JSON.stringify({ alg: 'ES256', kid: keyId }))
-  const jwtPayload = btoa(
-    JSON.stringify({ iss: teamId, iat: now, exp: now + 3600 }),
-  )
-  const signingInput = `${header}.${jwtPayload}`
 
   const { importPKCS8 } = await import('jose')
   const pkcs8Key = privateKey.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g, '')
@@ -195,6 +219,10 @@ async function sendApns(payload: PushPayload): Promise<PushResult> {
 
 export async function sendPush(payload: PushPayload): Promise<PushResult> {
   try {
+    if (isExpoPushToken(payload.token)) {
+      return await sendExpoPush(payload)
+    }
+
     if (payload.platform === 'ios') {
       return await sendApns(payload)
     }
@@ -206,9 +234,7 @@ export async function sendPush(payload: PushPayload): Promise<PushResult> {
   }
 }
 
-export async function sendPushBatch(
-  payloads: PushPayload[],
-): Promise<Map<string, PushResult>> {
+export async function sendPushBatch(payloads: PushPayload[]): Promise<Map<string, PushResult>> {
   const results = new Map<string, PushResult>()
   await Promise.all(
     payloads.map(async (p) => {

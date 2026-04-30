@@ -8,11 +8,20 @@ import { getDb } from '../db'
 function scalar<T>(rows: T[]): T {
   return rows[0]!
 }
-import { notifications } from '@S-Loco/db/schema'
+
+import { notifications, orderItems, orders, vendors } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { redis } from '../lib/redis'
 
 const PUSH_TOKEN_TTL = 60 * 60 * 24 * 30 // 30 days
+
+type PendingNotification = {
+  userId: string
+  type: string
+  title: string
+  body: string
+  data: Record<string, unknown>
+}
 
 export async function registerPushToken(userId: string, token: string, platform: string) {
   const key = `push_token:${userId}`
@@ -122,6 +131,60 @@ export async function getUnreadCount(userId: string) {
 
 // ─── Notify helpers (fire-and-forget) ──────────────────
 // Creates a DB notification record AND fires a real push notification.
+export function buildOrderPaidNotifications(
+  userId: string,
+  orderId: string,
+  vendorOwnerIds: string[],
+): PendingNotification[] {
+  const shortOrderId = orderId.slice(0, 8)
+  const uniqueVendorOwnerIds = [...new Set(vendorOwnerIds)]
+
+  return [
+    {
+      userId,
+      type: 'payment_success',
+      title: 'Thanh toán thành công!',
+      body: `Đơn hàng #${shortOrderId} đã được thanh toán. Voucher đã sẵn sàng.`,
+      data: { orderId },
+    },
+    ...uniqueVendorOwnerIds.map((vendorOwnerId) => ({
+      userId: vendorOwnerId,
+      type: 'vendor_new_order',
+      title: 'Đơn hàng mới!',
+      body: `Bạn có đơn hàng mới #${shortOrderId}.`,
+      data: { orderId },
+    })),
+  ]
+}
+
+export async function notifyOrderPaid(orderId: string) {
+  const db = getDb()
+  const [order] = await db
+    .select({ userId: orders.userId })
+    .from(orders)
+    .where(eq(orders.id, orderId))
+    .limit(1)
+
+  if (!order) return
+
+  const ownerRows = await db
+    .select({ ownerId: vendors.ownerId })
+    .from(orderItems)
+    .innerJoin(vendors, eq(orderItems.vendorId, vendors.id))
+    .where(eq(orderItems.orderId, orderId))
+
+  const pendingNotifications = buildOrderPaidNotifications(
+    order.userId,
+    orderId,
+    ownerRows.map((row) => row.ownerId),
+  )
+
+  for (const item of pendingNotifications) {
+    const notif = await createNotification(item.userId, item.type, item.title, item.body, item.data)
+    fireAndForgetPush(item.userId, notif.title, notif.body, item.data)
+  }
+}
+
 export async function notifyOrderCreated(userId: string, orderId: string) {
   const notif = await createNotification(
     userId,
@@ -183,9 +246,7 @@ async function fireAndForgetPush(
       platform: pushData.platform as 'android' | 'ios' | 'web',
       title,
       body,
-      data: Object.fromEntries(
-        Object.entries(data).map(([k, v]) => [k, String(v)]),
-      ),
+      data: Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])),
     })
   } catch (err) {
     // Log but never block the caller

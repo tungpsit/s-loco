@@ -7,6 +7,7 @@ final class AppState: ObservableObject {
     @Published private(set) var dashboard: Dashboard?
     @Published private(set) var vouchers: [Voucher] = []
     @Published private(set) var settlements: [Settlement] = []
+    @Published private(set) var reservations: [ReservationWire] = []
     @Published private(set) var qrPreview: VoucherPreview?
     @Published private(set) var redeemedVoucher: Voucher?
     @Published var selectedTab: AppTab = .dashboard
@@ -15,9 +16,10 @@ final class AppState: ObservableObject {
 
     private let tokenStore = TokenStore()
     private lazy var api = APIClient(tokenStore: tokenStore)
+    private var tokenRefreshTask: Task<Void, Never>?
 
     var isAuthenticated: Bool {
-        tokenStore.accessToken?.isEmpty == false
+        tokenStore.accessToken?.isEmpty == false || tokenStore.refreshToken?.isEmpty == false
     }
 
     var isLoading: Bool {
@@ -30,6 +32,14 @@ final class AppState: ObservableObject {
 
     func bootstrap() async {
         guard isAuthenticated else { return }
+        startTokenRefreshLoop()
+        do {
+            try await api.refreshAccessTokenIfNeeded()
+        } catch {
+            expireSession(showMessage: false)
+            return
+        }
+        await registerPushNotifications()
         await refreshHome()
     }
 
@@ -37,7 +47,9 @@ final class AppState: ObservableObject {
         await runLoading(.login) {
             let login = try await api.login(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
             user = login.user
+            startTokenRefreshLoop()
             vendor = try await api.vendorProfile()
+            await registerPushNotifications()
             try await reloadHome()
         }
     }
@@ -51,6 +63,49 @@ final class AppState: ObservableObject {
     func refreshOrders(status: String? = nil) async {
         await runLoading(.orders) {
             vouchers = try await api.vouchers(status: status)
+        }
+    }
+
+    func refreshReservations(status: String? = nil) async {
+        await runLoading(.reservations) {
+            reservations = try await api.reservations(status: status)
+        }
+    }
+
+    func confirmReservation(_ id: String) async {
+        await runLoading(.reservationAction) {
+            _ = try await api.confirmReservation(id)
+            reservations = try await api.reservations()
+            message = "Đã xác nhận và phát hành voucher iPos."
+        }
+    }
+
+    func rejectReservation(_ id: String) async {
+        await runLoading(.reservationAction) {
+            _ = try await api.rejectReservation(id)
+            reservations = try await api.reservations()
+            message = "Đã từ chối đặt chỗ."
+        }
+    }
+
+    func retryReservationVoucher(_ id: String) async {
+        await runLoading(.reservationAction) {
+            _ = try await api.retryReservationVoucher(id)
+            reservations = try await api.reservations()
+            message = "Đã thử phát hành lại voucher iPos."
+        }
+    }
+
+    func updateIposStoreId(_ value: String) async {
+        await runLoading(.settings) {
+            guard let currentVendor = vendor else {
+                throw ClientError.message("Chưa tải thông tin cửa hàng.")
+            }
+            vendor = try await api.updateIposStoreId(
+                vendorId: currentVendor.id,
+                value: value.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            message = "Đã lưu iPos store ID."
         }
     }
 
@@ -76,21 +131,72 @@ final class AppState: ObservableObject {
     }
 
     func logout() {
+        tokenRefreshTask?.cancel()
+        tokenRefreshTask = nil
         tokenStore.clear()
         user = nil
         vendor = nil
         dashboard = nil
         vouchers = []
         settlements = []
+        reservations = []
         qrPreview = nil
         redeemedVoucher = nil
         selectedTab = .dashboard
+    }
+
+    private func startTokenRefreshLoop() {
+        guard tokenRefreshTask == nil else { return }
+        tokenRefreshTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 60 * 1_000_000_000)
+                await self?.refreshSessionIfNeeded()
+            }
+        }
+    }
+
+    private func refreshSessionIfNeeded() async {
+        guard isAuthenticated else { return }
+        do {
+            try await api.refreshAccessTokenIfNeeded()
+        } catch {
+            expireSession(showMessage: true)
+        }
+    }
+
+    private func expireSession(showMessage: Bool) {
+        tokenRefreshTask?.cancel()
+        tokenRefreshTask = nil
+        tokenStore.clear()
+        user = nil
+        vendor = nil
+        dashboard = nil
+        vouchers = []
+        settlements = []
+        reservations = []
+        qrPreview = nil
+        redeemedVoucher = nil
+        selectedTab = .dashboard
+        if showMessage {
+            message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+        }
     }
 
     private func reloadHome() async throws {
         dashboard = try await api.dashboard()
         vouchers = try await api.vouchers()
         settlements = try await api.settlements()
+        reservations = try await api.reservations()
+    }
+
+    private func registerPushNotifications() async {
+        guard isAuthenticated else { return }
+        guard let token = await PushNotificationManager.shared.requestAuthorizationAndToken() else { return }
+        do {
+            try await api.registerPushToken(token)
+        } catch {
+            print("Failed to register push token: \(error.localizedDescription)")
+        }
     }
 
     private func runLoading(_ task: AppLoadingTask, _ operation: () async throws -> Void) async {
@@ -99,7 +205,11 @@ final class AppState: ObservableObject {
         do {
             try await operation()
         } catch {
-            message = error.localizedDescription
+            if case ClientError.sessionExpired = error {
+                expireSession(showMessage: true)
+            } else {
+                message = error.localizedDescription
+            }
         }
     }
 }
@@ -110,6 +220,9 @@ enum AppLoadingTask {
     case orders
     case redeemQr
     case completeVoucher
+    case reservations
+    case reservationAction
+    case settings
 
     var message: String {
         switch self {
@@ -123,6 +236,12 @@ enum AppLoadingTask {
             "Đang xác thực voucher..."
         case .completeVoucher:
             "Đang hoàn thành voucher..."
+        case .reservations:
+            "Đang tải đặt chỗ..."
+        case .reservationAction:
+            "Đang xử lý đặt chỗ..."
+        case .settings:
+            "Đang lưu cài đặt..."
         }
     }
 }

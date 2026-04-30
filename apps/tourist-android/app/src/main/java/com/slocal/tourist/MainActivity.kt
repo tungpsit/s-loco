@@ -1,7 +1,10 @@
 package com.slocal.tourist
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -92,9 +95,20 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestNotificationPermissionIfNeeded()
         setContent {
             TouristApp(applicationContext)
         }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
+        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQUEST)
+    }
+
+    private companion object {
+        const val NOTIFICATION_PERMISSION_REQUEST = 4101
     }
 }
 
@@ -134,6 +148,7 @@ private fun TouristApp(context: Context) {
 	                    is Screen.Checkout -> CheckoutScreen(state, screen.orderId)
                     is Screen.OrderDetail -> OrderDetailScreen(state, screen.orderId)
                     is Screen.VoucherDetail -> VoucherDetailScreen(state, screen.voucher)
+                    is Screen.ReservationDetail -> ReservationDetailScreen(state, screen.reservation)
                     Screen.Weather -> WeatherScreen(state)
                     is Screen.Login -> LoginScreen(state, screen.redirect)
                     is Screen.Otp -> OtpScreen(state, screen.phone, screen.redirect)
@@ -290,6 +305,9 @@ private fun BrowseScreen(state: AppState) {
 @Composable
 private fun ServiceDetailScreen(state: AppState, service: Service) {
     var quantity by remember { mutableIntStateOf(1) }
+    var partySize by remember { mutableStateOf("2") }
+    var requestedTime by remember { mutableStateOf("2026-05-01T12:00:00.000Z") }
+    var note by remember { mutableStateOf("") }
     Column(Modifier.fillMaxSize()) {
         TopBack("Dịch vụ", state::back)
         Column(
@@ -338,14 +356,26 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 Text(service.vendorName.ifBlank { "S-Loco partner" }, color = Blue, fontWeight = FontWeight.SemiBold)
                 Text("★ ${service.rating}", color = TextMuted)
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (service.originalPrice > service.price) {
+                    if (service.isReservation) {
+                        Text("Đặt chỗ · Ưu đãi ${service.reservationDiscountPercent}%", color = Coral, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                    } else if (service.originalPrice > service.price) {
                         Text(formatVnd(service.originalPrice), color = TextMuted)
+                        Text(formatVnd(service.price), color = Coral, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+                    } else {
+                        Text(formatVnd(service.price), color = Coral, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
                     }
-                    Text(formatVnd(service.price), color = Coral, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
                 }
                 Text("Mô tả", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(service.description.ifBlank { "Trải nghiệm địa phương được chọn lọc bởi S-Loco." }, color = TextMuted)
                 if (service.durationMinutes > 0) Text("Thời lượng: ${service.durationMinutes} phút", color = TextMuted)
+                if (service.isReservation) {
+                    AppCard {
+                        Text("Thông tin đặt chỗ", color = TextMain, fontWeight = FontWeight.ExtraBold)
+                        OutlinedTextField(partySize, { partySize = it }, label = { Text("Số người") }, singleLine = true)
+                        OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text("Thời gian mong muốn") }, singleLine = true)
+                        OutlinedTextField(note, { note = it }, label = { Text("Ghi chú") })
+                    }
+                }
             }
         }
         Row(
@@ -355,13 +385,21 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Stepper(quantity, onMinus = { quantity = maxOf(1, quantity - 1) }, onPlus = { quantity += 1 })
+            if (!service.isReservation) {
+                Stepper(quantity, onMinus = { quantity = maxOf(1, quantity - 1) }, onPlus = { quantity += 1 })
+            }
             Button(
-                onClick = { state.createOrder(service, quantity) },
+                onClick = {
+                    if (service.isReservation) {
+                        state.createReservation(service, partySize.toIntOrNull() ?: 2, requestedTime, note)
+                    } else {
+                        state.createOrder(service, quantity)
+                    }
+                },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = Blue)
             ) {
-                Text("Mua ngay")
+                Text(if (service.isReservation) "Gửi yêu cầu đặt chỗ" else "Mua ngay")
             }
         }
     }
@@ -499,7 +537,7 @@ private fun OrderDetailScreen(state: AppState, orderId: String) {
 
 @Composable
 private fun VouchersScreen(state: AppState) {
-    LaunchedEffect(state.token) { if (state.token != null) state.loadVouchers() }
+    LaunchedEffect(state.token) { if (state.token != null) { state.loadVouchers(); state.loadReservations() } }
     if (state.token == null) {
         LoginRequired(state)
         return
@@ -511,7 +549,39 @@ private fun VouchersScreen(state: AppState) {
         items(state.vouchers) { voucher ->
             VoucherCard(voucher) { state.screen = Screen.VoucherDetail(voucher) }
         }
+        item { SectionTitle("Đặt chỗ nhà hàng") }
+        items(state.reservations) { reservation ->
+            ReservationCard(reservation) { state.screen = Screen.ReservationDetail(reservation) }
+        }
         item { Spacer(Modifier.height(96.dp)) }
+    }
+}
+
+@Composable
+private fun ReservationDetailScreen(state: AppState, reservation: Reservation) {
+    Column(Modifier.fillMaxSize()) {
+        TopBack("Đặt chỗ", state::back)
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            BlueCard("RESERVATION", reservation.serviceName.ifBlank { "Đặt chỗ" }, reservationStatusLabel(reservation.status))
+            AppCard {
+                InfoRow("Cửa hàng", reservation.vendorName)
+                InfoRow("Số người", reservation.partySize.toString())
+                InfoRow("Thời gian", reservation.requestedTime)
+            }
+            reservation.voucherCode?.takeIf { it.isNotBlank() }?.let { code ->
+                AppCard(horizontal = Alignment.CenterHorizontally) {
+                    Text(code, color = Blue, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                    Text("Đưa mã này cho thu ngân để được giảm ${reservation.discountPercent ?: 0}% trên hóa đơn iPos.", color = TextMuted)
+                }
+            } ?: AppCard {
+                Text("Nhà hàng sẽ liên hệ và xác nhận trước khi phát hành mã ưu đãi.", color = TextMuted)
+            }
+        }
     }
 }
 
@@ -698,6 +768,7 @@ private fun ProfileScreen(state: AppState) {
                 }
             }
             MenuRow("🎫", "Voucher của tôi") { state.tab = AppTab.Vouchers }
+            MenuRow("🍽️", "Đặt chỗ nhà hàng") { state.tab = AppTab.Vouchers }
             MenuRow("🤖", "Lịch trình AI") { state.tab = AppTab.AI }
             MenuRow("🌤️", "Thời tiết") { state.screen = Screen.Weather }
         }
@@ -953,21 +1024,17 @@ private fun CategoryPanel(state: AppState) {
 
 @Composable
 private fun CategoryChips(selected: String, onSelect: (String) -> Unit) {
-    val cats = listOf(
-        "" to "Tất cả", "am-thuc" to "Ẩm thực", "luu-tru" to "Lưu trú", "spa-massage" to "Spa",
-        "xe-dien" to "Xe điện", "giai-tri" to "Giải trí", "mua-sam" to "Mua sắm"
-    )
     Row(
         Modifier.padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        cats.take(4).forEach { (slug, label) -> Pill(label, selected == slug) { onSelect(slug) } }
+        touristCategories.take(4).forEach { cat -> Pill(cat.label, selected == cat.value) { onSelect(cat.value) } }
     }
     Row(
         Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        cats.drop(4).forEach { (slug, label) -> Pill(label, selected == slug) { onSelect(slug) } }
+        touristCategories.drop(4).forEach { cat -> Pill(cat.label, selected == cat.value) { onSelect(cat.value) } }
     }
 }
 
@@ -1041,9 +1108,9 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.52f))))
             )
             Text("S-LOCO\nCoastal experience", color = Color.White, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
-            if (service.discountPercent > 0) {
+            if (service.discountPercent > 0 || service.isReservation) {
                 Text(
-                    "-${service.discountPercent}%",
+                    "-${if (service.isReservation) service.reservationDiscountPercent else service.discountPercent}%",
                     color = Color.White,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -1071,9 +1138,10 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(service.name, color = TextMain, fontWeight = FontWeight.ExtraBold, maxLines = 2)
             Text(service.vendorName, color = TextMuted, fontSize = 12.sp, maxLines = 1)
-            if (service.originalPrice > service.price) Text(formatVnd(service.originalPrice), color = TextMuted, fontSize = 12.sp)
+            if (service.isReservation) Text("Đặt chỗ trước, nhận mã ưu đãi iPos", color = TextMuted, fontSize = 12.sp)
+            else if (service.originalPrice > service.price) Text(formatVnd(service.originalPrice), color = TextMuted, fontSize = 12.sp)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(formatVnd(service.price), color = Coral, fontWeight = FontWeight.ExtraBold)
+                Text(if (service.isReservation) "Đặt chỗ" else formatVnd(service.price), color = Coral, fontWeight = FontWeight.ExtraBold)
                 Text("★ ${service.rating}", color = TextMuted, fontSize = 12.sp)
             }
         }
@@ -1118,6 +1186,28 @@ private fun VoucherCard(voucher: Voucher, onClick: () -> Unit) {
                 Text(formatVnd(voucher.totalAmount), color = Blue, fontWeight = FontWeight.Bold)
             }
             Text(statusLabel(voucher.status), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun ReservationCard(reservation: Reservation, onClick: () -> Unit) {
+    Card(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 7.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(Color.White)
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(reservation.serviceName.ifBlank { "Đặt chỗ" }, fontWeight = FontWeight.ExtraBold, color = TextMain)
+                Text(reservationStatusLabel(reservation.status), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+            Text(reservation.vendorName, color = TextMuted)
+            Text("${reservation.partySize} người · ${reservation.requestedTime}", color = TextMuted, fontSize = 12.sp)
+            if (!reservation.voucherCode.isNullOrBlank()) Text("Mã iPos: ${reservation.voucherCode}", color = Coral, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -1262,6 +1352,7 @@ private fun serviceImageRes(service: Service): Int {
 private class AppState(context: Context) {
     private val prefs = context.getSharedPreferences("tourist", Context.MODE_PRIVATE)
     private val api = ApiClient(prefs)
+    private val pushRegistrar = TouristPushRegistrar(context.applicationContext)
 
     var screen by mutableStateOf<Screen>(Screen.Main)
     var tab by mutableStateOf(AppTab.Home)
@@ -1276,6 +1367,7 @@ private class AppState(context: Context) {
     var searchServices by mutableStateOf(emptyList<Service>())
     var vendors by mutableStateOf(emptyList<Vendor>())
     var vouchers by mutableStateOf(emptyList<Voucher>())
+    var reservations by mutableStateOf(emptyList<Reservation>())
     var currentOrder by mutableStateOf<Order?>(null)
     var itinerary by mutableStateOf<GeneratedItinerary?>(null)
     var weather by mutableStateOf<Weather?>(null)
@@ -1288,7 +1380,10 @@ private class AppState(context: Context) {
         loadServices()
         loadWeather()
         search("", "")
-        if (token != null) loadVouchers()
+        if (token != null) {
+            registerPushToken()
+            loadVouchers()
+        }
     }
 
     fun back() {
@@ -1338,6 +1433,20 @@ private class AppState(context: Context) {
         }
     }
 
+    fun createReservation(service: Service, partySize: Int, requestedTime: String, note: String) {
+        if (token == null) {
+            stack.add(screen)
+            screen = Screen.Login(Screen.ServiceDetail(service))
+            return
+        }
+        run("Đang gửi yêu cầu đặt chỗ...") {
+            val reservation = api.createReservation(service.id, partySize, requestedTime, note)
+            reservations = listOf(reservation) + reservations
+            stack.add(screen)
+            screen = Screen.ReservationDetail(reservation)
+        }
+    }
+
     suspend fun loadOrder(id: String) = run("Đang tải đơn hàng...") {
         currentOrder = api.order(id)
     }
@@ -1345,6 +1454,12 @@ private class AppState(context: Context) {
     fun loadVouchers() {
         run("Đang tải voucher...") {
             vouchers = api.vouchers()
+        }
+    }
+
+    fun loadReservations() {
+        run("Đang tải đặt chỗ...") {
+            reservations = api.reservations()
         }
     }
 
@@ -1359,6 +1474,7 @@ private class AppState(context: Context) {
         userName = auth.name
         userPhone = phone
         startTokenRefreshLoop()
+        registerPushToken()
         loadVouchers()
         screen = redirect ?: Screen.Main
     }
@@ -1381,6 +1497,7 @@ private class AppState(context: Context) {
         userName = ""
         userPhone = ""
         vouchers = emptyList()
+        reservations = emptyList()
         currentOrder = null
         itinerary = null
     }
@@ -1431,11 +1548,20 @@ private class AppState(context: Context) {
         userName = ""
         userPhone = ""
         vouchers = emptyList()
+        reservations = emptyList()
         currentOrder = null
         itinerary = null
         screen = Screen.Main
         tab = AppTab.Home
         if (showMessage) message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+    }
+
+    private suspend fun registerPushToken() {
+        try {
+            pushRegistrar.registerCurrentToken()
+        } catch (error: Exception) {
+            println("Unable to register FCM token: ${error.message}")
+        }
     }
 }
 
@@ -1449,16 +1575,18 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
 
     suspend fun services(query: String = "", category: String = ""): List<Service> {
         var path = "/services?page=1&limit=30"
+        val categoryValue = touristCategoryApiValue(category)
         if (query.isNotBlank()) path += "&q=${query.urlEncode()}"
-        if (category.isNotBlank()) path += "&category=${category.urlEncode()}"
+        if (categoryValue.isNotBlank()) path += "&category=${categoryValue.urlEncode()}"
         val data = request(path)
         return data.obj("data")?.array("items").orEmpty().mapNotNull { parseService(it.jsonObject) }
     }
 
     suspend fun vendors(query: String = "", category: String = ""): List<Vendor> {
         var path = "/vendors?page=1"
+        val categoryValue = touristCategoryApiValue(category)
         if (query.isNotBlank()) path += "&q=${query.urlEncode()}"
-        if (category.isNotBlank()) path += "&category=${category.urlEncode()}"
+        if (categoryValue.isNotBlank()) path += "&category=${categoryValue.urlEncode()}"
         val data = request(path)
         return data.obj("data")?.array("items").orEmpty().map { raw ->
             val obj = raw.jsonObject
@@ -1493,6 +1621,25 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
         }
         val res = request("/orders", "POST", body)
         return res.obj("data")?.obj("order")?.str("id") ?: error("Không tạo được đơn hàng.")
+    }
+
+    suspend fun createReservation(serviceId: String, partySize: Int, requestedTime: String, note: String): Reservation {
+        val body = buildJsonObject {
+            put("service_id", serviceId)
+            put("party_size", partySize)
+            put("requested_time", requestedTime)
+            if (note.isNotBlank()) put("customer_note", note)
+        }
+        val res = request("/reservations", "POST", body)
+        val reservation = res.obj("data")?.obj("reservation") ?: error("Không tạo được đặt chỗ.")
+        return parseReservation(buildJsonObject {
+            put("reservation", reservation)
+        })
+    }
+
+    suspend fun reservations(): List<Reservation> {
+        val data = request("/reservations?page=1&limit=50").obj("data")
+        return data?.array("items").orEmpty().map { parseReservation(it.jsonObject) }
     }
 
     suspend fun order(id: String): Order {
@@ -1622,6 +1769,8 @@ private fun parseService(obj: JsonObject): Service? {
     val price = service.money("discountPrice", "discount_price").takeIf { it > 0 } ?: original
     val discount = service.num("discountPercent", "discount_percent").toInt().takeIf { it > 0 }
         ?: if (original > price && original > 0) ((1 - price.toDouble() / original) * 100).toInt() else 0
+    val fulfillmentType = service.str("fulfillmentType", "fulfillment_type").ifBlank { "fixed_price" }
+    val reservationDiscount = service.num("reservationDiscountPercent", "reservation_discount_percent").toInt()
     return Service(
         id = id,
         name = service.str("name").ifBlank { "Dịch vụ" },
@@ -1631,8 +1780,27 @@ private fun parseService(obj: JsonObject): Service? {
         originalPrice = original,
         price = price,
         discountPercent = discount,
+        fulfillmentType = fulfillmentType,
+        reservationDiscountPercent = reservationDiscount,
         rating = service.num("averageRating", "rating"),
         durationMinutes = service.int("durationMinutes", "duration_minutes")
+    )
+}
+
+private fun parseReservation(obj: JsonObject): Reservation {
+    val reservation = obj.obj("reservation") ?: obj
+    val service = obj.obj("service")
+    val vendor = obj.obj("vendor")
+    val voucher = obj.obj("voucher")
+    return Reservation(
+        id = reservation.str("id"),
+        status = reservation.str("status"),
+        serviceName = service?.str("name").orEmpty(),
+        vendorName = vendor?.str("name").orEmpty(),
+        partySize = reservation.int("partySize", "party_size").coerceAtLeast(1),
+        requestedTime = reservation.str("requestedTime", "requested_time"),
+        voucherCode = voucher?.str("iposVoucherCode", "ipos_voucher_code"),
+        discountPercent = voucher?.num("discountPercent", "discount_percent")?.toInt(),
     )
 }
 
@@ -1714,6 +1882,26 @@ private fun parseWeather(obj: JsonObject): Weather {
     )
 }
 
+data class TouristCategory(val value: String, val label: String)
+
+val touristCategories = listOf(
+    TouristCategory("", "Tất cả"),
+    TouristCategory("am-thuc", "Ẩm thực"),
+    TouristCategory("luu-tru", "Lưu trú"),
+    TouristCategory("spa-massage", "Spa"),
+    TouristCategory("xe-dien", "Xe điện"),
+    TouristCategory("giai-tri", "Giải trí"),
+    TouristCategory("mua-sam", "Mua sắm")
+)
+
+fun touristCategoryApiValue(value: String): String {
+    val trimmed = value.trim()
+    if (trimmed.isEmpty() || trimmed == "Tất cả") return ""
+    if (touristCategories.any { it.value == trimmed }) return trimmed
+    if (trimmed == "Spa & Massage") return "spa-massage"
+    return touristCategories.firstOrNull { it.label == trimmed }?.value ?: trimmed
+}
+
 private enum class AppTab(val label: String, val icon: String) {
     Home("Trang chủ", "⌂"),
     Browse("Tìm kiếm", "🔍"),
@@ -1729,6 +1917,7 @@ private sealed class Screen {
     data class Checkout(val orderId: String) : Screen()
     data class OrderDetail(val orderId: String) : Screen()
     data class VoucherDetail(val voucher: Voucher) : Screen()
+    data class ReservationDetail(val reservation: Reservation) : Screen()
     data class Login(val redirect: Screen?) : Screen()
     data class Otp(val phone: String, val redirect: Screen?) : Screen()
     data class Article(val title: String) : Screen()
@@ -1744,12 +1933,26 @@ private data class Service(
     val originalPrice: Int,
     val price: Int,
     val discountPercent: Int,
+    val fulfillmentType: String,
+    val reservationDiscountPercent: Int,
     val rating: Double,
     val durationMinutes: Int,
-)
+) {
+    val isReservation: Boolean get() = fulfillmentType == "reservation"
+}
 
 private data class Vendor(val id: String, val name: String, val address: String, val rating: Double)
 private data class Voucher(val id: String, val status: String, val serviceName: String, val vendorName: String, val quantity: Int, val totalAmount: Int, val qrToken: String)
+private data class Reservation(
+    val id: String,
+    val status: String,
+    val serviceName: String,
+    val vendorName: String,
+    val partySize: Int,
+    val requestedTime: String,
+    val voucherCode: String?,
+    val discountPercent: Int?,
+)
 private data class Order(val id: String, val status: String, val totalAmount: Int, val items: List<OrderLine>)
 private data class OrderLine(val name: String, val quantity: Int, val price: Int)
 private data class AuthResult(val token: String, val refreshToken: String, val expiresIn: Int, val name: String)
@@ -1820,6 +2023,16 @@ private fun statusLabel(status: String): String = when (status) {
     "redeemed" -> "Đã sử dụng"
     "completed" -> "Hoàn thành"
     "refunded" -> "Đã hoàn tiền"
+    else -> status
+}
+private fun reservationStatusLabel(status: String): String = when (status) {
+    "requested" -> "Chờ liên hệ"
+    "confirmed" -> "Đã xác nhận"
+    "voucher_issued" -> "Đã có mã ưu đãi"
+    "used" -> "Đã sử dụng"
+    "settled" -> "Đã đối soát"
+    "rejected" -> "Bị từ chối"
+    "cancelled" -> "Đã hủy"
     else -> status
 }
 private fun String.urlEncode(): String = java.net.URLEncoder.encode(this, "UTF-8")

@@ -6,4 +6,7 @@ enum class LoadingTask(val message: String) {
     Orders("Đang tải đơn hàng..."),
     RedeemQr("Đang xác thực voucher..."),
     CompleteVoucher("Đang hoàn thành voucher..."),
+    Reservations("Đang tải đặt chỗ..."),
+    ReservationAction("Đang xử lý đặt chỗ..."),
+    Settings("Đang lưu cài đặt..."),
 }

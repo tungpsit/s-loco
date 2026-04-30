@@ -6,6 +6,7 @@ import { Stack } from 'expo-router'
 import type React from 'react'
 import { useEffect } from 'react'
 import { colors } from '../lib/theme'
+import { registerPushNotifications } from '../src/lib/push-notifications'
 import { useAuthStore } from '../src/stores/auth-store'
 
 const queryClient = new QueryClient({
@@ -18,11 +19,18 @@ const queryClient = new QueryClient({
 })
 
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { isHydrated, hydrate } = useAuthStore()
+  const { isHydrated, hydrate, isLoggedIn } = useAuthStore()
 
   useEffect(() => {
     hydrate()
   }, [hydrate])
+
+  useEffect(() => {
+    if (!isHydrated || !isLoggedIn) return
+    registerPushNotifications().catch((err) => {
+      console.warn('[Push] Failed to register device token:', err)
+    })
+  }, [isHydrated, isLoggedIn])
 
   if (!isHydrated) return null
 

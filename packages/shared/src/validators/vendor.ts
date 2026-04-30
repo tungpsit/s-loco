@@ -26,6 +26,7 @@ export const updateVendorSchema = z.object({
   phone: z.string().max(20).optional(),
   email: z.string().email().optional(),
   business_hours: z.record(z.unknown()).optional(),
+  ipos_store_id: z.string().trim().max(100).optional(),
 })
 export type UpdateVendorInput = z.infer<typeof updateVendorSchema>
 

@@ -21,6 +21,12 @@ class TokenStore(context: Context) {
             }.apply()
         }
 
+    var accessTokenExpiresAtMillis: Long
+        get() = preferences.getLong("access_token_expires_at_ms", 0L)
+        set(value) {
+            preferences.edit().putLong("access_token_expires_at_ms", value).apply()
+        }
+
     fun clear() {
         preferences.edit().clear().apply()
     }

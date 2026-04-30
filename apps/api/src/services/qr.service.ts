@@ -1,8 +1,9 @@
-import { getDb } from '../db'
 import { vouchers } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
+import { getDb } from '../db'
+import { notifyVoucherRedeemed } from './notification.service'
+import { VoucherError, verifyQrToken } from './voucher.service'
 import { assertTransition } from './voucher-state'
-import { verifyQrToken, VoucherError } from './voucher.service'
 
 // ─── Redeem via QR token (vendor scans tourist's QR) ───
 export async function redeemByQr(qrToken: string, vendorId: string) {
@@ -105,6 +106,10 @@ async function atomicRedeem(voucherId: string, vendorId: string) {
   if (!updated) {
     throw new VoucherError('ALREADY_REDEEMED', 'Voucher đã được sử dụng.')
   }
+
+  void notifyVoucherRedeemed(updated.userId, updated.id).catch((err) => {
+    console.error(`[Notification] Failed to notify redeemed voucher ${updated.id}:`, err)
+  })
 
   return updated
 }

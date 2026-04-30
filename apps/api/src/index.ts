@@ -11,10 +11,12 @@ import notificationRoutes from './routes/notifications'
 import orderRoutes from './routes/orders'
 import paymentRoutes from './routes/payments'
 import reviewRoutes from './routes/reviews'
+import reservationRoutes from './routes/reservations'
 import serviceRoutes from './routes/services'
 import settlementRoutes from './routes/settlements'
 import vendorRoutes from './routes/vendors'
 import voucherRoutes from './routes/vouchers'
+import webhookRoutes from './routes/webhooks'
 import giftRoutes from './routes/gifts'
 import { getPostgresClient } from './db'
 
@@ -78,7 +80,9 @@ v1.route('/combos', comboRoutes)
 v1.route('/content', contentRoutes)
 v1.route('/itinerary', itineraryRoutes)
 v1.route('/reviews', reviewRoutes)
+v1.route('/reservations', reservationRoutes)
 v1.route('/gifts', giftRoutes)
+v1.route('/webhooks', webhookRoutes)
 v1.route('/admin', adminRoutes)
 app.route('/api/v1', v1)
 

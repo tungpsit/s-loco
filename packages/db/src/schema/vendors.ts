@@ -4,6 +4,10 @@ import { users } from './users'
 // ─── Enums ─────────────────────────────────────────────
 export const vendorStatusEnum = pgEnum('vendor_status', ['pending', 'active', 'suspended'])
 export const settlementTypeEnum = pgEnum('settlement_type', ['instant', 'periodic'])
+export const serviceFulfillmentTypeEnum = pgEnum('service_fulfillment_type', [
+  'fixed_price',
+  'reservation',
+])
 
 // ─── Vendors ───────────────────────────────────────────
 export const vendors = pgTable('vendors', {
@@ -59,6 +63,10 @@ export const services = pgTable('services', {
   originalPrice: decimal('original_price', { precision: 12, scale: 2 }).notNull(),
   discountPrice: decimal('discount_price', { precision: 12, scale: 2 }),
   discountPercent: decimal('discount_percent', { precision: 5, scale: 2 }),
+  fulfillmentType: serviceFulfillmentTypeEnum('fulfillment_type')
+    .notNull()
+    .default('fixed_price'),
+  reservationDiscountPercent: decimal('reservation_discount_percent', { precision: 5, scale: 2 }),
   images: jsonb('images').$type<string[]>().default([]),
   options: jsonb('options'),
   durationMinutes: integer('duration_minutes'),

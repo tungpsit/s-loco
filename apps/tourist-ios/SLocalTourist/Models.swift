@@ -1,5 +1,28 @@
 import Foundation
 
+struct TouristCategoryOption: Hashable {
+    let value: String
+    let label: String
+
+    static let home: [TouristCategoryOption] = [
+        TouristCategoryOption(value: "", label: "Tất cả"),
+        TouristCategoryOption(value: "am-thuc", label: "Ẩm thực"),
+        TouristCategoryOption(value: "luu-tru", label: "Lưu trú"),
+        TouristCategoryOption(value: "spa-massage", label: "Spa"),
+        TouristCategoryOption(value: "xe-dien", label: "Xe điện"),
+        TouristCategoryOption(value: "giai-tri", label: "Giải trí"),
+        TouristCategoryOption(value: "mua-sam", label: "Mua sắm"),
+    ]
+
+    static func apiValue(for value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty || trimmed == "Tất cả" { return "" }
+        if home.contains(where: { $0.value == trimmed }) { return trimmed }
+        if trimmed == "Spa & Massage" { return "spa-massage" }
+        return home.first { $0.label == trimmed }?.value ?? trimmed
+    }
+}
+
 struct ApiEnvelope<T: Decodable>: Decodable {
     let success: Bool
     let data: T?
@@ -97,9 +120,12 @@ struct ServiceCore: Decodable, Identifiable {
     let images: [String]?
     let durationMinutes: Int?
     let averageRating: String?
+    let fulfillmentType: String?
+    let reservationDiscountPercent: String?
     enum CodingKeys: String, CodingKey {
         case id, name, description, images
         case originalPrice, discountPrice, discountPercent, durationMinutes, averageRating
+        case fulfillmentType, reservationDiscountPercent
     }
 }
 
@@ -126,9 +152,13 @@ struct TouristService: Identifiable, Hashable {
     let originalPrice: Int
     let price: Int
     let discountPercent: Int
+    let fulfillmentType: String
+    let reservationDiscountPercent: Int
     let rating: Double
     let durationMinutes: Int
     let imageURL: String?
+
+    var isReservation: Bool { fulfillmentType == "reservation" }
 }
 
 struct Vendor: Decodable, Identifiable, Hashable {
@@ -256,6 +286,80 @@ struct OrderItemLite: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         quantity = container.decodeIntIfPresent(.quantity)
         totalPrice = container.decodeIntIfPresent(.totalPrice)
+    }
+}
+
+struct CreateReservationRequest: Encodable {
+    let serviceId: String
+    let partySize: Int
+    let requestedTime: String
+    let customerNote: String?
+
+    enum CodingKeys: String, CodingKey {
+        case serviceId = "service_id"
+        case partySize = "party_size"
+        case requestedTime = "requested_time"
+        case customerNote = "customer_note"
+    }
+}
+
+struct ReservationEnvelope: Decodable {
+    let reservation: Reservation
+}
+
+struct ReservationListData: Decodable {
+    let items: [ReservationWire]
+}
+
+struct ReservationWire: Decodable {
+    let reservation: Reservation
+    let service: ReservationService?
+    let vendor: ReservationVendor?
+    let voucher: ReservationDiscountVoucher?
+}
+
+struct ReservationService: Decodable {
+    let name: String?
+}
+
+struct ReservationVendor: Decodable {
+    let name: String?
+}
+
+struct ReservationDiscountVoucher: Decodable, Hashable {
+    let id: String
+    let status: String
+    let discountPercent: String?
+    let iposVoucherCode: String?
+    let issueError: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, status
+        case discountPercent = "discount_percent"
+        case iposVoucherCode = "ipos_voucher_code"
+        case issueError = "issue_error"
+    }
+}
+
+struct Reservation: Decodable, Identifiable, Hashable {
+    let id: String
+    let status: String
+    let customerName: String?
+    let customerPhone: String?
+    let partySize: Int
+    let requestedTime: String
+    let customerNote: String?
+    var serviceName: String? = nil
+    var vendorName: String? = nil
+    var voucher: ReservationDiscountVoucher? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case id, status
+        case customerName = "customer_name"
+        case customerPhone = "customer_phone"
+        case partySize = "party_size"
+        case requestedTime = "requested_time"
+        case customerNote = "customer_note"
     }
 }
 

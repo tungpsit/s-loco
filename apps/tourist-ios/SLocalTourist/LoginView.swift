@@ -158,6 +158,9 @@ struct ServiceDetailView: View {
     @EnvironmentObject private var state: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var quantity = 1
+    @State private var partySize = 2
+    @State private var requestedTime = "2026-05-01T12:00:00.000Z"
+    @State private var reservationNote = ""
     let service: TouristService
 
     var body: some View {
@@ -186,10 +189,29 @@ struct ServiceDetailView: View {
                             .foregroundStyle(TouristTheme.text)
                     }
 
-                    Stepper("Số lượng: \(quantity)", value: $quantity, in: 1...10)
+                    if service.isReservation {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Thông tin đặt chỗ")
+                                .font(.headline)
+                            Stepper("Số người: \(partySize)", value: $partySize, in: 1...100)
+                            TextField("Thời gian mong muốn", text: $requestedTime)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                            TextField("Ghi chú", text: $reservationNote, axis: .vertical)
+                                .lineLimit(2...4)
+                            Text("Nhà hàng sẽ liên hệ xác nhận trước khi phát hành mã ưu đãi iPos.")
+                                .font(.caption)
+                                .foregroundStyle(TouristTheme.muted)
+                        }
                         .padding(14)
                         .background(.white, in: RoundedRectangle(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+                    } else {
+                        Stepper("Số lượng: \(quantity)", value: $quantity, in: 1...10)
+                            .padding(14)
+                            .background(.white, in: RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+                    }
                 }
                 .padding(16)
             }
@@ -197,18 +219,29 @@ struct ServiceDetailView: View {
             .safeAreaInset(edge: .bottom) {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("Tổng")
+                        Text(service.isReservation ? "Ưu đãi" : "Tổng")
                             .font(.caption)
                             .foregroundStyle(TouristTheme.muted)
-                        Text((service.price * quantity).vnd)
+                        Text(service.isReservation ? "Giảm \(service.reservationDiscountPercent)%" : (service.price * quantity).vnd)
                             .font(.headline)
                             .foregroundStyle(TouristTheme.primary)
                     }
                     Spacer()
                     Button {
-                        Task { await state.createOrder(service: service, quantity: quantity) }
+                        Task {
+                            if service.isReservation {
+                                await state.createReservation(
+                                    service: service,
+                                    partySize: partySize,
+                                    requestedTime: requestedTime,
+                                    note: reservationNote
+                                )
+                            } else {
+                                await state.createOrder(service: service, quantity: quantity)
+                            }
+                        }
                     } label: {
-                        Label("Mua ngay", systemImage: "cart.fill")
+                        Label(service.isReservation ? "Đặt chỗ" : "Mua ngay", systemImage: service.isReservation ? "calendar.badge.plus" : "cart.fill")
                     }
                     .buttonStyle(PrimaryButtonStyle())
                 }
@@ -336,6 +369,66 @@ struct VoucherDetailView: View {
             .background(TouristTheme.surface.ignoresSafeArea())
             .navigationTitle("QR Voucher")
         }
+    }
+}
+
+struct ReservationDetailView: View {
+    let reservation: Reservation
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(reservation.serviceName ?? "Đặt chỗ")
+                        .font(.title2.bold())
+                    Text(reservationStatusLabel(reservation.status))
+                        .font(.caption.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(TouristTheme.primary, in: Capsule())
+                }
+                detailRow("Cửa hàng", reservation.vendorName ?? "Đối tác S-Loco")
+                detailRow("Số người", "\(reservation.partySize)")
+                detailRow("Thời gian", reservation.requestedTime)
+                if let code = reservation.voucher?.iposVoucherCode, !code.isEmpty {
+                    VStack(spacing: 8) {
+                        Text(code)
+                            .font(.system(size: 30, weight: .bold))
+                            .foregroundStyle(TouristTheme.primary)
+                        Text("Đưa mã này cho thu ngân để được giảm \(reservation.voucher?.discountPercent ?? "")% trên hóa đơn iPos.")
+                            .font(.subheadline)
+                            .foregroundStyle(TouristTheme.muted)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(18)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(TouristTheme.border))
+                } else {
+                    Text("Nhà hàng sẽ liên hệ xác nhận trước khi phát hành mã ưu đãi.")
+                        .font(.subheadline)
+                        .foregroundStyle(TouristTheme.muted)
+                        .padding(16)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                }
+                Spacer()
+            }
+            .padding(20)
+            .background(TouristTheme.surface.ignoresSafeArea())
+            .navigationTitle("Đặt chỗ")
+        }
+    }
+
+    private func detailRow(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title).foregroundStyle(TouristTheme.muted)
+            Spacer()
+            Text(value).fontWeight(.semibold)
+        }
+        .padding(14)
+        .background(.white, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
     }
 }
 

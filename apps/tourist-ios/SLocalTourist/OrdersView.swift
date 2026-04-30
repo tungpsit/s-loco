@@ -5,7 +5,7 @@ struct OrdersView: View {
     @State private var query = ""
     @State private var category = ""
 
-    private let categories = ["", "Tour", "Vé tham quan", "Ẩm thực", "Spa", "Di chuyển"]
+    private let categories = TouristCategoryOption.home
 
     var body: some View {
         NavigationStack {
@@ -78,16 +78,16 @@ struct OrdersView: View {
     private var categoryPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(categories, id: \.self) { value in
+                ForEach(categories, id: \.value) { option in
                     Button {
-                        category = value
+                        category = option.value
                     } label: {
-                        Text(value.isEmpty ? "Tất cả" : value)
+                        Text(option.label)
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(category == value ? .white : TouristTheme.primary)
+                            .foregroundStyle(category == option.value ? .white : TouristTheme.primary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(category == value ? TouristTheme.primary : .white, in: Capsule())
+                            .background(category == option.value ? TouristTheme.primary : .white, in: Capsule())
                             .overlay(Capsule().stroke(TouristTheme.border))
                     }
                 }
@@ -124,7 +124,7 @@ private struct ServiceListRow: View {
                         Label(String(format: "%.1f", service.rating), systemImage: "star.fill")
                             .foregroundStyle(TouristTheme.coral)
                         Spacer()
-                        Text(service.price.vnd)
+                        Text(service.isReservation ? "Đặt chỗ" : service.price.vnd)
                             .foregroundStyle(TouristTheme.primary)
                     }
                     .font(.caption.weight(.semibold))

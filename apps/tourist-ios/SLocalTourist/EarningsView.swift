@@ -18,7 +18,10 @@ struct EarningsView: View {
                 if state.isAuthenticated {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            Task { await state.loadVouchers() }
+                            Task {
+                                await state.loadVouchers()
+                                await state.loadReservations()
+                            }
                         } label: {
                             Image(systemName: "arrow.clockwise")
                         }
@@ -30,23 +33,43 @@ struct EarningsView: View {
 
     private var voucherList: some View {
         List {
-            ForEach(state.vouchers) { voucher in
-                Button {
-                    state.route = .voucher(voucher)
-                } label: {
-                    VoucherRow(voucher: voucher)
+            Section("Voucher") {
+                ForEach(state.vouchers) { voucher in
+                    Button {
+                        state.route = .voucher(voucher)
+                    } label: {
+                        VoucherRow(voucher: voucher)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
-                .buttonStyle(.plain)
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+            }
+            Section("Đặt chỗ nhà hàng") {
+                ForEach(state.reservations) { reservation in
+                    Button {
+                        state.route = .reservation(reservation)
+                    } label: {
+                        ReservationRow(reservation: reservation)
+                    }
+                    .buttonStyle(.plain)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .refreshable { await state.loadVouchers() }
+        .refreshable {
+            await state.loadVouchers()
+            await state.loadReservations()
+        }
+        .task {
+            await state.loadReservations()
+        }
         .overlay {
-            if state.vouchers.isEmpty {
-                EmptyState(icon: "ticket", title: "Chưa có vé", message: "Vé đã mua sẽ xuất hiện ở đây để quét QR khi sử dụng.")
+            if state.vouchers.isEmpty && state.reservations.isEmpty {
+                EmptyState(icon: "ticket", title: "Chưa có vé", message: "Voucher và đặt chỗ sẽ xuất hiện ở đây.")
             }
         }
     }
@@ -98,6 +121,52 @@ struct VoucherRow: View {
         .padding(12)
         .background(.white, in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+    }
+}
+
+struct ReservationRow: View {
+    let reservation: Reservation
+
+    var body: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(TouristTheme.primarySoft)
+                .frame(width: 58, height: 58)
+                .overlay(Image(systemName: "calendar.badge.clock").font(.title2).foregroundStyle(TouristTheme.primary))
+            VStack(alignment: .leading, spacing: 5) {
+                Text(reservation.serviceName ?? "Đặt chỗ")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(TouristTheme.text)
+                Text("\(reservation.partySize) người · \(reservation.requestedTime)")
+                    .font(.caption)
+                    .foregroundStyle(TouristTheme.muted)
+                if let code = reservation.voucher?.iposVoucherCode, !code.isEmpty {
+                    Text("Mã iPos: \(code)")
+                        .font(.caption.bold())
+                        .foregroundStyle(TouristTheme.primary)
+                }
+            }
+            Spacer()
+            Text(reservationStatusLabel(reservation.status))
+                .font(.caption.bold())
+                .foregroundStyle(TouristTheme.primary)
+        }
+        .padding(12)
+        .background(.white, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+    }
+}
+
+func reservationStatusLabel(_ status: String) -> String {
+    switch status {
+    case "requested": "Chờ liên hệ"
+    case "confirmed": "Đã xác nhận"
+    case "voucher_issued": "Đã có mã"
+    case "used": "Đã dùng"
+    case "settled": "Đã đối soát"
+    case "rejected": "Từ chối"
+    case "cancelled": "Đã hủy"
+    default: status
     }
 }
 

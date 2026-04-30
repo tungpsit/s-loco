@@ -36,6 +36,20 @@
       "when": 1776494286000,
       "tag": "0004_voucher_gift",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1777568400000,
+      "tag": "0005_reservation_ipos",
+      "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777568500000,
+      "tag": "0006_demo_reservation_data",
+      "breakpoints": false
     }
   ]
 }

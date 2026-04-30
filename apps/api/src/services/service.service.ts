@@ -25,6 +25,8 @@ export async function createService(vendorId: string, ownerId: string, data: Cre
       originalPrice: data.original_price,
       discountPrice: data.discount_price,
       discountPercent: data.discount_percent,
+      fulfillmentType: data.fulfillment_type,
+      reservationDiscountPercent: data.reservation_discount_percent,
       durationMinutes: data.duration_minutes,
       maxQuantityPerOrder: data.max_quantity_per_order || 10,
       images: data.images || [],
@@ -51,6 +53,9 @@ export async function updateService(serviceId: string, ownerId: string, data: Up
   if (data.original_price !== undefined) updateData.originalPrice = data.original_price
   if (data.discount_price !== undefined) updateData.discountPrice = data.discount_price
   if (data.discount_percent !== undefined) updateData.discountPercent = data.discount_percent
+  if (data.fulfillment_type !== undefined) updateData.fulfillmentType = data.fulfillment_type
+  if (data.reservation_discount_percent !== undefined)
+    updateData.reservationDiscountPercent = data.reservation_discount_percent
   if (data.duration_minutes !== undefined) updateData.durationMinutes = data.duration_minutes
   if (data.max_quantity_per_order !== undefined)
     updateData.maxQuantityPerOrder = data.max_quantity_per_order

@@ -19,6 +19,7 @@ final class APIClient {
 
     func services(query: String = "", category: String = "") async throws -> [TouristService] {
         var path = "/services?page=1&limit=30"
+        let category = TouristCategoryOption.apiValue(for: category)
         if !query.isEmpty { path += "&q=\(query.urlEncoded)" }
         if !category.isEmpty { path += "&category=\(category.urlEncoded)" }
         let data: ServiceListData = try await request(path, authenticated: false)
@@ -27,6 +28,7 @@ final class APIClient {
 
     func vendors(query: String = "", category: String = "") async throws -> [Vendor] {
         var path = "/vendors?page=1"
+        let category = TouristCategoryOption.apiValue(for: category)
         if !query.isEmpty { path += "&q=\(query.urlEncoded)" }
         if !category.isEmpty { path += "&category=\(category.urlEncoded)" }
         let data: Paginated<Vendor> = try await request(path, authenticated: false)
@@ -84,6 +86,30 @@ final class APIClient {
         return data.order
     }
 
+    func createReservation(serviceId: String, partySize: Int, requestedTime: String, note: String?) async throws -> Reservation {
+        let body = CreateReservationRequest(
+            serviceId: serviceId,
+            partySize: partySize,
+            requestedTime: requestedTime,
+            customerNote: note?.isEmpty == true ? nil : note
+        )
+        let data: ReservationEnvelope = try await request("/reservations", method: "POST", body: body)
+        return data.reservation
+    }
+
+    func reservations(status: String? = nil) async throws -> [Reservation] {
+        var path = "/reservations?page=1&limit=50"
+        if let status, !status.isEmpty { path += "&status=\(status)" }
+        let data: ReservationListData = try await request(path)
+        return data.items.map { wire in
+            var reservation = wire.reservation
+            reservation.serviceName = wire.service?.name
+            reservation.vendorName = wire.vendor?.name
+            reservation.voucher = wire.voucher
+            return reservation
+        }
+    }
+
     func order(id: String) async throws -> Order {
         let data: OrderEnvelope = try await request("/orders/\(id)")
         return data.order
@@ -130,6 +156,14 @@ final class APIClient {
             return try await fetchOpenMeteoWeather()
         }
         return data.weather
+    }
+
+    func registerPushToken(_ token: String) async throws {
+        let _: EmptyPayload = try await request(
+            "/notifications/register-token",
+            method: "POST",
+            body: PushTokenRequest(token: token, platform: "ios")
+        )
     }
 
     private func fetchOpenMeteoWeather() async throws -> TouristWeather {
@@ -192,6 +226,8 @@ final class APIClient {
             originalPrice: original,
             price: price,
             discountPercent: discount,
+            fulfillmentType: service.fulfillmentType ?? "fixed_price",
+            reservationDiscountPercent: service.reservationDiscountPercent.intValue,
             rating: service.averageRating.doubleValue,
             durationMinutes: service.durationMinutes ?? 0,
             imageURL: service.images?.first
@@ -268,6 +304,11 @@ final class APIClient {
 }
 
 struct EmptyPayload: Decodable {}
+
+private struct PushTokenRequest: Encodable {
+    let token: String
+    let platform: String
+}
 
 struct RawPayload: Decodable, CustomStringConvertible {
     let description: String

@@ -2,6 +2,15 @@ import XCTest
 @testable import SLocalTourist
 
 final class ModelDecodingTests: XCTestCase {
+    func testTouristCategoryOptionsUseApiSlugsForDisplayLabels() {
+        XCTAssertEqual(TouristCategoryOption.apiValue(for: "Ẩm thực"), "am-thuc")
+        XCTAssertEqual(TouristCategoryOption.apiValue(for: "Spa"), "spa-massage")
+        XCTAssertEqual(TouristCategoryOption.apiValue(for: "Spa & Massage"), "spa-massage")
+        XCTAssertEqual(TouristCategoryOption.apiValue(for: "Tất cả"), "")
+        XCTAssertEqual(TouristCategoryOption.apiValue(for: ""), "")
+        XCTAssertEqual(TouristCategoryOption.home.map(\.value), ["", "am-thuc", "luu-tru", "spa-massage", "xe-dien", "giai-tri", "mua-sam"])
+    }
+
     func testLoginDataDecodesCurrentTokenShape() throws {
         let raw = """
         {

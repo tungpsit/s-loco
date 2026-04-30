@@ -209,6 +209,8 @@ X-RateLimit-Reset: 1706000000
 | `PATCH` | `/vendors/:id` | Bearer (owner/admin) | Cập nhật vendor |
 | `PATCH` | `/vendors/:id/status` | Bearer (admin) | Duyệt / tạm ngưng vendor |
 
+`PATCH /vendors/:id` accepts `ipos_store_id` to save the vendor's iPos store identifier into `vendor.metadata.ipos_store_id`. Backend iPos credentials stay in `IPOS_BASE_URL`, `IPOS_API_KEY`, and `IPOS_WEBHOOK_SECRET`.
+
 **`GET /vendors`**
 
 ```json
@@ -256,7 +258,26 @@ X-RateLimit-Reset: 1706000000
 
 ---
 
-### 8.5 Orders — `/v1/orders`
+### 8.5 Reservations — `/v1/reservations`
+
+Reservation services are used when the final customer bill is not known before the visit, such as restaurants and cafes. Tourist does not pay S-Loco upfront. Vendor confirmation issues an iPos percentage discount voucher.
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `POST` | `/reservations` | Bearer (tourist) | Tạo yêu cầu đặt chỗ |
+| `GET` | `/reservations` | Bearer (tourist) | Danh sách đặt chỗ của tourist |
+| `GET` | `/reservations/vendor` | Bearer (vendor) | Danh sách đặt chỗ của vendor |
+| `POST` | `/reservations/:id/confirm` | Bearer (vendor) | Xác nhận và phát hành voucher iPos |
+| `POST` | `/reservations/:id/reject` | Bearer (vendor) | Từ chối yêu cầu đang chờ |
+| `POST` | `/reservations/discount-vouchers/:id/retry-issue` | Bearer (vendor) | Thử phát hành lại voucher iPos |
+
+### 8.6 iPos Webhook — `/v1/webhooks/ipos`
+
+`POST /webhooks/ipos` receives iPos voucher usage events. The endpoint verifies `x-ipos-signature` with `IPOS_WEBHOOK_SECRET`, stores raw payload, maps by iPos voucher code/id, marks reservation vouchers used, and calculates commission when bill amount is available.
+
+---
+
+### 8.7 Orders — `/v1/orders`
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
@@ -291,7 +312,7 @@ X-RateLimit-Reset: 1706000000
 
 ---
 
-### 8.6 Vouchers — `/v1/vouchers`
+### 8.8 Vouchers — `/v1/vouchers`
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
@@ -301,7 +322,7 @@ X-RateLimit-Reset: 1706000000
 
 ---
 
-### 8.7 QR Operations — `/v1/qr`
+### 8.9 QR Operations — `/v1/qr`
 
 | Method | Path | Auth | Description |
 |---|---|---|---|

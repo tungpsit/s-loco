@@ -3,7 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var state: AppState
 
-    private let categories = ["Tất cả", "Tour", "Vé tham quan", "Ẩm thực", "Spa", "Di chuyển"]
+    private let categories = TouristCategoryOption.home
 
     var body: some View {
         NavigationStack {
@@ -103,18 +103,17 @@ struct DashboardView: View {
     private var categoryRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                ForEach(categories, id: \.self) { item in
-                    let value = item == "Tất cả" ? "" : item
+                ForEach(categories, id: \.value) { item in
                     Button {
-                        state.selectedCategory = value
+                        state.selectedCategory = item.value
                         Task { await state.refreshHome() }
                     } label: {
-                        Text(item)
+                        Text(item.label)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(state.selectedCategory == value ? .white : TouristTheme.primary)
+                            .foregroundStyle(state.selectedCategory == item.value ? .white : TouristTheme.primary)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 9)
-                            .background(state.selectedCategory == value ? TouristTheme.primary : .white, in: Capsule())
+                            .background(state.selectedCategory == item.value ? TouristTheme.primary : .white, in: Capsule())
                             .overlay(Capsule().stroke(TouristTheme.border))
                     }
                 }
@@ -312,15 +311,15 @@ struct ServiceCard: View {
                         .foregroundStyle(.yellow)
                     Text(String(format: "%.1f", service.rating))
                     Spacer()
-                    if service.discountPercent > 0 {
-                        Text("-\(service.discountPercent)%")
+                    if service.discountPercent > 0 || service.isReservation {
+                        Text("-\(service.isReservation ? service.reservationDiscountPercent : service.discountPercent)%")
                             .foregroundStyle(TouristTheme.coral)
                     }
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(TouristTheme.muted)
 
-                Text(service.price.vnd)
+                Text(service.isReservation ? "Đặt chỗ" : service.price.vnd)
                     .font(.callout.bold())
                     .foregroundStyle(TouristTheme.primary)
             }

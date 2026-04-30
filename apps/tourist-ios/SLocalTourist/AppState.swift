@@ -8,6 +8,7 @@ final class AppState: ObservableObject {
     @Published var searchServices: [TouristService] = []
     @Published var vendors: [Vendor] = []
     @Published var vouchers: [Voucher] = []
+    @Published var reservations: [Reservation] = []
     @Published var selectedCategory = ""
     @Published var user: TouristUser?
     @Published var currentOrder: Order?
@@ -37,7 +38,11 @@ final class AppState: ObservableObject {
         }
         await refreshHome()
         await loadWeather()
-        if isAuthenticated { await loadVouchers() }
+        if isAuthenticated {
+            await registerPushNotifications()
+            await loadVouchers()
+            await loadReservations()
+        }
     }
 
     func refreshHome() async {
@@ -67,7 +72,9 @@ final class AppState: ObservableObject {
             let login = try await api.verifyOtp(phone: phone, code: code)
             user = login.user
             startTokenRefreshLoop()
+            await registerPushNotifications()
             await loadVouchers()
+            await loadReservations()
             route = redirect
         }
     }
@@ -80,7 +87,9 @@ final class AppState: ObservableObject {
             let login = try await api.verifyOtp(phone: phone, code: code)
             user = login.user
             startTokenRefreshLoop()
+            await registerPushNotifications()
             await loadVouchers()
+            await loadReservations()
             route = redirect
             return nil
         } catch {
@@ -111,6 +120,25 @@ final class AppState: ObservableObject {
         }
     }
 
+    func createReservation(service: TouristService, partySize: Int, requestedTime: String, note: String) async {
+        guard isAuthenticated else {
+            route = .login(redirect: .service(service))
+            return
+        }
+        await run(.checkout) {
+            var reservation = try await api.createReservation(
+                serviceId: service.id,
+                partySize: partySize,
+                requestedTime: requestedTime,
+                note: note
+            )
+            reservation.serviceName = service.name
+            reservation.vendorName = service.vendorName
+            reservations.insert(reservation, at: 0)
+            route = .reservation(reservation)
+        }
+    }
+
     func loadOrder(_ id: String) async {
         await run(.checkout) {
             currentOrder = try await api.order(id: id)
@@ -120,6 +148,12 @@ final class AppState: ObservableObject {
     func loadVouchers(status: String? = nil) async {
         await run(.vouchers) {
             vouchers = try await api.vouchers(status: status)
+        }
+    }
+
+    func loadReservations(status: String? = nil) async {
+        await run(.vouchers) {
+            reservations = try await api.reservations(status: status)
         }
     }
 
@@ -154,6 +188,7 @@ final class AppState: ObservableObject {
         tokenStore.clear()
         user = nil
         vouchers = []
+        reservations = []
         route = nil
         tab = .home
     }
@@ -183,11 +218,22 @@ final class AppState: ObservableObject {
         tokenStore.clear()
         user = nil
         vouchers = []
+        reservations = []
         currentOrder = nil
         route = nil
         tab = .home
         if showMessage {
             message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+        }
+    }
+
+    private func registerPushNotifications() async {
+        guard isAuthenticated else { return }
+        guard let token = await PushNotificationManager.shared.requestAuthorizationAndToken() else { return }
+        do {
+            try await api.registerPushToken(token)
+        } catch {
+            print("Failed to register push token: \(error.localizedDescription)")
         }
     }
 
@@ -230,6 +276,7 @@ indirect enum AppRoute: Identifiable {
     case vendor(Vendor)
     case checkout(String)
     case voucher(Voucher)
+    case reservation(Reservation)
     case weather
     case login(redirect: AppRoute?)
     case otp(phone: String, redirect: AppRoute?)
@@ -240,6 +287,7 @@ indirect enum AppRoute: Identifiable {
         case .vendor(let vendor): "vendor-\(vendor.id)"
         case .checkout(let id): "checkout-\(id)"
         case .voucher(let voucher): "voucher-\(voucher.id)"
+        case .reservation(let reservation): "reservation-\(reservation.id)"
         case .weather: "weather"
         case .login: "login"
         case .otp(let phone, _): "otp-\(phone)"

@@ -14,9 +14,22 @@ final class TokenStore {
         set { write(newValue, key: "refresh_token") }
     }
 
+    var accessTokenExpiresAt: Date? {
+        get {
+            guard let raw = read("access_token_expires_at"),
+                  let timestamp = TimeInterval(raw)
+            else { return nil }
+            return Date(timeIntervalSince1970: timestamp)
+        }
+        set {
+            write(newValue.map { String($0.timeIntervalSince1970) }, key: "access_token_expires_at")
+        }
+    }
+
     func clear() {
         write(nil, key: "access_token")
         write(nil, key: "refresh_token")
+        write(nil, key: "access_token_expires_at")
     }
 
     private func read(_ key: String) -> String? {

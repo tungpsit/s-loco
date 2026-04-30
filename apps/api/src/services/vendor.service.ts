@@ -13,6 +13,21 @@ function scalar<T>(rows: T[]): T {
   return rows[0]!
 }
 
+function mergeIposStoreId(metadata: unknown, iposStoreId: string | undefined) {
+  if (iposStoreId === undefined) return undefined
+  const next =
+    metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+      ? { ...(metadata as Record<string, unknown>) }
+      : {}
+  const value = iposStoreId.trim()
+  if (value) {
+    next.ipos_store_id = value
+  } else {
+    delete next.ipos_store_id
+  }
+  return next
+}
+
 export async function createVendor(data: CreateVendorInput) {
   const db = getDb()
   const [vendor] = await db
@@ -128,6 +143,7 @@ export async function updateVendor(vendorId: string, ownerId: string, data: Upda
     .where(and(eq(vendors.id, vendorId), eq(vendors.ownerId, ownerId)))
     .limit(1)
   if (!vendor) throw new VendorError('FORBIDDEN', 'Bạn không có quyền chỉnh sửa cửa hàng này.')
+  const metadata = mergeIposStoreId(vendor.metadata, data.ipos_store_id)
 
   const [updated] = await db
     .update(vendors)
@@ -140,6 +156,7 @@ export async function updateVendor(vendorId: string, ownerId: string, data: Upda
       ...(data.phone !== undefined && { phone: data.phone }),
       ...(data.email !== undefined && { email: data.email }),
       ...(data.business_hours !== undefined && { businessHours: data.business_hours }),
+      ...(metadata !== undefined && { metadata }),
       updatedAt: new Date(),
     })
     .where(eq(vendors.id, vendorId))
@@ -151,6 +168,7 @@ export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendo
   const db = getDb()
   const [vendor] = await db.select().from(vendors).where(eq(vendors.id, vendorId)).limit(1)
   if (!vendor) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
+  const metadata = mergeIposStoreId(vendor.metadata, data.ipos_store_id)
 
   const [updated] = await db
     .update(vendors)
@@ -164,6 +182,7 @@ export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendo
       ...(data.email !== undefined && { email: data.email }),
       ...(data.business_hours !== undefined && { businessHours: data.business_hours }),
       ...(data.commission_rate !== undefined && { commissionRate: data.commission_rate }),
+      ...(metadata !== undefined && { metadata }),
       updatedAt: new Date(),
     })
     .where(eq(vendors.id, vendorId))
