@@ -1,13 +1,38 @@
-import { afterEach, describe, expect, mock, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 
-const availableServices = [
+let availableServices = [
   {
-    id: 'service-1',
-    name: 'Beach tour',
-    category: 'Tour',
-    price: 100000,
-    originalPrice: 150000,
+    id: 'food-1',
+    name: 'Set hải sản 2 người',
+    category: 'Ẩm thực',
+    categorySlug: 'am-thuc',
+    description: 'Bữa trưa hải sản ven biển',
+    price: '100000',
+    originalPrice: '150000',
     vendorName: 'S-Loco Vendor',
+    durationMinutes: 60,
+  },
+  {
+    id: 'spa-1',
+    name: 'Massage chân thư giãn',
+    category: 'Spa & Massage',
+    categorySlug: 'spa-massage',
+    description: 'Thư giãn sau khi tắm biển',
+    price: '180000',
+    originalPrice: '220000',
+    vendorName: 'S-Loco Spa',
+    durationMinutes: 45,
+  },
+  {
+    id: 'fun-1',
+    name: 'Vé khu vui chơi biển',
+    category: 'Giải trí',
+    categorySlug: 'giai-tri',
+    description: 'Hoạt động buổi sáng cho nhóm bạn',
+    price: '90000',
+    originalPrice: '120000',
+    vendorName: 'S-Loco Fun',
+    durationMinutes: 90,
   },
 ]
 
@@ -41,6 +66,44 @@ const originalFetch = globalThis.fetch
 afterEach(() => {
   process.env = { ...originalEnv }
   globalThis.fetch = originalFetch
+})
+
+beforeEach(() => {
+  availableServices = [
+    {
+      id: 'food-1',
+      name: 'Set hải sản 2 người',
+      category: 'Ẩm thực',
+      categorySlug: 'am-thuc',
+      description: 'Bữa trưa hải sản ven biển',
+      price: '100000',
+      originalPrice: '150000',
+      vendorName: 'S-Loco Vendor',
+      durationMinutes: 60,
+    },
+    {
+      id: 'spa-1',
+      name: 'Massage chân thư giãn',
+      category: 'Spa & Massage',
+      categorySlug: 'spa-massage',
+      description: 'Thư giãn sau khi tắm biển',
+      price: '180000',
+      originalPrice: '220000',
+      vendorName: 'S-Loco Spa',
+      durationMinutes: 45,
+    },
+    {
+      id: 'fun-1',
+      name: 'Vé khu vui chơi biển',
+      category: 'Giải trí',
+      categorySlug: 'giai-tri',
+      description: 'Hoạt động buổi sáng cho nhóm bạn',
+      price: '90000',
+      originalPrice: '120000',
+      vendorName: 'S-Loco Fun',
+      durationMinutes: 90,
+    },
+  ]
 })
 
 function jsonResponse(body: unknown, status = 200) {
@@ -100,5 +163,197 @@ describe('generateItinerary', () => {
     })
     expect(body.messages[0]).toMatchObject({ role: 'user' })
     expect(result.title).toBe('Custom AI itinerary')
+  })
+
+  test('replaces invalid AI service IDs with real slot-matched services', async () => {
+    process.env.OPENAI_API_KEY = 'test-key'
+    process.env.OPENAI_BASE_URL = 'https://9router.test/v1'
+    process.env.OPENAI_MODEL = 'gpt-5.5'
+
+    globalThis.fetch = async () =>
+      jsonResponse({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                title: 'Invalid service itinerary',
+                summary: 'AI returned an unknown service id',
+                days: [
+                  {
+                    day: 1,
+                    title: 'Ngày 1',
+                    activities: [
+                      {
+                        time: '09:00',
+                        title: 'Hoạt động không rõ',
+                        description: 'AI bịa một dịch vụ',
+                        service_id: 'missing-service',
+                        estimated_cost: 999999,
+                      },
+                    ],
+                  },
+                ],
+                total_estimated_cost: 999999,
+                tips: [],
+              }),
+            },
+          },
+        ],
+      })
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const result = await generateItinerary({
+      days: 1,
+      budget: 500000,
+      preferences: ['giải trí'],
+      groupType: 'friends',
+    })
+
+    const activity = result.days[0]?.activities[0]
+    expect(activity?.service_id).toBe('fun-1')
+    expect(activity?.estimated_cost).toBe(90000)
+    expect(result.total_estimated_cost).toBe(90000)
+  })
+
+  test('recalculates valid linked activity costs from database prices', async () => {
+    process.env.OPENAI_API_KEY = 'test-key'
+    process.env.OPENAI_BASE_URL = 'https://9router.test/v1'
+    process.env.OPENAI_MODEL = 'gpt-5.5'
+
+    globalThis.fetch = async () =>
+      jsonResponse({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                title: 'Cost recalculation itinerary',
+                summary: 'AI returned a made up price',
+                days: [
+                  {
+                    day: 1,
+                    activities: [
+                      {
+                        time: '12:00',
+                        title: 'Ăn trưa',
+                        description: 'Ăn hải sản',
+                        service_id: 'food-1',
+                        estimated_cost: 1,
+                      },
+                    ],
+                  },
+                ],
+                total_estimated_cost: 1,
+                tips: [],
+              }),
+            },
+          },
+        ],
+      })
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const result = await generateItinerary({
+      days: 1,
+      budget: 500000,
+      preferences: ['ẩm thực'],
+      groupType: 'couple',
+    })
+
+    expect(result.days[0]?.activities[0]?.estimated_cost).toBe(100000)
+    expect(result.total_estimated_cost).toBe(100000)
+  })
+
+  test('diversifies all-food AI days when non-food services exist', async () => {
+    process.env.OPENAI_API_KEY = 'test-key'
+    process.env.OPENAI_BASE_URL = 'https://9router.test/v1'
+    process.env.OPENAI_MODEL = 'gpt-5.5'
+
+    globalThis.fetch = async () =>
+      jsonResponse({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                title: 'Food heavy itinerary',
+                summary: 'AI chose only food',
+                days: [
+                  {
+                    day: 1,
+                    activities: [
+                      {
+                        time: '09:00',
+                        title: 'Ăn sáng',
+                        description: 'Ăn sáng',
+                        service_id: 'food-1',
+                        estimated_cost: 100000,
+                      },
+                      {
+                        time: '12:00',
+                        title: 'Ăn trưa',
+                        description: 'Ăn trưa',
+                        service_id: 'food-1',
+                        estimated_cost: 100000,
+                      },
+                    ],
+                  },
+                ],
+                total_estimated_cost: 200000,
+                tips: [],
+              }),
+            },
+          },
+        ],
+      })
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const result = await generateItinerary({
+      days: 1,
+      budget: 700000,
+      preferences: ['spa', 'giải trí'],
+      groupType: 'family',
+    })
+
+    const serviceIds = result.days[0]?.activities.map((a) => a.service_id) ?? []
+    expect(serviceIds).toContain('food-1')
+    expect(serviceIds.some((id) => id === 'fun-1' || id === 'spa-1')).toBe(true)
+    expect(result.total_estimated_cost).toBeGreaterThan(100000)
+  })
+
+  test('uses slot-based fallback when API key is missing', async () => {
+    delete process.env.OPENAI_API_KEY
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const result = await generateItinerary({
+      days: 1,
+      budget: 700000,
+      preferences: ['spa', 'giải trí'],
+      groupType: 'family',
+    })
+
+    const activities = result.days[0]?.activities ?? []
+    expect(activities.map((activity) => activity.service_id)).toEqual([
+      'fun-1',
+      'food-1',
+      'spa-1',
+      'fun-1',
+    ])
+    expect(result.total_estimated_cost).toBe(460000)
+  })
+
+  test('fallback returns a valid no-service itinerary when no services are available', async () => {
+    availableServices = []
+    delete process.env.OPENAI_API_KEY
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const result = await generateItinerary({
+      days: 1,
+      budget: 700000,
+      preferences: ['spa', 'giải trí'],
+      groupType: 'family',
+    })
+
+    const activities = result.days[0]?.activities ?? []
+    expect(activities).toHaveLength(4)
+    expect(activities.every((activity) => activity.service_id === null)).toBe(true)
+    expect(result.total_estimated_cost).toBe(0)
   })
 })
