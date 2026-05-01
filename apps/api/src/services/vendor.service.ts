@@ -43,6 +43,7 @@ export async function createVendor(data: CreateVendorInput) {
       phone: data.phone,
       email: data.email,
       commissionRate: data.commission_rate || '8.00',
+      appDiscountPercent: data.app_discount_percent || '5.00',
       businessHours: data.business_hours,
     })
     .returning()
@@ -182,6 +183,9 @@ export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendo
       ...(data.email !== undefined && { email: data.email }),
       ...(data.business_hours !== undefined && { businessHours: data.business_hours }),
       ...(data.commission_rate !== undefined && { commissionRate: data.commission_rate }),
+      ...(data.app_discount_percent !== undefined && {
+        appDiscountPercent: data.app_discount_percent,
+      }),
       ...(metadata !== undefined && { metadata }),
       updatedAt: new Date(),
     })

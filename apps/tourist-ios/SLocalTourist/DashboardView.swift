@@ -311,8 +311,12 @@ struct ServiceCard: View {
                         .foregroundStyle(.yellow)
                     Text(String(format: "%.1f", service.rating))
                     Spacer()
-                    if service.discountPercent > 0 || service.isReservation {
-                        Text("-\(service.isReservation ? service.reservationDiscountPercent : service.discountPercent)%")
+                    if service.discountPercent > 0 {
+                        Text("KM \(service.discountPercent)%")
+                            .foregroundStyle(TouristTheme.coral)
+                    }
+                    if service.appDiscountPercent > 0 {
+                        Text("+App \(service.appDiscountPercent)%")
                             .foregroundStyle(TouristTheme.coral)
                     }
                 }

@@ -337,18 +337,15 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                     Text("S-LOCO", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold)
                     Text("Premium coastal service", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                 }
-                if (service.discountPercent > 0) {
-                    Text(
-                        "-${service.discountPercent}%",
-                        color = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Coral)
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        fontWeight = FontWeight.Bold
-                    )
+                if (service.discountPercent > 0 || service.appDiscountPercent > 0) {
+                    Column(
+                        modifier = Modifier.align(Alignment.TopEnd).padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        if (service.discountPercent > 0) DiscountChip("KM vendor ${service.discountPercent}%")
+                        if (service.appDiscountPercent > 0) DiscountChip("+App ${service.appDiscountPercent}%")
+                    }
                 }
             }
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -357,7 +354,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 Text("★ ${service.rating}", color = TextMuted)
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (service.isReservation) {
-                        Text("Đặt chỗ · Ưu đãi ${service.reservationDiscountPercent}%", color = Coral, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("Đặt chỗ · Giảm thêm ${service.appDiscountPercent}%", color = Coral, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                     } else if (service.originalPrice > service.price) {
                         Text(formatVnd(service.originalPrice), color = TextMuted)
                         Text(formatVnd(service.price), color = Coral, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
@@ -1108,19 +1105,15 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.52f))))
             )
             Text("S-LOCO\nCoastal experience", color = Color.White, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
-            if (service.discountPercent > 0 || service.isReservation) {
-                Text(
-                    "-${if (service.isReservation) service.reservationDiscountPercent else service.discountPercent}%",
-                    color = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(99.dp))
-                        .background(Coral)
-                        .padding(horizontal = 9.dp, vertical = 4.dp),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            if (service.discountPercent > 0 || service.appDiscountPercent > 0) {
+                Column(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    if (service.discountPercent > 0) DiscountChip("KM ${service.discountPercent}%", fontSize = 11)
+                    if (service.appDiscountPercent > 0) DiscountChip("+App ${service.appDiscountPercent}%", fontSize = 11)
+                }
             }
             Text(
                 service.category,
@@ -1258,6 +1251,20 @@ private fun AppCard(horizontal: Alignment.Horizontal = Alignment.Start, content:
             content = content
         )
     }
+}
+
+@Composable
+private fun DiscountChip(label: String, fontSize: Int = 13) {
+    Text(
+        label,
+        color = Color.White,
+        modifier = Modifier
+            .clip(RoundedCornerShape(99.dp))
+            .background(Coral)
+            .padding(horizontal = 9.dp, vertical = 4.dp),
+        fontSize = fontSize.sp,
+        fontWeight = FontWeight.Bold
+    )
 }
 
 @Composable
@@ -1763,14 +1770,18 @@ private fun parseService(obj: JsonObject): Service? {
     val service = obj.obj("service") ?: obj
     val vendor = obj.obj("vendor")
     val category = obj.obj("category")
+    val pricing = service.obj("pricing")
     val id = service.str("id")
     if (id.isBlank()) return null
     val original = service.money("originalPrice", "original_price")
-    val price = service.money("discountPrice", "discount_price").takeIf { it > 0 } ?: original
-    val discount = service.num("discountPercent", "discount_percent").toInt().takeIf { it > 0 }
-        ?: if (original > price && original > 0) ((1 - price.toDouble() / original) * 100).toInt() else 0
+    val vendorPrice = service.money("discountPrice", "discount_price").takeIf { it > 0 } ?: original
+    val price = pricing?.money("final_price")?.takeIf { it > 0 } ?: vendorPrice
+    val discount = pricing?.num("vendor_discount_percent")?.toInt()?.takeIf { it > 0 }
+        ?: service.num("discountPercent", "discount_percent").toInt().takeIf { it > 0 }
+        ?: if (original > vendorPrice && original > 0) ((1 - vendorPrice.toDouble() / original) * 100).toInt() else 0
+    val appDiscount = pricing?.num("app_discount_percent")?.toInt()?.takeIf { it > 0 }
+        ?: service.num("reservationDiscountPercent", "reservation_discount_percent").toInt()
     val fulfillmentType = service.str("fulfillmentType", "fulfillment_type").ifBlank { "fixed_price" }
-    val reservationDiscount = service.num("reservationDiscountPercent", "reservation_discount_percent").toInt()
     return Service(
         id = id,
         name = service.str("name").ifBlank { "Dịch vụ" },
@@ -1780,8 +1791,9 @@ private fun parseService(obj: JsonObject): Service? {
         originalPrice = original,
         price = price,
         discountPercent = discount,
+        appDiscountPercent = appDiscount,
         fulfillmentType = fulfillmentType,
-        reservationDiscountPercent = reservationDiscount,
+        reservationDiscountPercent = appDiscount,
         rating = service.num("averageRating", "rating"),
         durationMinutes = service.int("durationMinutes", "duration_minutes")
     )
@@ -1933,6 +1945,7 @@ private data class Service(
     val originalPrice: Int,
     val price: Int,
     val discountPercent: Int,
+    val appDiscountPercent: Int,
     val fulfillmentType: String,
     val reservationDiscountPercent: Int,
     val rating: Double,

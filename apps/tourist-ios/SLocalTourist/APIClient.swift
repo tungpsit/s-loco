@@ -213,10 +213,13 @@ final class APIClient {
     private func mapService(_ item: ServiceWire) -> TouristService? {
         guard let service = item.service else { return nil }
         let original = service.originalPrice.intValue
-        let price = service.discountPrice.intValue == 0 ? original : service.discountPrice.intValue
-        let discount = service.discountPercent.intValue == 0 && original > price && original > 0
-            ? Int((1 - Double(price) / Double(original)) * 100)
+        let vendorPrice = service.discountPrice.intValue == 0 ? original : service.discountPrice.intValue
+        let price = service.pricing?.finalPrice.intValue ?? vendorPrice
+        let discount = service.pricing?.vendorDiscountPercent.intValue ?? (service.discountPercent.intValue == 0 && original > vendorPrice && original > 0
+            ? Int((1 - Double(vendorPrice) / Double(original)) * 100)
             : service.discountPercent.intValue
+        )
+        let appDiscount = service.pricing?.appDiscountPercent.intValue ?? service.reservationDiscountPercent.intValue
         return TouristService(
             id: service.id,
             name: service.name,
@@ -226,8 +229,9 @@ final class APIClient {
             originalPrice: original,
             price: price,
             discountPercent: discount,
+            appDiscountPercent: appDiscount,
             fulfillmentType: service.fulfillmentType ?? "fixed_price",
-            reservationDiscountPercent: service.reservationDiscountPercent.intValue,
+            reservationDiscountPercent: appDiscount,
             rating: service.averageRating.doubleValue,
             durationMinutes: service.durationMinutes ?? 0,
             imageURL: service.images?.first

@@ -1,8 +1,9 @@
-import { orderItems, orders, services, vouchers } from '@S-Loco/db/schema'
+import { orderItems, orders, services, vendors, vouchers } from '@S-Loco/db/schema'
 import type { CreateOrderInput } from '@S-Loco/shared/validators'
 import { and, eq, sql } from 'drizzle-orm'
 import { getDb } from '../db'
 import { notifyOrderPaid } from './notification.service'
+import { calculateServicePricing } from './pricing'
 import { generateQrToken, generateVoucherCode } from './voucher.service'
 
 /** Non-null assertion for Drizzle scalar selects */
@@ -16,8 +17,9 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
   // 1. Fetch all services and validate
   const serviceIds = input.items.map((i) => i.service_id)
   const serviceRows = await db
-    .select()
+    .select({ service: services, vendor: vendors })
     .from(services)
+    .innerJoin(vendors, eq(services.vendorId, vendors.id))
     .where(
       and(
         eq(services.isActive, true),
@@ -28,7 +30,7 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       ),
     )
 
-  const serviceMap = new Map(serviceRows.map((s) => [s.id, s]))
+  const serviceMap = new Map(serviceRows.map((row) => [row.service.id, row]))
 
   // Validate all services exist and are active
   for (const item of input.items) {
@@ -38,10 +40,10 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         'SERVICE_NOT_FOUND',
         `Dịch vụ ${item.service_id} không tồn tại hoặc đã ngừng hoạt động.`,
       )
-    if (item.quantity > svc.maxQuantityPerOrder) {
+    if (item.quantity > svc.service.maxQuantityPerOrder) {
       throw new OrderError(
         'QUANTITY_EXCEEDED',
-        `Số lượng tối đa cho "${svc.name}" là ${svc.maxQuantityPerOrder}.`,
+        `Số lượng tối đa cho "${svc.service.name}" là ${svc.service.maxQuantityPerOrder}.`,
       )
     }
   }
@@ -59,9 +61,17 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
   }> = []
 
   for (const item of input.items) {
-    const svc = serviceMap.get(item.service_id)!
-    const price = svc.discountPrice ? Number(svc.discountPrice) : Number(svc.originalPrice)
-    const originalTotal = Number(svc.originalPrice) * item.quantity
+    const row = serviceMap.get(item.service_id)!
+    const svc = row.service
+    const pricing = calculateServicePricing({
+      originalPrice: svc.originalPrice,
+      discountPrice: svc.discountPrice,
+      discountPercent: svc.discountPercent,
+      commissionRate: row.vendor.commissionRate,
+      appDiscountPercent: row.vendor.appDiscountPercent,
+    })
+    const price = Number(pricing.final_price)
+    const originalTotal = Number(pricing.original_price) * item.quantity
     const itemTotal = price * item.quantity
     totalAmount += originalTotal
     discountAmount += originalTotal - itemTotal
@@ -76,6 +86,7 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         name: svc.name,
         originalPrice: svc.originalPrice,
         discountPrice: svc.discountPrice,
+        pricing,
         images: svc.images,
       },
     })

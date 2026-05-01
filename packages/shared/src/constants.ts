@@ -64,7 +64,8 @@ export const APP_CONSTANTS = {
   ACCESS_TOKEN_TTL_SECONDS: 900, // 15 minutes
   REFRESH_TOKEN_TTL_DAYS: 30,
   DEFAULT_COMMISSION_RATE: 8.0, // 8% vendor commission
-  TOURIST_DISCOUNT_RATE: 5.0, // 5% tourist discount
+  DEFAULT_APP_DISCOUNT_RATE: 5.0, // 5% app-funded customer discount
+  TOURIST_DISCOUNT_RATE: 5.0, // backwards-compatible alias
   PLATFORM_FEE_RATE: 3.0, // 3% platform fee
   MAX_ITEMS_PER_PAGE: 100,
   DEFAULT_ITEMS_PER_PAGE: 20,

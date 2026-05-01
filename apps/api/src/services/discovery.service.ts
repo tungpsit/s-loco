@@ -2,6 +2,7 @@ import { getDb } from '../db'
 import { serviceCategories, services, vendors } from '@S-Loco/db/schema'
 import type { ServiceFilterInput } from '@S-Loco/shared/validators'
 import { and, desc, eq, gte, ilike, isNull, lte, sql, asc } from 'drizzle-orm'
+import { withServicePricing } from './pricing'
 
 /** Non-null assertion for Drizzle scalar selects */
 function scalar<T>(rows: T[]): T {
@@ -15,6 +16,10 @@ export async function searchServices(filters: ServiceFilterInput) {
   const offset = (page - 1) * limit
 
   const conditions = [isNull(services.deletedAt), eq(services.isActive, true)]
+  const finalPriceCol = sql`(
+    COALESCE(${services.discountPrice}, ${services.originalPrice})::numeric
+    * (1 - (${vendors.appDiscountPercent}::numeric / 100))
+  )`
 
   // Keyword search — local-safe ILIKE fallback
   if (filters.q) {
@@ -39,7 +44,7 @@ export async function searchServices(filters: ServiceFilterInput) {
   if (filters.min_price !== undefined) {
     conditions.push(
       gte(
-        sql`COALESCE(${services.discountPrice}, ${services.originalPrice})::numeric`,
+        finalPriceCol,
         filters.min_price,
       ),
     )
@@ -47,7 +52,7 @@ export async function searchServices(filters: ServiceFilterInput) {
   if (filters.max_price !== undefined) {
     conditions.push(
       lte(
-        sql`COALESCE(${services.discountPrice}, ${services.originalPrice})::numeric`,
+        finalPriceCol,
         filters.max_price,
       ),
     )
@@ -68,7 +73,7 @@ export async function searchServices(filters: ServiceFilterInput) {
 
   // Build ORDER BY from sort param
   const effectiveSort = filters.sort ?? 'relevance'
-  const priceCol = sql`COALESCE(${services.discountPrice}, ${services.originalPrice})::numeric`
+  const priceCol = finalPriceCol
   const orderBy =
     effectiveSort === 'price_asc'
       ? [asc(priceCol), desc(sql`${vendors.ratingAvg}::numeric`)]
@@ -95,6 +100,8 @@ export async function searchServices(filters: ServiceFilterInput) {
         ratingAvg: vendors.ratingAvg,
         reviewCount: vendors.reviewCount,
         distanceKm: vendors.distanceKm,
+        commissionRate: vendors.commissionRate,
+        appDiscountPercent: vendors.appDiscountPercent,
       },
       category: {
         id: serviceCategories.id,
@@ -118,7 +125,7 @@ export async function searchServices(filters: ServiceFilterInput) {
     .innerJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
     .where(and(...conditions))
 
-  return { items, total: Number(scalar(rows).count), page, limit }
+  return { items: items.map(withServicePricing), total: Number(scalar(rows).count), page, limit }
 }
 
 export async function listCategories() {

@@ -41,6 +41,7 @@ export interface Vendor {
   isActive: boolean
   status: VendorStatus
   commissionRate: number
+  appDiscountPercent: number
   settlementType: 'instant' | 'periodic'
   settlementPeriodDays: number | null
   createdAt: Date

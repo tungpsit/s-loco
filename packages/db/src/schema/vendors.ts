@@ -27,6 +27,7 @@ export const vendors = pgTable('vendors', {
   settlementType: settlementTypeEnum('settlement_type').notNull().default('periodic'),
   settlementPeriodDays: integer('settlement_period_days').notNull().default(3),
   commissionRate: decimal('commission_rate', { precision: 5, scale: 2 }).notNull().default('8.00'),
+  appDiscountPercent: decimal('app_discount_percent', { precision: 5, scale: 2 }).notNull().default('5.00'),
   ratingAvg: decimal('rating_avg', { precision: 3, scale: 2 }).notNull().default('0.00'),
   reviewCount: integer('review_count').notNull().default(0),
   distanceKm: decimal('distance_km', { precision: 6, scale: 2 }),

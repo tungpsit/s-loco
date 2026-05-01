@@ -110,6 +110,17 @@ struct ServiceDetailData: Decodable {
     let category: CategoryLite?
 }
 
+struct ServicePricingWire: Decodable {
+    let finalPrice: String?
+    let vendorDiscountPercent: String?
+    let appDiscountPercent: String?
+    enum CodingKeys: String, CodingKey {
+        case finalPrice = "final_price"
+        case vendorDiscountPercent = "vendor_discount_percent"
+        case appDiscountPercent = "app_discount_percent"
+    }
+}
+
 struct ServiceCore: Decodable, Identifiable {
     let id: String
     let name: String
@@ -122,10 +133,11 @@ struct ServiceCore: Decodable, Identifiable {
     let averageRating: String?
     let fulfillmentType: String?
     let reservationDiscountPercent: String?
+    let pricing: ServicePricingWire?
     enum CodingKeys: String, CodingKey {
         case id, name, description, images
         case originalPrice, discountPrice, discountPercent, durationMinutes, averageRating
-        case fulfillmentType, reservationDiscountPercent
+        case fulfillmentType, reservationDiscountPercent, pricing
     }
 }
 
@@ -152,6 +164,7 @@ struct TouristService: Identifiable, Hashable {
     let originalPrice: Int
     let price: Int
     let discountPercent: Int
+    let appDiscountPercent: Int
     let fulfillmentType: String
     let reservationDiscountPercent: Int
     let rating: Double

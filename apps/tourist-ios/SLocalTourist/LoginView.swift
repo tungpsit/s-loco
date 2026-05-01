@@ -184,6 +184,18 @@ struct ServiceDetailView: View {
                         Text(service.vendorName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(TouristTheme.primary)
+                        HStack(spacing: 8) {
+                            if service.discountPercent > 0 {
+                                Text("KM vendor \(service.discountPercent)%")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(TouristTheme.coral)
+                            }
+                            if service.appDiscountPercent > 0 {
+                                Text("Đặt qua app giảm thêm \(service.appDiscountPercent)%")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(TouristTheme.coral)
+                            }
+                        }
                         Text(service.description.isEmpty ? "Trải nghiệm được tuyển chọn bởi S-Loco." : service.description)
                             .font(.body)
                             .foregroundStyle(TouristTheme.text)

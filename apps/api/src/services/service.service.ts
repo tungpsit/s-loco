@@ -2,6 +2,7 @@ import { getDb } from '../db'
 import { serviceCategories, services, vendors } from '@S-Loco/db/schema'
 import type { CreateServiceInput, UpdateServiceInput } from '@S-Loco/shared/validators'
 import { and, eq, isNull, sql } from 'drizzle-orm'
+import { withServicePricing } from './pricing'
 
 export async function createService(vendorId: string, ownerId: string, data: CreateServiceInput) {
   const db = getDb()
@@ -109,7 +110,7 @@ export async function getServiceById(serviceId: string) {
     .where(and(eq(services.id, serviceId), isNull(services.deletedAt)))
     .limit(1)
   if (!svc) throw new ServiceError('NOT_FOUND', 'Dịch vụ không tồn tại.')
-  return svc
+  return withServicePricing(svc)
 }
 
 export class ServiceError extends Error {

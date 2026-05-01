@@ -96,8 +96,9 @@ function toReservationListItemDto(row: {
 export async function createReservation(userId: string, input: CreateReservationInput) {
   const db = getDb()
   const [row] = await db
-    .select({ service: services, user: users })
+    .select({ service: services, user: users, vendor: vendors })
     .from(services)
+    .innerJoin(vendors, eq(services.vendorId, vendors.id))
     .innerJoin(users, eq(users.id, userId))
     .where(and(eq(services.id, input.service_id), eq(services.isActive, true)))
     .limit(1)
@@ -109,9 +110,6 @@ export async function createReservation(userId: string, input: CreateReservation
     )
   if (row.service.fulfillmentType !== 'reservation') {
     throw new ReservationError('SERVICE_NOT_RESERVATION', 'Dịch vụ này không hỗ trợ đặt chỗ.')
-  }
-  if (!row.service.reservationDiscountPercent) {
-    throw new ReservationError('DISCOUNT_NOT_CONFIGURED', 'Dịch vụ chưa cấu hình ưu đãi đặt chỗ.')
   }
 
   const [reservation] = await db
@@ -235,7 +233,7 @@ export async function confirmReservation(reservationId: string, ownerId: string)
     throw new ReservationError('INVALID_STATUS', 'Yêu cầu đặt chỗ không thể xác nhận.')
   }
 
-  const discountPercent = row.service.reservationDiscountPercent
+  const discountPercent = row.vendor.appDiscountPercent
   if (!discountPercent)
     throw new ReservationError('DISCOUNT_NOT_CONFIGURED', 'Dịch vụ chưa cấu hình ưu đãi đặt chỗ.')
 

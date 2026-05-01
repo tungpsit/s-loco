@@ -50,6 +50,13 @@
       "when": 1777568500000,
       "tag": "0006_demo_reservation_data",
       "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777568600000,
+      "tag": "0007_vendor_app_discount",
+      "breakpoints": false
     }
   ]
 }

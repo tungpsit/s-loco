@@ -1,5 +1,21 @@
 import { z } from 'zod'
 
+const percentString = z.string().regex(/^\d+(\.\d{1,2})?$/, 'Phần trăm không hợp lệ')
+
+function validateAppDiscountWithinCommission<
+  T extends { commission_rate?: string; app_discount_percent?: string },
+>(data: T, ctx: z.RefinementCtx) {
+  const commission = Number(data.commission_rate ?? '8.00')
+  const appDiscount = Number(data.app_discount_percent ?? '5.00')
+  if (appDiscount > commission) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['app_discount_percent'],
+      message: 'Ưu đãi khách đặt qua app không được lớn hơn hoa hồng vendor.',
+    })
+  }
+}
+
 // ─── Create Vendor (Admin) ─────────────────────────────
 export const createVendorSchema = z.object({
   owner_id: z.string().uuid('ID chủ cửa hàng không hợp lệ'),
@@ -11,9 +27,10 @@ export const createVendorSchema = z.object({
   longitude: z.string().optional(),
   phone: z.string().max(20).optional(),
   email: z.string().email().optional(),
-  commission_rate: z.string().optional(),
+  commission_rate: percentString.optional(),
+  app_discount_percent: percentString.optional(),
   business_hours: z.record(z.unknown()).optional(),
-})
+}).superRefine(validateAppDiscountWithinCommission)
 export type CreateVendorInput = z.infer<typeof createVendorSchema>
 
 // ─── Update Vendor (Vendor Owner) ──────────────────────
@@ -32,8 +49,9 @@ export type UpdateVendorInput = z.infer<typeof updateVendorSchema>
 
 // ─── Update Vendor (Admin) ─────────────────────────────
 export const adminUpdateVendorSchema = updateVendorSchema.extend({
-  commission_rate: z.string().optional(),
-})
+  commission_rate: percentString.optional(),
+  app_discount_percent: percentString.optional(),
+}).superRefine(validateAppDiscountWithinCommission)
 export type AdminUpdateVendorInput = z.infer<typeof adminUpdateVendorSchema>
 
 // ─── Update Vendor Status (Admin) ──────────────────────
