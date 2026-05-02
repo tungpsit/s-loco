@@ -284,14 +284,12 @@ border: 1px solid rgba(181, 190, 212, 0.15);
 
 ## 8. App-Specific Design Supplements
 
-All 4 S-Loco applications share the core design tokens defined in Sections 1–6 of this document. Each app has a dedicated design supplement:
+Active S-Loco applications share the core design tokens defined in Sections 1–6 of this document. Design supplements are maintained for the web admin and native vendor apps:
 
 | App | Supplement File | Platform |
 |-----|---------------|----------|
-| Tourist Mobile App | `docs/design-mobile.md` | React Native / Expo |
-| Vendor App | `docs/design-vendor.md` | React Native / Expo |
+| Vendor App | `docs/design-vendor.md` | Native iOS / Android |
 | Admin Dashboard | `docs/design-admin.md` | Next.js 16 / Tailwind CSS v4 |
-| PWA | `docs/design-pwa.md` | React Native Web / Expo |
 
 ### Supplement Scope
 
@@ -306,14 +304,14 @@ Each supplement extends this root document with:
 
 ### Key Differences by App
 
-| Concern | Tourist App | Vendor App | Admin | PWA |
-|---------|------------|-----------|-------|-----|
-| Navigation | Bottom tab bar (4 tabs) | Bottom tab bar (5 tabs) | Sidebar (dark) | Header + avatar dropdown |
-| Touch targets | 44×44px min | 48×48px min (actions) | N/A (mouse) | N/A |
-| Safe areas | iOS SafeAreaView | Same | N/A | N/A |
-| QR handling | Display + scan | Scan + verify | N/A | Display (print option) |
-| Offline | Limited | Important (store use) | N/A | Offline indicator |
-| Key screen | Home → Checkout → Voucher | Scan → Redeem → Earnings | Tables + Modals | Tourist app, desktop layout |
+| Concern | Tourist App | Vendor App | Admin |
+|---------|------------|-----------|-------|
+| Navigation | Native tab/navigation shell | Native tab/navigation shell | Sidebar (dark) |
+| Touch targets | 44×44px min | 48×48px min (actions) | N/A (mouse) |
+| Safe areas | iOS/Android system insets | Same | N/A |
+| QR handling | Display + scan | Scan + verify | N/A |
+| Offline | Limited | Important (store use) | N/A |
+| Key screen | Home → Checkout → Voucher | Scan → Redeem → Earnings | Tables + Modals |
 
 ---
 
@@ -323,14 +321,13 @@ Each supplement extends this root document with:
 
 | Gap | Status | Resolved By |
 |-----|--------|-------------|
-| No mobile-specific design tokens defined | ✅ Resolved | `docs/design-mobile.md` — touch targets, safe areas, notch handling |
+| No mobile-specific design tokens defined | Native app follow-up | Tourist native design supplement not yet documented |
 | No QR scanner overlay pattern documented | ✅ Resolved | `docs/design-vendor.md` — full viewfinder + bottom sheet spec |
 | No admin sidebar dark theme tokens | ✅ Resolved | `docs/design-admin.md` — sidebar palette + hover/active states |
-| No PWA design document | ✅ Resolved | `docs/design-pwa.md` — responsive breakpoints, install prompt, manifest |
-| No VND price formatting rule | ✅ Resolved | All 4 supplements document `Intl.NumberFormat('vi-VN')` |
-| No loading/error/empty states per screen | ✅ Resolved | Each supplement has a state table per screen |
-| No accessibility guidance for mobile | ✅ Resolved | `docs/design-mobile.md` — WCAG 2.1 AA, ARIA labels, outdoor contrast |
-| No OTP input spec (6-digit, auto-advance) | ✅ Resolved | `docs/design-mobile.md` — behavior + animation notes |
+| No VND price formatting rule | ✅ Resolved | Active supplements document Vietnamese currency formatting |
+| No loading/error/empty states per screen | Partial | Vendor and admin supplements include state tables |
+| No accessibility guidance for mobile | Native app follow-up | Document per-platform accessibility conventions in native supplements |
+| No OTP input spec (6-digit, auto-advance) | Native app follow-up | Document in tourist native supplement |
 
 ### Remaining Open Items
 

@@ -1,5 +1,6 @@
 export * from './auth'
 export * from './common'
+export * from './itinerary'
 export * from './order'
 export * from './payment'
 export * from './reservation'

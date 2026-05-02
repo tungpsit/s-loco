@@ -2,11 +2,20 @@
  * Test helpers — send HTTP requests to running local API.
  */
 
+let requestCounter = 0
+
 /** Make a request to the test API */
-export async function request(path: string, opts?: RequestInit & { json?: any; token?: string }) {
-  const url = new URL(path, 'http://localhost:3000')
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (opts?.token) headers['Authorization'] = `Bearer ${opts.token}`
+export async function request(
+  path: string,
+  opts?: RequestInit & { json?: unknown; token?: string },
+) {
+  const url = new URL(path, process.env.TEST_API_BASE_URL || 'http://localhost:3000')
+  requestCounter += 1
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'x-forwarded-for': `127.0.0.${(requestCounter % 250) + 1}`,
+  }
+  if (opts?.token) headers.Authorization = `Bearer ${opts.token}`
   if (opts?.headers) Object.assign(headers, opts.headers as Record<string, string>)
 
   const res = await fetch(url.toString(), {
@@ -15,7 +24,7 @@ export async function request(path: string, opts?: RequestInit & { json?: any; t
     body: opts?.json ? JSON.stringify(opts.json) : (opts?.body as BodyInit | null | undefined),
   })
 
-  let data: any = null
+  let data: unknown = null
   const text = await res.text()
   try {
     data = text ? JSON.parse(text) : null
@@ -39,7 +48,7 @@ export async function adminLogin() {
 export async function vendorLogin() {
   const { data } = await request('/api/v1/auth/login', {
     method: 'POST',
-    json: { email: 'vendor1@slocal.vn', password: 'vendor123' },
+    json: { email: 'vendor@slocal.vn', password: 'vendor123' },
   })
   return data?.data?.tokens?.access_token || data?.data?.access_token || null
 }

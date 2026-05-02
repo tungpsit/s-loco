@@ -8,8 +8,6 @@
     "dev:all": "turbo dev",
     "dev:api": "turbo dev --filter=@S-Loco/api",
     "dev:admin": "turbo dev --filter=@S-Loco/admin",
-    "dev:mobile": "turbo dev --filter=@s-loco/mobile",
-    "dev:vendor": "turbo dev --filter=@S-Loco/vendor",
     "build": "turbo build",
     "lint": "biome check .",
     "format": "biome format --write .",
@@ -31,10 +29,6 @@
     "typescript": "^5.7.0"
   },
   "dependencies": {
-    "expo-camera": "55.0.11",
-    "postgres-js": "0.1.0",
-    "qrcode": "1.5.4",
-    "react-native-qrcode-svg": "6.3.21",
-    "react-native-svg": "15.15.4"
+    "postgres-js": "0.1.0"
   }
 }

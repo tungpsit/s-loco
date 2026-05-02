@@ -1,4 +1,7 @@
 import { describe, expect, test } from 'bun:test'
+import { users } from '@S-Loco/db/schema'
+import { getDb } from '../src/db'
+import { hashPassword } from '../src/lib/password'
 import { randomPhone, request } from './helpers'
 
 describe('Auth Flow', () => {
@@ -69,6 +72,98 @@ describe('Auth Flow', () => {
     })
   })
 
+  // ─── Password Security ───────────────────────────────
+  describe('Password Security', () => {
+    test('POST /auth/change-password — rejects unauthenticated request', async () => {
+      const { status, data } = await request('/api/v1/auth/change-password', {
+        method: 'POST',
+        json: { current_password: 'oldpass123', new_password: 'newpass123' },
+      })
+      expect(status).toBe(401)
+      expect(data.success).toBe(false)
+    })
+
+    test('POST /auth/change-password — changes password with current password', async () => {
+      const email = await createPasswordTestUser('change')
+      const login = await request('/api/v1/auth/login', {
+        method: 'POST',
+        json: { email, password: 'oldpass123' },
+      })
+      const token = login.data.data.tokens.access_token
+
+      const { status, data } = await request('/api/v1/auth/change-password', {
+        method: 'POST',
+        token,
+        json: { current_password: 'oldpass123', new_password: 'newpass123' },
+      })
+
+      expect(status).toBe(200)
+      expect(data.success).toBe(true)
+
+      const oldLogin = await request('/api/v1/auth/login', {
+        method: 'POST',
+        json: { email, password: 'oldpass123' },
+      })
+      expect(oldLogin.status).toBe(401)
+
+      const newLogin = await request('/api/v1/auth/login', {
+        method: 'POST',
+        json: { email, password: 'newpass123' },
+      })
+      expect(newLogin.status).toBe(200)
+    })
+
+    test('POST /auth/change-password — rejects wrong current password', async () => {
+      const email = await createPasswordTestUser('wrong-current')
+      const login = await request('/api/v1/auth/login', {
+        method: 'POST',
+        json: { email, password: 'oldpass123' },
+      })
+      const token = login.data.data.tokens.access_token
+
+      const { status, data } = await request('/api/v1/auth/change-password', {
+        method: 'POST',
+        token,
+        json: { current_password: 'wrongpass123', new_password: 'newpass123' },
+      })
+
+      expect(status).toBe(401)
+      expect(data.success).toBe(false)
+    })
+
+    test('POST /auth/reset-password — returns temporary password and revokes refresh sessions', async () => {
+      const email = await createPasswordTestUser('reset')
+      const login = await request('/api/v1/auth/login', {
+        method: 'POST',
+        json: { email, password: 'oldpass123' },
+      })
+      const token = login.data.data.tokens.access_token
+      const refreshToken = login.data.data.tokens.refresh_token
+
+      const { status, data } = await request('/api/v1/auth/reset-password', {
+        method: 'POST',
+        token,
+      })
+
+      expect(status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.temporary_password).toBeString()
+      expect(data.data.temporary_password.length).toBeGreaterThanOrEqual(12)
+
+      const refresh = await request('/api/v1/auth/refresh', {
+        method: 'POST',
+        json: { refresh_token: refreshToken },
+      })
+      expect(refresh.status).toBe(401)
+
+      const tempLogin = await request('/api/v1/auth/login', {
+        method: 'POST',
+        json: { email, password: data.data.temporary_password },
+      })
+      expect(tempLogin.status).toBe(200)
+    })
+  })
+
   // ─── Token Refresh ───
   describe('Token Refresh', () => {
     test('POST /auth/refresh — rejects invalid refresh token', async () => {
@@ -81,3 +176,22 @@ describe('Auth Flow', () => {
     })
   })
 })
+
+async function createPasswordTestUser(label: string) {
+  const db = getDb()
+  const email = `auth-${label}-${crypto.randomUUID()}@example.com`
+  const passwordHash = await hashPassword('oldpass123')
+  const [user] = await db
+    .insert(users)
+    .values({
+      email,
+      phone: randomPhone(),
+      fullName: 'Auth Test Vendor',
+      role: 'vendor_owner',
+      passwordHash,
+    })
+    .returning()
+
+  if (!user) throw new Error('Unable to create test user')
+  return email
+}

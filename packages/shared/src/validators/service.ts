@@ -1,16 +1,30 @@
 import { z } from 'zod'
+import { latitudeNumberSchema, longitudeNumberSchema } from './common'
 
 // ─── Create Service ────────────────────────────────────
 export const createServiceSchema = z.object({
   name: z.string().min(2).max(200),
-  slug: z.string().min(2).max(200).regex(/^[a-z0-9-]+$/, 'Slug phải là chữ thường, số và dấu gạch ngang'),
+  slug: z
+    .string()
+    .min(2)
+    .max(200)
+    .regex(/^[a-z0-9-]+$/, 'Slug phải là chữ thường, số và dấu gạch ngang'),
   category_id: z.string().uuid('ID danh mục không hợp lệ'),
   description: z.string().max(2000).optional(),
   original_price: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Giá không hợp lệ'),
-  discount_price: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
-  discount_percent: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+  discount_price: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .optional(),
+  discount_percent: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .optional(),
   fulfillment_type: z.enum(['fixed_price', 'reservation']).default('fixed_price'),
-  reservation_discount_percent: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+  reservation_discount_percent: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .optional(),
   duration_minutes: z.coerce.number().int().min(1).optional(),
   max_quantity_per_order: z.coerce.number().int().min(1).max(100).optional(),
   images: z.array(z.string().url()).max(10).optional(),
@@ -21,12 +35,28 @@ export type CreateServiceInput = z.infer<typeof createServiceSchema>
 // ─── Update Service ────────────────────────────────────
 export const updateServiceSchema = z.object({
   name: z.string().min(2).max(200).optional(),
+  category_id: z.string().uuid('ID danh mục không hợp lệ').optional(),
   description: z.string().max(2000).optional(),
-  original_price: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
-  discount_price: z.string().regex(/^\d+(\.\d{1,2})?$/).nullable().optional(),
-  discount_percent: z.string().regex(/^\d+(\.\d{1,2})?$/).nullable().optional(),
+  original_price: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .optional(),
+  discount_price: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .nullable()
+    .optional(),
+  discount_percent: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .nullable()
+    .optional(),
   fulfillment_type: z.enum(['fixed_price', 'reservation']).optional(),
-  reservation_discount_percent: z.string().regex(/^\d+(\.\d{1,2})?$/).nullable().optional(),
+  reservation_discount_percent: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .nullable()
+    .optional(),
   duration_minutes: z.coerce.number().int().min(1).nullable().optional(),
   max_quantity_per_order: z.coerce.number().int().min(1).max(100).optional(),
   images: z.array(z.string().url()).max(10).optional(),
@@ -45,7 +75,11 @@ export const serviceFilterSchema = z.object({
   min_rating: z.coerce.number().min(0).max(5).optional(),
   min_distance: z.coerce.number().min(0).optional(), // km from Tây An beach
   max_distance: z.coerce.number().min(0).optional(),
-  sort: z.enum(['relevance', 'price_asc', 'price_desc', 'rating_desc', 'newest', 'distance_asc']).default('relevance'),
+  origin_latitude: latitudeNumberSchema.optional(),
+  origin_longitude: longitudeNumberSchema.optional(),
+  sort: z
+    .enum(['relevance', 'price_asc', 'price_desc', 'rating_desc', 'newest', 'distance_asc'])
+    .default('relevance'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })

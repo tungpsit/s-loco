@@ -1,9 +1,9 @@
-import { zValidator } from '@hono/zod-validator'
 import {
   createServiceSchema,
   serviceFilterSchema,
   updateServiceSchema,
 } from '@S-Loco/shared/validators'
+import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import * as discoverySvc from '../services/discovery.service'
@@ -21,6 +21,10 @@ serviceRoutes.get('/', async (c) => {
     max_price: c.req.query('max_price'),
     min_rating: c.req.query('min_rating'),
     sort: c.req.query('sort'),
+    min_distance: c.req.query('min_distance'),
+    max_distance: c.req.query('max_distance'),
+    origin_latitude: c.req.query('origin_latitude'),
+    origin_longitude: c.req.query('origin_longitude'),
     page: c.req.query('page'),
     limit: c.req.query('limit'),
   })
@@ -37,6 +41,10 @@ serviceRoutes.get('/search', async (c) => {
     max_price: c.req.query('max_price'),
     min_rating: c.req.query('min_rating'),
     sort: c.req.query('sort'),
+    min_distance: c.req.query('min_distance'),
+    max_distance: c.req.query('max_distance'),
+    origin_latitude: c.req.query('origin_latitude'),
+    origin_longitude: c.req.query('origin_longitude'),
     page: c.req.query('page'),
     limit: c.req.query('limit'),
   })

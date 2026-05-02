@@ -275,6 +275,7 @@ async function seed() {
 
   // 5 vendor owners
   const vendorOwnerData = [
+    { phone: '0900000002', email: 'vendor@slocal.vn', fullName: 'Nguyễn Văn Biển', role: 'vendor_owner' as const, passwordHash: vendorHash },
     { phone: '0901111111', email: 'vendor1@slocal.vn', fullName: 'Nguyễn Văn Biển', role: 'vendor_owner' as const, passwordHash: vendorHash },
     { phone: '0901111112', email: 'vendor2@slocal.vn', fullName: 'Trần Thị Hoa', role: 'vendor_owner' as const, passwordHash: vendorHash },
     { phone: '0901111113', email: 'vendor3@slocal.vn', fullName: 'Lê Quang Vinh', role: 'vendor_owner' as const, passwordHash: vendorHash },
@@ -313,6 +314,18 @@ async function seed() {
     businessHours: { mon: '08:00-22:00', tue: '08:00-22:00', wed: '08:00-22:00', thu: '08:00-22:00', fri: '08:00-23:00', sat: '07:00-23:00', sun: '07:00-22:00' },
   }))
   await db.insert(vendors).values(vendorValues).onConflictDoNothing()
+
+  const [defaultVendorOwner] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, 'vendor@slocal.vn'))
+  if (defaultVendorOwner) {
+    await db
+      .update(vendors)
+      .set({ ownerId: defaultVendorOwner.id })
+      .where(eq(vendors.slug, 'nha-hang-hai-san-bien-dong'))
+  }
+
   const insertedVendors = await db.select().from(vendors).where(eq(vendors.status, 'active'))
   console.log(`   ✅ ${insertedVendors.length} vendors\n`)
 

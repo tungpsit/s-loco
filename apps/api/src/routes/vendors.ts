@@ -1,5 +1,5 @@
-import { zValidator } from '@hono/zod-validator'
 import { updateVendorSchema, updateVendorStatusSchema } from '@S-Loco/shared/validators'
+import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { authMiddleware, optionalAuth, requireRole } from '../middleware/auth'
 import * as serviceSvc from '../services/service.service'
@@ -11,7 +11,10 @@ const vendorRoutes = new Hono()
 // ─── GET /vendors — list vendors (public: active only; admin: all) ───
 vendorRoutes.get('/', optionalAuth(), async (c) => {
   const role = c.get('userRole')
-  const status = role === 'admin' ? c.req.query('status') || undefined : 'active'
+  const status =
+    role === 'admin'
+      ? updateVendorStatusSchema.shape.status.optional().parse(c.req.query('status') || undefined)
+      : 'active'
   const page = Number(c.req.query('page') || 1)
   const limit = Number(c.req.query('limit') || 20)
   const result = await vendorSvc.listVendors({ status, page, limit })
@@ -20,7 +23,10 @@ vendorRoutes.get('/', optionalAuth(), async (c) => {
 
 // ─── POST /vendors — create vendor (admin only for now) ────
 vendorRoutes.post('/', authMiddleware(), requireRole('admin'), async (c) => {
-  return c.json({ success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Not implemented yet.' } }, 501)
+  return c.json(
+    { success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Not implemented yet.' } },
+    501,
+  )
 })
 
 // ─── GET /vendors/me — current vendor owner profile ────

@@ -28,6 +28,13 @@ export const loginSchema = z.object({
 })
 export type LoginInput = z.infer<typeof loginSchema>
 
+// ─── Change Password ───────────────────────────────────
+export const changePasswordSchema = z.object({
+  current_password: z.string().min(8, 'Mật khẩu hiện tại tối thiểu 8 ký tự'),
+  new_password: z.string().min(8, 'Mật khẩu mới tối thiểu 8 ký tự'),
+})
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
+
 // ─── Refresh Token ─────────────────────────────────────
 export const refreshTokenSchema = z.object({
   refresh_token: z.string().min(1, 'Refresh token is required'),

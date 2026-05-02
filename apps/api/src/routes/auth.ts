@@ -1,4 +1,5 @@
 import {
+  changePasswordSchema,
   loginSchema,
   refreshTokenSchema,
   sendOtpSchema,
@@ -10,9 +11,11 @@ import { authMiddleware } from '../middleware/auth'
 import { authRateLimit, otpRateLimit } from '../middleware/rate-limit'
 import {
   AuthError,
+  changePassword,
   getProfile,
   loginWithEmail,
   registerOrLoginWithOtp,
+  resetPassword,
 } from '../services/auth.service'
 import { OtpError, sendOtp } from '../services/otp.service'
 import { refreshTokens, revokeAllSessions, TokenError } from '../services/token.service'
@@ -99,6 +102,36 @@ auth.post('/logout', authMiddleware(), async (c) => {
     await revokeAllSessions(userId)
   }
   return c.json({ success: true, data: { message: 'Đã đăng xuất.' } })
+})
+
+// ─── POST /auth/change-password ────────────────────────
+auth.post('/change-password', authMiddleware(), zValidator('json', changePasswordSchema), async (c) => {
+  try {
+    const userId = c.get('userId')!
+    const { current_password, new_password } = c.req.valid('json')
+    await changePassword(userId, current_password, new_password)
+    return c.json({ success: true, data: { message: 'Đã đổi mật khẩu.' } })
+  } catch (err) {
+    if (err instanceof AuthError) {
+      const status = err.code === 'INVALID_CURRENT_PASSWORD' ? 401 : 400
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+    }
+    throw err
+  }
+})
+
+// ─── POST /auth/reset-password ─────────────────────────
+auth.post('/reset-password', authMiddleware(), async (c) => {
+  try {
+    const userId = c.get('userId')!
+    const result = await resetPassword(userId)
+    return c.json({ success: true, data: result })
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+    }
+    throw err
+  }
 })
 
 // ─── GET /auth/me ──────────────────────────────────────

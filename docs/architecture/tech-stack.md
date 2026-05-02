@@ -6,32 +6,29 @@
 
 ## 1. Tổng quan
 
-S-Loco xây dựng trên stack **TypeScript end-to-end** với Bun runtime, giúp thống nhất ngôn ngữ giữa frontend và backend, giảm context-switching và tận dụng tối đa hệ sinh thái npm.
+S-Loco dùng Bun/TypeScript cho API, admin và shared packages, đồng thời duy trì mobile clients bằng native Android và iOS để kiểm soát trải nghiệm platform.
 
 ---
 
 ## 2. Stack chi tiết
 
-### 2.1. Frontend — Mobile App
+### 2.1. Frontend — Tourist Native Apps
 
 | Thành phần | Công nghệ | Rationale |
 |---|---|---|
-| **Framework** | React Native + Expo SDK 52+ | Cross-platform iOS & Android từ 1 codebase. Expo cung cấp OTA update, EAS Build, push notification tích hợp |
-| **Navigation** | Expo Router (file-based) | Routing tương tự Next.js, hỗ trợ deep linking, typed routes |
-| **State Management** | Zustand + TanStack Query | Zustand cho client state (lightweight, ít boilerplate). TanStack Query cho server state (cache, refetch, optimistic updates) |
-| **UI Components** | React Native Paper / Tamagui | MD3 components, dark mode, theming. Tamagui cho hiệu năng tối ưu trên cả web và native |
-| **Forms** | React Hook Form + Zod | Validation type-safe, performance tối ưu (uncontrolled inputs) |
-| **QR Code** | expo-camera + expo-barcode-scanner | Quét QR cho voucher redemption |
-| **Maps** | react-native-maps | Hiển thị vị trí vendor, gợi ý gần đây |
-| **PWA** | Expo Web export | Cùng codebase, xuất ra PWA cho truy cập nhanh không cài đặt |
+| **iOS** | SwiftUI | Native UI, navigation, Keychain, APNs/FCM integration |
+| **Android** | Kotlin + Jetpack Compose | Native Material UI, lifecycle-aware state, Keystore, FCM integration |
+| **API Contract** | REST/OpenAPI from API service | Mobile clients consume stable backend contracts |
+| **QR Code** | Native platform libraries | Display and scan voucher QR codes with platform APIs |
 
-### 2.2. Frontend — Vendor App
+### 2.2. Frontend — Vendor Native Apps
 
 | Thành phần | Công nghệ | Rationale |
 |---|---|---|
-| **Framework** | React Native + Expo | Cùng stack với mobile app, chia sẻ `packages/shared` |
-| **QR Scanner** | expo-camera | Vendor quét QR voucher của khách |
-| **Notifications** | expo-notifications + FCM | Nhận thông báo đơn mới real-time |
+| **iOS** | SwiftUI | Native order, scan, service, and settings workflows |
+| **Android** | Kotlin + Jetpack Compose | Native order, scan, service, and settings workflows |
+| **QR Scanner** | AVFoundation / CameraX + ZXing | Vendor quét QR voucher của khách |
+| **Notifications** | APNs/FCM | Nhận thông báo đơn mới real-time |
 
 ### 2.3. Frontend — Admin Dashboard
 
@@ -162,8 +159,8 @@ S-Loco xây dựng trên stack **TypeScript end-to-end** với Bun runtime, giú
 |---|---|---|
 | Bun | 1.1+ | Runtime |
 | TypeScript | 5.5+ | Strict mode |
-| React Native | 0.76+ | New Architecture |
-| Expo SDK | 52+ | File-based routing |
+| Swift | 5.9+ | iOS native apps |
+| Kotlin | 2.0+ | Android native apps |
 | Next.js | 15+ | App Router, RSC |
 | Hono | 4+ | Web Standard |
 | PostgreSQL | 16+ | JSONB, logical replication |

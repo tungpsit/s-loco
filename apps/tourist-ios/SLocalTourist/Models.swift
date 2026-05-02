@@ -102,6 +102,11 @@ struct ServiceWire: Decodable {
     let service: ServiceCore?
     let vendor: VendorLite?
     let category: CategoryLite?
+    let distanceFromOriginKm: Double?
+    enum CodingKeys: String, CodingKey {
+        case service, vendor, category
+        case distanceFromOriginKm
+    }
 }
 
 struct ServiceDetailData: Decodable {
@@ -161,6 +166,8 @@ struct TouristService: Identifiable, Hashable {
     let description: String
     let category: String
     let vendorName: String
+    let vendorAddress: String?
+    let distanceFromOriginKm: Double?
     let originalPrice: Int
     let price: Int
     let discountPercent: Int
@@ -172,6 +179,12 @@ struct TouristService: Identifiable, Hashable {
     let imageURL: String?
 
     var isReservation: Bool { fulfillmentType == "reservation" }
+    var locationSummary: String? {
+        if let distanceFromOriginKm {
+            return String(format: "%.1f km", distanceFromOriginKm)
+        }
+        return vendorAddress
+    }
 }
 
 struct Vendor: Decodable, Identifiable, Hashable {

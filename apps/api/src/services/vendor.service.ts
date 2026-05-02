@@ -1,4 +1,3 @@
-import { getDb } from '../db'
 import { vendors } from '@S-Loco/db/schema'
 import type {
   AdminUpdateVendorInput,
@@ -7,6 +6,9 @@ import type {
   UpdateVendorStatusInput,
 } from '@S-Loco/shared/validators'
 import { and, eq, isNull, sql } from 'drizzle-orm'
+import { getDb } from '../db'
+
+type VendorStatus = UpdateVendorStatusInput['status']
 
 /** Non-null assertion for Drizzle scalar selects */
 function scalar<T>(rows: T[]): T {
@@ -62,6 +64,7 @@ export async function updateVendorStatus(vendorId: string, input: UpdateVendorSt
     pending: ['active', 'rejected'],
     active: ['suspended'],
     suspended: ['active'],
+    rejected: ['active'],
   }
   if (!valid[vendor.status]?.includes(input.status)) {
     throw new VendorError(
@@ -78,7 +81,7 @@ export async function updateVendorStatus(vendorId: string, input: UpdateVendorSt
   const [updated] = await db
     .update(vendors)
     .set({
-      status: input.status as any,
+      status: input.status,
       rejectionReason: input.rejection_reason || null,
       updatedAt: new Date(),
     })
@@ -110,14 +113,14 @@ export async function getVendorById(vendorId: string) {
   return vendor
 }
 
-export async function listVendors(opts: { status?: string; page?: number; limit?: number }) {
+export async function listVendors(opts: { status?: VendorStatus; page?: number; limit?: number }) {
   const db = getDb()
   const page = opts.page || 1
   const limit = opts.limit || 20
   const offset = (page - 1) * limit
 
   const conditions = [isNull(vendors.deletedAt)]
-  if (opts.status) conditions.push(eq(vendors.status, opts.status as any))
+  if (opts.status) conditions.push(eq(vendors.status, opts.status))
 
   const items = await db
     .select()
@@ -185,6 +188,12 @@ export async function adminUpdateVendor(vendorId: string, data: AdminUpdateVendo
       ...(data.commission_rate !== undefined && { commissionRate: data.commission_rate }),
       ...(data.app_discount_percent !== undefined && {
         appDiscountPercent: data.app_discount_percent,
+      }),
+      ...(data.logo_url !== undefined && { logoUrl: data.logo_url }),
+      ...(data.cover_image_url !== undefined && { coverImageUrl: data.cover_image_url }),
+      ...(data.settlement_type !== undefined && { settlementType: data.settlement_type }),
+      ...(data.settlement_period_days !== undefined && {
+        settlementPeriodDays: data.settlement_period_days,
       }),
       ...(metadata !== undefined && { metadata }),
       updatedAt: new Date(),

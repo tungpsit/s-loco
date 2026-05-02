@@ -8,7 +8,7 @@
 - **API:** Hono + TypeScript
 - **Database:** PostgreSQL 16 + Drizzle ORM
 - **Cache/Queue:** Redis 7 + BullMQ
-- **Mobile:** React Native + Expo SDK 54
+- **Mobile:** Native Android + native iOS
 - **Admin:** Next.js 15 + shadcn/ui + Tailwind CSS v4
 - **Payments:** VNPay + Momo + SePay
 
@@ -36,23 +36,25 @@ bun run --filter api dev
 # 7. Start admin dashboard
 bun run --filter admin dev
 
-# 8. Start mobile (Expo)
-cd apps/mobile && bun run dev
+# 8. Open native mobile apps
+open apps/tourist-ios/SLocalTourist.xcodeproj
+gradle -p apps/tourist-android :app:installDebug
 ```
 
 **Default Credentials:**
 - Admin: `admin@sloco.vn` / `admin123`
 - API: `http://localhost:3000`
 - Admin Dashboard: `http://localhost:3001`
-- Mobile (Expo): `exp://localhost:8081`
 
 ## Project Structure
 
 ```
 apps/
 ├── api/          # Hono API server
-├── mobile/       # React Native (Tourist app)
-├── vendor/       # React Native (Vendor app)
+├── tourist-ios/  # Native iOS tourist app
+├── tourist-android/ # Native Android tourist app
+├── vendor-ios/   # Native iOS vendor app
+├── vendor-android/ # Native Android vendor app
 └── admin/        # Next.js 15 (Admin dashboard)
 packages/
 ├── db/           # Drizzle ORM schema + migrations

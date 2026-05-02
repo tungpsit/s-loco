@@ -2,9 +2,9 @@ import { getDb } from '../db'
 import { users } from '@S-Loco/db/schema'
 import { APP_CONSTANTS } from '@S-Loco/shared'
 import { eq } from 'drizzle-orm'
-import { verifyPassword } from '../lib/password'
+import { hashPassword, verifyPassword } from '../lib/password'
 import { verifyOtp } from './otp.service'
-import { generateAccessToken, generateRefreshToken } from './token.service'
+import { generateAccessToken, generateRefreshToken, revokeAllSessions } from './token.service'
 
 // ─── OTP Login (Tourist) ───────────────────────────────
 export async function registerOrLoginWithOtp(
@@ -117,10 +117,52 @@ export async function getProfile(userId: string) {
   return sanitizeUser(user)
 }
 
+// ─── Password Security ─────────────────────────────────
+export async function changePassword(userId: string, currentPassword: string, newPassword: string) {
+  const db = getDb()
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+
+  if (!user) {
+    throw new AuthError('USER_NOT_FOUND', 'Người dùng không tồn tại.')
+  }
+  if (!user.passwordHash) {
+    throw new AuthError('NO_PASSWORD', 'Tài khoản chưa được thiết lập mật khẩu.')
+  }
+
+  const isValid = await verifyPassword(currentPassword, user.passwordHash)
+  if (!isValid) {
+    throw new AuthError('INVALID_CURRENT_PASSWORD', 'Mật khẩu hiện tại không đúng.')
+  }
+
+  const passwordHash = await hashPassword(newPassword)
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, userId))
+  await revokeAllSessions(userId)
+}
+
+export async function resetPassword(userId: string) {
+  const db = getDb()
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+
+  if (!user) {
+    throw new AuthError('USER_NOT_FOUND', 'Người dùng không tồn tại.')
+  }
+
+  const temporaryPassword = generateTemporaryPassword()
+  const passwordHash = await hashPassword(temporaryPassword)
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, userId))
+  await revokeAllSessions(userId)
+
+  return { temporary_password: temporaryPassword }
+}
+
 // ─── Helpers ───────────────────────────────────────────
 function sanitizeUser(user: typeof users.$inferSelect) {
   const { passwordHash, deletedAt, ...safe } = user
   return safe
+}
+
+function generateTemporaryPassword() {
+  return `${crypto.randomUUID().replaceAll('-', '').slice(0, 14)}A1`
 }
 
 // ─── Auth Error ────────────────────────────────────────

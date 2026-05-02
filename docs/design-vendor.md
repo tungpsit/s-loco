@@ -1,12 +1,12 @@
 # S-Loco Vendor App — Design Specification
 
-> **App:** S-Loco Vendor (`apps/vendor`)
-> **Framework:** Expo 55 + expo-router (file-based routing)
+> **App:** S-Loco Vendor native (`apps/vendor-ios`, `apps/vendor-android`)
+> **Framework:** SwiftUI on iOS, Kotlin + Jetpack Compose on Android
 > **Theme:** Coastal Editorial — adapted for operational/vendor context
 > **Language:** Vietnamese throughout
 > **Currency:** VND format `xxx.xxx₫`
 
-This document supplements `DESIGN.md` (root) and `apps/vendor/DESIGN.md` with mobile-specific design tokens, navigation patterns, key UI components, and operational patterns.
+This document supplements `DESIGN.md` (root) with mobile-specific design tokens, navigation patterns, key UI components, and operational patterns for the native vendor apps.
 
 ---
 
@@ -71,15 +71,16 @@ Identical to tourist mobile app. Standard `spacing.1`–`spacing.12` scale appli
 
 ### 2.1 Bottom Tab Navigator
 
-Five fixed tabs (vendor has one more than tourist):
+Six fixed tabs:
 
 | # | Tab | Icon | Badge | Route |
 |---|-----|------|-------|-------|
 | 1 | Trang chủ | home | — | `(tabs)/index` |
 | 2 | Quét QR | qr-code-scanner | red dot | `(tabs)/scan` |
 | 3 | Đơn hàng | shopping-bag | order count | `(tabs)/orders` |
-| 4 | Thu nhập | wallet | — | `(tabs)/earnings` |
-| 5 | Cài đặt | cog | — | `(tabs)/settings` |
+| 4 | Dịch vụ | ticket | — | service management |
+| 5 | Thu nhập | wallet | — | `(tabs)/earnings` |
+| 6 | Cài đặt | cog | — | `(tabs)/settings` |
 
 > **Rationale:** Settings is a tab (not tucked in profile) because vendors frequently check payouts from the main screen. Dashboard shows settlement status prominently.
 
@@ -88,37 +89,19 @@ Five fixed tabs (vendor has one more than tourist):
 ### 2.2 Screen Hierarchy
 
 ```
-apps/vendor/app/
-├── (tabs)/
-│   ├── _layout.tsx         ← Tab navigator
-│   ├── index.tsx           ← Dashboard
-│   ├── scan.tsx            ← QR Scanner
-│   ├── orders.tsx          ← Order list
-│   ├── earnings.tsx        ← Earnings & settlements
-│   └── settings.tsx        ← Settings (vendor account)
-│
-├── auth/
-│   ├── login.tsx           ← Email/password login
-│   └── verify.tsx          ← OTP (if 2FA enabled)
-│
-├── order/
-│   └── [id].tsx            ← Order detail
-│
-├── scan/
-│   ├── result.tsx          ← QR scan result
-│   └── history.tsx         ← Redemption history
-│
-├── service/
-│   ├── list.tsx            ← Service management list
-│   ├── [id]/edit.tsx       ← Edit service
-│   └── new.tsx             ← Create service
-│
-├── combo/
-│   ├── list.tsx            ← Combo list
-│   └── new.tsx             ← Create combo
-│
-└── settlement/
-    └── [id].tsx            ← Settlement detail
+apps/vendor-ios/SLocalVendor/
+├── RootView.swift          ← Tab navigator
+├── DashboardView.swift     ← Dashboard
+├── ScanView.swift          ← QR scanner
+├── OrdersView.swift        ← Order list
+├── ServicesView.swift      ← Service management list + editor
+├── EarningsView.swift      ← Earnings & settlements
+└── SettingsView.swift      ← Settings
+
+apps/vendor-android/app/src/main/java/com/slocal/vendor/
+├── ui/VendorApp.kt         ← Tab navigator + screens
+├── ui/AppState.kt          ← App state/actions
+└── data/VendorApi.kt       ← API client
 ```
 
 ---

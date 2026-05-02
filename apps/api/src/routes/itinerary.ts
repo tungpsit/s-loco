@@ -1,3 +1,4 @@
+import { itineraryGenerateSchema } from '@S-Loco/shared/validators'
 import { Hono } from 'hono'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { generateItinerary } from '../services/itinerary.service'
@@ -12,17 +13,16 @@ const itineraryRoutes = new Hono()
 itineraryRoutes.use('*', authMiddleware())
 
 itineraryRoutes.post('/generate', async (c) => {
-  const body = (await c.req.json()) as {
-    days?: number
-    budget?: number
-    preferences?: string[]
-    group_type?: string
-  }
+  const body = itineraryGenerateSchema.parse(await c.req.json())
   const result = await generateItinerary({
     days: body.days || 2,
     budget: body.budget || 2000000,
     preferences: body.preferences || ['biển', 'ẩm thực'],
     groupType: body.group_type || 'couple',
+    stayLocationLabel: body.stay_location_label,
+    stayLatitude: body.stay_latitude,
+    stayLongitude: body.stay_longitude,
+    preferNearStay: body.prefer_near_stay ?? false,
   })
   return c.json({ success: true, data: result })
 })
@@ -40,14 +40,18 @@ itineraryRoutes.post('/save', requireRole('tourist'), async (c) => {
       result_json?: Record<string, unknown>
       is_shared?: boolean
     }
-    const saved = await saveItinerary(userId, {
-      title: body.title || 'Lịch trình của tôi',
-      days: body.days || 2,
-      budget: body.budget || 2000000,
-      preferences: body.preferences || [],
-      groupType: body.group_type || 'couple',
-      resultJson: body.result_json || {},
-    }, body.is_shared ?? false)
+    const saved = await saveItinerary(
+      userId,
+      {
+        title: body.title || 'Lịch trình của tôi',
+        days: body.days || 2,
+        budget: body.budget || 2000000,
+        preferences: body.preferences || [],
+        groupType: body.group_type || 'couple',
+        resultJson: body.result_json || {},
+      },
+      body.is_shared ?? false,
+    )
     return c.json({ success: true, data: saved })
   } catch (err) {
     if (err instanceof ItinerarySaveError) {

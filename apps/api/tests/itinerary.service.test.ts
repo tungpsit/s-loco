@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
+import { getDb as getRealDb } from '@S-Loco/db'
 
 let availableServices = [
   {
@@ -10,6 +11,10 @@ let availableServices = [
     price: '100000',
     originalPrice: '150000',
     vendorName: 'S-Loco Vendor',
+    vendorAddress: '10 Hồ Xuân Hương',
+    vendorLatitude: '19.7400000',
+    vendorLongitude: '105.9000000',
+    distanceFromStayKm: 0.4,
     durationMinutes: 60,
   },
   {
@@ -21,6 +26,10 @@ let availableServices = [
     price: '180000',
     originalPrice: '220000',
     vendorName: 'S-Loco Spa',
+    vendorAddress: '20 Hồ Xuân Hương',
+    vendorLatitude: '19.7600000',
+    vendorLongitude: '105.9100000',
+    distanceFromStayKm: 2.8,
     durationMinutes: 45,
   },
   {
@@ -32,6 +41,10 @@ let availableServices = [
     price: '90000',
     originalPrice: '120000',
     vendorName: 'S-Loco Fun',
+    vendorAddress: '30 Hồ Xuân Hương',
+    vendorLatitude: '19.7500000',
+    vendorLongitude: '105.9050000',
+    distanceFromStayKm: 1.2,
     durationMinutes: 90,
   },
 ]
@@ -55,9 +68,14 @@ const query = {
 }
 
 mock.module('../src/db', () => ({
-  getDb: () => ({
-    select: () => query,
-  }),
+  getDb: () =>
+    new Proxy(getRealDb() as any, {
+      get(target, prop, receiver) {
+        if (prop === 'select') return () => query
+        const value = Reflect.get(target, prop, receiver)
+        return typeof value === 'function' ? value.bind(target) : value
+      },
+    }),
 }))
 
 const originalEnv = { ...process.env }
@@ -79,6 +97,10 @@ beforeEach(() => {
       price: '100000',
       originalPrice: '150000',
       vendorName: 'S-Loco Vendor',
+      vendorAddress: '10 Hồ Xuân Hương',
+      vendorLatitude: '19.7400000',
+      vendorLongitude: '105.9000000',
+      distanceFromStayKm: 0.4,
       durationMinutes: 60,
     },
     {
@@ -90,6 +112,10 @@ beforeEach(() => {
       price: '180000',
       originalPrice: '220000',
       vendorName: 'S-Loco Spa',
+      vendorAddress: '20 Hồ Xuân Hương',
+      vendorLatitude: '19.7600000',
+      vendorLongitude: '105.9100000',
+      distanceFromStayKm: 2.8,
       durationMinutes: 45,
     },
     {
@@ -101,6 +127,10 @@ beforeEach(() => {
       price: '90000',
       originalPrice: '120000',
       vendorName: 'S-Loco Fun',
+      vendorAddress: '30 Hồ Xuân Hương',
+      vendorLatitude: '19.7500000',
+      vendorLongitude: '105.9050000',
+      distanceFromStayKm: 1.2,
       durationMinutes: 90,
     },
   ]
@@ -146,6 +176,10 @@ describe('generateItinerary', () => {
       budget: 123000,
       preferences: ['food'],
       groupType: 'couple',
+      stayLocationLabel: 'Khách sạn gần biển',
+      stayLatitude: 19.742,
+      stayLongitude: 105.901,
+      preferNearStay: true,
     })
 
     expect(calls).toHaveLength(1)
@@ -162,6 +196,9 @@ describe('generateItinerary', () => {
       max_tokens: 4096,
     })
     expect(body.messages[0]).toMatchObject({ role: 'user' })
+    expect(body.messages[0].content).toContain('Vị trí lưu trú: Khách sạn gần biển')
+    expect(body.messages[0].content).toContain('10 Hồ Xuân Hương')
+    expect(body.messages[0].content).toContain('cách nơi lưu trú 0.4km')
     expect(result.title).toBe('Custom AI itinerary')
   })
 
@@ -355,5 +392,64 @@ describe('generateItinerary', () => {
     expect(activities).toHaveLength(4)
     expect(activities.every((activity) => activity.service_id === null)).toBe(true)
     expect(result.total_estimated_cost).toBe(0)
+  })
+
+  test('fallback prefers closer matching services only when near-stay preference is enabled', async () => {
+    availableServices = [
+      {
+        id: 'food-far',
+        name: 'Nhà hàng xa',
+        category: 'Ẩm thực',
+        categorySlug: 'am-thuc',
+        description: 'Bữa trưa hải sản',
+        price: '100000',
+        originalPrice: '100000',
+        vendorName: 'Quán xa',
+        vendorAddress: 'Xa khách sạn',
+        vendorLatitude: '19.7800000',
+        vendorLongitude: '105.9300000',
+        distanceFromStayKm: 4.5,
+        durationMinutes: 60,
+      },
+      {
+        id: 'food-near',
+        name: 'Nhà hàng gần',
+        category: 'Ẩm thực',
+        categorySlug: 'am-thuc',
+        description: 'Bữa trưa hải sản',
+        price: '100000',
+        originalPrice: '100000',
+        vendorName: 'Quán gần',
+        vendorAddress: 'Gần khách sạn',
+        vendorLatitude: '19.7420000',
+        vendorLongitude: '105.9010000',
+        distanceFromStayKm: 0.2,
+        durationMinutes: 60,
+      },
+    ]
+    delete process.env.OPENAI_API_KEY
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const withoutPreference = await generateItinerary({
+      days: 1,
+      budget: 700000,
+      preferences: ['ẩm thực'],
+      groupType: 'family',
+      stayLatitude: 19.742,
+      stayLongitude: 105.901,
+      preferNearStay: false,
+    })
+    const withPreference = await generateItinerary({
+      days: 1,
+      budget: 700000,
+      preferences: ['ẩm thực'],
+      groupType: 'family',
+      stayLatitude: 19.742,
+      stayLongitude: 105.901,
+      preferNearStay: true,
+    })
+
+    expect(withoutPreference.days[0]?.activities[0]?.service_id).toBe('food-far')
+    expect(withPreference.days[0]?.activities[0]?.service_id).toBe('food-near')
   })
 })

@@ -6,7 +6,7 @@
 
 ## 1. System Overview
 
-S-Loco is a **TypeScript end-to-end monorepo** travel super-app targeting Sầm Sơn, Vietnam. Built on **Bun runtime** for consistency across mobile, vendor, admin, and API layers.
+S-Loco is a travel super-app targeting Sầm Sơn, Vietnam. The API, admin, and shared packages run in a Bun/TypeScript monorepo; mobile clients are maintained as native Android and iOS apps.
 
 ### 1.1 What S-Loco Does
 
@@ -19,8 +19,10 @@ S-Loco connects tourists with local service vendors (restaurants, hotels, spa, e
 ```
 S-Loco/
 ├── apps/
-│   ├── mobile/          # React Native / Expo (tourist app)
-│   ├── vendor/          # React Native / Expo (vendor app)
+│   ├── tourist-ios/     # Native iOS tourist app
+│   ├── tourist-android/ # Native Android tourist app
+│   ├── vendor-ios/      # Native iOS vendor app
+│   ├── vendor-android/  # Native Android vendor app
 │   ├── admin/           # Next.js 15 (admin dashboard)
 │   └── api/             # Hono API server
 ├── packages/
@@ -168,8 +170,8 @@ vendor_amount      = customer_paid − commission_amount
 
 | Layer | Technology |
 |---|---|
-| Mobile (tourist) | React Native + Expo SDK 52+, Expo Router, Zustand, TanStack Query |
-| Mobile (vendor) | React Native + Expo, expo-camera (QR scanning) |
+| Mobile (tourist) | Native iOS (SwiftUI) + native Android (Kotlin/Jetpack Compose) |
+| Mobile (vendor) | Native iOS (SwiftUI) + native Android (Kotlin/Jetpack Compose) |
 | Admin | Next.js 15 (App Router), shadcn/ui, Tailwind CSS v4, TanStack Table, Recharts |
 | API Runtime | Bun 1.x, Hono 4, Zod |
 | ORM | Drizzle ORM 0.36+ |
@@ -196,4 +198,4 @@ vendor_amount      = customer_paid − commission_amount
 | **Observability** | Structured JSON logs (Pino), `X-Request-ID` correlation across services, Sentry error tracking |
 | **Data Integrity** | Idempotency keys on payment/settlement requests; atomic voucher state transitions; audit log for orders/payments/settlements |
 | **Localization** | UI strings support Vietnamese (`vi`) and English (`en`); `Accept-Language` header respected |
-| **Mobile** | iOS and Android via React Native / Expo; PWA fallback for web |
+| **Mobile** | Native iOS and Android clients for tourist and vendor workflows |

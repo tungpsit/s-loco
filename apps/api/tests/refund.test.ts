@@ -22,7 +22,7 @@ describe('Partial Refund API', () => {
 
   // ─── Endpoint Existence ────────────────────────────────────────────────────
   describe('Endpoint Wiring', () => {
-    test('POST /vouchers/:id/refund — returns 404 when not wired (missing route)', async () => {
+    test('POST /vouchers/:id/refund — route is wired and rejects non-tourist roles', async () => {
       const token = await adminLogin()
       if (!token) return
 
@@ -30,14 +30,13 @@ describe('Partial Refund API', () => {
         method: 'POST',
         token,
       })
-      // Route not yet wired — should return 404 from Hono's 404 handler
-      expect(status).toBe(404)
+      expect(status).toBe(403)
     })
   })
 
   // ─── Validation ─────────────────────────────────────────────────────────────
   describe('Validation', () => {
-    test('POST /vouchers/:id/refund — invalid UUID returns 400 or 404', async () => {
+    test('POST /vouchers/:id/refund — invalid UUID is still role-protected', async () => {
       const token = await adminLogin()
       if (!token) return
 
@@ -45,10 +44,10 @@ describe('Partial Refund API', () => {
         method: 'POST',
         token,
       })
-      expect([400, 404]).toContain(status)
+      expect(status).toBe(403)
     })
 
-    test('POST /vouchers/:id/refund — accepts optional reason field', async () => {
+    test('POST /vouchers/:id/refund — rejects non-tourist users even with optional reason field', async () => {
       const token = await adminLogin()
       if (!token) return
 
@@ -57,8 +56,7 @@ describe('Partial Refund API', () => {
         token,
         json: { reason: 'Khách yêu cầu hủy' },
       })
-      // Route may or may not be wired yet; this confirms body parsing works
-      expect([200, 400, 404]).toContain(status)
+      expect(status).toBe(403)
     })
   })
 

@@ -351,6 +351,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(service.name, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = TextMain)
                 Text(service.vendorName.ifBlank { "S-Loco partner" }, color = Blue, fontWeight = FontWeight.SemiBold)
+                service.locationSummary()?.let { Text(it, color = TextMuted) }
                 Text("★ ${service.rating}", color = TextMuted)
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (service.isReservation) {
@@ -1131,6 +1132,7 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(service.name, color = TextMain, fontWeight = FontWeight.ExtraBold, maxLines = 2)
             Text(service.vendorName, color = TextMuted, fontSize = 12.sp, maxLines = 1)
+            service.locationSummary()?.let { Text(it, color = TextMuted, fontSize = 12.sp, maxLines = 1) }
             if (service.isReservation) Text("Đặt chỗ trước, nhận mã ưu đãi iPos", color = TextMuted, fontSize = 12.sp)
             else if (service.originalPrice > service.price) Text(formatVnd(service.originalPrice), color = TextMuted, fontSize = 12.sp)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -1788,6 +1790,8 @@ private fun parseService(obj: JsonObject): Service? {
         description = service.str("description"),
         category = category?.str("name").ifNullOrBlank { service.str("category") },
         vendorName = vendor?.str("name").ifNullOrBlank { service.str("vendor_name") },
+        vendorAddress = vendor?.str("address").orEmpty(),
+        distanceFromOriginKm = obj.num("distanceFromOriginKm", "distance_from_origin_km").takeIf { it > 0 },
         originalPrice = original,
         price = price,
         discountPercent = discount,
@@ -1942,6 +1946,8 @@ private data class Service(
     val description: String,
     val category: String,
     val vendorName: String,
+    val vendorAddress: String,
+    val distanceFromOriginKm: Double?,
     val originalPrice: Int,
     val price: Int,
     val discountPercent: Int,
@@ -1952,6 +1958,8 @@ private data class Service(
     val durationMinutes: Int,
 ) {
     val isReservation: Boolean get() = fulfillmentType == "reservation"
+    fun locationSummary(): String? = distanceFromOriginKm?.let { String.format("%.1f km", it) }
+        ?: vendorAddress.takeIf { it.isNotBlank() }
 }
 
 private data class Vendor(val id: String, val name: String, val address: String, val rating: Double)

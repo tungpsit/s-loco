@@ -226,6 +226,8 @@ final class APIClient {
             description: service.description ?? "",
             category: item.category?.name ?? "",
             vendorName: item.vendor?.name ?? "",
+            vendorAddress: item.vendor?.address,
+            distanceFromOriginKm: item.distanceFromOriginKm,
             originalPrice: original,
             price: price,
             discountPercent: discount,

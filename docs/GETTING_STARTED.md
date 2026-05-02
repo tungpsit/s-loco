@@ -59,11 +59,17 @@ bun run --filter api dev
 # Admin dashboard (Next.js)
 bun run --filter admin dev
 
-# Tourist mobile app (Expo)
-cd apps/mobile && bun run dev
+# Tourist iOS native app
+open apps/tourist-ios/SLocalTourist.xcodeproj
 
-# Vendor mobile app (Expo)
-cd apps/vendor && bun run dev
+# Tourist Android native app
+gradle -p apps/tourist-android :app:installDebug
+
+# Vendor iOS native app
+open apps/vendor-ios/SLocalVendor.xcodeproj
+
+# Vendor Android native app
+gradle -p apps/vendor-android :app:installDebug
 ```
 
 ## Service URLs
@@ -73,7 +79,6 @@ cd apps/vendor && bun run dev
 | API | `http://localhost:3000` |
 | API Health | `http://localhost:3000/health` |
 | Admin Dashboard | `http://localhost:3001` |
-| Mobile (Expo) | `exp://localhost:8081` |
 | PostgreSQL | `localhost:5432` |
 | Redis | `localhost:6379` |
 

@@ -1,6 +1,7 @@
 import { serviceCategories, services, vendors } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
 import { getDb } from '../db'
+import { calculateDistanceKm, hasGeoPoint, parseCoordinate } from '../lib/geo'
 
 const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1'
 const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
@@ -10,6 +11,10 @@ interface ItineraryInput {
   budget: number
   preferences: string[]
   groupType: string
+  stayLocationLabel?: string
+  stayLatitude?: number
+  stayLongitude?: number
+  preferNearStay?: boolean
 }
 
 interface AvailableService {
@@ -21,6 +26,10 @@ interface AvailableService {
   price: string | null
   originalPrice: string
   vendorName: string
+  vendorAddress?: string | null
+  vendorLatitude?: string | number | null
+  vendorLongitude?: string | number | null
+  distanceFromStayKm?: number | null
   durationMinutes?: number | null
 }
 
@@ -93,6 +102,9 @@ export async function generateItinerary(input: ItineraryInput) {
       price: services.discountPrice,
       originalPrice: services.originalPrice,
       vendorName: vendors.name,
+      vendorAddress: vendors.address,
+      vendorLatitude: vendors.latitude,
+      vendorLongitude: vendors.longitude,
       durationMinutes: services.durationMinutes,
     })
     .from(services)
@@ -101,10 +113,12 @@ export async function generateItinerary(input: ItineraryInput) {
     .where(and(eq(services.isActive, true), eq(vendors.status, 'active')))
     .limit(50)
 
-  const serviceList = buildServiceCatalog(availableServices)
+  const servicesWithDistance = attachDistanceFromStay(availableServices, input)
+  const serviceList = buildServiceCatalog(servicesWithDistance)
   const slotRules = SLOT_ORDER.map((slot) => `- ${SLOT_LABELS[slot]}: ${SLOT_RULES[slot]}`).join(
     '\n',
   )
+  const locationContext = buildLocationContext(input)
 
   const prompt = `Bạn là một hướng dẫn viên du lịch chuyên nghiệp tại Sầm Sơn, Thanh Hóa, Việt Nam.
 Tạo lịch trình du lịch chi tiết cho khách du lịch với thông tin sau:
@@ -112,6 +126,7 @@ Tạo lịch trình du lịch chi tiết cho khách du lịch với thông tin s
 - Ngân sách: ${input.budget.toLocaleString('vi-VN')}đ
 - Sở thích: ${input.preferences.join(', ')}
 - Loại nhóm: ${input.groupType}
+${locationContext}
 
 Nhịp lịch trình mỗi ngày:
 ${slotRules}
@@ -171,12 +186,57 @@ Trả về JSON (không markdown) theo format:
     const data = (await res.json()) as ChatCompletionResponse
     const text = data.choices?.[0]?.message?.content || data.choices?.[0]?.text || ''
     const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) return validateItinerary(JSON.parse(jsonMatch[0]), input, availableServices)
+    if (jsonMatch) return validateItinerary(JSON.parse(jsonMatch[0]), input, servicesWithDistance)
   } catch (err) {
     console.error('[Itinerary] AI API error:', err)
   }
 
-  return generateFallbackItinerary(input, availableServices)
+  return generateFallbackItinerary(input, servicesWithDistance)
+}
+
+function attachDistanceFromStay(availableServices: AvailableService[], input: ItineraryInput) {
+  if (!hasGeoPoint({ latitude: input.stayLatitude, longitude: input.stayLongitude })) {
+    return availableServices
+  }
+
+  const stayLatitude = input.stayLatitude
+  const stayLongitude = input.stayLongitude
+  if (stayLatitude === undefined || stayLongitude === undefined) return availableServices
+
+  const stayPoint = { latitude: stayLatitude, longitude: stayLongitude }
+  return availableServices.map((service) => {
+    if (service.distanceFromStayKm !== undefined && service.distanceFromStayKm !== null) {
+      return service
+    }
+    const latitude = parseCoordinate(service.vendorLatitude)
+    const longitude = parseCoordinate(service.vendorLongitude)
+    if (latitude === undefined || longitude === undefined) return service
+
+    return {
+      ...service,
+      distanceFromStayKm: calculateDistanceKm(stayPoint, { latitude, longitude }),
+    }
+  })
+}
+
+function buildLocationContext(input: ItineraryInput) {
+  if (
+    !input.stayLocationLabel &&
+    input.stayLatitude === undefined &&
+    input.stayLongitude === undefined
+  ) {
+    return '- Vị trí lưu trú: chưa cung cấp\n- Ưu tiên gần nơi lưu trú: Không'
+  }
+
+  const coordinates =
+    input.stayLatitude !== undefined && input.stayLongitude !== undefined
+      ? ` (${input.stayLatitude}, ${input.stayLongitude})`
+      : ''
+  const label = input.stayLocationLabel || 'tọa độ khách cung cấp'
+  const preference = input.preferNearStay
+    ? 'Có - ưu tiên dịch vụ gần nơi lưu trú khi vẫn phù hợp sở thích, ngân sách và nhịp ngày'
+    : 'Không - chỉ dùng vị trí làm thông tin tham khảo, không ép chọn dịch vụ gần'
+  return `- Vị trí lưu trú: ${label}${coordinates}\n- Ưu tiên gần nơi lưu trú: ${preference}`
 }
 
 function buildServiceCatalog(availableServices: AvailableService[]) {
@@ -194,7 +254,12 @@ function buildServiceCatalog(availableServices: AvailableService[]) {
     .map(([category, items]) => {
       const rows = items.map((service) => {
         const price = getServicePrice(service)
-        return `  - ${service.name} — ${price}đ tại ${service.vendorName} [ID: ${service.id}]`
+        const address = service.vendorAddress ? `, ${service.vendorAddress}` : ''
+        const distance =
+          service.distanceFromStayKm !== undefined && service.distanceFromStayKm !== null
+            ? `, cách nơi lưu trú ${service.distanceFromStayKm}km`
+            : ''
+        return `  - ${service.name} — ${price}đ tại ${service.vendorName}${address}${distance} [ID: ${service.id}]`
       })
       return `${category}:\n${rows.join('\n')}`
     })
@@ -217,7 +282,9 @@ function validateItinerary(
       const needsReplacement = Boolean(activity.service_id && !service)
 
       if (needsReplacement) {
-        service = selectService(availableServices, slot, input.preferences, usedServiceIds)
+        service = selectService(availableServices, slot, input.preferences, usedServiceIds, {
+          preferNearStay: input.preferNearStay,
+        })
       }
 
       if (service) {
@@ -231,7 +298,13 @@ function validateItinerary(
       ...day,
       day: Number(day.day || index + 1),
       title: day.title || `Ngày ${index + 1}`,
-      activities: diversifyDay(activities, availableServices, input.preferences, usedServiceIds),
+      activities: diversifyDay(
+        activities,
+        availableServices,
+        input.preferences,
+        usedServiceIds,
+        input.preferNearStay,
+      ),
     }
   })
 
@@ -263,7 +336,7 @@ function generateFallbackItinerary(input: ItineraryInput, availableServices: Ava
               slot,
               input.preferences,
               usedServiceIds,
-              { allowRepeatWhenExhausted: true },
+              { allowRepeatWhenExhausted: true, preferNearStay: input.preferNearStay },
             )
             if (!service) return []
             usedServiceIds.add(service.id)
@@ -314,6 +387,7 @@ function diversifyDay(
   availableServices: AvailableService[],
   preferences: string[],
   usedServiceIds: Set<string>,
+  preferNearStay = false,
 ) {
   if (activities.length === 0) return activities
 
@@ -332,6 +406,7 @@ function diversifyDay(
   const slot = inferSlot(activities[replacementIndex]!.time)
   const replacement = selectService(availableServices, slot, preferences, usedServiceIds, {
     requireNonFood: true,
+    preferNearStay,
   })
   if (!replacement) return activities
 
@@ -375,7 +450,11 @@ function selectService(
   slot: ItinerarySlot,
   preferences: string[],
   usedServiceIds: Set<string>,
-  opts: { allowRepeatWhenExhausted?: boolean; requireNonFood?: boolean } = {},
+  opts: {
+    allowRepeatWhenExhausted?: boolean
+    requireNonFood?: boolean
+    preferNearStay?: boolean
+  } = {},
 ) {
   const candidates = rankServices(
     servicesPool,
@@ -383,15 +462,21 @@ function selectService(
     preferences,
     usedServiceIds,
     opts.requireNonFood,
+    opts.preferNearStay,
   )
   const service = candidates.find(
     (candidate) => candidate.score > Number.NEGATIVE_INFINITY,
   )?.service
   if (service || !opts.allowRepeatWhenExhausted) return service
 
-  return rankServices(servicesPool, slot, preferences, new Set(), opts.requireNonFood).find(
-    (candidate) => candidate.score > Number.NEGATIVE_INFINITY,
-  )?.service
+  return rankServices(
+    servicesPool,
+    slot,
+    preferences,
+    new Set(),
+    opts.requireNonFood,
+    opts.preferNearStay,
+  ).find((candidate) => candidate.score > Number.NEGATIVE_INFINITY)?.service
 }
 
 function rankServices(
@@ -400,12 +485,13 @@ function rankServices(
   preferences: string[],
   usedServiceIds: Set<string>,
   requireNonFood = false,
+  preferNearStay = false,
 ) {
   return servicesPool
     .filter((service) => !requireNonFood || !isFoodService(service))
     .map((service, index) => ({
       service,
-      score: scoreService(service, slot, preferences, usedServiceIds, index),
+      score: scoreService(service, slot, preferences, usedServiceIds, index, preferNearStay),
     }))
     .sort((a, b) => b.score - a.score)
 }
@@ -416,6 +502,7 @@ function scoreService(
   preferences: string[],
   usedServiceIds: Set<string>,
   index: number,
+  preferNearStay = false,
 ) {
   if (usedServiceIds.has(service.id)) return Number.NEGATIVE_INFINITY
 
@@ -425,6 +512,9 @@ function scoreService(
   }
   if (slot !== 'lunch' && !isFoodService(service)) {
     score += 10
+  }
+  if (preferNearStay) {
+    score += proximityScore(service)
   }
   score -= Math.min(getServicePrice(service) / 100000, 10)
   score -= index / 100
@@ -483,6 +573,11 @@ function defaultTips() {
 
 function getServicePrice(service: AvailableService) {
   return toNumber(service.price || service.originalPrice)
+}
+
+function proximityScore(service: AvailableService) {
+  if (service.distanceFromStayKm === undefined || service.distanceFromStayKm === null) return -20
+  return Math.max(0, 30 - service.distanceFromStayKm * 6)
 }
 
 function toNumber(value: unknown) {

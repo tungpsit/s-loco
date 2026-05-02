@@ -211,8 +211,10 @@ S-Loco/
 │   │   └── tsconfig.json
 │   │
 │   ├── admin-web/              # Admin SPA (React)
-│   ├── vendor-web/             # Vendor dashboard (React)
-│   └── tourist-web/            # Tourist PWA (Next.js)
+│   ├── tourist-ios/            # Native iOS tourist app
+│   ├── tourist-android/        # Native Android tourist app
+│   ├── vendor-ios/             # Native iOS vendor app
+│   └── vendor-android/         # Native Android vendor app
 │
 ├── packages/
 │   ├── shared-types/           # Shared TypeScript types

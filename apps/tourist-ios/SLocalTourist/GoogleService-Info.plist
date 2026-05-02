@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>vn.sloco.app</string>
+	<string>vn.sloco.tourist</string>
 	<key>PROJECT_ID</key>
 	<string>sloco-5363c</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1041617596427:ios:4073da381a44385298970e</string>
+	<string>1:1041617596427:ios:07c52bdc676416a798970e</string>
 </dict>
 </plist>

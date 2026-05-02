@@ -4,7 +4,7 @@
 
 ## 1. Giới thiệu dự án
 
-**S-Loco** là nền tảng công nghệ tích hợp dưới dạng **mobile app, web app và PWA**, được xây dựng với mục tiêu **số hóa hệ sinh thái dịch vụ du lịch tại Sầm Sơn**. Dự án hướng đến việc kết nối khách du lịch với các nhà cung cấp dịch vụ địa phương như nhà hàng, khách sạn, xe điện, quán cà phê, địa điểm giải trí, spa, cửa hàng lưu niệm và các hoạt động trải nghiệm biển.
+**S-Loco** là nền tảng công nghệ tích hợp dưới dạng **native mobile app và web admin**, được xây dựng với mục tiêu **số hóa hệ sinh thái dịch vụ du lịch tại Sầm Sơn**. Dự án hướng đến việc kết nối khách du lịch với các nhà cung cấp dịch vụ địa phương như nhà hàng, khách sạn, xe điện, quán cà phê, địa điểm giải trí, spa, cửa hàng lưu niệm và các hoạt động trải nghiệm biển.
 
 S-Loco không chỉ là một ứng dụng đặt dịch vụ, mà được định vị như một **“siêu ứng dụng bản địa”** – nơi khách du lịch và người dân địa phương có thể tìm kiếm thông tin, đặt dịch vụ, thanh toán, nhận ưu đãi và được gợi ý lịch trình phù hợp theo nhu cầu cá nhân.
 
@@ -337,7 +337,6 @@ Quy trình này giúp đảm bảo chất lượng dịch vụ đồng đều tr
 Dự án dự kiến phát triển trên các nền tảng:
 
 * **Mobile App:** iOS và Android
-* **PWA:** tăng độ phủ và khả năng truy cập nhanh
 * **Web App/Admin:** dành cho quản trị và vận hành nội bộ
 
 Các thành phần tích hợp chính gồm:

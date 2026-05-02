@@ -306,6 +306,13 @@ struct ServiceCard: View {
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
+                if let locationSummary = service.locationSummary {
+                    Label(locationSummary, systemImage: "mappin.and.ellipse")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(TouristTheme.muted)
+                        .lineLimit(1)
+                }
+
                 HStack(spacing: 4) {
                     Image(systemName: "star.fill")
                         .foregroundStyle(.yellow)

@@ -24,7 +24,7 @@ C4Context
     System_Ext(sms, "SMS/OTP", "Gửi OTP xác thực, thông báo")
     System_Ext(cdn, "CDN / Object Storage", "Lưu trữ media, hình ảnh vendor")
 
-    Rel(tourist, slocal, "Dùng app/PWA")
+    Rel(tourist, slocal, "Dùng native app")
     Rel(vendor, slocal, "Dùng vendor app")
     Rel(admin, slocal, "Dùng admin web")
     Rel(slocal, payment, "Tạo giao dịch, webhook")
@@ -47,9 +47,8 @@ C4Container
     Person(admin, "Admin")
 
     System_Boundary(slocal, "S-Loco Platform") {
-        Container(mobile, "Mobile App", "React Native / Expo", "iOS & Android — khách du lịch")
-        Container(pwa, "PWA", "React Native Web", "Truy cập nhanh không cần cài đặt")
-        Container(vendorApp, "Vendor App", "React Native / Expo", "Quản lý đơn, quét QR")
+        Container(mobile, "Tourist Native Apps", "SwiftUI / Kotlin", "iOS & Android — khách du lịch")
+        Container(vendorApp, "Vendor Native Apps", "SwiftUI / Kotlin", "Quản lý đơn, quét QR")
         Container(adminWeb, "Admin Dashboard", "Next.js 15", "Quản trị toàn hệ thống")
         Container(apiGw, "API Gateway", "Node.js + Hono", "Routing, auth, rate limiting")
         Container(authSvc, "Auth Service", "Node.js", "Đăng nhập, JWT, OTP, RBAC")
@@ -70,11 +69,9 @@ C4Container
     System_Ext(push, "FCM")
 
     Rel(tourist, mobile, "Sử dụng")
-    Rel(tourist, pwa, "Sử dụng")
     Rel(vendor, vendorApp, "Sử dụng")
     Rel(admin, adminWeb, "Sử dụng")
     Rel(mobile, apiGw, "HTTPS/REST")
-    Rel(pwa, apiGw, "HTTPS/REST")
     Rel(vendorApp, apiGw, "HTTPS/REST")
     Rel(adminWeb, apiGw, "HTTPS/REST")
     Rel(apiGw, authSvc, "Internal")
@@ -225,8 +222,10 @@ sequenceDiagram
 ```
 S-Loco/
 ├── apps/
-│   ├── mobile/          # React Native / Expo (khách du lịch)
-│   ├── vendor/          # React Native / Expo (vendor)
+│   ├── tourist-ios/     # Native iOS app cho khách du lịch
+│   ├── tourist-android/ # Native Android app cho khách du lịch
+│   ├── vendor-ios/      # Native iOS app cho vendor
+│   ├── vendor-android/  # Native Android app cho vendor
 │   ├── admin/           # Next.js 15 (admin dashboard)
 │   └── api/             # API server (Hono)
 ├── packages/

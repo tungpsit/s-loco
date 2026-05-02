@@ -5,14 +5,55 @@ const TOKEN_KEY = 'sloco_admin_token'
 
 // Token stored in memory for admin session
 let authToken: string | null = null
-export function setAuthToken(token: string | null) { authToken = token }
-export function getAuthToken() { return authToken }
+export function setAuthToken(token: string | null) {
+  authToken = token
+}
+export function getAuthToken() {
+  return authToken
+}
 
-export async function api<T = any>(path: string, opts?: RequestInit & { noAuth?: boolean }): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...opts?.headers as Record<string, string> }
+type ApiJson = {
+  [key: string]:
+    | ApiJson
+    | ApiJson[]
+    | string
+    | number
+    | boolean
+    | Record<string, number | undefined>
+    | undefined
+  data?: ApiJson
+  items?: ApiJson
+  total?: number
+  title?: string
+  slug?: string
+  category?: string
+  content?: string
+  coverImage?: string
+  cover_image?: string
+  isPublished?: boolean
+  is_published?: boolean
+  revenue?: { orders?: number; total?: number }
+  vendors?: { active?: number }
+  vouchersToday?: number
+  todayVouchers?: number
+  totalOrders?: number
+  totalRevenue?: number
+  activeVendors?: number
+} & ApiJson[]
+
+export async function api<T = ApiJson>(
+  path: string,
+  opts?: RequestInit & { noAuth?: boolean },
+): Promise<T> {
+  const isFormData = opts?.body instanceof FormData
+  const headers: Record<string, string> = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(opts?.headers as Record<string, string>),
+  }
 
   // Get token from memory or localStorage
-  const token = authToken || (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null)
+  const token =
+    authToken || (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null)
 
   if (token && !opts?.noAuth) {
     headers.Authorization = `Bearer ${token}`
@@ -36,14 +77,23 @@ export async function api<T = any>(path: string, opts?: RequestInit & { noAuth?:
   }
 
   const data = await res.json()
-  if (!res.ok) throw new ApiError(data?.error?.code || 'ERROR', data?.error?.message || 'API error', res.status)
+  if (!res.ok)
+    throw new ApiError(
+      data?.error?.code || 'ERROR',
+      data?.error?.message || 'API error',
+      res.status,
+    )
   return data as T
 }
 
 export class ApiError extends Error {
-  code: string; status: number
+  code: string
+  status: number
   constructor(code: string, message: string, status: number) {
-    super(message); this.code = code; this.status = status; this.name = 'ApiError'
+    super(message)
+    this.code = code
+    this.status = status
+    this.name = 'ApiError'
   }
 }
 
@@ -63,10 +113,54 @@ export const vendorApi = {
     return api(`/admin/vendors?${q}`)
   },
   getById: (id: string) => api(`/admin/vendors/${id}`),
-  create: (data: Record<string, any>) => api('/admin/vendors', { method: 'POST', body: JSON.stringify(data) }),
-  update: (id: string, data: Record<string, any>) => api(`/admin/vendors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  approve: (id: string) => api(`/admin/vendors/${id}/status`, { method: 'PUT', body: JSON.stringify({ status: 'active' }) }),
-  suspend: (id: string) => api(`/admin/vendors/${id}/status`, { method: 'PUT', body: JSON.stringify({ status: 'suspended' }) }),
+  create: (data: Record<string, unknown>) =>
+    api('/admin/vendors', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: Record<string, unknown>) =>
+    api(`/admin/vendors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  approve: (id: string) =>
+    api(`/admin/vendors/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'active' }),
+    }),
+  reject: (id: string, rejectionReason: string) =>
+    api(`/admin/vendors/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'rejected', rejection_reason: rejectionReason }),
+    }),
+  suspend: (id: string) =>
+    api(`/admin/vendors/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'suspended' }),
+    }),
+  reactivate: (id: string) =>
+    api(`/admin/vendors/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'active' }),
+    }),
+}
+
+// ─── Services ───
+export const serviceApi = {
+  categories: () => api('/services/categories'),
+  listByVendor: (vendorId: string) => api(`/services/vendor/${vendorId}`),
+  adminCreate: (vendorId: string, data: Record<string, unknown>) =>
+    api(`/admin/vendors/${vendorId}/services`, { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdate: (id: string, data: Record<string, unknown>) =>
+    api(`/admin/services/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  adminDelete: (id: string) => api(`/admin/services/${id}`, { method: 'DELETE' }),
+}
+
+// ─── Uploads ───
+export const uploadApi = {
+  image: (file: File, purpose: 'vendor_logo' | 'vendor_cover' | 'service_image') => {
+    const body = new FormData()
+    body.set('file', file)
+    body.set('purpose', purpose)
+    return api<{ success: boolean; data: { key: string; url: string } }>('/admin/uploads', {
+      method: 'POST',
+      body,
+    })
+  },
 }
 
 // ─── Orders ───
@@ -98,7 +192,14 @@ export const contentApi = {
     q.set('page', String(params?.page || 1))
     return api(`/content/articles?${q}`)
   },
-  create: (data: { title: string; slug: string; content?: string; category: string; coverImage?: string; isPublished?: boolean }) =>
+  create: (data: {
+    title: string
+    slug: string
+    content?: string
+    category: string
+    coverImage?: string
+    isPublished?: boolean
+  }) =>
     api('/content/articles', {
       method: 'POST',
       body: JSON.stringify({
@@ -106,7 +207,7 @@ export const contentApi = {
         coverImageUrl: data.coverImage,
       }),
     }),
-  update: (id: string, data: Record<string, any>) =>
+  update: (id: string, data: Record<string, unknown>) =>
     api(`/content/articles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: string) => api(`/content/articles/${id}`, { method: 'DELETE' }),
 }
@@ -120,7 +221,7 @@ export const userApi = {
     q.set('limit', String(params?.limit || 100))
     return api(`/admin/users?${q}`)
   },
-  update: (id: string, data: Record<string, any>) =>
+  update: (id: string, data: Record<string, unknown>) =>
     api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   getById: (id: string) => api(`/admin/users/${id}`),
 }
