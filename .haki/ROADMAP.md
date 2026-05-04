@@ -201,6 +201,12 @@ _Last updated: 2026-04-03 after Phase 5 task generation_
 
 ## Knowledge Base
 
+### Tasks
+
+| Date | Task | Plan | Spec | Status |
+| ---- | ---- | ---- | ---- | ------ |
+| 2026-05-04 | Image upload fields | [.haki/tasks/2026-05-04-image-upload-fields-plan.md](tasks/2026-05-04-image-upload-fields-plan.md) | [docs/superpowers/specs/2026-05-04-image-upload-fields-design.md](../docs/superpowers/specs/2026-05-04-image-upload-fields-design.md) | Planned |
+
 ### Screen Documentation
 
 | App     | Screen                     | Doc                                                                                 | Status |
