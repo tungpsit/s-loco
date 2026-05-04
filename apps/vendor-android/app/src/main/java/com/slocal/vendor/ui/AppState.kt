@@ -1,6 +1,7 @@
 package vn.sloco.vendor.ui
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,6 +30,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class AppState(context: Context) {
+    private val appContext = context.applicationContext
     private val tokenStore = TokenStore(context)
     private val api = VendorApi(tokenStore)
     private val pushRegistrar = VendorPushRegistrar(context.applicationContext)
@@ -111,6 +113,26 @@ class AppState(context: Context) {
         serviceCategories = api.serviceCategories()
         val currentVendor = vendor ?: api.vendorProfile().also { vendor = it }
         services = api.services(currentVendor.id)
+    }
+
+    suspend fun uploadServiceImage(uri: Uri): String {
+        val resolver = appContext.contentResolver
+        val mimeType = resolver.getType(uri) ?: "image/jpeg"
+        require(mimeType in allowedImageMimeTypes) { "Chỉ hỗ trợ ảnh JPG, PNG, WebP hoặc GIF." }
+        val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: throw IllegalArgumentException("Không đọc được ảnh đã chọn.")
+        require(bytes.size <= maxImageBytes) { "Ảnh không được vượt quá 5MB." }
+        val extension = when (mimeType) {
+            "image/png" -> "png"
+            "image/webp" -> "webp"
+            "image/gif" -> "gif"
+            else -> "jpg"
+        }
+        return api.uploadServiceImage(
+            bytes = bytes,
+            filename = "service-${System.currentTimeMillis()}.$extension",
+            mimeType = mimeType,
+        ).url
     }
 
     suspend fun saveService(
@@ -441,6 +463,9 @@ enum class AppTab(val label: String) {
 private fun String.onlyDigits(): String = filter { it.isDigit() }
 
 private fun String.onlyPercent(): String = filter { it.isDigit() || it == '.' }.trim('.')
+
+private val allowedImageMimeTypes = setOf("image/jpeg", "image/png", "image/webp", "image/gif")
+private const val maxImageBytes = 5 * 1024 * 1024
 
 private fun validateCoordinate(value: String, min: Double, max: Double, label: String) {
     if (value.isBlank()) return

@@ -1,6 +1,7 @@
-import { getDb } from '../db'
 import { orderItems, orders, services, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
+import { getDb } from '../db'
+import { assertManagedImageUrls } from './media.service'
 import { generateVoucherCode } from './voucher.service'
 
 /** Non-null assertion for Drizzle scalar selects */
@@ -38,6 +39,9 @@ export async function createCombo(
     const [svc] = await db.select().from(services).where(eq(services.id, item.serviceId)).limit(1)
     if (svc) originalTotal += Number(svc.originalPrice) * item.quantity
   }
+
+  assertManagedImageUrls(data.images)
+
   const [combo] = await db
     .insert(services)
     .values({

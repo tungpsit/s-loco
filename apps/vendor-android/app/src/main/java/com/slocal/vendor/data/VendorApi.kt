@@ -6,6 +6,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -174,6 +175,17 @@ class VendorApi(
         )
     }
 
+    suspend fun uploadServiceImage(bytes: ByteArray, filename: String, mimeType: String): UploadedImage {
+        return uploadImage(
+            path = "/uploads/images",
+            bytes = bytes,
+            filename = filename,
+            mimeType = mimeType,
+            purpose = "service_image",
+            serializer = UploadedImage.serializer(),
+        )
+    }
+
     suspend fun vouchers(status: String? = null): List<Voucher> {
         val query = if (status.isNullOrBlank()) "" else "&status=$status"
         return request(
@@ -249,6 +261,60 @@ class VendorApi(
             method = "POST",
             serializer = ReservationActionEnvelope.serializer(),
         )
+    }
+
+    private suspend fun <T> uploadImage(
+        path: String,
+        bytes: ByteArray,
+        filename: String,
+        mimeType: String,
+        purpose: String,
+        serializer: KSerializer<T>,
+        canRefresh: Boolean = true,
+    ): T {
+        if (canRefresh) {
+            refreshAccessTokenIfNeeded()
+        }
+        return performUploadImage(path, bytes, filename, mimeType, purpose, serializer, canRefresh)
+    }
+
+    private suspend fun <T> performUploadImage(
+        path: String,
+        bytes: ByteArray,
+        filename: String,
+        mimeType: String,
+        purpose: String,
+        serializer: KSerializer<T>,
+        canRefresh: Boolean,
+    ): T = withContext(Dispatchers.IO) {
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("purpose", purpose)
+            .addFormDataPart("file", filename, bytes.toRequestBody(mimeType.toMediaType()))
+            .build()
+        val builder = Request.Builder()
+            .url("$baseUrl$path")
+            .post(body)
+
+        tokenStore.accessToken?.let { builder.header("Authorization", "Bearer $it") }
+
+        client.newCall(builder.build()).execute().use { response ->
+            val raw = response.body?.string().orEmpty()
+            if (response.code == 401 && canRefresh) {
+                try {
+                    refreshAccessTokenIfNeeded(force = true)
+                    return@withContext performUploadImage(path, bytes, filename, mimeType, purpose, serializer, false)
+                } catch (_: Exception) {
+                    tokenStore.clear()
+                    throw SessionExpiredException()
+                }
+            }
+            val envelope = json.decodeFromString(ApiEnvelope.serializer(serializer), raw)
+            if (!response.isSuccessful || !envelope.success || envelope.data == null) {
+                throw ApiException(response.code, envelope.error?.message ?: "Không thể upload ảnh.")
+            }
+            envelope.data
+        }
     }
 
     private suspend fun <T> request(

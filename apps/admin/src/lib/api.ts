@@ -19,6 +19,7 @@ type ApiJson = {
     | string
     | number
     | boolean
+    | null
     | Record<string, number | undefined>
     | undefined
   data?: ApiJson
@@ -151,8 +152,15 @@ export const serviceApi = {
 }
 
 // ─── Uploads ───
+export type UploadImagePurpose =
+  | 'vendor_logo'
+  | 'vendor_cover'
+  | 'service_image'
+  | 'content_cover'
+  | 'user_avatar'
+
 export const uploadApi = {
-  image: (file: File, purpose: 'vendor_logo' | 'vendor_cover' | 'service_image') => {
+  image: (file: File, purpose: UploadImagePurpose) => {
     const body = new FormData()
     body.set('file', file)
     body.set('purpose', purpose)
@@ -223,5 +231,12 @@ export const userApi = {
   },
   update: (id: string, data: Record<string, unknown>) =>
     api(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  updateRole: (id: string, role: string) =>
+    api(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+  updateStatus: (id: string, isActive: boolean) =>
+    api(`/admin/users/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_active: isActive }),
+    }),
   getById: (id: string) => api(`/admin/users/${id}`),
 }

@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -428,8 +429,34 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
     var durationMinutes by remember(service?.id) { mutableStateOf(service?.durationMinutesValue?.toString().orEmpty()) }
     var maxQuantity by remember(service?.id) { mutableStateOf(service?.maxQuantityPerOrderValue?.toString() ?: "10") }
     var imageUrls by remember(service?.id) { mutableStateOf(service?.images?.joinToString("\n").orEmpty()) }
+    var isUploadingImages by remember(service?.id) { mutableStateOf(false) }
+    var uploadError by remember(service?.id) { mutableStateOf("") }
     var isActive by remember(service?.id) { mutableStateOf(service?.activeValue ?: true) }
     var confirmDelete by remember(service?.id) { mutableStateOf(false) }
+    val imageUrlList = remember(imageUrls) {
+        imageUrls.lineSequence().map { it.trim() }.filter { it.isNotBlank() }.toList()
+    }
+    fun setImageUrlList(urls: List<String>) {
+        imageUrls = urls.joinToString("\n")
+    }
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        scope.launch {
+            isUploadingImages = true
+            uploadError = ""
+            val urls = imageUrlList.toMutableList()
+            try {
+                uris.forEach { uri ->
+                    urls += state.uploadServiceImage(uri)
+                }
+                setImageUrlList(urls)
+            } catch (error: Exception) {
+                uploadError = error.message ?: "Không thể upload ảnh."
+            } finally {
+                isUploadingImages = false
+            }
+        }
+    }
 
     ScreenList(title = if (service == null) "Thêm dịch vụ" else "Sửa dịch vụ") {
         item {
@@ -586,14 +613,34 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                             enabled = !state.isLoading,
                         )
                     }
-                    OutlinedTextField(
-                        value = imageUrls,
-                        onValueChange = { imageUrls = it },
-                        label = { Text("URL ảnh, mỗi dòng một ảnh") },
-                        minLines = 3,
+                    Text("Hình ảnh", fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
+                    Text("Chọn ảnh để upload lên server. Ảnh sẽ được tải lên ngay khi chọn.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                    OutlinedButton(
+                        onClick = { imagePicker.launch("image/*") },
+                        enabled = !state.isLoading && !isUploadingImages,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !state.isLoading,
-                    )
+                    ) {
+                        Text(if (isUploadingImages) "Đang tải ảnh..." else "Chọn ảnh dịch vụ")
+                    }
+                    if (isUploadingImages) {
+                        CircularProgressIndicator(color = Primary)
+                    }
+                    if (uploadError.isNotBlank()) {
+                        Text(uploadError, color = Danger, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    if (imageUrlList.isEmpty()) {
+                        Text("Chưa có ảnh dịch vụ.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                            imageUrlList.forEachIndexed { index, url ->
+                                AssistChip(
+                                    onClick = { setImageUrlList(imageUrlList.filter { it != url }) },
+                                    label = { Text("Xóa ảnh ${index + 1}") },
+                                    enabled = !state.isLoading && !isUploadingImages,
+                                )
+                            }
+                        }
+                    }
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -628,6 +675,7 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                         enabled = !state.isLoading &&
                             name.isNotBlank() &&
                             categoryId.isNotBlank() &&
+                            !isUploadingImages &&
                             (productType == PRODUCT_TYPE_COUPON || originalPrice.isNotBlank()) &&
                             (productType != PRODUCT_TYPE_COUPON || reservationDiscountPercent.isNotBlank()),
                         modifier = Modifier.fillMaxWidth(),

@@ -81,6 +81,11 @@ final class AppState: ObservableObject {
         }
     }
 
+    func uploadServiceImage(data: Data, filename: String, mimeType: String) async throws -> String {
+        let uploaded = try await api.uploadServiceImage(data: data, filename: filename, mimeType: mimeType)
+        return uploaded.url
+    }
+
     func saveService(
         service: VendorService?,
         name: String,

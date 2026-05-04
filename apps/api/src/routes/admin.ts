@@ -26,6 +26,11 @@ const updateStatusSchema = z.object({
   is_active: z.boolean(),
 })
 
+const updateUserProfileSchema = z.object({
+  full_name: z.string().trim().min(1).max(100).optional(),
+  avatar_url: z.string().url('URL avatar không hợp lệ').nullable().optional(),
+})
+
 const adminRoutes = new Hono<{ Variables: { userId: string | null; userRole: string | null } }>()
 
 // All admin routes require admin role
@@ -202,6 +207,22 @@ adminRoutes.get('/users/:id', async (c) => {
 adminRoutes.get('/vendors/pending', async (c) => {
   const result = await vendorSvc.listVendors({ status: 'pending', page: 1, limit: 20 })
   return c.json({ success: true, data: result })
+})
+
+// ─── PATCH /admin/users/:id — update user profile ────
+adminRoutes.patch('/users/:id', zValidator('json', updateUserProfileSchema), async (c) => {
+  try {
+    const userId = c.req.param('id')
+    const adminId = c.get('userId')!
+    const data = c.req.valid('json')
+    const user = await adminSvc.updateUserProfile(userId, data, adminId)
+    return c.json({ success: true, data: { user } })
+  } catch (err) {
+    if (err instanceof AdminError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 404)
+    }
+    throw err
+  }
 })
 
 // ─── PATCH /admin/users/:id/role — change user role ────

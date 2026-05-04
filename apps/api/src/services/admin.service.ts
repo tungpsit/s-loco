@@ -1,6 +1,6 @@
-import { getDb } from '../db'
 import { auditLogs, users } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
+import { getDb } from '../db'
 
 /** Non-null assertion for Drizzle limit(1) / scalar select returning arrays */
 function scalar<T>(rows: T[]): T {
@@ -24,6 +24,7 @@ export async function listUsers(opts: { role?: string; page?: number; limit?: nu
       phone: users.phone,
       email: users.email,
       fullName: users.fullName,
+      avatarUrl: users.avatarUrl,
       role: users.role,
       isActive: users.isActive,
       createdAt: users.createdAt,
@@ -150,6 +151,7 @@ export async function getUserById(userId: string) {
       phone: users.phone,
       email: users.email,
       fullName: users.fullName,
+      avatarUrl: users.avatarUrl,
       role: users.role,
       isActive: users.isActive,
       createdAt: users.createdAt,
@@ -159,4 +161,45 @@ export async function getUserById(userId: string) {
     .limit(1)
   if (!user) throw new AdminError('NOT_FOUND', 'Người dùng không tồn tại.')
   return user
+}
+
+export async function updateUserProfile(
+  userId: string,
+  data: { full_name?: string; avatar_url?: string | null },
+  adminId: string,
+) {
+  const db = getDb()
+  const [target] = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+  if (!target) throw new AdminError('NOT_FOUND', 'Người dùng không tồn tại.')
+
+  const [updated] = await db
+    .update(users)
+    .set({
+      ...(data.full_name !== undefined && { fullName: data.full_name }),
+      ...(data.avatar_url !== undefined && { avatarUrl: data.avatar_url || null }),
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      phone: users.phone,
+      email: users.email,
+      fullName: users.fullName,
+      avatarUrl: users.avatarUrl,
+      role: users.role,
+      isActive: users.isActive,
+      createdAt: users.createdAt,
+    })
+  if (!updated) throw new AdminError('NOT_FOUND', 'Người dùng không tồn tại.')
+
+  await db.insert(auditLogs).values({
+    entityType: 'user',
+    entityId: userId,
+    action: 'profile_update',
+    oldData: { fullName: target.fullName, avatarUrl: target.avatarUrl },
+    newData: { fullName: updated.fullName, avatarUrl: updated.avatarUrl },
+    performedBy: adminId,
+  })
+
+  return updated
 }

@@ -268,6 +268,20 @@ struct VendorService: Decodable, Identifiable {
     var isCoupon: Bool { productType == productTypeCoupon }
 }
 
+struct UploadedImage: Decodable {
+    let key: String
+    let url: String
+    let contentType: String
+    let size: Int
+
+    enum CodingKeys: String, CodingKey {
+        case key
+        case url
+        case contentType
+        case size
+    }
+}
+
 struct CreateServiceRequest: Encodable {
     let name: String
     let slug: String

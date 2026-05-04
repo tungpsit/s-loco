@@ -247,6 +247,92 @@ describe('Vendor & Service Management', () => {
       expect(data.data.key).toContain('vendor_logo')
     })
   })
+
+  describe('Vendor image URL restrictions', () => {
+    test('vendor service creation rejects manually supplied external image URLs', async () => {
+      const token = await vendorLogin()
+      expect(token).toBeTruthy()
+
+      const profile = await request('/api/v1/vendors/me', { token })
+      expect(profile.status).toBe(200)
+      const vendorId = profile.data.data.vendor.id
+      const categoryId = await createServiceCategory('vendor-external-image')
+
+      const created = await request(`/api/v1/services/vendor/${vendorId}`, {
+        method: 'POST',
+        token,
+        json: {
+          name: 'Vendor External Image Service',
+          slug: `vendor-external-image-service-${crypto.randomUUID().slice(0, 8)}`,
+          category_id: categoryId,
+          original_price: '350000',
+          images: ['https://example.com/manual.jpg'],
+        },
+      })
+
+      expect(created.status).toBe(400)
+      expect(created.data.success).toBe(false)
+      expect(created.data.error.code).toBe('INVALID_IMAGE_URL')
+    })
+
+    test('vendor service creation accepts uploaded managed image URLs', async () => {
+      const token = await vendorLogin()
+      expect(token).toBeTruthy()
+
+      const profile = await request('/api/v1/vendors/me', { token })
+      expect(profile.status).toBe(200)
+      const vendorId = profile.data.data.vendor.id
+      const categoryId = await createServiceCategory('vendor-managed-image')
+
+      const managedImageUrl = `${process.env.TEST_API_BASE_URL || 'http://localhost:3000'}/service_image/vendor-owner-id/uploaded.png`
+      const created = await request(`/api/v1/services/vendor/${vendorId}`, {
+        method: 'POST',
+        token,
+        json: {
+          name: 'Vendor Managed Image Service',
+          slug: `vendor-managed-image-service-${crypto.randomUUID().slice(0, 8)}`,
+          category_id: categoryId,
+          original_price: '350000',
+          images: [managedImageUrl],
+        },
+      })
+
+      expect(created.status).toBe(201)
+      expect(created.data.success).toBe(true)
+      expect(created.data.data.service.images).toEqual([managedImageUrl])
+    })
+
+    test('vendor combo creation rejects manually supplied external image URLs', async () => {
+      const token = await vendorLogin()
+      expect(token).toBeTruthy()
+
+      const profile = await request('/api/v1/vendors/me', { token })
+      expect(profile.status).toBe(200)
+      const vendorId = profile.data.data.vendor.id
+      const categoryId = await createServiceCategory('combo-external-image')
+      const service = await createVendorService(
+        token!,
+        vendorId,
+        categoryId,
+        'combo-external-image',
+      )
+
+      const combo = await request('/api/v1/combos', {
+        method: 'POST',
+        token,
+        json: {
+          name: 'Combo external image',
+          comboPrice: 250000,
+          items: [{ serviceId: service.id, quantity: 1 }],
+          images: ['https://example.com/combo.jpg'],
+        },
+      })
+
+      expect(combo.status).toBe(400)
+      expect(combo.data.success).toBe(false)
+      expect(combo.data.error.code).toBe('INVALID_IMAGE_URL')
+    })
+  })
 })
 
 async function createVendorOwner(label: string) {
@@ -262,6 +348,26 @@ async function createVendorOwner(label: string) {
     .returning()
   if (!user) throw new Error('Unable to create vendor owner')
   return user.id
+}
+
+async function createVendorService(
+  token: string,
+  vendorId: string,
+  categoryId: string,
+  label: string,
+) {
+  const service = await request(`/api/v1/services/vendor/${vendorId}`, {
+    method: 'POST',
+    token,
+    json: {
+      name: `Vendor Service ${label}`,
+      slug: `vendor-service-${label}-${crypto.randomUUID().slice(0, 8)}`,
+      category_id: categoryId,
+      original_price: '350000',
+    },
+  })
+  expect(service.status).toBe(201)
+  return service.data.data.service
 }
 
 async function createServiceCategory(label: string) {

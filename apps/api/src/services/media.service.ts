@@ -2,7 +2,13 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-const PURPOSES = new Set(['vendor_logo', 'vendor_cover', 'service_image'])
+const PURPOSES = new Set([
+  'vendor_logo',
+  'vendor_cover',
+  'service_image',
+  'content_cover',
+  'user_avatar',
+])
 
 type UploadImageInput = {
   file: File
@@ -44,13 +50,36 @@ function getBucket() {
   return bucket
 }
 
-function getPublicBaseUrl() {
+export function getPublicBaseUrl() {
   return (
     process.env.S3_PUBLIC_BASE_URL ||
     process.env.MINIO_PUBLIC_BASE_URL ||
     process.env.APP_URL ||
     'http://localhost:3000'
   ).replace(/\/$/, '')
+}
+
+export function isManagedImageUrl(url: string) {
+  try {
+    const parsed = new URL(url)
+    const managedBase = new URL(getPublicBaseUrl())
+    return (
+      parsed.origin === managedBase.origin && parsed.pathname.split('/').filter(Boolean).length >= 3
+    )
+  } catch {
+    return false
+  }
+}
+
+export function assertManagedImageUrls(urls: string[] | undefined) {
+  if (!urls) return
+  const invalidUrl = urls.find((url) => !isManagedImageUrl(url))
+  if (invalidUrl) {
+    throw new MediaError(
+      'INVALID_IMAGE_URL',
+      'Vui lòng upload ảnh lên server thay vì nhập URL bên ngoài.',
+    )
+  }
 }
 
 function extensionFor(contentType: string) {

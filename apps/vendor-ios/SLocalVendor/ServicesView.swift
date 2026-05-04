@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ServicesView: View {
     @EnvironmentObject private var state: AppState
@@ -150,6 +152,9 @@ private struct ServiceEditorView: View {
     @State private var durationMinutes = ""
     @State private var maxQuantityPerOrder = "10"
     @State private var imageUrls = ""
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var isUploadingImages = false
+    @State private var uploadError = ""
     @State private var isActive = true
     @State private var confirmDelete = false
 
@@ -266,11 +271,58 @@ private struct ServiceEditorView: View {
             }
 
             Section("Hình ảnh") {
-                Text("Nhập URL ảnh, mỗi dòng một ảnh.")
+                Text("Chọn ảnh để upload lên server. Ảnh sẽ được tải lên ngay khi chọn.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                TextEditor(text: $imageUrls)
-                    .frame(minHeight: 100)
+                PhotosPicker(
+                    isUploadingImages ? "Đang tải ảnh..." : "Chọn ảnh dịch vụ",
+                    selection: $selectedPhotoItems,
+                    matching: .images
+                )
+                .disabled(state.isLoading || isUploadingImages)
+
+                if isUploadingImages {
+                    ProgressView("Đang upload ảnh...")
+                }
+
+                if !uploadError.isEmpty {
+                    Text(uploadError)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.red)
+                }
+
+                let urls = imageUrlList
+                if urls.isEmpty {
+                    Text("Chưa có ảnh dịch vụ.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(urls, id: \.self) { url in
+                        HStack(alignment: .top) {
+                            AsyncImage(url: URL(string: url)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Color(.systemGray5)
+                            }
+                            .frame(width: 64, height: 64)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                            Text(url)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                            Spacer()
+                            Button("Xóa") {
+                                removeImageUrl(url)
+                            }
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.red)
+                            .disabled(state.isLoading || isUploadingImages)
+                        }
+                    }
+                }
             }
 
             Section {
@@ -300,6 +352,7 @@ private struct ServiceEditorView: View {
                     state.isLoading ||
                         name.isEmpty ||
                         categoryId.isEmpty ||
+                        isUploadingImages ||
                         (productType != productTypeCoupon && originalPrice.isEmpty) ||
                         (productType == productTypeCoupon && reservationDiscountPercent.isEmpty)
                 )
@@ -327,6 +380,9 @@ private struct ServiceEditorView: View {
             if categoryId.isEmpty {
                 categoryId = state.serviceCategories.first?.id ?? ""
             }
+        }
+        .onChange(of: selectedPhotoItems) { _, items in
+            uploadSelectedImages(items)
         }
         .sheet(isPresented: $isBlackoutDatePickerPresented) {
             NavigationStack {
@@ -382,6 +438,50 @@ private struct ServiceEditorView: View {
         case 6: return "T7"
         case 7: return "CN"
         default: return "T\(day)"
+        }
+    }
+
+    private var imageUrlList: [String] {
+        imageUrls
+            .split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    private func setImageUrlList(_ urls: [String]) {
+        imageUrls = urls.joined(separator: "\n")
+    }
+
+    private func removeImageUrl(_ url: String) {
+        setImageUrlList(imageUrlList.filter { $0 != url })
+    }
+
+    private func uploadSelectedImages(_ items: [PhotosPickerItem]) {
+        guard !items.isEmpty else { return }
+        isUploadingImages = true
+        uploadError = ""
+        Task {
+            var urls = imageUrlList
+            do {
+                for item in items {
+                    guard let data = try await item.loadTransferable(type: Data.self) else {
+                        throw ClientError.message("Không đọc được ảnh đã chọn.")
+                    }
+                    let mimeType = item.supportedContentTypes.first?.preferredMIMEType ?? "image/jpeg"
+                    let fileExtension = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
+                    let url = try await state.uploadServiceImage(
+                        data: data,
+                        filename: "service-\(UUID().uuidString).\(fileExtension)",
+                        mimeType: mimeType
+                    )
+                    urls.append(url)
+                }
+                setImageUrlList(urls)
+            } catch {
+                uploadError = error.localizedDescription
+            }
+            selectedPhotoItems = []
+            isUploadingImages = false
         }
     }
 

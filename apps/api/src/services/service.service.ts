@@ -3,6 +3,7 @@ import type { CreateServiceInput, UpdateServiceInput } from '@S-Loco/shared/vali
 import type { InferInsertModel } from 'drizzle-orm'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import { getDb } from '../db'
+import { assertManagedImageUrls, MediaError } from './media.service'
 import { withServicePricing } from './pricing'
 
 type ServiceUpdateData = Partial<InferInsertModel<typeof services>>
@@ -17,6 +18,8 @@ export async function createService(vendorId: string, ownerId: string, data: Cre
     .limit(1)
   if (!vendor)
     throw new ServiceError('FORBIDDEN', 'Bạn không có quyền thêm dịch vụ cho cửa hàng này.')
+
+  assertManagedImageUrls(data.images)
 
   const [service] = await db
     .insert(services)
@@ -82,6 +85,8 @@ export async function updateService(serviceId: string, ownerId: string, data: Up
     .limit(1)
   if (!svc) throw new ServiceError('FORBIDDEN', 'Bạn không có quyền chỉnh sửa dịch vụ này.')
 
+  assertManagedImageUrls(data.images)
+
   const updateData: ServiceUpdateData = { updatedAt: new Date() }
   if (data.name !== undefined) updateData.name = data.name
   if (data.category_id !== undefined) updateData.categoryId = data.category_id
@@ -93,7 +98,8 @@ export async function updateService(serviceId: string, ownerId: string, data: Up
   if (data.fulfillment_type !== undefined) updateData.fulfillmentType = data.fulfillment_type
   if (data.reservation_discount_percent !== undefined)
     updateData.reservationDiscountPercent = data.reservation_discount_percent
-  if (data.applicability_policy !== undefined) updateData.applicabilityPolicy = data.applicability_policy || {}
+  if (data.applicability_policy !== undefined)
+    updateData.applicabilityPolicy = data.applicability_policy || {}
   if (data.duration_minutes !== undefined) updateData.durationMinutes = data.duration_minutes
   if (data.max_quantity_per_order !== undefined)
     updateData.maxQuantityPerOrder = data.max_quantity_per_order
@@ -126,7 +132,8 @@ export async function adminUpdateService(serviceId: string, data: UpdateServiceI
   if (data.fulfillment_type !== undefined) updateData.fulfillmentType = data.fulfillment_type
   if (data.reservation_discount_percent !== undefined)
     updateData.reservationDiscountPercent = data.reservation_discount_percent
-  if (data.applicability_policy !== undefined) updateData.applicabilityPolicy = data.applicability_policy || {}
+  if (data.applicability_policy !== undefined)
+    updateData.applicabilityPolicy = data.applicability_policy || {}
   if (data.duration_minutes !== undefined) updateData.durationMinutes = data.duration_minutes
   if (data.max_quantity_per_order !== undefined)
     updateData.maxQuantityPerOrder = data.max_quantity_per_order
@@ -202,3 +209,5 @@ export class ServiceError extends Error {
     this.name = 'ServiceError'
   }
 }
+
+export { MediaError }

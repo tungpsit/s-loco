@@ -136,6 +136,10 @@ final class APIClient {
         let _: EmptyBody = try await request("/services/\(id)", method: "DELETE")
     }
 
+    func uploadServiceImage(data: Data, filename: String, mimeType: String) async throws -> UploadedImage {
+        try await uploadImage(path: "/uploads/images", data: data, filename: filename, mimeType: mimeType, purpose: "service_image")
+    }
+
     func vouchers(status: String? = nil) async throws -> [Voucher] {
         var path = "/vouchers/vendor?page=1&limit=50"
         if let status, !status.isEmpty {
@@ -202,6 +206,77 @@ final class APIClient {
             method: "POST",
             body: PushTokenRequest(token: token, platform: "ios")
         )
+    }
+
+    private func uploadImage(
+        path: String,
+        data: Data,
+        filename: String,
+        mimeType: String,
+        purpose: String,
+        canRefresh: Bool = true
+    ) async throws -> UploadedImage {
+        if canRefresh {
+            try await refreshAccessTokenIfNeeded()
+        }
+
+        let boundary = "Boundary-\(UUID().uuidString)"
+        let url = URL(string: baseURL.absoluteString + path)!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        if let token = tokenStore.accessToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.httpBody = multipartImageBody(
+            boundary: boundary,
+            data: data,
+            filename: filename,
+            mimeType: mimeType,
+            purpose: purpose
+        )
+
+        let (responseData, response) = try await session.data(for: request)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if statusCode == 401, canRefresh {
+            do {
+                try await refreshAccessTokenIfNeeded(force: true)
+                return try await uploadImage(path: path, data: data, filename: filename, mimeType: mimeType, purpose: purpose, canRefresh: false)
+            } catch {
+                tokenStore.clear()
+                throw ClientError.sessionExpired
+            }
+        }
+
+        let envelope: ApiEnvelope<UploadedImage>
+        do {
+            envelope = try decoder.decode(ApiEnvelope<UploadedImage>.self, from: responseData)
+        } catch {
+            throw ClientError.message("API trả về dữ liệu không đúng định dạng.")
+        }
+        if (200..<300).contains(statusCode), envelope.success, let payload = envelope.data {
+            return payload
+        }
+        throw ClientError.message(envelope.error?.message ?? "Không thể upload ảnh.")
+    }
+
+    private func multipartImageBody(
+        boundary: String,
+        data: Data,
+        filename: String,
+        mimeType: String,
+        purpose: String
+    ) -> Data {
+        var body = Data()
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"purpose\"\r\n\r\n")
+        body.appendString("\(purpose)\r\n")
+        body.appendString("--\(boundary)\r\n")
+        body.appendString("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n")
+        body.appendString("Content-Type: \(mimeType)\r\n\r\n")
+        body.append(data)
+        body.appendString("\r\n--\(boundary)--\r\n")
+        return body
     }
 
     private func request<T: Decodable, Body: Encodable>(
@@ -284,6 +359,12 @@ final class APIClient {
 }
 
 private struct EmptyBody: Codable {}
+
+private extension Data {
+    mutating func appendString(_ value: String) {
+        append(Data(value.utf8))
+    }
+}
 
 private struct PushTokenRequest: Encodable {
     let token: String

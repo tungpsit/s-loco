@@ -7,6 +7,7 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import * as discoverySvc from '../services/discovery.service'
+import { MediaError } from '../services/media.service'
 import * as serviceSvc from '../services/service.service'
 import { ServiceError } from '../services/service.service'
 
@@ -105,6 +106,9 @@ serviceRoutes.post(
         const status = err.code === 'FORBIDDEN' ? 403 : 400
         return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
       }
+      if (err instanceof MediaError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+      }
       throw err
     }
   },
@@ -127,6 +131,9 @@ serviceRoutes.patch(
       if (err instanceof ServiceError) {
         const status = err.code === 'FORBIDDEN' ? 403 : 400
         return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+      }
+      if (err instanceof MediaError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
       }
       throw err
     }

@@ -130,6 +130,14 @@ data class ServiceListEnvelope(val services: List<VendorService> = emptyList())
 data class ServiceEnvelope(val service: VendorService)
 
 @Serializable
+data class UploadedImage(
+    val key: String,
+    val url: String,
+    val contentType: String,
+    val size: Int,
+)
+
+@Serializable
 data class VendorService(
     val id: String,
     val name: String,

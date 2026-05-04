@@ -1,29 +1,29 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import { getPostgresClient } from './db'
 import adminRoutes from './routes/admin'
 import authRoutes from './routes/auth'
 import comboRoutes from './routes/combos'
 import contentRoutes from './routes/content'
 import dashboardRoutes from './routes/dashboard'
+import giftRoutes from './routes/gifts'
 import itineraryRoutes from './routes/itinerary'
 import notificationRoutes from './routes/notifications'
 import orderRoutes from './routes/orders'
 import paymentRoutes from './routes/payments'
-import reviewRoutes from './routes/reviews'
 import reservationRoutes from './routes/reservations'
+import reviewRoutes from './routes/reviews'
 import serviceRoutes from './routes/services'
 import settlementRoutes from './routes/settlements'
+import uploadRoutes from './routes/uploads'
 import vendorRoutes from './routes/vendors'
 import voucherRoutes from './routes/vouchers'
 import webhookRoutes from './routes/webhooks'
-import giftRoutes from './routes/gifts'
-import { getPostgresClient } from './db'
 
 const app = new Hono()
 const allowedOrigins = (
-  process.env.ALLOWED_ORIGINS ??
-  'http://localhost:3001,http://localhost:8081'
+  process.env.ALLOWED_ORIGINS ?? 'http://localhost:3001,http://localhost:8081'
 ).split(',')
 for (const origin of ['http://localhost:3002', 'http://localhost:8082', 'http://localhost:8083']) {
   if (!allowedOrigins.includes(origin)) allowedOrigins.push(origin)
@@ -70,6 +70,7 @@ const v1 = new Hono()
 v1.route('/auth', authRoutes)
 v1.route('/vendors', vendorRoutes)
 v1.route('/services', serviceRoutes)
+v1.route('/uploads', uploadRoutes)
 v1.route('/orders', orderRoutes)
 v1.route('/vouchers', voucherRoutes)
 v1.route('/payments', paymentRoutes)

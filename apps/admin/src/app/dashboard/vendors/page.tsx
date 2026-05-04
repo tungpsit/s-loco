@@ -3,8 +3,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
+import { ImageUploadField, MultiImageUploadField } from '@/components/ui'
 import { VendorLocationPicker } from '@/components/vendor-location-picker'
-import { serviceApi, uploadApi, userApi, vendorApi } from '@/lib/api'
+import { serviceApi, userApi, vendorApi } from '@/lib/api'
 
 type VendorStatus = 'pending' | 'active' | 'suspended' | 'rejected'
 
@@ -278,6 +279,11 @@ function VendorFormModal({
   const qc = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [statusLoading, setStatusLoading] = useState(false)
+  const [uploadingCount, setUploadingCount] = useState(0)
+  const imageUploading = uploadingCount > 0
+  const trackImageUploading = (isUploading: boolean) => {
+    setUploadingCount((current) => Math.max(0, current + (isUploading ? 1 : -1)))
+  }
   const [error, setError] = useState('')
   const [rejectionReason, setRejectionReason] = useState(vendor?.rejectionReason || '')
   const iposStoreId =
@@ -311,6 +317,10 @@ function VendorFormModal({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    if (imageUploading) {
+      setError('Vui lòng chờ ảnh tải lên xong trước khi lưu.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -344,15 +354,6 @@ function VendorFormModal({
       setLoading(false)
     }
   }
-
-  const uploadVendorImage = async (file: File, purpose: 'vendor_logo' | 'vendor_cover') => {
-    const result = await uploadApi.image(file, purpose)
-    setFormData((current) => ({
-      ...current,
-      [purpose === 'vendor_logo' ? 'logo_url' : 'cover_image_url']: result.data.url,
-    }))
-  }
-
   const changeStatus = async (status: VendorStatus) => {
     if (!vendor) return
     setStatusLoading(true)
@@ -527,17 +528,22 @@ function VendorFormModal({
           </Section>
           <Section title="Hình ảnh">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <ImageInput
+              <ImageUploadField
                 label="Logo"
-                url={formData.logo_url}
-                onUrlChange={(url) => setFormData({ ...formData, logo_url: url })}
-                onFileChange={(file) => uploadVendorImage(file, 'vendor_logo')}
+                value={formData.logo_url}
+                purpose="vendor_logo"
+                helperText="Tải logo vendor lên server."
+                onChange={(url) => setFormData({ ...formData, logo_url: url })}
+                onUploadingChange={trackImageUploading}
               />
-              <ImageInput
+              <ImageUploadField
                 label="Ảnh bìa"
-                url={formData.cover_image_url}
-                onUrlChange={(url) => setFormData({ ...formData, cover_image_url: url })}
-                onFileChange={(file) => uploadVendorImage(file, 'vendor_cover')}
+                value={formData.cover_image_url}
+                purpose="vendor_cover"
+                helperText="Ảnh bìa hiển thị trên hồ sơ vendor."
+                previewClassName="h-36 w-full object-cover"
+                onChange={(url) => setFormData({ ...formData, cover_image_url: url })}
+                onUploadingChange={trackImageUploading}
               />
             </div>
           </Section>
@@ -579,10 +585,10 @@ function VendorFormModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || imageUploading}
               className="px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-primary hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {loading ? 'Đang lưu...' : 'Lưu thông tin'}
+              {imageUploading ? 'Đang tải ảnh...' : loading ? 'Đang lưu...' : 'Lưu thông tin'}
             </button>
           </div>
         </form>
@@ -706,6 +712,7 @@ function ServiceForm({
   onChanged: () => void
 }) {
   const [loading, setLoading] = useState(false)
+  const [imageUploading, setImageUploading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     name: service?.name || '',
@@ -729,8 +736,15 @@ function ServiceForm({
     .split('\n')
     .map((url) => url.trim())
     .filter(Boolean)
+  const setImageUrls = (urls: string[]) => {
+    setFormData((current) => ({ ...current, images: urls.join('\n') }))
+  }
   const submit = async (e: FormEvent) => {
     e.preventDefault()
+    if (imageUploading) {
+      setError('Vui lòng chờ ảnh tải lên xong trước khi lưu.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -762,11 +776,6 @@ function ServiceForm({
       setLoading(false)
     }
   }
-  const uploadServiceImage = async (file: File) => {
-    const result = await uploadApi.image(file, 'service_image')
-    setFormData((current) => ({ ...current, images: [...imageUrls, result.data.url].join('\n') }))
-  }
-
   return (
     <form onSubmit={submit} className="rounded-2xl bg-surface p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -862,30 +871,14 @@ function ServiceForm({
         value={formData.description}
         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
       />
-      <div>
-        <label
-          htmlFor="service-images-upload"
-          className="block text-sm font-medium text-on-surface mb-1.5"
-        >
-          Ảnh dịch vụ
-        </label>
-        <input
-          id="service-images-upload"
-          type="file"
-          accept="image/*"
-          className="block w-full text-sm text-on-surface-variant"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) uploadServiceImage(file)
-          }}
-        />
-        <textarea
-          className={`${inputClass} mt-2 min-h-[80px]`}
-          value={formData.images}
-          onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-          placeholder="Mỗi URL một dòng"
-        />
-      </div>
+      <MultiImageUploadField
+        label="Ảnh dịch vụ"
+        value={imageUrls}
+        purpose="service_image"
+        helperText="Tải một hoặc nhiều ảnh dịch vụ lên server."
+        onChange={setImageUrls}
+        onUploadingChange={setImageUploading}
+      />
       <label className="flex items-center gap-2 text-sm text-on-surface">
         <input
           type="checkbox"
@@ -904,10 +897,10 @@ function ServiceForm({
         </button>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || imageUploading}
           className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium disabled:opacity-50"
         >
-          {loading ? 'Đang lưu...' : 'Lưu dịch vụ'}
+          {imageUploading ? 'Đang tải ảnh...' : loading ? 'Đang lưu...' : 'Lưu dịch vụ'}
         </button>
       </div>
     </form>
@@ -1075,53 +1068,6 @@ function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement> & { la
         {children}
       </select>
     </label>
-  )
-}
-
-function ImageInput({
-  label,
-  url,
-  onUrlChange,
-  onFileChange,
-}: {
-  label: string
-  url: string
-  onUrlChange: (url: string) => void
-  onFileChange: (file: File) => void
-}) {
-  return (
-    <div className="space-y-2">
-      <label htmlFor={`${label}-url`} className="block text-sm font-medium text-on-surface">
-        {label}
-      </label>
-      {url && (
-        <Image
-          src={url}
-          alt=""
-          width={640}
-          height={160}
-          unoptimized
-          className="h-28 w-full rounded-xl object-cover bg-surface"
-        />
-      )}
-      <input
-        id={`${label}-url`}
-        className={inputClass}
-        value={url}
-        onChange={(e) => onUrlChange(e.target.value)}
-        placeholder="URL ảnh"
-      />
-      <input
-        aria-label={`Upload ${label}`}
-        type="file"
-        accept="image/*"
-        className="block w-full text-sm text-on-surface-variant"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) onFileChange(file)
-        }}
-      />
-    </div>
   )
 }
 

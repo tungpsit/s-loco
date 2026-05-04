@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import * as comboSvc from '../services/combo.service'
 import { ComboError } from '../services/combo.service'
+import { MediaError } from '../services/media.service'
 import { getVendorByOwnerId } from '../services/vendor.service'
 
 const comboRoutes = new Hono<{ Variables: { userId: string | null; userRole: string | null } }>()
@@ -27,7 +28,7 @@ comboRoutes.post('/', authMiddleware(), requireRole('vendor_owner'), async (c) =
     const result = await comboSvc.createCombo(vendorList[0]!.id, body)
     return c.json({ success: true, data: result }, 201)
   } catch (err) {
-    if (err instanceof ComboError)
+    if (err instanceof ComboError || err instanceof MediaError)
       return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
     throw err
   }
