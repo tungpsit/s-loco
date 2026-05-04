@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import type { CSSProperties, ReactNode } from 'react'
 import {
+  applicabilityPolicyRules,
   marketPainPoints,
   marketSignals,
   platformSides,
@@ -479,6 +480,16 @@ function VoucherLifecycleSection() {
             thấy cách nền tảng kiểm soát rủi ro vận hành.
           </p>
           <div className="mt-8 grid gap-3 md:grid-cols-3">
+            {applicabilityPolicyRules.map((rule) => (
+              <div className="rounded-2xl border border-line bg-white/70 p-4" key={rule}>
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">
+                  APPLY_POLICY
+                </p>
+                <p className="mt-3 text-sm leading-6 text-muted">{rule}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
             {policyStates.map((state) => (
               <div className="rounded-2xl border border-line bg-white/70 p-4" key={state.code}>
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-accent-dark">
@@ -814,8 +825,12 @@ export default function Home() {
             <a className="hover:text-foreground" href={contactHref}>
               Liên hệ đầu tư
             </a>
-            <span>Chính sách bảo mật</span>
-            <span>Điều khoản dịch vụ</span>
+            <a className="hover:text-foreground" href="https://sloco.vn/privacy">
+              Chính sách bảo mật
+            </a>
+            <a className="hover:text-foreground" href="https://sloco.vn/terms">
+              Điều khoản dịch vụ
+            </a>
           </div>
         </footer>
       </section>

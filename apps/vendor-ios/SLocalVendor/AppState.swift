@@ -42,7 +42,6 @@ final class AppState: ObservableObject {
             expireSession(showMessage: false)
             return
         }
-        await registerPushNotifications()
         await refreshHome()
     }
 
@@ -52,7 +51,6 @@ final class AppState: ObservableObject {
             user = login.user
             startTokenRefreshLoop()
             vendor = try await api.vendorProfile()
-            await registerPushNotifications()
             try await reloadHome()
         }
     }
@@ -92,6 +90,10 @@ final class AppState: ObservableObject {
         originalPrice: String,
         discountPrice: String,
         reservationDiscountPercent: String,
+        policyWeekdays: Set<Int>,
+        excludePublicHolidays: Bool,
+        blackoutDates: String,
+        policyConditions: String,
         durationMinutes: String,
         maxQuantityPerOrder: String,
         imageUrls: String,
@@ -117,6 +119,16 @@ final class AppState: ObservableObject {
             }
             let duration = Int(durationMinutes.onlyDigits)
             let maxQuantity = Int(maxQuantityPerOrder.onlyDigits)
+            let policyBlackoutDates = blackoutDates
+                .split(whereSeparator: \.isNewline)
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+            let policy = ApplicabilityPolicy(
+                weekdays: policyWeekdays.isEmpty ? nil : policyWeekdays.sorted(),
+                excludePublicHolidays: excludePublicHolidays ? true : nil,
+                blackoutDates: policyBlackoutDates.isEmpty ? nil : policyBlackoutDates,
+                conditions: policyConditions.trimmedNil
+            )
             let images = imageUrls
                 .split(whereSeparator: \.isNewline)
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -134,6 +146,7 @@ final class AppState: ObservableObject {
                         productType: productType,
                         fulfillmentType: fulfillmentType,
                         reservationDiscountPercent: isCoupon ? cleanedReservationDiscount : nil,
+                        applicabilityPolicy: policy.isEmpty ? nil : policy,
                         durationMinutes: duration,
                         maxQuantityPerOrder: maxQuantity,
                         isActive: isActive,
@@ -154,6 +167,7 @@ final class AppState: ObservableObject {
                         productType: productType,
                         fulfillmentType: fulfillmentType,
                         reservationDiscountPercent: isCoupon ? cleanedReservationDiscount : nil,
+                        applicabilityPolicy: policy.isEmpty ? nil : policy,
                         durationMinutes: duration,
                         maxQuantityPerOrder: maxQuantity,
                         images: images.isEmpty ? nil : images
@@ -343,7 +357,7 @@ final class AppState: ObservableObject {
         return loaded
     }
 
-    private func registerPushNotifications() async {
+    func registerPushNotifications() async {
         guard isAuthenticated else { return }
         guard let token = await PushNotificationManager.shared.requestAuthorizationAndToken() else { return }
         do {

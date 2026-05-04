@@ -18,6 +18,7 @@
 		85CAB059AEDD403BBF32969C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F37F62BC359546B487697F5A /* SettingsView.swift */; };
 		A1D0F0022FA4010100E26625 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D0F0012FA4010100E26625 /* PushNotificationManager.swift */; };
 		A1D0F0042FA4010100E26625 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A1D0F0032FA4010100E26625 /* GoogleService-Info.plist */; };
+		A2D0F0122FA4010100E26625 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A2D0F0112FA4010100E26625 /* PrivacyInfo.xcprivacy */; };
 		9C402B8EAA2F4AF3A34643F2 /* ModelDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C91AF647C3427CAA469413 /* ModelDecodingTests.swift */; };
 		AB9B2796A4B147EE8EB491C9 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2517C6DE5BE94A289FE0ABE2 /* Models.swift */; };
 		B35B20E1B8AA46DCAF1886CF /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C766180F9B3421BBE756D50 /* TokenStore.swift */; };
@@ -53,6 +54,8 @@
 		9C314CFDA7E045F693FF84E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1D0F0012FA4010100E26625 /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		A1D0F0032FA4010100E26625 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		A2D0F0102FA4010100E26625 /* SLocalTourist.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SLocalTourist.entitlements; sourceTree = "<group>"; };
+		A2D0F0112FA4010100E26625 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B866DECE20454D9E88E2E36C /* SLocalTouristApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SLocalTouristApp.swift; sourceTree = "<group>"; };
 		C9E9085730BF4FD69166C172 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		E7C91AF647C3427CAA469413 /* ModelDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDecodingTests.swift; sourceTree = "<group>"; };
@@ -118,6 +121,8 @@
 				F37F62BC359546B487697F5A /* SettingsView.swift */,
 				4565693D04C24F6699777E29 /* ScanView.swift */,
 				A1D0F0032FA4010100E26625 /* GoogleService-Info.plist */,
+				A2D0F0102FA4010100E26625 /* SLocalTourist.entitlements */,
+				A2D0F0112FA4010100E26625 /* PrivacyInfo.xcprivacy */,
 				9C314CFDA7E045F693FF84E5 /* Info.plist */,
 			);
 			path = SLocalTourist;
@@ -217,6 +222,7 @@
 			files = (
 				7C8A2B4DE9F445C9B2468A11 /* Assets.xcassets in Resources */,
 				A1D0F0042FA4010100E26625 /* GoogleService-Info.plist in Resources */,
+				A2D0F0122FA4010100E26625 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +280,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SLocalTourist/SLocalTourist.entitlements;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
@@ -306,6 +313,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SLocalTourist/SLocalTourist.entitlements;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";

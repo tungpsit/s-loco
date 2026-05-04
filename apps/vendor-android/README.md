@@ -12,7 +12,7 @@ Native Android vendor app written in Kotlin and Jetpack Compose.
 - QR token verify/redeem/complete flow through the real voucher endpoints
 - Settlement history from `GET /api/v1/settlements`
 
-The default API base URL is `http://10.0.2.2:3000/api/v1` for Android Emulator.
+Release builds use `https://api.sloco.vn/api/v1`. Debug builds use `http://10.0.2.2:3000/api/v1` for the Android Emulator.
 
 ## Run
 

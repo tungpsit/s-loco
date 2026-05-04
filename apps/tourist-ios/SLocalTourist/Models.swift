@@ -8,6 +8,50 @@ func productTypeLabel(_ productType: String) -> String {
     productType == productTypeTicket ? "Vé" : (productType == productTypeCoupon ? "Coupon" : "Voucher")
 }
 
+struct ApplicabilityPolicy: Codable, Hashable {
+    let weekdays: [Int]?
+    let excludePublicHolidays: Bool?
+    let blackoutDates: [String]?
+    let conditions: String?
+
+    enum CodingKeys: String, CodingKey {
+        case weekdays
+        case excludePublicHolidays = "exclude_public_holidays"
+        case blackoutDates = "blackout_dates"
+        case conditions
+    }
+
+    var displayLines: [String] {
+        var lines: [String] = []
+        if let weekdays, !weekdays.isEmpty {
+            lines.append("Áp dụng: \(weekdays.map(weekdayLabel).joined(separator: ", "))")
+        }
+        if excludePublicHolidays == true {
+            lines.append("Không áp dụng ngày lễ.")
+        }
+        if let blackoutDates, !blackoutDates.isEmpty {
+            lines.append("Không áp dụng: \(blackoutDates.joined(separator: ", "))")
+        }
+        if let conditions, !conditions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.append(conditions)
+        }
+        return lines
+    }
+
+    private func weekdayLabel(_ day: Int) -> String {
+        switch day {
+        case 1: return "Thứ 2"
+        case 2: return "Thứ 3"
+        case 3: return "Thứ 4"
+        case 4: return "Thứ 5"
+        case 5: return "Thứ 6"
+        case 6: return "Thứ 7"
+        case 7: return "Chủ nhật"
+        default: return "Ngày \(day)"
+        }
+    }
+}
+
 struct TouristCategoryOption: Hashable {
     let value: String
     let label: String
@@ -147,11 +191,12 @@ struct ServiceCore: Decodable, Identifiable {
     let productType: String?
     let fulfillmentType: String?
     let reservationDiscountPercent: String?
+    let applicabilityPolicy: ApplicabilityPolicy?
     let pricing: ServicePricingWire?
     enum CodingKeys: String, CodingKey {
         case id, name, description, images
         case originalPrice, discountPrice, discountPercent, durationMinutes, averageRating
-        case productType, fulfillmentType, reservationDiscountPercent, pricing
+        case productType, fulfillmentType, reservationDiscountPercent, applicabilityPolicy, pricing
     }
 }
 
@@ -188,6 +233,7 @@ struct TouristService: Identifiable, Hashable {
     let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: Int
+    let applicabilityPolicy: ApplicabilityPolicy?
     let rating: Double
     let durationMinutes: Int
     let imageURL: String?

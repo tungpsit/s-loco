@@ -70,6 +70,12 @@ const discoverFlow = [
   },
 ]
 
+const policyExamples = [
+  'Chỉ áp dụng thứ 2–6 hoặc theo khung ngày vendor công bố.',
+  'Không áp dụng ngày lễ, ngày cao điểm hoặc ngày blackout cụ thể.',
+  'Điều kiện sản phẩm như số khách tối thiểu, không cộng dồn khuyến mãi, cần đặt trước.',
+]
+
 const voucherFlow = [
   {
     step: '01',
@@ -179,11 +185,7 @@ export default function TouristLandingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-8 lg:px-10">
           <a href="#top" className="flex items-center gap-3" aria-label="S-Loco Sầm Sơn">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white shadow-[0_14px_34px_-24px_rgba(2,75,134,0.8)]">
-              <IconImage
-                src="/icons/icon_tourist.png"
-                alt="S-Loco Tourist"
-                className="h-8 w-8"
-              />
+              <IconImage src="/icons/icon_tourist.png" alt="S-Loco Tourist" className="h-8 w-8" />
             </span>
             <span>
               <span className="block text-lg font-black tracking-tight text-deep-ocean">
@@ -294,6 +296,29 @@ export default function TouristLandingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="applicability-policy" className="px-4 pb-16 md:px-8 lg:px-10">
+        <div className="mx-auto grid max-w-7xl gap-8 rounded-[2.5rem] border border-line bg-white p-6 shadow-[0_28px_80px_-58px_rgba(2,75,134,0.88)] md:p-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div>
+            <SectionLabel>Chính sách áp dụng</SectionLabel>
+            <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.035em] text-[#112944] md:text-5xl">
+              Biết rõ voucher dùng được khi nào trước khi mua.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-ink-muted">
+              Mỗi sản phẩm có phần điều kiện do vendor tự cấu hình: ngày áp dụng, ngày không áp
+              dụng, ngày lễ và ghi chú sản phẩm. Khách xem ngay trên chi tiết dịch vụ trước khi
+              thanh toán hoặc nhận coupon.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            {policyExamples.map((item) => (
+              <div key={item} className="rounded-2xl bg-coast px-5 py-4 text-base font-bold leading-7 text-[#243b57]">
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -431,12 +456,18 @@ export default function TouristLandingPage() {
         </div>
         <footer className="mx-auto flex max-w-7xl flex-col gap-3 px-2 py-8 text-sm font-medium text-ink-muted md:flex-row md:items-center md:justify-between">
           <span>© 2026 S-Loco Sầm Sơn.</span>
-          <span className="flex gap-4">
-            <a className="transition hover:text-deep-ocean" href="#download">
+          <span className="flex flex-wrap gap-4">
+            <a className="transition hover:text-deep-ocean" href="/privacy">
               Chính sách riêng tư
             </a>
-            <a className="transition hover:text-deep-ocean" href="#download">
+            <a className="transition hover:text-deep-ocean" href="/terms">
               Điều khoản sử dụng
+            </a>
+            <a className="transition hover:text-deep-ocean" href="/support">
+              Hỗ trợ
+            </a>
+            <a className="transition hover:text-deep-ocean" href="/delete-account">
+              Xóa tài khoản
             </a>
           </span>
         </footer>

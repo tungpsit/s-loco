@@ -2,6 +2,7 @@ package vn.sloco.vendor.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -64,9 +66,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import vn.sloco.vendor.MainActivity
 import vn.sloco.vendor.data.Settlement
 import vn.sloco.vendor.data.ReservationWire
 import vn.sloco.vendor.data.ReservationStatusTone
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import vn.sloco.vendor.data.PRODUCT_TYPE_COUPON
 import vn.sloco.vendor.data.PRODUCT_TYPE_TICKET
 import vn.sloco.vendor.data.PRODUCT_TYPE_VOUCHER
@@ -75,16 +84,19 @@ import vn.sloco.vendor.data.VendorProfile
 import vn.sloco.vendor.data.VendorService
 import vn.sloco.vendor.data.Voucher
 import java.text.NumberFormat
+import java.util.Calendar
 import java.util.Locale
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 private val Primary = Color(0xFF005E97)
 private val SurfaceBg = Color(0xFFF4F7FB)
 private val Success = Color(0xFF2E7D32)
 private val Warning = Color(0xFFE65100)
 private val Danger = Color(0xFFC62828)
+private const val LEGAL_PRIVACY_URL = "https://sloco.vn/privacy"
+private const val LEGAL_TERMS_URL = "https://sloco.vn/terms"
+private const val LEGAL_SUPPORT_URL = "https://sloco.vn/support"
+private const val LEGAL_DELETE_ACCOUNT_URL = "https://sloco.vn/delete-account"
 
 @Composable
 fun VendorApp() {
@@ -407,6 +419,12 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
     var originalPrice by remember(service?.id) { mutableStateOf(service?.originalPriceValue?.takeIf { it > 0 }?.toString().orEmpty()) }
     var discountPrice by remember(service?.id) { mutableStateOf(service?.discountPriceValue?.toString().orEmpty()) }
     var reservationDiscountPercent by remember(service?.id) { mutableStateOf(service?.reservationDiscountPercentValue.orEmpty()) }
+    var policyWeekdays by remember(service?.id) {
+        mutableStateOf(service?.applicabilityPolicyValue.weekdaysFromPolicy()?.toSet() ?: (1..7).toSet())
+    }
+    var excludePublicHolidays by remember(service?.id) { mutableStateOf(service?.applicabilityPolicyValue.booleanFromPolicy("exclude_public_holidays") ?: false) }
+    var blackoutDates by remember(service?.id) { mutableStateOf(service?.applicabilityPolicyValue.stringArrayFromPolicy("blackout_dates").toSet()) }
+    var policyConditions by remember(service?.id) { mutableStateOf(service?.applicabilityPolicyValue.stringFromPolicy("conditions")) }
     var durationMinutes by remember(service?.id) { mutableStateOf(service?.durationMinutesValue?.toString().orEmpty()) }
     var maxQuantity by remember(service?.id) { mutableStateOf(service?.maxQuantityPerOrderValue?.toString() ?: "10") }
     var imageUrls by remember(service?.id) { mutableStateOf(service?.images?.joinToString("\n").orEmpty()) }
@@ -478,9 +496,11 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                         }
                     }
                     if (productType == PRODUCT_TYPE_COUPON) {
-                        Text("Coupon: tourist không trả trước; vendor thu tại quầy và trả hoa hồng cho S-Loco sau khi dùng.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                        Text("Coupon: Khách không trả trước; vendor thu tại quầy và trả hoa hồng cho S-Loco sau khi dùng.", color = Color(0xFF3B4460), fontSize = 12.sp)
                     } else if (productType == PRODUCT_TYPE_TICKET) {
-                        Text("Vé: tourist trả trước, QR scan xong được hoàn tất ngay để đối soát S-Loco trả vendor.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                        Text("Vé: Khách trả trước, QR scan xong được hoàn tất ngay để đối soát S-Loco trả vendor.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                    } else {
+                        Text("Voucher: Khách trả trước; QR scan ghi nhận đã dùng, vendor hoàn thành dịch vụ để đối soát S-Loco trả vendor.", color = Color(0xFF3B4460), fontSize = 12.sp)
                     }
                     OutlinedTextField(
                         value = originalPrice,
@@ -509,6 +529,45 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                             enabled = !state.isLoading,
                         )
                     }
+                    Text("Chính sách áp dụng", fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
+                    Text("Thông tin này hiển thị cho Khách trước khi mua/nhận voucher.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                    Text("Ngày áp dụng", fontWeight = FontWeight.SemiBold, color = Color(0xFF161B2E), fontSize = 13.sp)
+                    val weekdayLabels = listOf(1 to "T2", 2 to "T3", 3 to "T4", 4 to "T5", 5 to "T6", 6 to "T7", 7 to "CN")
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                        weekdayLabels.forEach { (day, label) ->
+                            OutlinedButton(
+                                onClick = {
+                                    policyWeekdays = if (policyWeekdays.contains(day)) policyWeekdays - day else policyWeekdays + day
+                                },
+                                enabled = !state.isLoading,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(label, fontSize = 11.sp, color = if (policyWeekdays.contains(day)) Primary else Color(0xFF3B4460), fontWeight = if (policyWeekdays.contains(day)) FontWeight.ExtraBold else FontWeight.SemiBold)
+                            }
+                        }
+                    }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Không áp dụng ngày lễ", color = Color(0xFF161B2E))
+                        Switch(checked = excludePublicHolidays, onCheckedChange = { excludePublicHolidays = it }, enabled = !state.isLoading)
+                    }
+                    BlackoutDatePickerSection(
+                        blackoutDates = blackoutDates,
+                        enabled = !state.isLoading,
+                        onAddDate = { date -> blackoutDates = blackoutDates + date },
+                        onRemoveDate = { date -> blackoutDates = blackoutDates - date },
+                    )
+                    OutlinedTextField(
+                        value = policyConditions,
+                        onValueChange = { policyConditions = it },
+                        label = { Text("Điều kiện khác") },
+                        minLines = 3,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading,
+                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
                             value = durationMinutes,
@@ -555,6 +614,10 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                                     originalPrice = originalPrice,
                                     discountPrice = discountPrice,
                                     reservationDiscountPercent = reservationDiscountPercent,
+                                    policyWeekdays = policyWeekdays,
+                                    excludePublicHolidays = excludePublicHolidays,
+                                    blackoutDates = blackoutDates.sorted().joinToString("\n"),
+                                    policyConditions = policyConditions,
                                     durationMinutes = durationMinutes,
                                     maxQuantityPerOrder = maxQuantity,
                                     imageUrls = imageUrls,
@@ -585,6 +648,59 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                         ) {
                             Text(if (confirmDelete) "Bấm lần nữa để xóa" else "Xóa dịch vụ")
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BlackoutDatePickerSection(
+    blackoutDates: Set<String>,
+    enabled: Boolean,
+    onAddDate: (String) -> Unit,
+    onRemoveDate: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val calendar = remember { Calendar.getInstance() }
+    val datePickerDialog = remember {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                onAddDate("%04d-%02d-%02d".format(Locale.US, year, month + 1, dayOfMonth))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH),
+        )
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        Text("Ngày không áp dụng", fontWeight = FontWeight.SemiBold, color = Color(0xFF161B2E), fontSize = 13.sp)
+        OutlinedButton(
+            onClick = { datePickerDialog.show() },
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Chọn ngày không áp dụng")
+        }
+        if (blackoutDates.isEmpty()) {
+            Text("Chưa chọn ngày không áp dụng.", color = Color(0xFF3B4460), fontSize = 12.sp)
+        } else {
+            blackoutDates.sorted().forEach { date ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF4F7FB), RoundedCornerShape(999.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(date, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF161B2E))
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(onClick = { onRemoveDate(date) }, enabled = enabled) {
+                        Text("Xóa", color = Danger, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -679,6 +795,9 @@ private fun MoreDashboardScreen(
     onOpenSecurity: () -> Unit,
     onOpenEarnings: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val activity = context as? MainActivity
+
     ScreenList(title = null) {
         item {
             Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(14.dp)) {
@@ -720,6 +839,33 @@ private fun MoreDashboardScreen(
         }
         item {
             MoreMenuButton("Bảo mật", "Đổi mật khẩu hoặc tạo mật khẩu tạm thời", onOpenSecurity)
+        }
+        item { SectionTitle("Pháp lý & hỗ trợ") }
+        item {
+            MoreMenuButton("Bật thông báo đơn hàng", "Nhận cập nhật voucher, đặt chỗ và đối soát") {
+                activity?.requestNotificationPermissionIfNeeded()
+                    ?: state.showMessage("Mở app trên thiết bị Android để bật thông báo.")
+            }
+        }
+        item {
+            MoreMenuButton("Chính sách riêng tư", "Dữ liệu, quyền riêng tư và Firebase") {
+                openLegalUrl(context, LEGAL_PRIVACY_URL)
+            }
+        }
+        item {
+            MoreMenuButton("Điều khoản sử dụng", "Quy định vận hành trên S-Loco") {
+                openLegalUrl(context, LEGAL_TERMS_URL)
+            }
+        }
+        item {
+            MoreMenuButton("Hỗ trợ", "Liên hệ S-Loco support") {
+                openLegalUrl(context, LEGAL_SUPPORT_URL)
+            }
+        }
+        item {
+            MoreMenuButton("Xóa tài khoản", "Yêu cầu xóa tài khoản và dữ liệu") {
+                openLegalUrl(context, LEGAL_DELETE_ACCOUNT_URL)
+            }
         }
         item {
             Button(onClick = { state.logout() }, enabled = !state.isLoading, modifier = Modifier.fillMaxWidth()) {
@@ -803,6 +949,11 @@ private fun IposSettingsScreen(
                         )
                     }
                     VendorLocationMap(latitude, longitude)
+                    Text(
+                        "S-Loco chỉ dùng vị trí khi bạn bấm nút này để điền tọa độ cửa hàng; quyền vị trí không được dùng để theo dõi nền.",
+                        color = Color(0xFF3B4460),
+                        fontSize = 12.sp,
+                    )
                     OutlinedButton(
                         onClick = {
                             if (hasLocationPermission(context)) {
@@ -1101,6 +1252,10 @@ private fun iposStoreId(vendor: VendorProfile?): String {
     return vendor?.metadata?.get("ipos_store_id")?.jsonPrimitive?.contentOrNull.orEmpty()
 }
 
+private fun openLegalUrl(context: Context, url: String) {
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+}
+
 @Composable
 private fun ScreenList(title: String?, content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit) {
     LazyColumn(
@@ -1253,7 +1408,7 @@ private fun ReservationDetailScreen(state: AppState, item: ReservationWire) {
             InfoCard(
                 title = "Voucher iPos",
                 body = if (voucher == null) {
-                    "Chưa phát hành voucher. Xác nhận đặt chỗ để tạo voucher cho tourist."
+                    "Chưa phát hành voucher. Xác nhận đặt chỗ để tạo voucher cho Khách."
                 } else {
                     listOfNotNull(
                         "Trạng thái: ${voucherStatusLabel(voucher.status)}",
@@ -1390,6 +1545,22 @@ private fun varTextField(
     }
 }
 
+private fun JsonObject?.weekdaysFromPolicy(): List<Int>? =
+    (this?.get("weekdays") as? JsonArray)
+        ?.mapNotNull { it.jsonPrimitive.intOrNull }
+        ?.filter { it in 1..7 }
+
+private fun JsonObject?.stringArrayFromPolicy(key: String): List<String> =
+    (this?.get(key) as? JsonArray)
+        ?.mapNotNull { it.jsonPrimitive.contentOrNull }
+        ?: emptyList()
+
+private fun JsonObject?.booleanFromPolicy(key: String): Boolean? =
+    this?.get(key)?.jsonPrimitive?.booleanOrNull
+
+private fun JsonObject?.stringFromPolicy(key: String): String =
+    this?.get(key)?.jsonPrimitive?.contentOrNull.orEmpty()
+
 private fun formatVnd(value: Long?): String {
     val amount = value ?: 0
     return NumberFormat.getNumberInstance(Locale("vi", "VN")).format(amount) + "₫"
@@ -1420,11 +1591,11 @@ private fun statusText(item: ReservationWire): String {
 }
 
 private fun statusDescription(item: ReservationWire): String {
-    if (item.voucher?.status == "issue_failed") return "Cần thử tạo lại voucher iPos cho tourist."
+    if (item.voucher?.status == "issue_failed") return "Cần thử tạo lại voucher iPos cho Khách."
     return when (item.reservation.status) {
         "requested" -> "Cần liên hệ khách và xác nhận để tạo voucher."
         "confirmed" -> "Đã xác nhận, hệ thống đang xử lý voucher."
-        "voucher_issued" -> "Voucher đã sẵn sàng cho tourist sử dụng."
+        "voucher_issued" -> "Voucher đã sẵn sàng cho Khách sử dụng."
         "used" -> "Khách đã sử dụng voucher tại quầy."
         "settled" -> "Đặt chỗ đã hoàn tất đối soát."
         "rejected" -> "Đặt chỗ đã bị từ chối."

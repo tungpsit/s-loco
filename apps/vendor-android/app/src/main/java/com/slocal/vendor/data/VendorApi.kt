@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import vn.sloco.vendor.BuildConfig
 
 class VendorApi(
     private val tokenStore: TokenStore,
@@ -350,7 +351,7 @@ class VendorApi(
     }
 
     companion object {
-        const val DEFAULT_BASE_URL = "http://10.0.2.2:3000/api/v1"
+        val DEFAULT_BASE_URL = BuildConfig.API_BASE_URL
         private const val REFRESH_SKEW_MS = 120_000L
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     }

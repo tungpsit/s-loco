@@ -2,6 +2,13 @@ import CoreLocation
 import SwiftUI
 import WebKit
 
+private enum LegalLink {
+    static let privacy = URL(string: "https://sloco.vn/privacy")!
+    static let terms = URL(string: "https://sloco.vn/terms")!
+    static let support = URL(string: "https://sloco.vn/support")!
+    static let deleteAccount = URL(string: "https://sloco.vn/delete-account")!
+}
+
 struct SettingsView: View {
     @EnvironmentObject private var state: AppState
 
@@ -59,6 +66,26 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Pháp lý & hỗ trợ") {
+                    Button {
+                        Task { await state.registerPushNotifications() }
+                    } label: {
+                        MoreMenuRow(title: "Bật thông báo đơn hàng", subtitle: "Nhận cập nhật voucher, đặt chỗ và đối soát", systemImage: "bell.badge")
+                    }
+                    Link(destination: LegalLink.privacy) {
+                        MoreMenuRow(title: "Chính sách riêng tư", subtitle: "Dữ liệu, quyền riêng tư và Firebase", systemImage: "hand.raised")
+                    }
+                    Link(destination: LegalLink.terms) {
+                        MoreMenuRow(title: "Điều khoản sử dụng", subtitle: "Quy định vận hành trên S-Loco", systemImage: "doc.text")
+                    }
+                    Link(destination: LegalLink.support) {
+                        MoreMenuRow(title: "Hỗ trợ", subtitle: "Liên hệ S-Loco support", systemImage: "questionmark.circle")
+                    }
+                    Link(destination: LegalLink.deleteAccount) {
+                        MoreMenuRow(title: "Xóa tài khoản", subtitle: "Yêu cầu xóa tài khoản và dữ liệu", systemImage: "person.crop.circle.badge.xmark")
+                    }
+                }
+
                 Section {
                     Button("Đăng xuất", role: .destructive) {
                         state.logout()
@@ -102,6 +129,9 @@ private struct IposSettingsView: View {
                 VendorLocationMap(latitude: latitude, longitude: longitude)
                     .frame(height: 180)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                Text("S-Loco chỉ dùng vị trí khi bạn bấm nút này để điền tọa độ cửa hàng; quyền vị trí không được dùng để theo dõi nền.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 Button("Lấy vị trí hiện tại") {
                     locationProvider.requestLocation { location, message in
                         if let location {

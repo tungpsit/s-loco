@@ -132,6 +132,12 @@ export const voucherStates = [
   },
 ]
 
+export const applicabilityPolicyRules = [
+  'Vendor cấu hình ngày áp dụng: thứ 2–6, cuối tuần hoặc theo lịch vận hành riêng.',
+  'Hệ thống lưu ngày lễ, blackout dates và ghi chú điều kiện sản phẩm bằng dữ liệu có cấu trúc.',
+  'Khách thấy chính sách ngay trong chi tiết dịch vụ trước khi mua voucher, vé hoặc nhận coupon.',
+]
+
 export const policyStates = [
   {
     code: 'TRANSFERRED',

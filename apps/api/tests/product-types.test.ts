@@ -72,4 +72,28 @@ describe('service validators product type support', () => {
 
     expect(updateServiceSchema.parse({ product_type: 'ticket' }).fulfillment_type).toBe('fixed_price')
   })
+
+  test('accepts structured applicability policy rules', () => {
+    const parsed = createServiceSchema.parse({
+      name: 'Voucher buffet weekday',
+      slug: 'voucher-buffet-weekday',
+      category_id: '11111111-1111-4111-8111-111111111111',
+      product_type: 'voucher',
+      original_price: '300000',
+      applicability_policy: {
+        weekdays: [1, 2, 3, 4, 5],
+        exclude_public_holidays: true,
+        blackout_dates: ['2026-01-01'],
+        conditions: 'Không áp dụng cùng chương trình khuyến mãi khác.',
+      },
+    })
+
+    expect(parsed.applicability_policy).toEqual({
+      weekdays: [1, 2, 3, 4, 5],
+      exclude_public_holidays: true,
+      blackout_dates: ['2026-01-01'],
+      conditions: 'Không áp dụng cùng chương trình khuyến mãi khác.',
+    })
+    expect(() => updateServiceSchema.parse({ applicability_policy: { weekdays: [0] } })).toThrow()
+  })
 })

@@ -59,7 +59,7 @@ class SLocalFirebaseMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setContentIntent(pendingIntent)
@@ -102,7 +102,7 @@ class TouristPushRegistrar(context: Context) {
     }
 
     private companion object {
-        const val BASE_URL = "http://10.0.2.2:3000/api/v1"
+        val BASE_URL = BuildConfig.API_BASE_URL
         val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     }
 }

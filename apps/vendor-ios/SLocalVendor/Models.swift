@@ -12,6 +12,27 @@ func fulfillmentTypeForProductType(_ productType: String) -> String {
     productType == productTypeCoupon ? ServiceType.reservation : ServiceType.fixedPrice
 }
 
+struct ApplicabilityPolicy: Codable, Hashable {
+    var weekdays: [Int]?
+    var excludePublicHolidays: Bool?
+    var blackoutDates: [String]?
+    var conditions: String?
+
+    enum CodingKeys: String, CodingKey {
+        case weekdays
+        case excludePublicHolidays = "exclude_public_holidays"
+        case blackoutDates = "blackout_dates"
+        case conditions
+    }
+
+    var isEmpty: Bool {
+        (weekdays?.isEmpty ?? true) &&
+            excludePublicHolidays != true &&
+            (blackoutDates?.isEmpty ?? true) &&
+            (conditions?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+    }
+}
+
 struct ApiEnvelope<T: Decodable>: Decodable {
     let success: Bool
     let data: T?
@@ -170,6 +191,7 @@ struct VendorService: Decodable, Identifiable {
     let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: String?
+    let applicabilityPolicy: ApplicabilityPolicy?
     let durationMinutes: Int?
     let maxQuantityPerOrder: Int?
     let isActive: Bool
@@ -192,6 +214,8 @@ struct VendorService: Decodable, Identifiable {
         case fulfillmentTypeSnake = "fulfillment_type"
         case reservationDiscountPercent
         case reservationDiscountPercentSnake = "reservation_discount_percent"
+        case applicabilityPolicy
+        case applicabilityPolicySnake = "applicability_policy"
         case durationMinutes
         case durationMinutesSnake = "duration_minutes"
         case maxQuantityPerOrder
@@ -225,6 +249,9 @@ struct VendorService: Decodable, Identifiable {
         let decodedReservationDiscount = try container.decodeStringIfPresent(forKey: .reservationDiscountPercent)
         let decodedReservationDiscountSnake = try container.decodeStringIfPresent(forKey: .reservationDiscountPercentSnake)
         reservationDiscountPercent = decodedReservationDiscount ?? decodedReservationDiscountSnake
+        let decodedPolicy = try container.decodeIfPresent(ApplicabilityPolicy.self, forKey: .applicabilityPolicy)
+        let decodedPolicySnake = try container.decodeIfPresent(ApplicabilityPolicy.self, forKey: .applicabilityPolicySnake)
+        applicabilityPolicy = decodedPolicy ?? decodedPolicySnake
         let decodedDurationMinutes = try container.decodeLossyIntIfPresent(forKey: .durationMinutes)
         let decodedDurationMinutesSnake = try container.decodeLossyIntIfPresent(forKey: .durationMinutesSnake)
         durationMinutes = decodedDurationMinutes ?? decodedDurationMinutesSnake
@@ -251,6 +278,7 @@ struct CreateServiceRequest: Encodable {
     let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: String?
+    let applicabilityPolicy: ApplicabilityPolicy?
     let durationMinutes: Int?
     let maxQuantityPerOrder: Int?
     let images: [String]?
@@ -265,6 +293,7 @@ struct CreateServiceRequest: Encodable {
         case productType = "product_type"
         case fulfillmentType = "fulfillment_type"
         case reservationDiscountPercent = "reservation_discount_percent"
+        case applicabilityPolicy = "applicability_policy"
         case durationMinutes = "duration_minutes"
         case maxQuantityPerOrder = "max_quantity_per_order"
         case images
@@ -280,6 +309,7 @@ struct UpdateServiceRequest: Encodable {
     let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: String?
+    let applicabilityPolicy: ApplicabilityPolicy?
     let durationMinutes: Int?
     let maxQuantityPerOrder: Int?
     let isActive: Bool
@@ -294,6 +324,7 @@ struct UpdateServiceRequest: Encodable {
         case productType = "product_type"
         case fulfillmentType = "fulfillment_type"
         case reservationDiscountPercent = "reservation_discount_percent"
+        case applicabilityPolicy = "applicability_policy"
         case durationMinutes = "duration_minutes"
         case maxQuantityPerOrder = "max_quantity_per_order"
         case isActive = "is_active"

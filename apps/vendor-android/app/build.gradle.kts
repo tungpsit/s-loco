@@ -9,6 +9,17 @@ if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
 
+val releaseKeystorePath = System.getenv("SLOCO_VENDOR_UPLOAD_KEYSTORE")
+val releaseKeystorePassword = System.getenv("SLOCO_VENDOR_UPLOAD_KEYSTORE_PASSWORD")
+val releaseKeyAlias = System.getenv("SLOCO_VENDOR_UPLOAD_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("SLOCO_VENDOR_UPLOAD_KEY_PASSWORD")
+val hasReleaseSigning = listOf(
+    releaseKeystorePath,
+    releaseKeystorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "vn.sloco.vendor"
     compileSdk = 35
@@ -18,13 +29,38 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.0.1"
+        versionName = "1.0.0"
+        buildConfigField("String", "API_BASE_URL", "\"https://api.sloco.vn/api/v1\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/v1\"")
+        }
+        release {
+            isMinifyEnabled = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
     }
 
     compileOptions {

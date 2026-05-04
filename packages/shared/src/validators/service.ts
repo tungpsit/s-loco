@@ -3,6 +3,12 @@ import { latitudeNumberSchema, longitudeNumberSchema } from './common'
 
 const productTypeSchema = z.enum(['coupon', 'voucher', 'ticket'])
 const fulfillmentTypeSchema = z.enum(['fixed_price', 'reservation'])
+const applicabilityPolicySchema = z.object({
+  weekdays: z.array(z.coerce.number().int().min(1).max(7)).max(7).optional(),
+  exclude_public_holidays: z.boolean().optional(),
+  blackout_dates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(100).optional(),
+  conditions: z.string().max(1000).optional(),
+}).strict()
 
 function fulfillmentTypeForProductType(productType: z.infer<typeof productTypeSchema>) {
   return productType === 'coupon' ? 'reservation' : 'fixed_price'
@@ -43,6 +49,7 @@ export const createServiceSchema = z.object({
     .string()
     .regex(/^\d+(\.\d{1,2})?$/)
     .optional(),
+  applicability_policy: applicabilityPolicySchema.optional(),
   duration_minutes: z.coerce.number().int().min(1).optional(),
   max_quantity_per_order: z.coerce.number().int().min(1).max(100).optional(),
   images: z.array(z.string().url()).max(10).optional(),
@@ -76,6 +83,7 @@ export const updateServiceSchema = z.object({
     .regex(/^\d+(\.\d{1,2})?$/)
     .nullable()
     .optional(),
+  applicability_policy: applicabilityPolicySchema.nullable().optional(),
   duration_minutes: z.coerce.number().int().min(1).nullable().optional(),
   max_quantity_per_order: z.coerce.number().int().min(1).max(100).optional(),
   images: z.array(z.string().url()).max(10).optional(),

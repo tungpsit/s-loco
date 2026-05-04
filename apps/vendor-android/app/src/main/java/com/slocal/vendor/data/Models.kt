@@ -151,6 +151,8 @@ data class VendorService(
     @SerialName("fulfillment_type") val fulfillmentTypeSnake: String? = null,
     @SerialName("reservationDiscountPercent") val reservationDiscountPercent: String? = null,
     @SerialName("reservation_discount_percent") val reservationDiscountPercentSnake: String? = null,
+    @SerialName("applicabilityPolicy") val applicabilityPolicy: JsonObject? = null,
+    @SerialName("applicability_policy") val applicabilityPolicySnake: JsonObject? = null,
     @SerialName("durationMinutes") val durationMinutes: Int? = null,
     @SerialName("duration_minutes") val durationMinutesSnake: Int? = null,
     @SerialName("maxQuantityPerOrder") val maxQuantityPerOrder: Int? = null,
@@ -173,6 +175,8 @@ data class VendorService(
         get() = productTypeLabel(productTypeValue)
     val reservationDiscountPercentValue: String
         get() = reservationDiscountPercent ?: reservationDiscountPercentSnake ?: ""
+    val applicabilityPolicyValue: JsonObject?
+        get() = applicabilityPolicy ?: applicabilityPolicySnake
     val durationMinutesValue: Int?
         get() = durationMinutes ?: durationMinutesSnake
     val maxQuantityPerOrderValue: Int?
@@ -192,6 +196,7 @@ data class CreateServiceRequest(
     @SerialName("product_type") val productType: String = PRODUCT_TYPE_VOUCHER,
     @SerialName("fulfillment_type") val fulfillmentType: String = SERVICE_TYPE_FIXED_PRICE,
     @SerialName("reservation_discount_percent") val reservationDiscountPercent: String? = null,
+    @SerialName("applicability_policy") val applicabilityPolicy: ApplicabilityPolicyRequest? = null,
     @SerialName("duration_minutes") val durationMinutes: Int? = null,
     @SerialName("max_quantity_per_order") val maxQuantityPerOrder: Int? = null,
     val images: List<String>? = null,
@@ -207,6 +212,7 @@ data class UpdateServiceRequest(
     @SerialName("product_type") val productType: String? = null,
     @SerialName("fulfillment_type") val fulfillmentType: String? = null,
     @SerialName("reservation_discount_percent") val reservationDiscountPercent: String? = null,
+    @SerialName("applicability_policy") val applicabilityPolicy: ApplicabilityPolicyRequest? = null,
     @SerialName("duration_minutes") val durationMinutes: Int? = null,
     @SerialName("max_quantity_per_order") val maxQuantityPerOrder: Int? = null,
     @SerialName("is_active") val isActive: Boolean,
@@ -227,6 +233,14 @@ fun productTypeLabel(productType: String): String = when (productType) {
 
 fun fulfillmentTypeForProductType(productType: String): String =
     if (productType == PRODUCT_TYPE_COUPON) SERVICE_TYPE_RESERVATION else SERVICE_TYPE_FIXED_PRICE
+
+@Serializable
+data class ApplicabilityPolicyRequest(
+    val weekdays: List<Int>? = null,
+    @SerialName("exclude_public_holidays") val excludePublicHolidays: Boolean? = null,
+    @SerialName("blackout_dates") val blackoutDates: List<String>? = null,
+    val conditions: String? = null,
+)
 
 @Serializable
 data class Dashboard(

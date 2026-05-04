@@ -103,6 +103,33 @@ private struct ServiceRow: View {
     }
 }
 
+private struct WeekdayPolicyButton: View {
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack(alignment: .topTrailing) {
+                Text(label)
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 34, height: 34)
+                    .foregroundStyle(isSelected ? VendorTheme.primary : .secondary)
+                    .background(isSelected ? VendorTheme.primary.opacity(0.12) : Color(.systemGray6), in: Circle())
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(VendorTheme.primary)
+                        .offset(x: 1, y: -1)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Ngày áp dụng \(label)")
+        .accessibilityValue(isSelected ? "Đã chọn" : "Chưa chọn")
+    }
+}
+
 private struct ServiceEditorView: View {
     @EnvironmentObject private var state: AppState
     let service: VendorService?
@@ -114,6 +141,12 @@ private struct ServiceEditorView: View {
     @State private var originalPrice = ""
     @State private var discountPrice = ""
     @State private var reservationDiscountPercent = ""
+    @State private var policyWeekdays: Set<Int> = Set(1...7)
+    @State private var excludePublicHolidays = false
+    @State private var draftBlackoutDate = Date()
+    @State private var isBlackoutDatePickerPresented = false
+    @State private var blackoutDates: Set<String> = []
+    @State private var policyConditions = ""
     @State private var durationMinutes = ""
     @State private var maxQuantityPerOrder = "10"
     @State private var imageUrls = ""
@@ -142,11 +175,15 @@ private struct ServiceEditorView: View {
                 .pickerStyle(.segmented)
 
                 if productType == productTypeCoupon {
-                    Text("Coupon: tourist không trả trước; vendor thu tại quầy và trả hoa hồng cho S-Loco sau khi dùng.")
+                    Text("Coupon: Khách không trả trước; vendor thu tại quầy và trả hoa hồng cho S-Loco sau khi dùng.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 } else if productType == productTypeTicket {
-                    Text("Vé: tourist trả trước, QR scan xong được hoàn tất ngay để đối soát S-Loco trả vendor.")
+                    Text("Vé: Khách trả trước, QR scan xong được hoàn tất ngay để đối soát S-Loco trả vendor.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Voucher: Khách trả trước; QR scan ghi nhận đã dùng, vendor hoàn thành dịch vụ để đối soát S-Loco trả vendor.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -170,6 +207,64 @@ private struct ServiceEditorView: View {
                     .disabled(service == nil)
             }
 
+            Section("Chính sách áp dụng") {
+                Text("Thông tin này hiển thị cho Khách trước khi mua/nhận voucher.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Ngày áp dụng")
+                        .font(.subheadline.weight(.semibold))
+                    HStack(spacing: 8) {
+                        ForEach(1...7, id: \.self) { day in
+                            WeekdayPolicyButton(
+                                label: weekdayShortLabel(day),
+                                isSelected: policyWeekdays.contains(day)
+                            ) {
+                                if policyWeekdays.contains(day) {
+                                    policyWeekdays.remove(day)
+                                } else {
+                                    policyWeekdays.insert(day)
+                                }
+                            }
+                        }
+                    }
+                }
+                Toggle("Không áp dụng ngày lễ", isOn: $excludePublicHolidays)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Ngày không áp dụng")
+                        .font(.subheadline.weight(.semibold))
+                    Button("Chọn ngày không áp dụng") {
+                        draftBlackoutDate = Date()
+                        isBlackoutDatePickerPresented = true
+                    }
+                    .buttonStyle(.bordered)
+                    if blackoutDates.isEmpty {
+                        Text("Chưa chọn ngày không áp dụng.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(blackoutDates.sorted(), id: \.self) { date in
+                            HStack {
+                                Text(date)
+                                    .font(.footnote.weight(.semibold))
+                                Spacer()
+                                Button("Xóa") {
+                                    blackoutDates.remove(date)
+                                }
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.red)
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 10)
+                            .background(Color(.systemGray6), in: Capsule())
+                        }
+                    }
+                }
+                TextField("Điều kiện khác", text: $policyConditions, axis: .vertical)
+                    .lineLimit(3...6)
+            }
+
             Section("Hình ảnh") {
                 Text("Nhập URL ảnh, mỗi dòng một ảnh.")
                     .font(.footnote)
@@ -190,6 +285,10 @@ private struct ServiceEditorView: View {
                             originalPrice: originalPrice,
                             discountPrice: discountPrice,
                             reservationDiscountPercent: reservationDiscountPercent,
+                            policyWeekdays: policyWeekdays,
+                            excludePublicHolidays: excludePublicHolidays,
+                            blackoutDates: blackoutDates.sorted().joined(separator: "\n"),
+                            policyConditions: policyConditions,
                             durationMinutes: durationMinutes,
                             maxQuantityPerOrder: maxQuantityPerOrder,
                             imageUrls: imageUrls,
@@ -229,8 +328,61 @@ private struct ServiceEditorView: View {
                 categoryId = state.serviceCategories.first?.id ?? ""
             }
         }
+        .sheet(isPresented: $isBlackoutDatePickerPresented) {
+            NavigationStack {
+                VStack(spacing: 20) {
+                    DatePicker(
+                        "Chọn ngày không áp dụng",
+                        selection: $draftBlackoutDate,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    Spacer()
+                }
+                .padding()
+                .navigationTitle("Chọn ngày")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Hủy") {
+                            isBlackoutDatePickerPresented = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Thêm") {
+                            blackoutDates.insert(Self.blackoutDateFormatter.string(from: draftBlackoutDate))
+                            isBlackoutDatePickerPresented = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
         .scrollContentBackground(.hidden)
         .background(VendorTheme.surface)
+    }
+
+    private static let blackoutDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+
+    private func weekdayShortLabel(_ day: Int) -> String {
+        switch day {
+        case 1: return "T2"
+        case 2: return "T3"
+        case 3: return "T4"
+        case 4: return "T5"
+        case 5: return "T6"
+        case 6: return "T7"
+        case 7: return "CN"
+        default: return "T\(day)"
+        }
     }
 
     private func hydrate() {
@@ -244,6 +396,10 @@ private struct ServiceEditorView: View {
         originalPrice = service.map { String($0.originalPrice) } ?? ""
         discountPrice = service?.discountPrice.map(String.init) ?? ""
         reservationDiscountPercent = service?.reservationDiscountPercent ?? ""
+        policyWeekdays = service?.applicabilityPolicy?.weekdays.map(Set.init) ?? Set(1...7)
+        excludePublicHolidays = service?.applicabilityPolicy?.excludePublicHolidays ?? false
+        blackoutDates = Set(service?.applicabilityPolicy?.blackoutDates ?? [])
+        policyConditions = service?.applicabilityPolicy?.conditions ?? ""
         durationMinutes = service?.durationMinutes.map(String.init) ?? ""
         maxQuantityPerOrder = service?.maxQuantityPerOrder.map(String.init) ?? "10"
         imageUrls = service?.images.joined(separator: "\n") ?? ""

@@ -202,6 +202,8 @@ struct ServiceDetailView: View {
                             .foregroundStyle(TouristTheme.text)
                     }
 
+                    ApplicabilityPolicySection(policy: service.applicabilityPolicy)
+
                     VendorLocationSection(service: service)
 
                     if service.isCoupon {
@@ -268,6 +270,29 @@ struct ServiceDetailView: View {
                     Button("Đóng") { dismiss() }
                 }
             }
+        }
+    }
+}
+
+struct ApplicabilityPolicySection: View {
+    let policy: ApplicabilityPolicy?
+
+    var body: some View {
+        let lines = policy?.displayLines ?? []
+        if !lines.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Chính sách áp dụng")
+                    .font(.headline)
+                    .foregroundStyle(TouristTheme.text)
+                ForEach(lines, id: \.self) { line in
+                    Text("• \(line)")
+                        .font(.footnote)
+                        .foregroundStyle(TouristTheme.muted)
+                }
+            }
+            .padding(14)
+            .background(.white, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
         }
     }
 }
@@ -369,13 +394,21 @@ struct CheckoutView: View {
                     if let order = state.currentOrder {
                         OrderSummary(order: order)
                     }
-                    paymentRow(icon: "creditcard.fill", title: "Thẻ nội địa / quốc tế")
-                    paymentRow(icon: "wallet.pass.fill", title: "Ví điện tử")
-                    paymentRow(icon: "building.columns.fill", title: "Chuyển khoản")
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Thanh toán trực tuyến đang được hoàn thiện")
+                            .font(.headline)
+                            .foregroundStyle(TouristTheme.text)
+                        Text("Bản phát hành này ghi nhận đơn hàng/voucher để nhân viên S-Loco xác nhận. Cổng VNPay, MoMo và SePay sẽ xuất hiện khi được kích hoạt chính thức.")
+                            .font(.subheadline)
+                            .foregroundStyle(TouristTheme.muted)
+                    }
+                    .padding(14)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
                     Button {
-                        state.message = "Đơn hàng đã được tạo. Tích hợp cổng thanh toán sẽ xử lý bước thu tiền."
+                        state.message = "Đơn hàng đã được ghi nhận. S-Loco sẽ thông báo khi cổng thanh toán trực tuyến sẵn sàng."
                     } label: {
-                        Text("Xác nhận thanh toán")
+                        Text("Ghi nhận đơn hàng")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PrimaryButtonStyle())

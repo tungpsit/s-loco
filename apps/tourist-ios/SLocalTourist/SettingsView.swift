@@ -1,5 +1,12 @@
 import SwiftUI
 
+private enum LegalLink {
+    static let privacy = URL(string: "https://sloco.vn/privacy")!
+    static let terms = URL(string: "https://sloco.vn/terms")!
+    static let support = URL(string: "https://sloco.vn/support")!
+    static let deleteAccount = URL(string: "https://sloco.vn/delete-account")!
+}
+
 struct SettingsView: View {
     @EnvironmentObject private var state: AppState
 
@@ -17,7 +24,29 @@ struct SettingsView: View {
                     menuRow(icon: "cloud.sun", title: "Thời tiết Sầm Sơn", subtitle: "UV, mưa, gió, sóng và nhiệt độ biển") {
                         state.route = .weather
                     }
-                    menuRow(icon: "questionmark.circle", title: "Hỗ trợ", subtitle: "Chat với S-Loco support") {}
+                    Link(destination: LegalLink.support) {
+                        menuRowContent(icon: "questionmark.circle", title: "Hỗ trợ", subtitle: "Liên hệ S-Loco support")
+                    }
+                    .buttonStyle(.plain)
+
+                    menuRow(icon: "bell.badge", title: "Bật thông báo đơn hàng", subtitle: "Nhận cập nhật voucher, đặt chỗ và ưu đãi") {
+                        Task { await state.registerPushNotifications() }
+                    }
+
+                    Link(destination: LegalLink.privacy) {
+                        menuRowContent(icon: "hand.raised", title: "Chính sách riêng tư", subtitle: "Dữ liệu, quyền riêng tư và Firebase")
+                    }
+                    .buttonStyle(.plain)
+
+                    Link(destination: LegalLink.terms) {
+                        menuRowContent(icon: "doc.text", title: "Điều khoản sử dụng", subtitle: "Quy định sử dụng dịch vụ S-Loco")
+                    }
+                    .buttonStyle(.plain)
+
+                    Link(destination: LegalLink.deleteAccount) {
+                        menuRowContent(icon: "person.crop.circle.badge.xmark", title: "Xóa tài khoản", subtitle: "Yêu cầu xóa tài khoản và dữ liệu")
+                    }
+                    .buttonStyle(.plain)
 
                     if state.isAuthenticated {
                         Button(role: .destructive) {
@@ -71,28 +100,32 @@ struct SettingsView: View {
 
     private func menuRow(icon: String, title: String, subtitle: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .frame(width: 34, height: 34)
-                    .foregroundStyle(TouristTheme.primary)
-                    .background(TouristTheme.primarySoft, in: RoundedRectangle(cornerRadius: 10))
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(TouristTheme.text)
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(TouristTheme.muted)
-                }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.bold())
-                    .foregroundStyle(TouristTheme.muted)
-            }
-            .padding(14)
-            .background(.white, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+            menuRowContent(icon: icon, title: title, subtitle: subtitle)
         }
         .buttonStyle(.plain)
+    }
+
+    private func menuRowContent(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .frame(width: 34, height: 34)
+                .foregroundStyle(TouristTheme.primary)
+                .background(TouristTheme.primarySoft, in: RoundedRectangle(cornerRadius: 10))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(TouristTheme.text)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(TouristTheme.muted)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption.bold())
+                .foregroundStyle(TouristTheme.muted)
+        }
+        .padding(14)
+        .background(.white, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
     }
 }

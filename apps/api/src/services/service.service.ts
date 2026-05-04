@@ -32,6 +32,7 @@ export async function createService(vendorId: string, ownerId: string, data: Cre
       productType: data.product_type,
       fulfillmentType: data.fulfillment_type,
       reservationDiscountPercent: data.reservation_discount_percent,
+      applicabilityPolicy: data.applicability_policy || {},
       durationMinutes: data.duration_minutes,
       maxQuantityPerOrder: data.max_quantity_per_order || 10,
       images: data.images || [],
@@ -60,6 +61,7 @@ export async function adminCreateService(vendorId: string, data: CreateServiceIn
       productType: data.product_type,
       fulfillmentType: data.fulfillment_type,
       reservationDiscountPercent: data.reservation_discount_percent,
+      applicabilityPolicy: data.applicability_policy || {},
       durationMinutes: data.duration_minutes,
       maxQuantityPerOrder: data.max_quantity_per_order || 10,
       images: data.images || [],
@@ -91,6 +93,7 @@ export async function updateService(serviceId: string, ownerId: string, data: Up
   if (data.fulfillment_type !== undefined) updateData.fulfillmentType = data.fulfillment_type
   if (data.reservation_discount_percent !== undefined)
     updateData.reservationDiscountPercent = data.reservation_discount_percent
+  if (data.applicability_policy !== undefined) updateData.applicabilityPolicy = data.applicability_policy || {}
   if (data.duration_minutes !== undefined) updateData.durationMinutes = data.duration_minutes
   if (data.max_quantity_per_order !== undefined)
     updateData.maxQuantityPerOrder = data.max_quantity_per_order
@@ -123,6 +126,7 @@ export async function adminUpdateService(serviceId: string, data: UpdateServiceI
   if (data.fulfillment_type !== undefined) updateData.fulfillmentType = data.fulfillment_type
   if (data.reservation_discount_percent !== undefined)
     updateData.reservationDiscountPercent = data.reservation_discount_percent
+  if (data.applicability_policy !== undefined) updateData.applicabilityPolicy = data.applicability_policy || {}
   if (data.duration_minutes !== undefined) updateData.durationMinutes = data.duration_minutes
   if (data.max_quantity_per_order !== undefined)
     updateData.maxQuantityPerOrder = data.max_quantity_per_order

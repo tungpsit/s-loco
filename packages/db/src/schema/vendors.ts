@@ -104,6 +104,7 @@ export const services = pgTable(
       .notNull()
       .default('fixed_price'),
     reservationDiscountPercent: decimal('reservation_discount_percent', { precision: 5, scale: 2 }),
+    applicabilityPolicy: jsonb('applicability_policy').$type<Record<string, unknown>>().default({}),
     images: jsonb('images').$type<string[]>().default([]),
     options: jsonb('options'),
     durationMinutes: integer('duration_minutes'),

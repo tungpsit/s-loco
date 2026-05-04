@@ -90,6 +90,7 @@ final class ModelDecodingTests: XCTestCase {
           "productType": "coupon",
           "fulfillmentType": "reservation",
           "reservationDiscountPercent": "10.00",
+          "applicabilityPolicy": {"weekdays": [1,2,3,4,5], "exclude_public_holidays": true, "blackout_dates": ["2026-01-01"], "conditions": "Không áp dụng ngày lễ."},
           "durationMinutes": 90,
           "maxQuantityPerOrder": 6,
           "isActive": true,
@@ -106,6 +107,8 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(decoded.productLabel, "Coupon")
         XCTAssertEqual(decoded.fulfillmentType, ServiceType.reservation)
         XCTAssertEqual(decoded.reservationDiscountPercent, "10.00")
+        XCTAssertEqual(decoded.applicabilityPolicy?.weekdays, [1, 2, 3, 4, 5])
+        XCTAssertEqual(decoded.applicabilityPolicy?.excludePublicHolidays, true)
         XCTAssertEqual(decoded.durationMinutes, 90)
         XCTAssertEqual(decoded.maxQuantityPerOrder, 6)
         XCTAssertTrue(decoded.isActive)
@@ -122,6 +125,12 @@ final class ModelDecodingTests: XCTestCase {
             productType: productTypeVoucher,
             fulfillmentType: ServiceType.fixedPrice,
             reservationDiscountPercent: nil,
+            applicabilityPolicy: ApplicabilityPolicy(
+                weekdays: [1, 2, 3, 4, 5],
+                excludePublicHolidays: true,
+                blackoutDates: ["2026-01-01"],
+                conditions: "Không áp dụng ngày lễ."
+            ),
             durationMinutes: 90,
             maxQuantityPerOrder: 6,
             images: ["https://example.com/a.jpg"]
@@ -133,6 +142,11 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(object?["discount_price"] as? String, "299000")
         XCTAssertEqual(object?["product_type"] as? String, "voucher")
         XCTAssertEqual(object?["fulfillment_type"] as? String, "fixed_price")
+        let policy = object?["applicability_policy"] as? [String: Any]
+        XCTAssertEqual(policy?["weekdays"] as? [Int], [1, 2, 3, 4, 5])
+        XCTAssertEqual(policy?["exclude_public_holidays"] as? Bool, true)
+        XCTAssertEqual(policy?["blackout_dates"] as? [String], ["2026-01-01"])
+        XCTAssertEqual(policy?["conditions"] as? String, "Không áp dụng ngày lễ.")
         XCTAssertEqual(object?["duration_minutes"] as? Int, 90)
         XCTAssertEqual(object?["max_quantity_per_order"] as? Int, 6)
     }
@@ -148,6 +162,7 @@ final class ModelDecodingTests: XCTestCase {
             productType: productTypeCoupon,
             fulfillmentType: ServiceType.reservation,
             reservationDiscountPercent: "10",
+            applicabilityPolicy: nil,
             durationMinutes: nil,
             maxQuantityPerOrder: nil,
             images: nil

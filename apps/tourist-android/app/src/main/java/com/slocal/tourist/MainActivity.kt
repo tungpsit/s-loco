@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
+import vn.sloco.tourist.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -105,13 +106,12 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestNotificationPermissionIfNeeded()
         setContent {
             TouristApp(applicationContext)
         }
     }
 
-    private fun requestNotificationPermissionIfNeeded() {
+    fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
         requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQUEST)
@@ -131,10 +131,15 @@ private val TextMain = Color(0xFF102033)
 private val TextMuted = Color(0xFF5D6B7A)
 private val Coral = Color(0xFFFF6B35)
 private val Yellow = Color(0xFFFFC83D)
+private const val LEGAL_PRIVACY_URL = "https://sloco.vn/privacy"
+private const val LEGAL_TERMS_URL = "https://sloco.vn/terms"
+private const val LEGAL_SUPPORT_URL = "https://sloco.vn/support"
+private const val LEGAL_DELETE_ACCOUNT_URL = "https://sloco.vn/delete-account"
 
 @Composable
 private fun TouristApp(context: Context) {
     val state = remember { AppState(context) }
+    val activity = LocalContext.current as? MainActivity
 
     LaunchedEffect(Unit) {
         state.bootstrap()
@@ -164,6 +169,25 @@ private fun TouristApp(context: Context) {
                     is Screen.Login -> LoginScreen(state, screen.redirect)
                     is Screen.Otp -> OtpScreen(state, screen.phone, screen.redirect)
                     is Screen.Article -> TextShell("Bài viết", screen.title, state::back)
+                }
+
+                if (state.message != null) {
+                    Box(
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                    ) {
+                        Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(Color.White)) {
+                            Row(
+                                Modifier.padding(14.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(state.message.orEmpty(), color = TextMain, modifier = Modifier.weight(1f, fill = false))
+                                Text("Đóng", color = Blue, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { state.message = null })
+                            }
+                        }
+                    }
                 }
 
                 if (state.loading) {
@@ -529,6 +553,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 Text("Mô tả", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(service.description.ifBlank { "Trải nghiệm địa phương được chọn lọc bởi S-Loco." }, color = TextMuted)
                 if (service.durationMinutes > 0) Text("Thời lượng: ${service.durationMinutes} phút", color = TextMuted)
+                ApplicabilityPolicySection(service)
                 VendorLocationSection(service)
                 if (service.isCoupon) {
                     AppCard {
@@ -564,6 +589,16 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 Text(if (service.isCoupon) "Nhận coupon" else "Mua ${service.productLabel.lowercase()}")
             }
         }
+    }
+}
+
+@Composable
+private fun ApplicabilityPolicySection(service: Service) {
+    val lines = service.applicabilityPolicyLines()
+    if (lines.isEmpty()) return
+    AppCard {
+        Text("Chính sách áp dụng", color = TextMain, fontWeight = FontWeight.ExtraBold)
+        lines.forEach { line -> Text("• $line", color = TextMuted, fontSize = 13.sp) }
     }
 }
 
@@ -746,18 +781,22 @@ private fun CheckoutScreen(state: AppState, orderId: String) {
                     }
                 }
             }
-            PaymentChoice("VNPay")
-            PaymentChoice("MoMo")
-            PaymentChoice("SePay")
+            AppCard {
+                Text("Thanh toán trực tuyến đang được hoàn thiện", fontWeight = FontWeight.ExtraBold, color = TextMain)
+                Text(
+                    "Bản phát hành này ghi nhận đơn hàng/voucher để nhân viên S-Loco xác nhận. Cổng VNPay, MoMo và SePay sẽ xuất hiện khi được kích hoạt chính thức.",
+                    color = TextMuted
+                )
+            }
         }
         Button(
-            onClick = { state.message = "Thanh toán mẫu đã sẵn sàng. Kết nối cổng thực qua /payments/initiate." },
+            onClick = { state.message = "Đơn hàng đã được ghi nhận. S-Loco sẽ thông báo khi cổng thanh toán trực tuyến sẵn sàng." },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Blue)
         ) {
-            Text("Thanh toán")
+            Text("Ghi nhận đơn hàng")
         }
     }
 }
@@ -1165,6 +1204,8 @@ private fun ItineraryTimelineActivity(
 
 @Composable
 private fun ProfileScreen(state: AppState) {
+    val activity = LocalContext.current as? MainActivity
+
     Column(Modifier.fillMaxSize()) {
         BluePageHeader("ACCOUNT", "Tài khoản", "Quản lý voucher, lịch trình và ưu đãi S-Loco")
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1185,6 +1226,14 @@ private fun ProfileScreen(state: AppState) {
             MenuRow("🍽️", "Đặt chỗ nhà hàng") { state.tab = AppTab.Vouchers }
             MenuRow("🤖", "Lịch trình AI") { state.tab = AppTab.AI }
             MenuRow("🌤️", "Thời tiết") { state.screen = Screen.Weather }
+            MenuRow("🔔", "Bật thông báo đơn hàng") {
+                activity?.requestNotificationPermissionIfNeeded()
+                    ?: run { state.message = "Mở app trên thiết bị Android để bật thông báo." }
+            }
+            MenuRow("🔐", "Chính sách riêng tư") { openLegalUrl(state.context, LEGAL_PRIVACY_URL) }
+            MenuRow("📄", "Điều khoản sử dụng") { openLegalUrl(state.context, LEGAL_TERMS_URL) }
+            MenuRow("❔", "Hỗ trợ") { openLegalUrl(state.context, LEGAL_SUPPORT_URL) }
+            MenuRow("🗑", "Xóa tài khoản") { openLegalUrl(state.context, LEGAL_DELETE_ACCOUNT_URL) }
         }
     }
 }
@@ -1787,12 +1836,6 @@ private fun Stepper(value: Int, onMinus: () -> Unit, onPlus: () -> Unit) {
         Text("+", color = Blue, fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onPlus))
     }
 }
-
-@Composable
-private fun PaymentChoice(label: String) {
-    AppCard { Text(label, fontWeight = FontWeight.Bold); Text("Cổng thanh toán $label", color = TextMuted) }
-}
-
 @Composable
 private fun InfoRow(label: String, value: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -1804,6 +1847,10 @@ private fun InfoRow(label: String, value: String) {
 @Composable
 private fun MenuRow(icon: String, label: String, onClick: () -> Unit) {
     AppCard { Row(Modifier.clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) { Text(icon); Text(label, fontWeight = FontWeight.Bold) } }
+}
+
+private fun openLegalUrl(context: Context, url: String) {
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
 @Composable
@@ -1852,7 +1899,7 @@ private fun serviceImageRes(service: Service): Int {
     }
 }
 
-private class AppState(context: Context) {
+private class AppState(val context: Context) {
     private val prefs = context.getSharedPreferences("tourist", Context.MODE_PRIVATE)
     private val api = ApiClient(prefs)
     private val pushRegistrar = TouristPushRegistrar(context.applicationContext)
@@ -2089,7 +2136,7 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
         .readTimeout(120, TimeUnit.SECONDS)
         .build()
     private val json = Json { ignoreUnknownKeys = true }
-    private val baseUrl = "http://10.0.2.2:3000/api/v1"
+    private val baseUrl = BuildConfig.API_BASE_URL
     private val refreshSkewMs = 120_000L
 
     fun hasRefreshToken(): Boolean = !prefs.getString("refresh_token", null).isNullOrBlank()
@@ -2318,6 +2365,7 @@ private fun parseService(obj: JsonObject): Service? {
         fulfillmentType = fulfillmentType,
         productType = productType,
         reservationDiscountPercent = appDiscount,
+        applicabilityPolicy = service.obj("applicabilityPolicy") ?: service.obj("applicability_policy"),
         rating = service.num("averageRating", "rating"),
         durationMinutes = service.int("durationMinutes", "duration_minutes")
     )
@@ -2512,6 +2560,7 @@ private data class Service(
     val fulfillmentType: String,
     val productType: String,
     val reservationDiscountPercent: Int,
+    val applicabilityPolicy: JsonObject?,
     val rating: Double,
     val durationMinutes: Int,
 ) {
@@ -2525,6 +2574,17 @@ private data class Service(
     }
     fun locationSummary(): String? = distanceFromOriginKm?.let { String.format("%.1f km", it) }
         ?: vendorAddress.takeIf { it.isNotBlank() }
+    fun applicabilityPolicyLines(): List<String> {
+        val policy = applicabilityPolicy ?: return emptyList()
+        val lines = mutableListOf<String>()
+        val weekdays = (policy["weekdays"] as? JsonArray)?.mapNotNull { it.jsonPrimitive.intOrNull }?.filter { it in 1..7 }.orEmpty()
+        if (weekdays.isNotEmpty()) lines += "Áp dụng: ${weekdays.joinToString(", ") { weekdayLabel(it) }}"
+        if (policy["exclude_public_holidays"]?.jsonPrimitive?.contentOrNull == "true") lines += "Không áp dụng ngày lễ."
+        val blackoutDates = (policy["blackout_dates"] as? JsonArray)?.mapNotNull { it.jsonPrimitive.contentOrNull }.orEmpty()
+        if (blackoutDates.isNotEmpty()) lines += "Không áp dụng: ${blackoutDates.joinToString(", ")}"
+        policy["conditions"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }?.let { lines += it }
+        return lines
+    }
     fun isLodging(): Boolean {
         val normalized = category.normalizeVietnamese()
         return normalized.contains("luu tru") || category.contains("Lưu trú", ignoreCase = true)
@@ -2533,6 +2593,17 @@ private data class Service(
     fun stayLabel(): String = if (vendorName.isBlank()) name else "$name - $vendorName"
     fun hasVendorCoordinate(): Boolean = vendorLatitude != null && vendorLongitude != null
     fun toStayContext(): ItineraryStayContext = ItineraryStayContext(stayLabel(), vendorLatitude, vendorLongitude)
+}
+
+private fun weekdayLabel(day: Int): String = when (day) {
+    1 -> "Thứ 2"
+    2 -> "Thứ 3"
+    3 -> "Thứ 4"
+    4 -> "Thứ 5"
+    5 -> "Thứ 6"
+    6 -> "Thứ 7"
+    7 -> "Chủ nhật"
+    else -> "Ngày $day"
 }
 
 private data class Vendor(val id: String, val name: String, val address: String, val rating: Double)

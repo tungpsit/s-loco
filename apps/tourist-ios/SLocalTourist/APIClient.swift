@@ -10,7 +10,7 @@ final class APIClient {
     private let decoder = JSONDecoder()
 
     init(
-        baseURL: URL = URL(string: Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? "http://localhost:3000/api/v1")!,
+        baseURL: URL = URL(string: Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? "https://api.sloco.vn/api/v1")!,
         tokenStore: TokenStore,
         session: URLSession = .shared
     ) {
@@ -262,6 +262,7 @@ final class APIClient {
             productType: service.productType ?? (service.fulfillmentType == "reservation" ? productTypeCoupon : productTypeVoucher),
             fulfillmentType: service.fulfillmentType ?? "fixed_price",
             reservationDiscountPercent: appDiscount,
+            applicabilityPolicy: service.applicabilityPolicy,
             rating: service.averageRating.doubleValue,
             durationMinutes: service.durationMinutes ?? 0,
             imageURL: service.images?.first

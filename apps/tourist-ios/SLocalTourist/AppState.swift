@@ -39,7 +39,6 @@ final class AppState: ObservableObject {
         await refreshHome()
         await loadWeather()
         if isAuthenticated {
-            await registerPushNotifications()
             await loadVouchers()
             await loadReservations()
         }
@@ -72,7 +71,6 @@ final class AppState: ObservableObject {
             let login = try await api.verifyOtp(phone: phone, code: code)
             user = login.user
             startTokenRefreshLoop()
-            await registerPushNotifications()
             await loadVouchers()
             await loadReservations()
             route = redirect
@@ -87,7 +85,6 @@ final class AppState: ObservableObject {
             let login = try await api.verifyOtp(phone: phone, code: code)
             user = login.user
             startTokenRefreshLoop()
-            await registerPushNotifications()
             await loadVouchers()
             await loadReservations()
             route = redirect
@@ -245,7 +242,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func registerPushNotifications() async {
+    func registerPushNotifications() async {
         guard isAuthenticated else { return }
         guard let token = await PushNotificationManager.shared.requestAuthorizationAndToken() else { return }
         do {

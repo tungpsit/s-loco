@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import vn.sloco.vendor.data.ApiException
+import vn.sloco.vendor.data.ApplicabilityPolicyRequest
 import vn.sloco.vendor.data.CreateServiceRequest
 import vn.sloco.vendor.data.Dashboard
 import vn.sloco.vendor.data.ReservationWire
@@ -121,6 +122,10 @@ class AppState(context: Context) {
         originalPrice: String,
         discountPrice: String,
         reservationDiscountPercent: String,
+        policyWeekdays: Set<Int>,
+        excludePublicHolidays: Boolean,
+        blackoutDates: String,
+        policyConditions: String,
         durationMinutes: String,
         maxQuantityPerOrder: String,
         imageUrls: String,
@@ -145,6 +150,17 @@ class AppState(context: Context) {
         }
         val duration = durationMinutes.onlyDigits().toIntOrNull()
         val maxQuantity = maxQuantityPerOrder.onlyDigits().toIntOrNull()
+        val cleanedBlackoutDates = blackoutDates
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .toList()
+        val policy = ApplicabilityPolicyRequest(
+            weekdays = policyWeekdays.sorted().takeIf { it.isNotEmpty() },
+            excludePublicHolidays = excludePublicHolidays.takeIf { it },
+            blackoutDates = cleanedBlackoutDates.takeIf { it.isNotEmpty() },
+            conditions = policyConditions.trim().takeIf { it.isNotBlank() },
+        )
         val images = imageUrls
             .lineSequence()
             .map { it.trim() }
@@ -165,6 +181,7 @@ class AppState(context: Context) {
                     productType = productType,
                     fulfillmentType = fulfillmentType,
                     reservationDiscountPercent = cleanedReservationDiscount.takeIf { isCoupon },
+                    applicabilityPolicy = policy,
                     durationMinutes = duration,
                     maxQuantityPerOrder = maxQuantity,
                     images = images,
@@ -183,6 +200,7 @@ class AppState(context: Context) {
                     productType = productType,
                     fulfillmentType = fulfillmentType,
                     reservationDiscountPercent = cleanedReservationDiscount.takeIf { isCoupon },
+                    applicabilityPolicy = policy,
                     durationMinutes = duration,
                     maxQuantityPerOrder = maxQuantity,
                     isActive = isActive,

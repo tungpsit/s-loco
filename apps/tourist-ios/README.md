@@ -13,7 +13,7 @@ Native iOS tourist app written in SwiftUI.
 - QR voucher display with CoreImage
 - AI itinerary request via `POST /api/v1/itinerary`
 
-The default API base URL is `http://localhost:3000/api/v1` for iOS Simulator.
+The default API base URL is `https://api.sloco.vn/api/v1`. Use build-specific `API_BASE_URL` overrides only for local development.
 
 ## Run
 

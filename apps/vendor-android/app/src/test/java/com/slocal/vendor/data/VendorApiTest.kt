@@ -2,6 +2,7 @@ package vn.sloco.vendor.data
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class VendorApiTest {
@@ -105,6 +106,7 @@ class VendorApiTest {
               "discountPrice": "299000.00",
               "fulfillmentType": "reservation",
               "reservationDiscountPercent": "10.00",
+              "applicabilityPolicy": {"weekdays": [1,2,3,4,5], "exclude_public_holidays": true, "blackout_dates": ["2026-01-01"], "conditions": "Không áp dụng ngày lễ."},
               "durationMinutes": 90,
               "maxQuantityPerOrder": 6,
               "isActive": true,
@@ -120,6 +122,7 @@ class VendorApiTest {
         assertEquals("reservation", decoded.fulfillmentTypeValue)
         assertEquals(PRODUCT_TYPE_COUPON, decoded.productTypeValue)
         assertEquals("10.00", decoded.reservationDiscountPercentValue)
+        assertNotNull(decoded.applicabilityPolicyValue)
         assertEquals(90, decoded.durationMinutesValue)
         assertEquals(6, decoded.maxQuantityPerOrderValue)
         assertEquals(true, decoded.activeValue)
@@ -137,6 +140,12 @@ class VendorApiTest {
                 discountPrice = "299000",
                 productType = PRODUCT_TYPE_TICKET,
                 fulfillmentType = SERVICE_TYPE_FIXED_PRICE,
+                applicabilityPolicy = ApplicabilityPolicyRequest(
+                    weekdays = listOf(1, 2, 3, 4, 5),
+                    excludePublicHolidays = true,
+                    blackoutDates = listOf("2026-01-01"),
+                    conditions = "Không áp dụng ngày lễ.",
+                ),
                 durationMinutes = 90,
                 maxQuantityPerOrder = 6,
                 images = listOf("https://example.com/a.jpg"),
@@ -144,7 +153,7 @@ class VendorApiTest {
         )
 
         assertEquals(
-            """{"name":"Buffet hải sản","slug":"buffet-hai-san","category_id":"c1","original_price":"350000","discount_price":"299000","product_type":"ticket","duration_minutes":90,"max_quantity_per_order":6,"images":["https://example.com/a.jpg"]}""",
+            """{"name":"Buffet hải sản","slug":"buffet-hai-san","category_id":"c1","original_price":"350000","discount_price":"299000","product_type":"ticket","applicability_policy":{"weekdays":[1,2,3,4,5],"exclude_public_holidays":true,"blackout_dates":["2026-01-01"],"conditions":"Không áp dụng ngày lễ."},"duration_minutes":90,"max_quantity_per_order":6,"images":["https://example.com/a.jpg"]}""",
             encoded,
         )
     }

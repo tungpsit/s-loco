@@ -85,6 +85,13 @@
       "when": 1777687700000,
       "tag": "0011_settlement_direction",
       "breakpoints": false
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1777687800000,
+      "tag": "0012_service_applicability_policy",
+      "breakpoints": false
     }
   ]
 }
