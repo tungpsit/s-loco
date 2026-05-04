@@ -5,6 +5,7 @@ import { calculateDistanceKm, hasGeoPoint, parseCoordinate } from '../lib/geo'
 
 const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1'
 const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
+const DEFAULT_ITINERARY_AI_TIMEOUT_MS = 120_000
 
 interface ItineraryInput {
   days: number
@@ -49,6 +50,7 @@ interface ItineraryActivity {
   service_id: string | null
   estimated_cost?: number
   category?: string
+  distance_from_stay_km?: number
 }
 
 interface ItineraryDay {
@@ -165,19 +167,22 @@ Trả về JSON (không markdown) theo format:
   try {
     const baseUrl = (process.env.OPENAI_BASE_URL || DEFAULT_OPENAI_BASE_URL).replace(/\/+$/, '')
     const model = process.env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), getItineraryAiTimeoutMs())
     const res = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
         max_tokens: 4096,
       }),
-    })
+    }).finally(() => clearTimeout(timeout))
 
     if (!res.ok) {
       throw new Error(`OpenAI-compatible API returned ${res.status}`)
@@ -194,9 +199,27 @@ Trả về JSON (không markdown) theo format:
   return generateFallbackItinerary(input, servicesWithDistance)
 }
 
+function getItineraryAiTimeoutMs() {
+  const configured = Number(process.env.ITINERARY_AI_TIMEOUT_MS)
+  return Number.isFinite(configured) && configured > 0
+    ? configured
+    : DEFAULT_ITINERARY_AI_TIMEOUT_MS
+}
+
+function roundDistanceKm(km: number) {
+  return Math.round(km * 10) / 10
+}
+
+function distanceKmForActivity(service: AvailableService | undefined, input: ItineraryInput): number | undefined {
+  if (!service || !hasGeoPoint({ latitude: input.stayLatitude, longitude: input.stayLongitude })) return undefined
+  const km = service.distanceFromStayKm
+  if (km === undefined || km === null) return undefined
+  return roundDistanceKm(km)
+}
+
 function attachDistanceFromStay(availableServices: AvailableService[], input: ItineraryInput) {
   if (!hasGeoPoint({ latitude: input.stayLatitude, longitude: input.stayLongitude })) {
-    return availableServices
+    return availableServices.map(({ distanceFromStayKm: _distanceFromStayKm, ...service }) => service)
   }
 
   const stayLatitude = input.stayLatitude
@@ -291,7 +314,7 @@ function validateItinerary(
         usedServiceIds.add(service.id)
       }
 
-      return mergeActivityWithService(activity, service, needsReplacement)
+      return mergeActivityWithService(activity, service, needsReplacement, input)
     })
 
     return {
@@ -304,6 +327,7 @@ function validateItinerary(
         input.preferences,
         usedServiceIds,
         input.preferNearStay,
+        input,
       ),
     }
   })
@@ -340,7 +364,7 @@ function generateFallbackItinerary(input: ItineraryInput, availableServices: Ava
             )
             if (!service) return []
             usedServiceIds.add(service.id)
-            return [activityFromService(service, slot)]
+            return [activityFromService(service, slot, undefined, input)]
           })
         : genericActivities()
 
@@ -388,6 +412,7 @@ function diversifyDay(
   preferences: string[],
   usedServiceIds: Set<string>,
   preferNearStay = false,
+  input: ItineraryInput,
 ) {
   if (activities.length === 0) return activities
 
@@ -416,6 +441,7 @@ function diversifyDay(
     replacement,
     slot,
     activities[replacementIndex]!.time,
+    input,
   )
   return nextActivities
 }
@@ -424,24 +450,31 @@ function mergeActivityWithService(
   activity: ItineraryActivity,
   service: AvailableService | undefined,
   replacedService: boolean,
+  input: ItineraryInput,
 ) {
   if (!service) {
     return {
-      ...activity,
+      time: activity.time,
+      title: activity.title,
+      description: activity.description,
       service_id: null,
       estimated_cost: activity.estimated_cost || 0,
+      category: activity.category,
     }
   }
 
   if (replacedService) {
-    return activityFromService(service, inferSlot(activity.time), activity.time)
+    return activityFromService(service, inferSlot(activity.time), activity.time, input)
   }
 
+  const km = distanceKmForActivity(service, input)
+  const { distance_from_stay_km: _dropAiDistance, ...activityRest } = activity
   return {
-    ...activity,
+    ...activityRest,
     service_id: service.id,
     estimated_cost: getServicePrice(service),
     category: service.category || activity.category,
+    ...(km === undefined ? {} : { distance_from_stay_km: km }),
   }
 }
 
@@ -541,15 +574,19 @@ function inferSlot(time: string): ItinerarySlot {
 function activityFromService(
   service: AvailableService,
   slot: ItinerarySlot,
-  time = SLOT_TIMES[slot],
+  time: string | undefined,
+  input: ItineraryInput,
 ) {
+  const slotTime = time ?? SLOT_TIMES[slot]
+  const km = distanceKmForActivity(service, input)
   return {
-    time,
+    time: slotTime,
     title: service.name,
     description: `Trải nghiệm ${service.name} tại ${service.vendorName}`,
     service_id: service.id,
     estimated_cost: getServicePrice(service),
     category: service.category || undefined,
+    ...(km === undefined ? {} : { distance_from_stay_km: km }),
   }
 }
 

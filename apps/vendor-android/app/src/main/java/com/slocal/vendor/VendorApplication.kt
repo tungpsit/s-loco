@@ -1,4 +1,4 @@
-package com.slocal.vendor
+package vn.sloco.vendor
 
 import android.app.Application
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Shopping souvenir">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#E7F8FF"/><stop offset="1" stop-color="#FFF2C6"/></linearGradient>
+    <linearGradient id="blue" x1="30" y1="35" x2="98" y2="102" gradientUnits="userSpaceOnUse"><stop stop-color="#2BBBF0"/><stop offset="1" stop-color="#075993"/></linearGradient>
+    <linearGradient id="gold" x1="37" y1="22" x2="92" y2="86" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD86E"/><stop offset="1" stop-color="#EFA51A"/></linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <path d="M36 46h56l7 57H29l7-57Z" fill="url(#blue)"/>
+  <path d="M49 48c0-12 7-21 15-21s15 9 15 21" stroke="#123F67" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M42 67h44" stroke="white" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+  <path d="M54 82h20" stroke="white" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+  <circle cx="91" cy="43" r="14" fill="url(#gold)"/>
+  <path d="M86 43h10m-5-5v10" stroke="white" stroke-width="4" stroke-linecap="round"/>
+</svg>

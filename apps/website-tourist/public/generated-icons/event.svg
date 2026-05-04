@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Local event calendar">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#E7F8FF"/><stop offset="1" stop-color="#FFF2C6"/></linearGradient>
+    <linearGradient id="blue" x1="28" y1="30" x2="100" y2="103" gradientUnits="userSpaceOnUse"><stop stop-color="#2BBBF0"/><stop offset="1" stop-color="#075993"/></linearGradient>
+    <linearGradient id="gold" x1="40" y1="34" x2="96" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD86E"/><stop offset="1" stop-color="#EFA51A"/></linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <rect x="30" y="33" width="68" height="70" rx="14" fill="url(#blue)"/>
+  <path d="M30 52h68" stroke="white" stroke-width="7" opacity=".88"/>
+  <path d="M47 25v17m34-17v17" stroke="#123F67" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="66" cy="76" r="16" fill="url(#gold)"/>
+  <path d="M66 53v8m0 30v8m23-23h-8m-30 0h-8m39-16-6 6M56 86l-6 6m32 0-6-6M56 66l-6-6" stroke="#F7C04A" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+</svg>

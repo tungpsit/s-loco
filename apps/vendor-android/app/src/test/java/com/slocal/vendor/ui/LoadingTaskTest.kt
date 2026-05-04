@@ -1,4 +1,4 @@
-package com.slocal.vendor.ui
+package vn.sloco.vendor.ui
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

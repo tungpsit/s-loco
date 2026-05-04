@@ -1,4 +1,4 @@
-package com.slocal.vendor.data
+package vn.sloco.vendor.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

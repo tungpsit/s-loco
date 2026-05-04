@@ -1,0 +1,63 @@
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">S-Loco operating flow</title>
+  <desc id="desc">Tourist app, AI itinerary, voucher QR, vendor scan, and admin reconciliation flow.</desc>
+  <rect width="1400" height="920" rx="56" fill="#F7FBFF"/>
+  <circle cx="172" cy="126" r="220" fill="#90E0EF" fill-opacity="0.26"/>
+  <circle cx="1202" cy="148" r="260" fill="#FFF4DF" fill-opacity="0.88"/>
+  <path d="M0 700C174 642 266 684 440 608C620 530 700 394 912 430C1100 462 1240 402 1400 294V920H0V700Z" fill="#EAF7FC"/>
+  <path d="M112 522C250 304 412 632 574 430C742 220 852 644 1028 408C1120 285 1212 266 1292 300" stroke="#0077B6" stroke-width="8" stroke-linecap="round" stroke-dasharray="18 24"/>
+
+  <g filter="url(#shadow)">
+    <rect x="84" y="170" width="284" height="520" rx="42" fill="white"/>
+    <rect x="110" y="208" width="232" height="146" rx="28" fill="#EAF7FC"/>
+    <path d="M110 316C152 284 188 306 230 280C274 252 306 244 342 258V354H110V316Z" fill="#0077B6" fill-opacity="0.72"/>
+    <circle cx="292" cy="246" r="32" fill="#FFD166"/>
+    <text x="122" y="404" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#112033">AI itinerary</text>
+    <text x="122" y="438" font-family="Arial, sans-serif" font-size="17" fill="#607186">Family trip, 2 days</text>
+    <rect x="122" y="474" width="95" height="50" rx="18" fill="#EEF7FF"/>
+    <rect x="232" y="474" width="95" height="50" rx="18" fill="#EEF7FF"/>
+    <rect x="122" y="538" width="205" height="58" rx="20" fill="#112033"/>
+    <text x="142" y="574" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="white">Voucher QR</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="454" y="120" width="300" height="192" rx="34" fill="white"/>
+    <text x="486" y="174" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#112033">Discover services</text>
+    <text x="486" y="210" font-family="Arial, sans-serif" font-size="17" fill="#607186">Food, hotel, cart, spa</text>
+    <rect x="486" y="238" width="72" height="38" rx="14" fill="#C8EDF7"/>
+    <rect x="570" y="238" width="72" height="38" rx="14" fill="#FFF4DF"/>
+    <rect x="654" y="238" width="72" height="38" rx="14" fill="#E7F8EE"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="514" y="570" width="322" height="210" rx="36" fill="white"/>
+    <text x="546" y="626" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#112033">Vendor scans QR</text>
+    <text x="546" y="662" font-family="Arial, sans-serif" font-size="17" fill="#607186">Voucher is verified on-site</text>
+    <rect x="546" y="696" width="84" height="84" rx="22" fill="#EEF7FF"/>
+    <g fill="#005E97">
+      <rect x="564" y="714" width="16" height="16" rx="4"/><rect x="590" y="714" width="16" height="16" rx="4"/>
+      <rect x="564" y="740" width="16" height="16" rx="4"/><rect x="616" y="740" width="16" height="16" rx="4"/>
+      <rect x="590" y="766" width="16" height="16" rx="4"/>
+    </g>
+    <rect x="658" y="710" width="138" height="18" rx="9" fill="#C8EDF7"/>
+    <rect x="658" y="744" width="104" height="18" rx="9" fill="#C8EDF7"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="940" y="170" width="348" height="430" rx="42" fill="white"/>
+    <text x="982" y="230" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#112033">Admin dashboard</text>
+    <text x="982" y="266" font-family="Arial, sans-serif" font-size="17" fill="#607186">Revenue, vouchers, payout</text>
+    <rect x="982" y="318" width="264" height="18" rx="9" fill="#EEF7FF"/>
+    <rect x="982" y="318" width="204" height="18" rx="9" fill="#0077B6"/>
+    <rect x="982" y="378" width="264" height="18" rx="9" fill="#EEF7FF"/>
+    <rect x="982" y="378" width="158" height="18" rx="9" fill="#0077B6"/>
+    <rect x="982" y="438" width="264" height="18" rx="9" fill="#EEF7FF"/>
+    <rect x="982" y="438" width="228" height="18" rx="9" fill="#0077B6"/>
+    <rect x="982" y="506" width="134" height="58" rx="22" fill="#112033"/>
+    <text x="1010" y="542" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="white">SETTLED</text>
+  </g>
+
+  <text x="92" y="820" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#005E97">S-Loco operating flow</text>
+  <text x="92" y="856" font-family="Arial, sans-serif" font-size="18" fill="#607186">Tourist discovery - AI plan - voucher QR - vendor verification - admin settlement</text>
+  <defs><filter id="shadow" x="0" y="0" width="1400" height="920" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#005E97" flood-opacity="0.16"/></filter></defs>
+</svg>

@@ -103,7 +103,11 @@ final class ModelDecodingTests: XCTestCase {
             days: 3,
             budget: 3000000,
             preferences: ["Ẩm thực", "Điểm tham quan"],
-            groupType: "couple"
+            groupType: "couple",
+            stayLocationLabel: nil,
+            stayLatitude: nil,
+            stayLongitude: nil,
+            preferNearStay: nil
         )
 
         let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(request)) as? [String: Any]
@@ -113,6 +117,61 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(json?["preferences"] as? [String], ["Ẩm thực", "Điểm tham quan"])
         XCTAssertEqual(json?["group_type"] as? String, "couple")
         XCTAssertNil(json?["group_size"])
+        XCTAssertNil(json?["stay_location_label"])
+        XCTAssertNil(json?["stay_latitude"])
+        XCTAssertNil(json?["stay_longitude"])
+        XCTAssertNil(json?["prefer_near_stay"])
+    }
+
+    func testItineraryRequestEncodesNearStayOptionsWhenProvided() throws {
+        let request = ItineraryRequest(
+            days: 2,
+            budget: 2000000,
+            preferences: ["Biển"],
+            groupType: "family",
+            stayLocationLabel: "FLC Sầm Sơn",
+            stayLatitude: 19.742,
+            stayLongitude: 105.901,
+            preferNearStay: true
+        )
+
+        let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(request)) as? [String: Any]
+
+        XCTAssertEqual(json?["group_type"] as? String, "family")
+        XCTAssertEqual(json?["stay_location_label"] as? String, "FLC Sầm Sơn")
+        XCTAssertEqual(json?["stay_latitude"] as? Double, 19.742)
+        XCTAssertEqual(json?["stay_longitude"] as? Double, 105.901)
+        XCTAssertEqual(json?["prefer_near_stay"] as? Bool, true)
+    }
+
+    func testGeneratedItineraryDecodesDistanceFromStayKmOnActivities() throws {
+        let raw = """
+        {
+          "title": "Test",
+          "summary": "",
+          "days": [
+            {
+              "day": 1,
+              "title": "Ngày 1",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "title": "Tour",
+                  "description": "Desc",
+                  "service_id": "svc-1",
+                  "estimated_cost": 100000,
+                  "distance_from_stay_km": 1.3
+                }
+              ]
+            }
+          ],
+          "total_estimated_cost": 100000,
+          "tips": []
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(GeneratedItinerary.self, from: raw)
+        XCTAssertEqual(decoded.days.first?.activities.first?.distanceFromStayKm, 1.3)
     }
 
     func testWeatherDecodesCurrentApiShape() throws {

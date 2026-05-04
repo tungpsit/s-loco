@@ -67,6 +67,23 @@
         "typescript": "^5.7.0",
       },
     },
+    "apps/website-pitching": {
+      "name": "@S-Loco/website-pitching",
+      "version": "0.0.1",
+      "dependencies": {
+        "next": "16.2.1",
+        "react": "19.2.4",
+        "react-dom": "19.2.4",
+      },
+      "devDependencies": {
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "tailwindcss": "^4",
+        "typescript": "^5",
+      },
+    },
     "packages/db": {
       "name": "@S-Loco/db",
       "version": "0.0.1",
@@ -105,6 +122,8 @@
     "@S-Loco/db": ["@S-Loco/db@workspace:packages/db"],
 
     "@S-Loco/shared": ["@S-Loco/shared@workspace:packages/shared"],
+
+    "@S-Loco/website-pitching": ["@S-Loco/website-pitching@workspace:apps/website-pitching"],
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
 

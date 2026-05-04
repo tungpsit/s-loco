@@ -17,6 +17,7 @@
 		72A81FFC2FA355AE00E26625 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 72A81FFB2FA355AE00E26625 /* FirebaseCore */; };
 		72A81FFE2FA355AE00E26625 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 72A81FFD2FA355AE00E26625 /* FirebaseMessaging */; };
 		85CAB059AEDD403BBF32969C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F37F62BC359546B487697F5A /* SettingsView.swift */; };
+		8F7A1B2C3D4E5F60718293A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F7A1B2C3D4E5F60718293A3 /* Assets.xcassets */; };
 		B1D0F0022FA4010100E26625 /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D0F0012FA4010100E26625 /* PushNotificationManager.swift */; };
 		B1D0F0042FA4010100E26625 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1D0F0032FA4010100E26625 /* GoogleService-Info.plist */; };
 		9C402B8EAA2F4AF3A34643F2 /* ModelDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C91AF647C3427CAA469413 /* ModelDecodingTests.swift */; };
@@ -53,6 +54,7 @@
 		656D9F0B42F4485D9723A495 /* LoginBackground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = LoginBackground.png; sourceTree = "<group>"; };
 		7E2F9B8C4D9A4F8CA7A9E312 /* ServicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesView.swift; sourceTree = "<group>"; };
 		8621A4F6AF9F473B9A2A7CA1 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		8F7A1B2C3D4E5F60718293A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9C314CFDA7E045F693FF84E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1D0F0012FA4010100E26625 /* PushNotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		B1D0F0032FA4010100E26625 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				48A8C925F6034383A40C0227 /* AppState.swift */,
 				B1D0F0012FA4010100E26625 /* PushNotificationManager.swift */,
 				5A7B7017DA56487F8EF5A545 /* Theme.swift */,
+				8F7A1B2C3D4E5F60718293A3 /* Assets.xcassets */,
 				8621A4F6AF9F473B9A2A7CA1 /* RootView.swift */,
 				16C25879F3CA4110B2F9EFC6 /* LoginView.swift */,
 				EBCF5D34E0A24AF0829F5833 /* DashboardView.swift */,
@@ -221,6 +224,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D62B0DA3E344656A84001BB /* LoginBackground.png in Resources */,
+				8F7A1B2C3D4E5F60718293A4 /* Assets.xcassets in Resources */,
 				B1D0F0042FA4010100E26625 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,13 +283,14 @@
 		1B6A08D4D78048F68597DF44 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = SLocalVendor/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.slocal.vendor;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.sloco.vendor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -299,7 +304,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.slocal.vendor.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.sloco.vendor.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -310,13 +315,14 @@
 		2799F652BFA445ABBA182FA7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = SLocalVendor/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.slocal.vendor;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.sloco.vendor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -442,7 +448,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.slocal.vendor.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = vn.sloco.vendor.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

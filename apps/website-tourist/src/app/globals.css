@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4fbff;
+  --foreground: #12243f;
+  --ocean: #006bb6;
+  --deep-ocean: #024b86;
+  --sky: #45b8ef;
+  --sky-soft: #d9f3ff;
+  --sand: #f5b942;
+  --sand-soft: #fff3cf;
+  --reef: #16a6c7;
+  --coast: #eef9ff;
+  --ink-muted: #4d6380;
+  --line: rgba(2, 75, 134, 0.14);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ocean: var(--ocean);
+  --color-deep-ocean: var(--deep-ocean);
+  --color-sky: var(--sky);
+  --color-sky-soft: var(--sky-soft);
+  --color-sand: var(--sand);
+  --color-sand-soft: var(--sand-soft);
+  --color-reef: var(--reef);
+  --color-coast: var(--coast);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --font-body: var(--font-roboto);
+  --font-display: var(--font-roboto);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 78% 4%, rgba(69, 184, 239, 0.28), transparent 34rem),
+    radial-gradient(circle at 8% 20%, rgba(245, 185, 66, 0.16), transparent 28rem),
+    linear-gradient(180deg, #f4fbff 0%, #ffffff 48%, #eef9ff 100%);
+  color: var(--foreground);
+  font-family: var(--font-roboto), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(245, 185, 66, 0.45);
+  color: #08233c;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes drift-x {
+  0% {
+    transform: translateX(-20%);
+  }
+  100% {
+    transform: translateX(20%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.float-y {
+  animation: float-y 6s ease-in-out infinite;
+}
+
+.drift-x {
+  animation: drift-x 10s ease-in-out infinite alternate;
+}
+
+.pulse-soft {
+  animation: pulse-soft 2.8s ease-in-out infinite;
+}
+
+.shimmer-line::after {
+  animation: shimmer 2.8s ease-in-out infinite;
+}

@@ -1,11 +1,15 @@
-package com.slocal.tourist
+package vn.sloco.tourist
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -43,6 +47,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
@@ -62,11 +67,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.Dispatchers
@@ -87,10 +95,12 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlin.math.roundToInt
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,6 +130,7 @@ private val Border = Color(0xFFD9E7F2)
 private val TextMain = Color(0xFF102033)
 private val TextMuted = Color(0xFF5D6B7A)
 private val Coral = Color(0xFFFF6B35)
+private val Yellow = Color(0xFFFFC83D)
 
 @Composable
 private fun TouristApp(context: Context) {
@@ -210,27 +221,18 @@ private fun MainTabs(state: AppState) {
 
 @Composable
 private fun HomeScreen(state: AppState) {
-    LazyColumn(Modifier.fillMaxSize()) {
+    LazyColumn(
+        Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(Color(0xFFDDF6FF), Surface)))
+    ) {
         item {
-            HeroHeader(
-                title = "Bạn muốn đi đâu?",
-                subtitle = "Sầm Sơn, Thanh Hóa",
-                trailing = state.weather?.let { "${it.temperature}°" } ?: "🌤️",
-                searchText = "Tìm dịch vụ, nhà hàng, khách sạn...",
-                onSearch = { state.tab = AppTab.Browse }
+            HomeHeader(state)
+            RecommendationTitle(
+                title = "Gợi ý cho bạn",
+                action = "Xem tất cả",
+                onAction = { state.tab = AppTab.Browse }
             )
-            CategoryPanel(state)
-            WeatherSummaryCard(state.weather) { state.screen = Screen.Weather }
-            SectionTitle("Ưu đãi nổi bật")
-            Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OfferCard("✨", "AI beach itinerary", "Tạo lịch trình Sầm Sơn trong 30 giây") {
-                    state.tab = AppTab.AI
-                }
-                OfferCard("🎫", "Voucher minh bạch", "Mua trước, quét QR, dùng ngay") {
-                    state.tab = AppTab.Vouchers
-                }
-            }
-            SectionTitle("Phổ biến gần bạn", "CURATED SERVICES")
         }
         val rows = state.services.chunked(2)
         items(rows) { row ->
@@ -244,6 +246,167 @@ private fun HomeScreen(state: AppState) {
             }
         }
         item { Spacer(Modifier.height(96.dp)) }
+    }
+}
+
+@Composable
+private fun HomeHeader(state: AppState) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 28.dp, bottom = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text("Xin chào,", color = TextMain, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text("Chào mừng đến Sầm Sơn!", color = TextMain, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+            }
+            Box(
+                Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("🔔", fontSize = 16.sp)
+                Box(
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 8.dp, end = 7.dp)
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(Yellow)
+                )
+            }
+        }
+        HomeSearchBox(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            onClick = { state.tab = AppTab.Browse }
+        )
+        HomeCategoryGrid(state)
+    }
+}
+
+@Composable
+private fun HomeSearchBox(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("⌕", color = TextMuted, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Bạn muốn tìm gì?", color = TextMuted, fontSize = 13.sp)
+    }
+}
+
+@Composable
+private fun HomeCategoryGrid(state: AppState) {
+    val actions = listOf(
+        HomeCategoryAction(R.drawable.category_diem_den, "Điểm đến", "") {
+            state.homeCategory = ""
+            state.loadServices()
+        },
+        HomeCategoryAction(R.drawable.category_am_thuc, "Ẩm thực", "am-thuc") {
+            state.homeCategory = "am-thuc"
+            state.loadServices()
+        },
+        HomeCategoryAction(R.drawable.category_luu_tru, "Lưu trú", "luu-tru") {
+            state.homeCategory = "luu-tru"
+            state.loadServices()
+        },
+        HomeCategoryAction(R.drawable.category_giai_tri, "Giải trí", "giai-tri") {
+            state.homeCategory = "giai-tri"
+            state.loadServices()
+        },
+        HomeCategoryAction(R.drawable.category_su_kien, "Sự kiện", "") {
+            state.tab = AppTab.Browse
+        },
+        HomeCategoryAction(R.drawable.category_phuong_tien, "Phương tiện", "xe-dien") {
+            state.homeCategory = "xe-dien"
+            state.loadServices()
+        },
+        HomeCategoryAction(R.drawable.category_mua_sam, "Mua sắm", "mua-sam") {
+            state.homeCategory = "mua-sam"
+            state.loadServices()
+        },
+        HomeCategoryAction(R.drawable.category_xem_them, "Xem thêm", "") {
+            state.tab = AppTab.Browse
+        },
+    )
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        actions.chunked(4).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { action ->
+                    HomeCategoryTile(
+                        action = action,
+                        active = action.category.isNotEmpty() && state.homeCategory == action.category,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeCategoryTile(action: HomeCategoryAction, active: Boolean, modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .height(72.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White)
+            .clickable(onClick = action.onClick)
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Box(
+            Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(action.icon),
+                contentDescription = action.label,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Text(action.label, color = TextMain, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun RecommendationTitle(title: String, action: String, onAction: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 18.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(title, color = TextMain, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+        Text(action, color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onAction))
     }
 }
 
@@ -343,7 +506,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                         horizontalAlignment = Alignment.End
                     ) {
-                        if (service.discountPercent > 0) DiscountChip("KM vendor ${service.discountPercent}%")
+                        if (service.discountPercent > 0) DiscountChip("Giá KM ${service.discountPercent}%")
                         if (service.appDiscountPercent > 0) DiscountChip("+App ${service.appDiscountPercent}%")
                     }
                 }
@@ -366,6 +529,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 Text("Mô tả", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(service.description.ifBlank { "Trải nghiệm địa phương được chọn lọc bởi S-Loco." }, color = TextMuted)
                 if (service.durationMinutes > 0) Text("Thời lượng: ${service.durationMinutes} phút", color = TextMuted)
+                VendorLocationSection(service)
                 if (service.isReservation) {
                     AppCard {
                         Text("Thông tin đặt chỗ", color = TextMain, fontWeight = FontWeight.ExtraBold)
@@ -401,6 +565,89 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
             }
         }
     }
+}
+
+@Composable
+private fun VendorLocationSection(service: Service) {
+    val context = LocalContext.current
+    val hasCoordinate = service.vendorLatitude != null && service.vendorLongitude != null
+    AppCard {
+        Text("Địa điểm cung cấp dịch vụ", color = TextMain, fontWeight = FontWeight.ExtraBold)
+        Text(service.vendorName.ifBlank { "S-Loco partner" }, color = Blue, fontWeight = FontWeight.Bold)
+        if (service.vendorAddress.isNotBlank()) {
+            Text(service.vendorAddress, color = TextMuted, fontSize = 13.sp)
+        }
+        service.locationSummary()?.takeIf { it != service.vendorAddress }?.let {
+            Text(it, color = TextMuted, fontSize = 13.sp)
+        }
+        if (hasCoordinate) {
+            VendorMapPreview(
+                latitude = service.vendorLatitude!!,
+                longitude = service.vendorLongitude!!,
+                vendorName = service.vendorName,
+            )
+        } else {
+            Text("Vendor chưa ghim vị trí bản đồ.", color = Coral, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        }
+        TextButton(onClick = { openVendorMap(context, service) }) {
+            Text(if (hasCoordinate) "Mở bản đồ" else "Tìm trên bản đồ", color = Blue, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun VendorMapPreview(latitude: Double, longitude: Double, vendorName: String) {
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(150.dp)
+            .clip(RoundedCornerShape(14.dp)),
+        factory = { context ->
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                settings.javaScriptEnabled = true
+                settings.loadWithOverviewMode = true
+                settings.useWideViewPort = true
+                setBackgroundColor(0)
+                loadDataWithBaseURL(
+                    "https://www.openstreetmap.org",
+                    osmEmbedHtml(latitude, longitude, vendorName),
+                    "text/html",
+                    "UTF-8",
+                    null
+                )
+            }
+        }
+    )
+}
+
+private fun openVendorMap(context: Context, service: Service) {
+    val uri = if (service.vendorLatitude != null && service.vendorLongitude != null) {
+        Uri.parse("https://www.google.com/maps/search/?api=1&query=${service.vendorLatitude},${service.vendorLongitude}")
+    } else {
+        val query = Uri.encode(service.vendorAddress.ifBlank { service.vendorName })
+        Uri.parse("https://www.google.com/maps/search/?api=1&query=$query")
+    }
+    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+}
+
+private fun osmEmbedHtml(latitude: Double, longitude: Double, vendorName: String): String {
+    val delta = 0.006
+    val label = vendorName.ifBlank { "Vendor" }
+    return """
+        <!doctype html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            html, body, iframe { margin: 0; width: 100%; height: 100%; border: 0; overflow: hidden; }
+          </style>
+        </head>
+        <body>
+          <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${longitude - delta}%2C${latitude - delta}%2C${longitude + delta}%2C${latitude + delta}&layer=mapnik&marker=$latitude%2C$longitude" title="$label"></iframe>
+        </body>
+        </html>
+    """.trimIndent()
 }
 
 @Composable
@@ -611,11 +858,150 @@ private fun VoucherDetailScreen(state: AppState, voucher: Voucher) {
     }
 }
 
+private enum class ItineraryStayMode(val label: String) {
+    Slocal("Chọn lưu trú S-Loco"),
+    Manual("Nhập nơi lưu trú"),
+}
+
+private enum class ItineraryGroupType(val value: String, val label: String) {
+    Couple("couple", "Cặp đôi"),
+    Family("family", "Gia đình"),
+    Friends("friends", "Nhóm bạn"),
+    Solo("solo", "Đi một mình"),
+}
+
+data class ItineraryStayContext(
+    val label: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+)
+
+@Composable
+private fun ItineraryGroupTypeSection(selected: ItineraryGroupType, onSelectedChange: (ItineraryGroupType) -> Unit) {
+    AppCard {
+        Text("Bạn đi cùng ai?", color = TextMain, fontWeight = FontWeight.ExtraBold)
+        ItineraryGroupType.entries.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { option ->
+                    Box(Modifier.weight(1f)) {
+                        Pill(option.label, selected == option) { onSelectedChange(option) }
+                    }
+                }
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ItineraryStaySection(
+    mode: ItineraryStayMode,
+    onModeChange: (ItineraryStayMode) -> Unit,
+    lodgingServices: List<Service>,
+    selectedServiceId: String,
+    onSelectedServiceChange: (String) -> Unit,
+    manualLabel: String,
+    onManualLabelChange: (String) -> Unit,
+    preferNearStay: Boolean,
+    onPreferNearStayChange: (Boolean) -> Unit,
+) {
+    AppCard {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Ưu tiên gần nơi lưu trú", color = TextMain, fontWeight = FontWeight.Bold)
+                Text(
+                    "Bật để chọn hoặc nhập nơi lưu trú; có tọa độ S-Loco thì ưu tiên gần và hiển thị khoảng cách trên lịch trình.",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                )
+            }
+            Switch(checked = preferNearStay, onCheckedChange = onPreferNearStayChange)
+        }
+
+        if (preferNearStay) {
+            Text("Nơi lưu trú", color = TextMain, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(top = 12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ItineraryStayMode.entries.forEach { option ->
+                    Pill(option.label, mode == option) { onModeChange(option) }
+                }
+            }
+
+            if (mode == ItineraryStayMode.Slocal) {
+                if (lodgingServices.isEmpty()) {
+                    Text(
+                        "Chưa có lưu trú S-Loco khả dụng. Bạn có thể nhập tên khách sạn hoặc địa chỉ thủ công.",
+                        color = TextMuted,
+                        fontSize = 12.sp,
+                    )
+                } else {
+                    Text("Chọn lưu trú", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    lodgingServices.take(4).forEach { service ->
+                        StayServiceRow(
+                            service = service,
+                            selected = service.id == selectedServiceId,
+                            onClick = { onSelectedServiceChange(service.id) },
+                        )
+                    }
+                }
+            } else {
+                OutlinedTextField(
+                    value = manualLabel,
+                    onValueChange = onManualLabelChange,
+                    label = { Text("VD: FLC Sầm Sơn, khách sạn gần biển...") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    "Bản v1 chưa định vị địa chỉ nhập tay; AI sẽ dùng nội dung này làm ngữ cảnh.",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StayServiceRow(service: Service, selected: Boolean, onClick: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (selected) BlueSoft else Surface)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(service.stayLabel(), color = if (selected) Blue else TextMain, fontWeight = FontWeight.Bold)
+        if (service.vendorAddress.isNotBlank()) Text(service.vendorAddress, color = TextMuted, fontSize = 12.sp)
+        Text(
+            if (service.hasVendorCoordinate()) "Có tọa độ để tối ưu khoảng cách." else "Chưa có tọa độ, AI sẽ dùng tên nơi lưu trú làm ngữ cảnh.",
+            color = if (service.hasVendorCoordinate()) Blue else Coral,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
 @Composable
 private fun AIScreen(state: AppState) {
     var days by remember { mutableStateOf("2") }
     var budget by remember { mutableStateOf("2000000") }
     var preferences by remember { mutableStateOf("ẩm thực, biển, spa") }
+    var groupType by remember { mutableStateOf(ItineraryGroupType.Couple) }
+    var stayMode by remember { mutableStateOf(ItineraryStayMode.Slocal) }
+    var selectedStayServiceId by remember { mutableStateOf("") }
+    var manualStayLabel by remember { mutableStateOf("") }
+    var preferNearStay by remember { mutableStateOf(false) }
+    val lodgingServices = remember(state.services, state.searchServices) {
+        (state.services + state.searchServices).filter { it.isLodging() }.distinctBy { it.id }
+    }
+    val selectedStayService = lodgingServices.firstOrNull { it.id == selectedStayServiceId }
+        ?: lodgingServices.firstOrNull()
+    LaunchedEffect(lodgingServices.map { it.id }) {
+        if (selectedStayServiceId.isBlank() || lodgingServices.none { it.id == selectedStayServiceId }) {
+            selectedStayServiceId = lodgingServices.firstOrNull()?.id.orEmpty()
+        }
+    }
     val scope = rememberCoroutineScope()
     LazyColumn(Modifier.fillMaxSize()) {
         item {
@@ -626,7 +1012,29 @@ private fun AIScreen(state: AppState) {
                 OutlinedTextField(days, { days = it }, label = { Text("Số ngày") }, singleLine = true)
                 OutlinedTextField(budget, { budget = it }, label = { Text("Ngân sách") }, singleLine = true)
                 OutlinedTextField(preferences, { preferences = it }, label = { Text("Sở thích") })
-                Button(onClick = { scope.launch { state.createItinerary(days, budget, preferences) } }, colors = ButtonDefaults.buttonColors(containerColor = Blue)) {
+                ItineraryGroupTypeSection(groupType) { groupType = it }
+                ItineraryStaySection(
+                    mode = stayMode,
+                    onModeChange = { stayMode = it },
+                    lodgingServices = lodgingServices,
+                    selectedServiceId = selectedStayServiceId,
+                    onSelectedServiceChange = { selectedStayServiceId = it },
+                    manualLabel = manualStayLabel,
+                    onManualLabelChange = { manualStayLabel = it },
+                    preferNearStay = preferNearStay,
+                    onPreferNearStayChange = { preferNearStay = it },
+                )
+                Button(onClick = {
+                    val stay = if (preferNearStay) {
+                        when (stayMode) {
+                            ItineraryStayMode.Slocal -> selectedStayService?.toStayContext() ?: ItineraryStayContext()
+                            ItineraryStayMode.Manual -> ItineraryStayContext(label = manualStayLabel)
+                        }
+                    } else {
+                        ItineraryStayContext()
+                    }
+                    scope.launch { state.createItinerary(days, budget, preferences, groupType.value, stay, preferNearStay) }
+                }, colors = ButtonDefaults.buttonColors(containerColor = Blue)) {
                     Text("Tạo lịch trình")
                 }
                 state.itinerary?.let { itinerary ->
@@ -737,6 +1145,14 @@ private fun ItineraryTimelineActivity(
                 }
                 Text(activity.title, color = TextMain, fontWeight = FontWeight.ExtraBold)
                 if (activity.description.isNotBlank()) Text(activity.description, color = TextMuted, fontSize = 13.sp)
+                activity.distanceFromStayKm?.let { km ->
+                    Text(
+                        String.format("Cách nơi lưu trú · %.1f km", km),
+                        color = Blue,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
                 if (activity.serviceId.isNotBlank()) {
                     TextButton(onClick = { onOpenService(activity.serviceId) }) {
                         Text("Đặt dịch vụ", color = Blue, fontWeight = FontWeight.Bold)
@@ -1079,6 +1495,9 @@ private fun OfferCard(icon: String, title: String, body: String, onClick: () -> 
 
 @Composable
 private fun ServiceCard(service: Service, onClick: () -> Unit) {
+    val offerBadge = service.offerBadgeLabel()
+    val preAppPrice = service.preAppPrice()
+    val appSaving = service.appSavingAmount()
     Card(
         Modifier
             .fillMaxWidth()
@@ -1106,15 +1525,11 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.52f))))
             )
             Text("S-LOCO\nCoastal experience", color = Color.White, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
-            if (service.discountPercent > 0 || service.appDiscountPercent > 0) {
-                Column(
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    if (service.discountPercent > 0) DiscountChip("KM ${service.discountPercent}%", fontSize = 11)
-                    if (service.appDiscountPercent > 0) DiscountChip("+App ${service.appDiscountPercent}%", fontSize = 11)
-                }
+            if (offerBadge != null) {
+                OfferBadge(
+                    label = offerBadge,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                )
             }
             Text(
                 service.category,
@@ -1133,14 +1548,63 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
             Text(service.name, color = TextMain, fontWeight = FontWeight.ExtraBold, maxLines = 2)
             Text(service.vendorName, color = TextMuted, fontSize = 12.sp, maxLines = 1)
             service.locationSummary()?.let { Text(it, color = TextMuted, fontSize = 12.sp, maxLines = 1) }
-            if (service.isReservation) Text("Đặt chỗ trước, nhận mã ưu đãi iPos", color = TextMuted, fontSize = 12.sp)
-            else if (service.originalPrice > service.price) Text(formatVnd(service.originalPrice), color = TextMuted, fontSize = 12.sp)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(if (service.isReservation) "Đặt chỗ" else formatVnd(service.price), color = Coral, fontWeight = FontWeight.ExtraBold)
-                Text("★ ${service.rating}", color = TextMuted, fontSize = 12.sp)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    if (service.isReservation) {
+                        Text("Đặt qua app", color = Blue, fontWeight = FontWeight.ExtraBold)
+                        if (service.appDiscountPercent > 0) {
+                            AppSavingStrip(
+                                "Nhận thêm ${service.appDiscountPercent}% tại cửa hàng",
+                                modifier = Modifier.padding(top = 2.dp)
+                            )
+                        }
+                    } else {
+                        if (service.originalPrice > service.price) {
+                            Text(
+                                formatVnd(service.originalPrice),
+                                color = TextMuted,
+                                fontSize = 12.sp,
+                                textDecoration = TextDecoration.LineThrough
+                            )
+                        }
+                        if (preAppPrice != null && service.discountPercent > 0) {
+                            Text("Giá KM: ${formatVnd(preAppPrice)}", color = TextMuted, fontSize = 12.sp, maxLines = 1)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(formatVnd(service.price), color = Blue, fontWeight = FontWeight.ExtraBold)
+                            if (service.appDiscountPercent > 0) {
+                                Text("giá app", color = Coral, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+                            }
+                        }
+                        if (appSaving != null) {
+                            AppSavingStrip(
+                                "Đặt qua app tiết kiệm thêm ${formatVnd(appSaving)}",
+                                modifier = Modifier.padding(top = 2.dp)
+                            )
+                        }
+                    }
+                }
+                Text("★ ${service.rating}", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }
+}
+
+private fun Service.offerBadgeLabel(): String? = when {
+    appDiscountPercent > 0 -> "App -$appDiscountPercent%"
+    discountPercent > 0 -> "KM -$discountPercent%"
+    else -> null
+}
+
+private fun Service.preAppPrice(): Int? {
+    if (appDiscountPercent !in 1..99 || price <= 0) return if (discountPercent > 0) price else null
+    val value = (price * 100.0 / (100 - appDiscountPercent)).roundToInt()
+    return value.takeIf { it > price }
+}
+
+private fun Service.appSavingAmount(): Int? {
+    val value = preAppPrice()?.minus(price) ?: return null
+    return value.takeIf { it > 0 && appDiscountPercent > 0 }
 }
 
 @Composable
@@ -1266,6 +1730,36 @@ private fun DiscountChip(label: String, fontSize: Int = 13) {
             .padding(horizontal = 9.dp, vertical = 4.dp),
         fontSize = fontSize.sp,
         fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+private fun OfferBadge(label: String, modifier: Modifier = Modifier) {
+    Text(
+        label,
+        color = Color.White,
+        modifier = modifier
+            .clip(RoundedCornerShape(99.dp))
+            .background(Brush.horizontalGradient(listOf(Coral, Color(0xFFFF8A3D))))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        fontSize = 11.sp,
+        fontWeight = FontWeight.ExtraBold
+    )
+}
+
+@Composable
+private fun AppSavingStrip(label: String, modifier: Modifier = Modifier) {
+    Text(
+        label,
+        color = Blue,
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(BlueSoft)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        fontSize = 11.sp,
+        fontWeight = FontWeight.ExtraBold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
     )
 }
 
@@ -1488,8 +1982,22 @@ private class AppState(context: Context) {
         screen = redirect ?: Screen.Main
     }
 
-    suspend fun createItinerary(days: String, budget: String, preferences: String) = run("Đang tạo lịch trình...") {
-        itinerary = api.itinerary(days.toIntOrNull() ?: 2, budget.toIntOrNull() ?: 2_000_000, preferences)
+    suspend fun createItinerary(
+        days: String,
+        budget: String,
+        preferences: String,
+        groupType: String = "couple",
+        stay: ItineraryStayContext = ItineraryStayContext(),
+        preferNearStay: Boolean = false,
+    ) = run("Đang tạo lịch trình...") {
+        itinerary = api.itinerary(
+            days.toIntOrNull() ?: 2,
+            budget.toIntOrNull() ?: 2_000_000,
+            preferences,
+            groupType,
+            stay,
+            preferNearStay,
+        )
     }
 
     fun loadWeather() {
@@ -1576,6 +2084,10 @@ private class AppState(context: Context) {
 
 private class ApiClient(private val prefs: android.content.SharedPreferences) {
     private val client = OkHttpClient()
+    private val itineraryClient = client.newBuilder()
+        .callTimeout(120, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .build()
     private val json = Json { ignoreUnknownKeys = true }
     private val baseUrl = "http://10.0.2.2:3000/api/v1"
     private val refreshSkewMs = 120_000L
@@ -1671,14 +2183,15 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
         return data?.array("items").orEmpty().map { parseVoucher(it.jsonObject) }
     }
 
-    suspend fun itinerary(days: Int, budget: Int, preferences: String): GeneratedItinerary {
-        val preferenceList = preferences.split(",").map { it.trim() }.filter { it.isNotBlank() }
-        val res = request("/itinerary/generate", "POST", buildJsonObject {
-            put("days", days)
-            put("budget", budget)
-            put("preferences", JsonArray(preferenceList.map { JsonPrimitive(it) }))
-            put("group_type", "couple")
-        })
+    suspend fun itinerary(
+        days: Int,
+        budget: Int,
+        preferences: String,
+        groupType: String = "couple",
+        stay: ItineraryStayContext = ItineraryStayContext(),
+        preferNearStay: Boolean = false,
+    ): GeneratedItinerary {
+        val res = request("/itinerary/generate", "POST", itineraryPayload(days, budget, preferences, groupType, stay, preferNearStay))
         val data = res.obj("data") ?: JsonObject(emptyMap())
         return parseItinerary(data.obj("itinerary") ?: data)
     }
@@ -1735,7 +2248,8 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
         prefs.getString("access_token", null)?.let { builder.header("Authorization", "Bearer $it") }
         val requestBody = body?.toString()?.toRequestBody("application/json".toMediaType())
         val request = builder.method(method, requestBody).build()
-        return client.newCall(request).execute().use { response ->
+        val requestClient = if (path == "/itinerary/generate") itineraryClient else client
+        return requestClient.newCall(request).execute().use { response ->
             val text = response.body?.string().orEmpty()
             val parsed = json.parseToJsonElement(text).jsonObject
             HttpJsonResponse(response.code, response.isSuccessful, parsed)
@@ -1791,6 +2305,8 @@ private fun parseService(obj: JsonObject): Service? {
         category = category?.str("name").ifNullOrBlank { service.str("category") },
         vendorName = vendor?.str("name").ifNullOrBlank { service.str("vendor_name") },
         vendorAddress = vendor?.str("address").orEmpty(),
+        vendorLatitude = vendor?.numOrNull("latitude")?.takeIf { it in -90.0..90.0 },
+        vendorLongitude = vendor?.numOrNull("longitude")?.takeIf { it in -180.0..180.0 },
         distanceFromOriginKm = obj.num("distanceFromOriginKm", "distance_from_origin_km").takeIf { it > 0 },
         originalPrice = original,
         price = price,
@@ -1852,7 +2368,8 @@ private fun parseItinerary(obj: JsonObject): GeneratedItinerary {
                         title = activity.str("title").ifBlank { "Hoạt động" },
                         description = activity.str("description"),
                         serviceId = activity.str("service_id", "serviceId"),
-                        estimatedCost = activity.money("estimated_cost", "estimatedCost")
+                        estimatedCost = activity.money("estimated_cost", "estimatedCost"),
+                        distanceFromStayKm = activity.numOrNull("distance_from_stay_km", "distanceFromStayKm"),
                     )
                 }
             )
@@ -1899,6 +2416,7 @@ private fun parseWeather(obj: JsonObject): Weather {
 }
 
 data class TouristCategory(val value: String, val label: String)
+private data class HomeCategoryAction(val icon: Int, val label: String, val category: String, val onClick: () -> Unit)
 
 val touristCategories = listOf(
     TouristCategory("", "Tất cả"),
@@ -1916,6 +2434,30 @@ fun touristCategoryApiValue(value: String): String {
     if (touristCategories.any { it.value == trimmed }) return trimmed
     if (trimmed == "Spa & Massage") return "spa-massage"
     return touristCategories.firstOrNull { it.label == trimmed }?.value ?: trimmed
+}
+
+fun itineraryPayload(
+    days: Int,
+    budget: Int,
+    preferences: String,
+    groupType: String = "couple",
+    stay: ItineraryStayContext = ItineraryStayContext(),
+    preferNearStay: Boolean = false,
+): JsonObject {
+    val preferenceList = preferences.split(",").map { it.trim() }.filter { it.isNotBlank() }
+    return buildJsonObject {
+        put("days", days)
+        put("budget", budget)
+        put("preferences", JsonArray(preferenceList.map { JsonPrimitive(it) }))
+        put("group_type", groupType.ifBlank { "couple" })
+        if (preferNearStay) {
+            val stayLabel = stay.label?.trim().orEmpty()
+            if (stayLabel.isNotBlank()) put("stay_location_label", stayLabel)
+            if (stay.latitude != null) put("stay_latitude", stay.latitude)
+            if (stay.longitude != null) put("stay_longitude", stay.longitude)
+            put("prefer_near_stay", true)
+        }
+    }
 }
 
 private enum class AppTab(val label: String, val icon: String) {
@@ -1947,6 +2489,8 @@ private data class Service(
     val category: String,
     val vendorName: String,
     val vendorAddress: String,
+    val vendorLatitude: Double?,
+    val vendorLongitude: Double?,
     val distanceFromOriginKm: Double?,
     val originalPrice: Int,
     val price: Int,
@@ -1960,6 +2504,14 @@ private data class Service(
     val isReservation: Boolean get() = fulfillmentType == "reservation"
     fun locationSummary(): String? = distanceFromOriginKm?.let { String.format("%.1f km", it) }
         ?: vendorAddress.takeIf { it.isNotBlank() }
+    fun isLodging(): Boolean {
+        val normalized = category.normalizeVietnamese()
+        return normalized.contains("luu tru") || category.contains("Lưu trú", ignoreCase = true)
+    }
+
+    fun stayLabel(): String = if (vendorName.isBlank()) name else "$name - $vendorName"
+    fun hasVendorCoordinate(): Boolean = vendorLatitude != null && vendorLongitude != null
+    fun toStayContext(): ItineraryStayContext = ItineraryStayContext(stayLabel(), vendorLatitude, vendorLongitude)
 }
 
 private data class Vendor(val id: String, val name: String, val address: String, val rating: Double)
@@ -2008,7 +2560,14 @@ private data class WeatherForecastDay(
 )
 private data class GeneratedItinerary(val title: String, val summary: String, val days: List<ItineraryDay>, val totalEstimatedCost: Int, val tips: List<String>)
 private data class ItineraryDay(val day: Int, val title: String, val activities: List<ItineraryActivity>)
-private data class ItineraryActivity(val time: String, val title: String, val description: String, val serviceId: String, val estimatedCost: Int)
+private data class ItineraryActivity(
+    val time: String,
+    val title: String,
+    val description: String,
+    val serviceId: String,
+    val estimatedCost: Int,
+    val distanceFromStayKm: Double? = null,
+)
 private data class HttpJsonResponse(val statusCode: Int, val isSuccessful: Boolean, val body: JsonObject)
 private class SessionExpiredException : RuntimeException("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
 
@@ -2028,6 +2587,13 @@ private fun JsonObject.num(vararg keys: String): Double {
     }
     return 0.0
 }
+private fun JsonObject.numOrNull(vararg keys: String): Double? {
+    for (key in keys) {
+        val value = this[key]
+        if (value is JsonPrimitive) return value.doubleOrNull ?: value.contentOrNull?.toDoubleOrNull()
+    }
+    return null
+}
 private fun JsonObject.int(vararg keys: String): Int {
     for (key in keys) {
         val value = this[key]
@@ -2038,6 +2604,10 @@ private fun JsonObject.int(vararg keys: String): Int {
 private fun JsonObject.money(vararg keys: String): Int = num(*keys).toInt()
 private fun String?.ifNullOrBlank(fallback: () -> String): String = if (this.isNullOrBlank()) fallback() else this
 private fun formatVnd(value: Int): String = "%,d₫".format(value).replace(',', '.')
+private fun String.normalizeVietnamese(): String = java.text.Normalizer
+    .normalize(this, java.text.Normalizer.Form.NFD)
+    .replace("\\p{Mn}+".toRegex(), "")
+    .lowercase()
 private fun statusLabel(status: String): String = when (status) {
     "created" -> "Chờ thanh toán"
     "paid" -> "Đã thanh toán"

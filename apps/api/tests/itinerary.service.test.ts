@@ -202,6 +202,47 @@ describe('generateItinerary', () => {
     expect(result.title).toBe('Custom AI itinerary')
   })
 
+  test('adds manual stay label to the prompt without distance rows when coordinates are absent', async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = []
+    process.env.OPENAI_API_KEY = 'test-key'
+    process.env.OPENAI_BASE_URL = 'https://9router.test/v1'
+    process.env.OPENAI_MODEL = 'gpt-5.5'
+
+    globalThis.fetch = async (url: string | URL | Request, init?: RequestInit) => {
+      calls.push({ url: String(url), init: init ?? {} })
+      return jsonResponse({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                title: 'Manual stay itinerary',
+                summary: 'Generated with a manual stay label',
+                days: [],
+                total_estimated_cost: 0,
+                tips: [],
+              }),
+            },
+          },
+        ],
+      })
+    }
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    await generateItinerary({
+      days: 1,
+      budget: 800000,
+      preferences: ['biển'],
+      groupType: 'couple',
+      stayLocationLabel: 'FLC Sầm Sơn',
+      preferNearStay: true,
+    })
+
+    const body = JSON.parse(String(calls[0]?.init.body))
+    expect(body.messages[0].content).toContain('Vị trí lưu trú: FLC Sầm Sơn')
+    expect(body.messages[0].content).toContain('Ưu tiên gần nơi lưu trú: Có')
+    expect(body.messages[0].content).not.toContain('cách nơi lưu trú')
+  })
+
   test('replaces invalid AI service IDs with real slot-matched services', async () => {
     process.env.OPENAI_API_KEY = 'test-key'
     process.env.OPENAI_BASE_URL = 'https://9router.test/v1'
@@ -451,5 +492,24 @@ describe('generateItinerary', () => {
 
     expect(withoutPreference.days[0]?.activities[0]?.service_id).toBe('food-far')
     expect(withPreference.days[0]?.activities[0]?.service_id).toBe('food-near')
+  })
+
+  test('includes distance_from_stay_km on activities when stay coordinates are provided', async () => {
+    delete process.env.OPENAI_API_KEY
+
+    const { generateItinerary } = await import('../src/services/itinerary.service')
+    const result = await generateItinerary({
+      days: 1,
+      budget: 700000,
+      preferences: ['ẩm thực'],
+      groupType: 'family',
+      stayLatitude: 19.742,
+      stayLongitude: 105.901,
+      preferNearStay: false,
+    })
+
+    const km = result.days[0]?.activities[0]?.distance_from_stay_km
+    expect(km).toBeDefined()
+    expect(km).toBeCloseTo(0.4)
   })
 })

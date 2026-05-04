@@ -1,4 +1,4 @@
-package com.slocal.vendor
+package vn.sloco.vendor
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,8 +12,8 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.slocal.vendor.data.TokenStore
-import com.slocal.vendor.data.VendorApi
+import vn.sloco.vendor.data.TokenStore
+import vn.sloco.vendor.data.VendorApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 import CoreImage.CIFilterBuiltins
 
 struct LoginView: View {
@@ -186,7 +187,7 @@ struct ServiceDetailView: View {
                             .foregroundStyle(TouristTheme.primary)
                         HStack(spacing: 8) {
                             if service.discountPercent > 0 {
-                                Text("KM vendor \(service.discountPercent)%")
+                                Text("Giá KM \(service.discountPercent)%")
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(TouristTheme.coral)
                             }
@@ -200,6 +201,8 @@ struct ServiceDetailView: View {
                             .font(.body)
                             .foregroundStyle(TouristTheme.text)
                     }
+
+                    VendorLocationSection(service: service)
 
                     if service.isReservation {
                         VStack(alignment: .leading, spacing: 10) {
@@ -265,6 +268,89 @@ struct ServiceDetailView: View {
                     Button("Đóng") { dismiss() }
                 }
             }
+        }
+    }
+}
+
+struct VendorLocationSection: View {
+    @Environment(\.openURL) private var openURL
+    let service: TouristService
+
+    private var coordinate: CLLocationCoordinate2D? {
+        guard let latitude = service.vendorLatitude, let longitude = service.vendorLongitude else { return nil }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    private var mapsURL: URL? {
+        let encodedName = service.vendorName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        if let coordinate {
+            return URL(string: "http://maps.apple.com/?ll=\(coordinate.latitude),\(coordinate.longitude)&q=\(encodedName)")
+        }
+        guard let address = service.vendorAddress?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed), !address.isEmpty else {
+            return nil
+        }
+        return URL(string: "http://maps.apple.com/?q=\(address)")
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Địa điểm cung cấp dịch vụ")
+                .font(.headline)
+                .foregroundStyle(TouristTheme.text)
+            Text(service.vendorName.isEmpty ? "S-Loco partner" : service.vendorName)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(TouristTheme.primary)
+            if let address = service.vendorAddress, !address.isEmpty {
+                Label(address, systemImage: "mappin.and.ellipse")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(TouristTheme.muted)
+                    .lineLimit(2)
+            }
+            if let locationSummary = service.locationSummary, locationSummary != service.vendorAddress {
+                Text(locationSummary)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(TouristTheme.muted)
+            }
+            if let coordinate {
+                VendorMapPreview(coordinate: coordinate, vendorName: service.vendorName)
+                    .frame(height: 160)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            } else {
+                Text("Vendor chưa ghim vị trí bản đồ.")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(TouristTheme.coral)
+            }
+            if let mapsURL {
+                Button {
+                    openURL(mapsURL)
+                } label: {
+                    Label(coordinate == nil ? "Tìm trên bản đồ" : "Mở bản đồ", systemImage: "map")
+                }
+                .font(.caption.weight(.bold))
+                .foregroundStyle(TouristTheme.primary)
+            }
+        }
+        .padding(14)
+        .background(.white, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+    }
+}
+
+struct VendorMapPreview: View {
+    let coordinate: CLLocationCoordinate2D
+    let vendorName: String
+    @State private var position: MapCameraPosition
+
+    init(coordinate: CLLocationCoordinate2D, vendorName: String) {
+        self.coordinate = coordinate
+        self.vendorName = vendorName
+        _position = State(initialValue: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012))))
+    }
+
+    var body: some View {
+        Map(position: $position, interactionModes: []) {
+            Marker(vendorName.isEmpty ? "Vendor" : vendorName, coordinate: coordinate)
+                .tint(TouristTheme.coral)
         }
     }
 }

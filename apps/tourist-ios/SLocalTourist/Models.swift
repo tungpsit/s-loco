@@ -151,6 +151,8 @@ struct VendorLite: Decodable {
     let name: String
     let slug: String?
     let address: String?
+    let latitude: String?
+    let longitude: String?
     let ratingAvg: String?
     let reviewCount: Int?
 }
@@ -167,6 +169,8 @@ struct TouristService: Identifiable, Hashable {
     let category: String
     let vendorName: String
     let vendorAddress: String?
+    let vendorLatitude: Double?
+    let vendorLongitude: Double?
     let distanceFromOriginKm: Double?
     let originalPrice: Int
     let price: Int
@@ -638,9 +642,17 @@ struct ItineraryRequest: Encodable {
     let budget: Int
     let preferences: [String]
     let groupType: String
+    let stayLocationLabel: String?
+    let stayLatitude: Double?
+    let stayLongitude: Double?
+    let preferNearStay: Bool?
     enum CodingKeys: String, CodingKey {
         case days, budget, preferences
         case groupType = "group_type"
+        case stayLocationLabel = "stay_location_label"
+        case stayLatitude = "stay_latitude"
+        case stayLongitude = "stay_longitude"
+        case preferNearStay = "prefer_near_stay"
     }
 }
 
@@ -699,11 +711,23 @@ struct GeneratedItineraryActivity: Decodable {
     let description: String
     let serviceId: String?
     let estimatedCost: Int?
+    let distanceFromStayKm: Double?
 
     enum CodingKeys: String, CodingKey {
         case time, title, description
         case serviceId = "service_id"
         case estimatedCost = "estimated_cost"
+        case distanceFromStayKm = "distance_from_stay_km"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        time = try c.decodeStringIfPresent(.time) ?? "09:00"
+        title = try c.decodeStringIfPresent(.title) ?? ""
+        description = try c.decodeStringIfPresent(.description) ?? ""
+        serviceId = try c.decodeStringIfPresent(.serviceId)
+        estimatedCost = try c.decodeIntIfPresent(.estimatedCost)
+        distanceFromStayKm = try c.decodeDoubleIfPresent(.distanceFromStayKm)
     }
 }
 

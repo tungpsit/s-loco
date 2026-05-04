@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 final class TokenStore {
-    private let service = "com.slocal.tourist"
+    private let service = "vn.sloco.tourist"
 
     var accessToken: String? {
         get { read("access_token") }

@@ -1,4 +1,4 @@
-package com.slocal.vendor.data
+package vn.sloco.vendor.data
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals

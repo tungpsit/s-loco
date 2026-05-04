@@ -1,4 +1,4 @@
-package com.slocal.vendor.data
+package vn.sloco.vendor.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

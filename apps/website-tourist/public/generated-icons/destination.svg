@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Beach destination">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7F8FF"/>
+      <stop offset="1" stop-color="#FFF2C6"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="34" y1="22" x2="92" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#27B7EE"/>
+      <stop offset="1" stop-color="#055D9C"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="52" y1="16" x2="91" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD76A"/>
+      <stop offset="1" stop-color="#F2A71B"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <circle cx="92" cy="34" r="14" fill="url(#gold)"/>
+  <path d="M21 91c15-11 28-12 42-3 15 9 27 8 44-6v23H21V91Z" fill="#0A74B8" opacity=".2"/>
+  <path d="M26 96c17-10 31-10 45-1 13 8 25 7 37-4" stroke="#0C77B8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M64 20c-18 0-33 14-33 32 0 25 33 58 33 58s33-33 33-58c0-18-15-32-33-32Z" fill="url(#blue)"/>
+  <circle cx="64" cy="52" r="13" fill="white"/>
+  <circle cx="64" cy="52" r="6" fill="#F4B52B"/>
+</svg>

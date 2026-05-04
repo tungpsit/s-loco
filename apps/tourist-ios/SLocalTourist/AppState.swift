@@ -157,9 +157,27 @@ final class AppState: ObservableObject {
         }
     }
 
-    func createItinerary(days: Int, budget: Int, preferences: String) async {
+    func createItinerary(
+        days: Int,
+        budget: Int,
+        preferences: String,
+        groupType: String = "couple",
+        stayLocationLabel: String? = nil,
+        stayLatitude: Double? = nil,
+        stayLongitude: Double? = nil,
+        preferNearStay: Bool = false
+    ) async {
         await run(.ai) {
-            itinerary = try await api.itinerary(days: days, budget: budget, preferences: preferences)
+            itinerary = try await api.itinerary(
+                days: days,
+                budget: budget,
+                preferences: preferences,
+                groupType: groupType,
+                stayLocationLabel: stayLocationLabel,
+                stayLatitude: stayLatitude,
+                stayLongitude: stayLongitude,
+                preferNearStay: preferNearStay
+            )
         }
     }
 

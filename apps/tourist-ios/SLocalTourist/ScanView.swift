@@ -5,16 +5,45 @@ struct ScanView: View {
     @State private var days = 3.0
     @State private var budget = "3000000"
     @State private var preferences = "Ẩm thực địa phương, điểm tham quan nhẹ nhàng"
+    @State private var groupType = ItineraryGroupType.couple
+    @State private var stayMode = ItineraryStayMode.slocal
+    @State private var selectedStayServiceId = ""
+    @State private var manualStayLabel = ""
+    @State private var preferNearStay = false
+
+    private var lodgingServices: [TouristService] {
+        (state.services + state.searchServices)
+            .filter(\.isLodging)
+            .uniquedById
+    }
+
+    private var selectedStayService: TouristService? {
+        lodgingServices.first { $0.id == selectedStayServiceId } ?? lodgingServices.first
+    }
+
+    private var stayContext: ItineraryStayContext {
+        switch stayMode {
+        case .slocal:
+            guard let selectedStayService else { return ItineraryStayContext() }
+            return ItineraryStayContext(
+                label: selectedStayService.stayLabel,
+                latitude: selectedStayService.vendorLatitude,
+                longitude: selectedStayService.vendorLongitude
+            )
+        case .manual:
+            return ItineraryStayContext(label: manualStayLabel)
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("AI Planner", systemImage: "sparkles")
+                        Label("Tạo lịch trình AI", systemImage: "sparkles")
                             .font(.title2.bold())
                             .foregroundStyle(TouristTheme.primary)
-                        Text("Tạo lịch trình nhanh theo số ngày, ngân sách và sở thích.")
+                        Text("Đề xuất lịch trình nhanh theo số ngày, ngân sách và sở thích của bạn.")
                             .font(.subheadline)
                             .foregroundStyle(TouristTheme.muted)
                     }
@@ -43,9 +72,29 @@ struct ScanView: View {
                             .background(.white, in: RoundedRectangle(cornerRadius: 12))
                             .overlay(RoundedRectangle(cornerRadius: 12).stroke(TouristTheme.border))
 
+                        ItineraryGroupTypeSection(selection: $groupType)
+
+                        ItineraryStaySection(
+                            mode: $stayMode,
+                            selectedServiceId: $selectedStayServiceId,
+                            manualLabel: $manualStayLabel,
+                            preferNearStay: $preferNearStay,
+                            lodgingServices: lodgingServices
+                        )
+
                         Button {
                             Task {
-                                await state.createItinerary(days: Int(days), budget: Int(budget) ?? 0, preferences: preferences)
+                                let stay = preferNearStay ? stayContext : ItineraryStayContext()
+                                await state.createItinerary(
+                                    days: Int(days),
+                                    budget: Int(budget) ?? 0,
+                                    preferences: preferences,
+                                    groupType: groupType.rawValue,
+                                    stayLocationLabel: stay.label,
+                                    stayLatitude: stay.latitude,
+                                    stayLongitude: stay.longitude,
+                                    preferNearStay: preferNearStay
+                                )
                             }
                         } label: {
                             Label("Tạo lịch trình", systemImage: "sparkles")
@@ -69,6 +118,141 @@ struct ScanView: View {
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .navigationTitle("AI")
+        }
+    }
+}
+
+private enum ItineraryStayMode: String, CaseIterable, Identifiable {
+    case slocal = "Chọn lưu trú S-Loco"
+    case manual = "Nhập nơi lưu trú"
+
+    var id: String { rawValue }
+}
+
+private enum ItineraryGroupType: String, CaseIterable, Identifiable {
+    case couple
+    case family
+    case friends
+    case solo
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .couple: "Cặp đôi"
+        case .family: "Gia đình"
+        case .friends: "Nhóm bạn"
+        case .solo: "Đi một mình"
+        }
+    }
+}
+
+private struct ItineraryGroupTypeSection: View {
+    @Binding var selection: ItineraryGroupType
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Bạn đi cùng ai?")
+                .font(.headline)
+            Picker("Loại nhóm", selection: $selection) {
+                ForEach(ItineraryGroupType.allCases) { option in
+                    Text(option.label).tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+}
+
+private struct ItineraryStayContext {
+    let label: String?
+    let latitude: Double?
+    let longitude: Double?
+
+    init(label: String? = nil, latitude: Double? = nil, longitude: Double? = nil) {
+        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.label = trimmed?.isEmpty == false ? trimmed : nil
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+}
+
+private struct ItineraryStaySection: View {
+    @Binding var mode: ItineraryStayMode
+    @Binding var selectedServiceId: String
+    @Binding var manualLabel: String
+    @Binding var preferNearStay: Bool
+    let lodgingServices: [TouristService]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle("Ưu tiên gần nơi lưu trú", isOn: $preferNearStay)
+                .tint(TouristTheme.primary)
+            Text("Bật để chọn hoặc nhập nơi lưu trú; khi có tọa độ S-Loco, lịch trình ưu tiên dịch vụ gần hơn và hiển thị khoảng cách.")
+                .font(.caption)
+                .foregroundStyle(TouristTheme.muted)
+
+            if preferNearStay {
+                Text("Nơi lưu trú")
+                    .font(.headline)
+
+                Picker("Nơi lưu trú", selection: $mode) {
+                    ForEach(ItineraryStayMode.allCases) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                if mode == .slocal {
+                    if lodgingServices.isEmpty {
+                        Text("Chưa có lưu trú S-Loco khả dụng. Bạn có thể nhập tên khách sạn hoặc địa chỉ thủ công.")
+                            .font(.caption)
+                            .foregroundStyle(TouristTheme.muted)
+                    } else {
+                        Picker("Chọn lưu trú", selection: $selectedServiceId) {
+                            ForEach(lodgingServices) { service in
+                                Text(service.stayLabel).tag(service.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .onAppear {
+                            if selectedServiceId.isEmpty {
+                                selectedServiceId = lodgingServices.first?.id ?? ""
+                            }
+                        }
+                        .onChange(of: lodgingServices.map(\.id)) { _, ids in
+                            if selectedServiceId.isEmpty || !ids.contains(selectedServiceId) {
+                                selectedServiceId = ids.first ?? ""
+                            }
+                        }
+
+                        if let selected = lodgingServices.first(where: { $0.id == selectedServiceId }) ?? lodgingServices.first {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(selected.vendorName)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(TouristTheme.primary)
+                                if let address = selected.vendorAddress, !address.isEmpty {
+                                    Text(address)
+                                        .font(.caption)
+                                        .foregroundStyle(TouristTheme.muted)
+                                }
+                                Text(selected.hasVendorCoordinate ? "Có tọa độ để tối ưu khoảng cách." : "Chưa có tọa độ, AI sẽ dùng tên nơi lưu trú làm ngữ cảnh.")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(selected.hasVendorCoordinate ? TouristTheme.primary : TouristTheme.coral)
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(TouristTheme.surface, in: RoundedRectangle(cornerRadius: 12))
+                        }
+                    }
+                } else {
+                    TextField("VD: FLC Sầm Sơn, khách sạn gần biển...", text: $manualLabel)
+                        .textFieldStyle(TouristTextFieldStyle())
+                    Text("Bản v1 chưa định vị địa chỉ nhập tay; AI sẽ dùng nội dung này làm ngữ cảnh.")
+                        .font(.caption)
+                        .foregroundStyle(TouristTheme.muted)
+                }
+            }
         }
     }
 }
@@ -215,6 +399,12 @@ private struct ItineraryTimelineActivity: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
+                if let km = activity.distanceFromStayKm {
+                    Text(String(format: "Cách nơi lưu trú · %.1f km", km))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(TouristTheme.primary)
+                }
+
                 if let serviceId = activity.serviceId {
                     Button {
                         onOpenService(serviceId)
@@ -229,6 +419,31 @@ private struct ItineraryTimelineActivity: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(TouristTheme.surface, in: RoundedRectangle(cornerRadius: 14))
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+        }
+    }
+}
+
+private extension TouristService {
+    var isLodging: Bool {
+        let normalized = category.folding(options: .diacriticInsensitive, locale: .current).lowercased()
+        return normalized.contains("luu tru") || normalized.contains("lưu trú")
+    }
+
+    var stayLabel: String {
+        if vendorName.isEmpty { return name }
+        return "\(name) - \(vendorName)"
+    }
+
+    var hasVendorCoordinate: Bool {
+        vendorLatitude != nil && vendorLongitude != nil
+    }
+}
+
+private extension Array where Element == TouristService {
+    var uniquedById: [TouristService] {
+        var seen = Set<String>()
+        return filter { service in
+            seen.insert(service.id).inserted
         }
     }
 }

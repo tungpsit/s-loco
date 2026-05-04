@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Local guide compass">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#E7F8FF"/><stop offset="1" stop-color="#FFF2C6"/></linearGradient>
+    <linearGradient id="blue" x1="27" y1="25" x2="100" y2="102" gradientUnits="userSpaceOnUse"><stop stop-color="#2BBBF0"/><stop offset="1" stop-color="#075993"/></linearGradient>
+    <linearGradient id="gold" x1="42" y1="27" x2="90" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD86E"/><stop offset="1" stop-color="#EFA51A"/></linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <circle cx="64" cy="64" r="42" fill="url(#blue)"/>
+  <circle cx="64" cy="64" r="30" fill="white" opacity=".94"/>
+  <path d="M78 42 68 71 46 86l10-29 22-15Z" fill="url(#gold)"/>
+  <path d="M50 86 60 57l22-15-10 29-22 15Z" fill="#123F67" opacity=".82"/>
+  <circle cx="64" cy="64" r="5" fill="#0B6CAC"/>
+  <path d="M64 16v11m0 74v11M16 64h11m74 0h11" stroke="#123F67" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,6 +1,8 @@
 import Foundation
 
 final class APIClient {
+    private static let itineraryTimeout: TimeInterval = 120
+
     private let baseURL: URL
     private let tokenStore: TokenStore
     private let session: URLSession
@@ -37,7 +39,7 @@ final class APIClient {
 
     func service(id: String) async throws -> TouristService {
         let data: ServiceDetailData = try await request("/services/\(id)", authenticated: false)
-        return mapService(ServiceWire(service: data.service, vendor: data.vendor, category: data.category))!
+        return mapService(ServiceWire(service: data.service, vendor: data.vendor, category: data.category, distanceFromOriginKm: nil))!
     }
 
     func sendOtp(phone: String) async throws {
@@ -145,9 +147,28 @@ final class APIClient {
         }
     }
 
-    func itinerary(days: Int, budget: Int, preferences: String) async throws -> GeneratedItinerary {
-        let body = ItineraryRequest(days: days, budget: budget, preferences: preferences.preferenceList, groupType: "couple")
-        return try await request("/itinerary/generate", method: "POST", body: body)
+    func itinerary(
+        days: Int,
+        budget: Int,
+        preferences: String,
+        groupType: String = "couple",
+        stayLocationLabel: String? = nil,
+        stayLatitude: Double? = nil,
+        stayLongitude: Double? = nil,
+        preferNearStay: Bool = false
+    ) async throws -> GeneratedItinerary {
+        let label = stayLocationLabel?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let body = ItineraryRequest(
+            days: days,
+            budget: budget,
+            preferences: preferences.preferenceList,
+            groupType: groupType,
+            stayLocationLabel: label?.isEmpty == false ? label : nil,
+            stayLatitude: stayLatitude,
+            stayLongitude: stayLongitude,
+            preferNearStay: preferNearStay ? true : nil
+        )
+        return try await request("/itinerary/generate", method: "POST", body: body, timeout: Self.itineraryTimeout)
     }
 
     func weather() async throws -> TouristWeather {
@@ -227,6 +248,8 @@ final class APIClient {
             category: item.category?.name ?? "",
             vendorName: item.vendor?.name ?? "",
             vendorAddress: item.vendor?.address,
+            vendorLatitude: item.vendor?.latitude?.doubleValue.validLatitude,
+            vendorLongitude: item.vendor?.longitude?.doubleValue.validLongitude,
             distanceFromOriginKm: item.distanceFromOriginKm,
             originalPrice: original,
             price: price,
@@ -245,12 +268,13 @@ final class APIClient {
         method: String = "GET",
         body: Body? = nil,
         authenticated: Bool = true,
-        canRefresh: Bool = true
+        canRefresh: Bool = true,
+        timeout: TimeInterval? = nil
     ) async throws -> T {
         if authenticated, canRefresh {
             try await refreshAccessTokenIfNeeded()
         }
-        return try await performRequest(path, method: method, body: body, authenticated: authenticated, canRefresh: canRefresh)
+        return try await performRequest(path, method: method, body: body, authenticated: authenticated, canRefresh: canRefresh, timeout: timeout)
     }
 
     private func performRequest<T: Decodable, Body: Encodable>(
@@ -258,10 +282,14 @@ final class APIClient {
         method: String,
         body: Body?,
         authenticated: Bool,
-        canRefresh: Bool
+        canRefresh: Bool,
+        timeout: TimeInterval?
     ) async throws -> T {
         let url = URL(string: baseURL.absoluteString + path)!
         var request = URLRequest(url: url)
+        if let timeout {
+            request.timeoutInterval = timeout
+        }
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if authenticated, let token = tokenStore.accessToken {
@@ -276,7 +304,7 @@ final class APIClient {
         if statusCode == 401, authenticated, canRefresh {
             do {
                 try await refreshAccessTokenIfNeeded(force: true)
-                return try await performRequest(path, method: method, body: body, authenticated: authenticated, canRefresh: false)
+                return try await performRequest(path, method: method, body: body, authenticated: authenticated, canRefresh: false, timeout: timeout)
             } catch {
                 tokenStore.clear()
                 throw ClientError.sessionExpired
@@ -351,4 +379,9 @@ private extension String {
 private extension Optional where Wrapped == String {
     var intValue: Int { self?.intValue ?? 0 }
     var doubleValue: Double { self?.doubleValue ?? 0 }
+}
+
+private extension Double {
+    var validLatitude: Double? { (-90...90).contains(self) ? self : nil }
+    var validLongitude: Double? { (-180...180).contains(self) ? self : nil }
 }

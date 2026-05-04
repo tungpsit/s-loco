@@ -1,0 +1,56 @@
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">S-Loco voucher lifecycle</title>
+  <desc id="desc">Voucher lifecycle from created to paid, redeemed, completed, and settled, with refund and transfer side paths.</desc>
+  <rect width="1400" height="920" rx="56" fill="#F7FBFF"/>
+  <circle cx="1090" cy="160" r="280" fill="#FFF4DF" fill-opacity="0.9"/>
+  <circle cx="238" cy="760" r="260" fill="#90E0EF" fill-opacity="0.24"/>
+  <text x="94" y="116" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#112033">Voucher lifecycle &amp; settlement</text>
+  <text x="94" y="160" font-family="Arial, sans-serif" font-size="20" fill="#607186">A state machine controls money, service use, refunds, transfers, and vendor payout.</text>
+  <path d="M154 420H1216" stroke="#B8D4F0" stroke-width="10" stroke-linecap="round"/>
+
+  <g filter="url(#shadow)">
+    <rect x="84" y="334" width="190" height="172" rx="34" fill="white"/>
+    <text x="124" y="396" font-family="Arial, sans-serif" font-size="21" font-weight="800" fill="#005E97">CREATED</text>
+    <text x="124" y="436" font-family="Arial, sans-serif" font-size="16" fill="#607186">Awaiting payment</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="318" y="334" width="190" height="172" rx="34" fill="white"/>
+    <text x="368" y="396" font-family="Arial, sans-serif" font-size="21" font-weight="800" fill="#005E97">PAID</text>
+    <text x="356" y="436" font-family="Arial, sans-serif" font-size="16" fill="#607186">Voucher active</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="552" y="334" width="190" height="172" rx="34" fill="white"/>
+    <text x="592" y="396" font-family="Arial, sans-serif" font-size="21" font-weight="800" fill="#005E97">REDEEMED</text>
+    <text x="592" y="436" font-family="Arial, sans-serif" font-size="16" fill="#607186">QR scanned</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="786" y="334" width="190" height="172" rx="34" fill="white"/>
+    <text x="818" y="396" font-family="Arial, sans-serif" font-size="21" font-weight="800" fill="#005E97">COMPLETED</text>
+    <text x="824" y="436" font-family="Arial, sans-serif" font-size="16" fill="#607186">Service done</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="1020" y="334" width="230" height="172" rx="34" fill="#112033"/>
+    <text x="1074" y="396" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="white">SETTLED</text>
+    <text x="1064" y="436" font-family="Arial, sans-serif" font-size="16" fill="#B8D4F0">Vendor payout</text>
+  </g>
+
+  <path d="M413 528V650H260" stroke="#0077B6" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 14"/>
+  <path d="M413 528V650H562" stroke="#0077B6" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 14"/>
+  <g filter="url(#shadow)">
+    <rect x="116" y="650" width="288" height="118" rx="30" fill="white"/>
+    <text x="154" y="704" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#112033">REFUNDED</text>
+    <text x="154" y="738" font-family="Arial, sans-serif" font-size="16" fill="#607186">Unused voucher refund</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="456" y="650" width="288" height="118" rx="30" fill="white"/>
+    <text x="494" y="704" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#112033">TRANSFERRED</text>
+    <text x="494" y="738" font-family="Arial, sans-serif" font-size="16" fill="#607186">Gift or transfer in app</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="876" y="640" width="358" height="138" rx="34" fill="#FFF4DF"/>
+    <text x="918" y="698" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="#112033">Batch settlement</text>
+    <text x="918" y="736" font-family="Arial, sans-serif" font-size="18" fill="#607186">Instant payout or 3-day cycle</text>
+  </g>
+  <g fill="#0077B6"><circle cx="296" cy="420" r="10"/><circle cx="530" cy="420" r="10"/><circle cx="764" cy="420" r="10"/><circle cx="998" cy="420" r="10"/></g>
+  <defs><filter id="shadow" x="0" y="0" width="1400" height="920" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#005E97" flood-opacity="0.16"/></filter></defs>
+</svg>

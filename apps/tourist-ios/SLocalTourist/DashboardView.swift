@@ -9,116 +9,136 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    hero
-                    categoryRow
-                    sectionHeader("Đề xuất hôm nay", action: "Làm mới") {
-                        Task { await state.refreshHome() }
-                    }
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        ForEach(state.services.prefix(8)) { service in
-                            ServiceCard(service: service) {
-                                state.route = .service(service)
+                    homeHeader
+                    VStack(alignment: .leading, spacing: 18) {
+                        sectionHeader("Gợi ý cho bạn", action: "Xem tất cả") {
+                            state.tab = .browse
+                        }
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                            ForEach(state.services.prefix(8)) { service in
+                                ServiceCard(service: service) {
+                                    state.route = .service(service)
+                                }
+                            }
+                        }
+                        sectionHeader("Đối tác nổi bật", action: nil, actionHandler: nil)
+                        VStack(spacing: 10) {
+                            ForEach(state.vendors.prefix(5)) { vendor in
+                                VendorRow(vendor: vendor) {
+                                    state.route = .vendor(vendor)
+                                }
                             }
                         }
                     }
-                    sectionHeader("Đối tác nổi bật", action: nil, actionHandler: nil)
-                    VStack(spacing: 10) {
-                        ForEach(state.vendors.prefix(5)) { vendor in
-                            VendorRow(vendor: vendor) {
-                                state.route = .vendor(vendor)
-                            }
-                        }
-                    }
-                }
-                .padding(16)
-            }
-            .background(TouristTheme.surface.ignoresSafeArea())
-            .navigationTitle("S-Loco")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        state.tab = .browse
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
                 }
             }
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 0.867, green: 0.965, blue: 1.0), TouristTheme.surface],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            )
+            .navigationTitle("")
+            .toolbar(.hidden, for: .navigationBar)
             .refreshable { await state.refreshHome() }
         }
     }
 
-    private var hero: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Khám phá trải nghiệm xanh")
-                        .font(.title2.bold())
-                        .foregroundStyle(.white)
-                    Text("Tour, vé tham quan và dịch vụ địa phương được gom trong một app.")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.86))
+    private var homeHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Xin chào,")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(TouristTheme.text)
+                    Text("Chào mừng đến Sầm Sơn!")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(TouristTheme.text)
                 }
                 Spacer()
                 Button {
-                    state.route = .weather
                 } label: {
-                    VStack(spacing: 2) {
-                        Image(systemName: "cloud.sun.fill")
-                            .font(.title2)
-                        Text(state.weather.map { "\($0.temperature)°" } ?? "Thời tiết")
-                            .font(.caption.weight(.bold))
+                    ZStack(alignment: .topTrailing) {
+                        Circle()
+                            .fill(.white)
+                            .frame(width: 34, height: 34)
+                            .overlay(Image(systemName: "bell.fill").font(.subheadline).foregroundStyle(TouristTheme.primary))
+                        Circle()
+                            .fill(Color(red: 1.0, green: 0.784, blue: 0.239))
+                            .frame(width: 7, height: 7)
+                            .offset(x: -4, y: 5)
                     }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .background(.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(.plain)
             }
 
-            HStack(spacing: 10) {
-                HeroPill(icon: "ticket", text: "Voucher QR") {
-                    state.tab = .vouchers
+            Button {
+                state.tab = .browse
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                    Text("Bạn muốn tìm gì?")
+                    Spacer()
                 }
-                HeroPill(icon: "sparkles", text: "AI itinerary") {
-                    state.tab = .ai
-                }
-                HeroPill(icon: "cloud.sun", text: "Thời tiết") {
-                    state.route = .weather
+                .font(.subheadline)
+                .foregroundStyle(TouristTheme.muted)
+                .padding(.horizontal, 14)
+                .frame(height: 46)
+                .background(.white, in: RoundedRectangle(cornerRadius: 14))
+            }
+            .buttonStyle(.plain)
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+                ForEach(homeCategoryActions, id: \.assetName) { action in
+                    HomeCategoryTile(
+                        action: action,
+                        active: !action.category.isEmpty && state.selectedCategory == action.category
+                    )
                 }
             }
         }
-        .padding(18)
-        .background {
-            ZStack {
-                Image("tourist_hero")
-                    .resizable()
-                    .scaledToFill()
-                LinearGradient(colors: [.black.opacity(0.54), TouristTheme.primary.opacity(0.18)], startPoint: .topLeading, endPoint: .bottomTrailing)
-            }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .padding(.horizontal, 16)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
     }
 
-    private var categoryRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(categories, id: \.value) { item in
-                    Button {
-                        state.selectedCategory = item.value
-                        Task { await state.refreshHome() }
-                    } label: {
-                        Text(item.label)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(state.selectedCategory == item.value ? .white : TouristTheme.primary)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 9)
-                            .background(state.selectedCategory == item.value ? TouristTheme.primary : .white, in: Capsule())
-                            .overlay(Capsule().stroke(TouristTheme.border))
-                    }
-                }
-            }
-        }
+    private var homeCategoryActions: [HomeCategoryAction] {
+        [
+            HomeCategoryAction(assetName: "category_diem_den", label: "Điểm đến", category: "") {
+                state.selectedCategory = ""
+                Task { await state.refreshHome() }
+            },
+            HomeCategoryAction(assetName: "category_am_thuc", label: "Ẩm thực", category: "am-thuc") {
+                state.selectedCategory = "am-thuc"
+                Task { await state.refreshHome() }
+            },
+            HomeCategoryAction(assetName: "category_luu_tru", label: "Lưu trú", category: "luu-tru") {
+                state.selectedCategory = "luu-tru"
+                Task { await state.refreshHome() }
+            },
+            HomeCategoryAction(assetName: "category_giai_tri", label: "Giải trí", category: "giai-tri") {
+                state.selectedCategory = "giai-tri"
+                Task { await state.refreshHome() }
+            },
+            HomeCategoryAction(assetName: "category_su_kien", label: "Sự kiện", category: "") {
+                state.tab = .browse
+            },
+            HomeCategoryAction(assetName: "category_phuong_tien", label: "Phương tiện", category: "xe-dien") {
+                state.selectedCategory = "xe-dien"
+                Task { await state.refreshHome() }
+            },
+            HomeCategoryAction(assetName: "category_mua_sam", label: "Mua sắm", category: "mua-sam") {
+                state.selectedCategory = "mua-sam"
+                Task { await state.refreshHome() }
+            },
+            HomeCategoryAction(assetName: "category_xem_them", label: "Xem thêm", category: "") {
+                state.tab = .browse
+            },
+        ]
     }
 
     private func sectionHeader(_ title: String, action: String?, actionHandler: (() -> Void)?) -> some View {
@@ -132,6 +152,42 @@ struct DashboardView: View {
                     .font(.subheadline.weight(.semibold))
             }
         }
+        .padding(.vertical, 6)
+    }
+}
+
+struct HomeCategoryAction {
+    let assetName: String
+    let label: String
+    let category: String
+    let action: () -> Void
+}
+
+struct HomeCategoryTile: View {
+    let action: HomeCategoryAction
+    let active: Bool
+
+    var body: some View {
+        Button(action: action.action) {
+            VStack(spacing: 5) {
+                ZStack {
+                    Image(action.assetName)
+                        .renderingMode(.original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                }
+                Text(action.label)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(TouristTheme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 72)
+            .background(.white, in: RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -293,12 +349,48 @@ struct ServiceCard: View {
     let service: TouristService
     let onTap: () -> Void
 
+    private var offerBadgeLabel: String? {
+        if service.appDiscountPercent > 0 {
+            return "App -\(service.appDiscountPercent)%"
+        }
+        if service.discountPercent > 0 {
+            return "KM -\(service.discountPercent)%"
+        }
+        return nil
+    }
+
+    private var preAppPrice: Int? {
+        if service.appDiscountPercent > 0 && service.appDiscountPercent < 100 && service.price > 0 {
+            let value = Int((Double(service.price) * 100 / Double(100 - service.appDiscountPercent)).rounded())
+            return value > service.price ? value : nil
+        }
+        return service.discountPercent > 0 ? service.price : nil
+    }
+
+    private var appSaving: Int? {
+        guard service.appDiscountPercent > 0, let preAppPrice else { return nil }
+        let value = preAppPrice - service.price
+        return value > 0 ? value : nil
+    }
+
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 8) {
-                ServiceImage(url: service.imageURL, category: service.category, serviceName: service.name)
-                    .frame(height: 112)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                ZStack(alignment: .topTrailing) {
+                    ServiceImage(url: service.imageURL, category: service.category, serviceName: service.name)
+                        .frame(height: 112)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    if let offerBadgeLabel {
+                        Text(offerBadgeLabel)
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(TouristTheme.coral, in: Capsule())
+                            .padding(8)
+                    }
+                }
 
                 Text(service.name)
                     .font(.subheadline.weight(.semibold))
@@ -317,28 +409,70 @@ struct ServiceCard: View {
                     Image(systemName: "star.fill")
                         .foregroundStyle(.yellow)
                     Text(String(format: "%.1f", service.rating))
-                    Spacer()
-                    if service.discountPercent > 0 {
-                        Text("KM \(service.discountPercent)%")
-                            .foregroundStyle(TouristTheme.coral)
-                    }
-                    if service.appDiscountPercent > 0 {
-                        Text("+App \(service.appDiscountPercent)%")
-                            .foregroundStyle(TouristTheme.coral)
-                    }
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(TouristTheme.muted)
 
-                Text(service.isReservation ? "Đặt chỗ" : service.price.vnd)
-                    .font(.callout.bold())
-                    .foregroundStyle(TouristTheme.primary)
+                VStack(alignment: .leading, spacing: 2) {
+                    if service.isReservation {
+                        Text("Đặt qua app")
+                            .font(.callout.bold())
+                            .foregroundStyle(TouristTheme.primary)
+                        if service.appDiscountPercent > 0 {
+                            AppSavingStrip("Nhận thêm \(service.appDiscountPercent)% tại cửa hàng")
+                        }
+                    } else {
+                        if service.originalPrice > service.price {
+                            Text(service.originalPrice.vnd)
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(TouristTheme.muted)
+                                .strikethrough()
+                        }
+                        if let preAppPrice, service.discountPercent > 0 {
+                            Text("Giá KM: \(preAppPrice.vnd)")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(TouristTheme.muted)
+                                .lineLimit(1)
+                        }
+                        HStack(spacing: 6) {
+                            Text(service.price.vnd)
+                                .font(.callout.bold())
+                                .foregroundStyle(TouristTheme.primary)
+                            if service.appDiscountPercent > 0 {
+                                Text("giá app")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(TouristTheme.coral)
+                            }
+                        }
+                        if let appSaving {
+                            AppSavingStrip("Đặt qua app tiết kiệm thêm \(appSaving.vnd)")
+                        }
+                    }
+                }
             }
             .padding(10)
             .background(.white, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(TouristTheme.border))
         }
         .buttonStyle(.plain)
+    }
+}
+
+struct AppSavingStrip: View {
+    let label: String
+
+    init(_ label: String) {
+        self.label = label
+    }
+
+    var body: some View {
+        Text(label)
+            .font(.caption2.weight(.bold))
+            .foregroundStyle(TouristTheme.primary)
+            .lineLimit(1)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(TouristTheme.primarySoft, in: RoundedRectangle(cornerRadius: 8))
     }
 }
 

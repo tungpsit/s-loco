@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="AI itinerary route">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#E7F8FF"/><stop offset="1" stop-color="#FFF2C6"/></linearGradient>
+    <linearGradient id="blue" x1="26" y1="25" x2="101" y2="101" gradientUnits="userSpaceOnUse"><stop stop-color="#2BBBF0"/><stop offset="1" stop-color="#075993"/></linearGradient>
+    <linearGradient id="gold" x1="36" y1="22" x2="99" y2="92" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD86E"/><stop offset="1" stop-color="#EFA51A"/></linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <path d="M33 86c14-34 49-16 62-50" stroke="url(#blue)" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <circle cx="33" cy="86" r="12" fill="url(#gold)"/>
+  <circle cx="95" cy="36" r="12" fill="url(#gold)"/>
+  <circle cx="63" cy="61" r="9" fill="#123F67"/>
+  <path d="M52 28l5 11 11 5-11 5-5 11-5-11-11-5 11-5 5-11Zm41 40 4 8 8 4-8 4-4 8-4-8-8-4 8-4 4-8Z" fill="url(#gold)"/>
+  <path d="M35 87h1m27-26h1m31-25h1" stroke="white" stroke-width="5" stroke-linecap="round"/>
+</svg>

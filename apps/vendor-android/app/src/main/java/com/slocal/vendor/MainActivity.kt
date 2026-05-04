@@ -1,9 +1,9 @@
-package com.slocal.vendor
+package vn.sloco.vendor
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.slocal.vendor.ui.VendorApp
+import vn.sloco.vendor.ui.VendorApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

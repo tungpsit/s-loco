@@ -10,11 +10,11 @@ if (file("google-services.json").exists()) {
 }
 
 android {
-    namespace = "com.slocal.tourist"
+    namespace = "vn.sloco.tourist"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.slocal.tourist"
+        applicationId = "vn.sloco.tourist"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

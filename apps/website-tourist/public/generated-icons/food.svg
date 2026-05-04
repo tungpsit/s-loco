@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Seafood restaurant">
+  <defs>
+    <linearGradient id="bg" x1="18" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse"><stop stop-color="#E7F8FF"/><stop offset="1" stop-color="#FFF2C6"/></linearGradient>
+    <linearGradient id="blue" x1="30" y1="30" x2="98" y2="98" gradientUnits="userSpaceOnUse"><stop stop-color="#29B7EE"/><stop offset="1" stop-color="#075993"/></linearGradient>
+    <linearGradient id="gold" x1="34" y1="28" x2="94" y2="84" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD86E"/><stop offset="1" stop-color="#EFA51A"/></linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+  <path d="M34 69h60c0 18-13 32-30 32S34 87 34 69Z" fill="url(#blue)"/>
+  <path d="M27 66h74" stroke="#0A5F9E" stroke-width="8" stroke-linecap="round"/>
+  <path d="M42 59c6-12 15-18 27-18 10 0 18 4 23 11" stroke="url(#gold)" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M44 42c4 6 4 12 0 18m18-23c4 7 4 14 0 21m18-17c4 6 4 12 0 18" stroke="#0A74B8" stroke-width="5" stroke-linecap="round" opacity=".75"/>
+  <path d="M26 42 55 64m47-22L73 64" stroke="#123F67" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="82" cy="57" r="5" fill="#F4B52B"/>
+</svg>

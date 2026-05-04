@@ -1,0 +1,47 @@
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">S-Loco money flow</title>
+  <desc id="desc">Voucher Pre-pay and Hold money flow showing 95 percent customer payment, 3 percent platform revenue, and 92 percent vendor payout.</desc>
+  <rect width="1400" height="920" rx="56" fill="#F8FCFF"/>
+  <circle cx="242" cy="132" r="260" fill="#FFF4DF" fill-opacity="0.86"/>
+  <circle cx="1134" cy="196" r="290" fill="#90E0EF" fill-opacity="0.24"/>
+  <text x="96" y="120" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#112033">Voucher Pre-pay &amp; Hold</text>
+  <text x="96" y="164" font-family="Arial, sans-serif" font-size="20" fill="#607186">Customer pays first. S-Loco holds funds. Vendor receives payout after completion.</text>
+  <path d="M236 460H1164" stroke="#0077B6" stroke-width="8" stroke-linecap="round"/>
+  <path d="M1164 460L1118 430V490L1164 460Z" fill="#0077B6"/>
+
+  <g filter="url(#shadow)">
+    <rect x="96" y="300" width="270" height="312" rx="40" fill="white"/>
+    <text x="136" y="358" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#112033">Customer pays</text>
+    <text x="136" y="404" font-family="Arial, sans-serif" font-size="72" font-weight="900" fill="#005E97">95%</text>
+    <text x="140" y="446" font-family="Arial, sans-serif" font-size="30" font-weight="800" fill="#112033">950k VND</text>
+    <text x="140" y="500" font-family="Arial, sans-serif" font-size="18" fill="#607186">5% lower than on-site price</text>
+    <rect x="136" y="536" width="178" height="40" rx="16" fill="#EEF7FF"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="442" y="246" width="516" height="420" rx="48" fill="#112033"/>
+    <text x="500" y="322" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="white">S-Loco hold layer</text>
+    <text x="500" y="362" font-family="Arial, sans-serif" font-size="18" fill="#B8D4F0">Funds stay protected until service completion or refund decision.</text>
+    <rect x="500" y="414" width="400" height="92" rx="28" fill="white" fill-opacity="0.1"/>
+    <text x="536" y="472" font-family="Arial, sans-serif" font-size="54" font-weight="900" fill="#90E0EF">3%</text>
+    <text x="650" y="468" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="white">30k VND platform revenue</text>
+    <rect x="500" y="548" width="400" height="58" rx="20" fill="#0077B6"/>
+    <text x="536" y="585" font-family="Arial, sans-serif" font-size="20" font-weight="800" fill="white">COMPLETED unlocks payout</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1034" y="300" width="270" height="312" rx="40" fill="white"/>
+    <text x="1074" y="358" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#112033">Vendor receives</text>
+    <text x="1074" y="404" font-family="Arial, sans-serif" font-size="72" font-weight="900" fill="#005E97">92%</text>
+    <text x="1078" y="446" font-family="Arial, sans-serif" font-size="30" font-weight="800" fill="#112033">920k VND</text>
+    <text x="1078" y="500" font-family="Arial, sans-serif" font-size="18" fill="#607186">Instant or 3-day batch</text>
+    <rect x="1074" y="536" width="178" height="40" rx="16" fill="#EEF7FF"/>
+  </g>
+
+  <g>
+    <rect x="112" y="728" width="1176" height="96" rx="30" fill="white" fill-opacity="0.74"/>
+    <text x="154" y="786" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#112033">Extended revenue</text>
+    <text x="416" y="786" font-family="Arial, sans-serif" font-size="18" fill="#607186">Transaction commission - featured placement - membership - B2B tours and local trend data</text>
+  </g>
+  <defs><filter id="shadow" x="0" y="0" width="1400" height="920" filterUnits="userSpaceOnUse"><feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#005E97" flood-opacity="0.15"/></filter></defs>
+</svg>

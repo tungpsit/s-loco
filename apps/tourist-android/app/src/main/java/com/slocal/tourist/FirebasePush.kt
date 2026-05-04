@@ -1,4 +1,4 @@
-package com.slocal.tourist
+package vn.sloco.tourist
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

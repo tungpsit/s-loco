@@ -1,4 +1,4 @@
-package com.slocal.vendor.ui
+package vn.sloco.vendor.ui
 
 enum class LoadingTask(val message: String) {
     Login("Đang đăng nhập..."),

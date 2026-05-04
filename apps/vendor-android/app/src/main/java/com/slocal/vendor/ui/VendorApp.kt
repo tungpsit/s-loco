@@ -1,4 +1,4 @@
-package com.slocal.vendor.ui
+package vn.sloco.vendor.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -64,15 +64,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.slocal.vendor.data.Settlement
-import com.slocal.vendor.data.ReservationWire
-import com.slocal.vendor.data.ReservationStatusTone
-import com.slocal.vendor.data.SERVICE_TYPE_FIXED_PRICE
-import com.slocal.vendor.data.SERVICE_TYPE_RESERVATION
-import com.slocal.vendor.data.ServiceCategory
-import com.slocal.vendor.data.VendorProfile
-import com.slocal.vendor.data.VendorService
-import com.slocal.vendor.data.Voucher
+import vn.sloco.vendor.data.Settlement
+import vn.sloco.vendor.data.ReservationWire
+import vn.sloco.vendor.data.ReservationStatusTone
+import vn.sloco.vendor.data.SERVICE_TYPE_FIXED_PRICE
+import vn.sloco.vendor.data.SERVICE_TYPE_RESERVATION
+import vn.sloco.vendor.data.ServiceCategory
+import vn.sloco.vendor.data.VendorProfile
+import vn.sloco.vendor.data.VendorService
+import vn.sloco.vendor.data.Voucher
 import java.text.NumberFormat
 import java.util.Locale
 import kotlinx.coroutines.launch
