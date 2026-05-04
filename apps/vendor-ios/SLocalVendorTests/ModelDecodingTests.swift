@@ -87,6 +87,7 @@ final class ModelDecodingTests: XCTestCase {
           "categoryId": "c1",
           "originalPrice": "350000.00",
           "discountPrice": "299000.00",
+          "productType": "coupon",
           "fulfillmentType": "reservation",
           "reservationDiscountPercent": "10.00",
           "durationMinutes": 90,
@@ -101,6 +102,8 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(decoded.categoryId, "c1")
         XCTAssertEqual(decoded.originalPrice, 350_000)
         XCTAssertEqual(decoded.discountPrice, 299_000)
+        XCTAssertEqual(decoded.productType, productTypeCoupon)
+        XCTAssertEqual(decoded.productLabel, "Coupon")
         XCTAssertEqual(decoded.fulfillmentType, ServiceType.reservation)
         XCTAssertEqual(decoded.reservationDiscountPercent, "10.00")
         XCTAssertEqual(decoded.durationMinutes, 90)
@@ -116,6 +119,7 @@ final class ModelDecodingTests: XCTestCase {
             description: nil,
             originalPrice: "350000",
             discountPrice: "299000",
+            productType: productTypeVoucher,
             fulfillmentType: ServiceType.fixedPrice,
             reservationDiscountPercent: nil,
             durationMinutes: 90,
@@ -127,6 +131,7 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(object?["category_id"] as? String, "c1")
         XCTAssertEqual(object?["original_price"] as? String, "350000")
         XCTAssertEqual(object?["discount_price"] as? String, "299000")
+        XCTAssertEqual(object?["product_type"] as? String, "voucher")
         XCTAssertEqual(object?["fulfillment_type"] as? String, "fixed_price")
         XCTAssertEqual(object?["duration_minutes"] as? Int, 90)
         XCTAssertEqual(object?["max_quantity_per_order"] as? Int, 6)
@@ -140,6 +145,7 @@ final class ModelDecodingTests: XCTestCase {
             description: nil,
             originalPrice: "0",
             discountPrice: nil,
+            productType: productTypeCoupon,
             fulfillmentType: ServiceType.reservation,
             reservationDiscountPercent: "10",
             durationMinutes: nil,
@@ -150,9 +156,41 @@ final class ModelDecodingTests: XCTestCase {
 
         XCTAssertEqual(object?["category_id"] as? String, "c1")
         XCTAssertEqual(object?["original_price"] as? String, "0")
+        XCTAssertEqual(object?["product_type"] as? String, "coupon")
         XCTAssertEqual(object?["fulfillment_type"] as? String, "reservation")
         XCTAssertEqual(object?["reservation_discount_percent"] as? String, "10")
         XCTAssertNil(object?["discount_price"])
+    }
+
+    func testVoucherAndSettlementDecodeProductTaxonomy() throws {
+        let voucherRaw = """
+        {
+          "id": "v1",
+          "status": "completed",
+          "final_amount": "120000.00",
+          "service_name": "Vé show biển",
+          "customer_name": "Mai Anh",
+          "product_type": "ticket",
+          "artifact_type": "ticket"
+        }
+        """.data(using: .utf8)!
+        let settlementRaw = """
+        {
+          "id": "st1",
+          "status": "pending",
+          "net_amount": "90000.00",
+          "voucher_count": 1,
+          "direction": "vendor_pays_sloco"
+        }
+        """.data(using: .utf8)!
+
+        let voucher = try JSONDecoder().decode(Voucher.self, from: voucherRaw)
+        let settlement = try JSONDecoder().decode(Settlement.self, from: settlementRaw)
+
+        XCTAssertEqual(voucher.productLabel, "Vé")
+        XCTAssertTrue(voucher.isTicket)
+        XCTAssertEqual(settlement.netAmount, 90_000)
+        XCTAssertEqual(settlement.directionLabel, "Vendor trả S-Loco")
     }
 
     func testUpdateVendorSettingsRequestEncodesLocationFields() throws {

@@ -1,7 +1,8 @@
-import { vouchers } from '@S-Loco/db/schema'
+import { services, vouchers } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
 import { getDb } from '../db'
 import { notifyVoucherRedeemed } from './notification.service'
+import { normalizeProductType } from './product-types'
 import { VoucherError, verifyQrToken } from './voucher.service'
 import { assertTransition } from './voucher-state'
 
@@ -30,15 +31,27 @@ export async function previewVoucher(qrToken: string) {
   const { voucherId } = await verifyQrToken(qrToken)
   const db = getDb()
 
-  const [v] = await db.select().from(vouchers).where(eq(vouchers.id, voucherId)).limit(1)
-  if (!v) throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại.')
+  const [row] = await db
+    .select({ voucher: vouchers, service: services })
+    .from(vouchers)
+    .innerJoin(services, eq(vouchers.serviceId, services.id))
+    .where(eq(vouchers.id, voucherId))
+    .limit(1)
+  if (!row) throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại.')
+
+  const productType = normalizeProductType({
+    productType: row.service.productType,
+    fulfillmentType: row.service.fulfillmentType,
+  })
 
   return {
-    voucher_id: v.id,
-    code: v.code,
-    status: v.status,
-    can_redeem: v.status === 'paid',
-    expires_at: v.expiresAt,
+    voucher_id: row.voucher.id,
+    code: row.voucher.code,
+    status: row.voucher.status,
+    can_redeem: row.voucher.status === 'paid',
+    expires_at: row.voucher.expiresAt,
+    artifact_type: row.voucher.artifactType,
+    product_type: productType,
   }
 }
 
@@ -92,13 +105,16 @@ async function atomicRedeem(voucherId: string, vendorId: string) {
   assertTransition(v.status, 'redeemed')
 
   // Optimistic lock: only update if version matches (prevents double-redemption)
+  const nextStatus = v.artifactType === 'ticket' ? 'completed' : 'redeemed'
+  const now = new Date()
   const [updated] = await db
     .update(vouchers)
     .set({
-      status: 'redeemed',
-      redeemedAt: new Date(),
+      status: nextStatus,
+      redeemedAt: now,
+      completedAt: v.artifactType === 'ticket' ? now : v.completedAt,
       version: v.version + 1,
-      updatedAt: new Date(),
+      updatedAt: now,
     })
     .where(and(eq(vouchers.id, voucherId), eq(vouchers.version, v.version)))
     .returning()

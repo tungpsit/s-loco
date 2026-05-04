@@ -2,6 +2,7 @@ import { orderItems, services, users, vendors, vouchers } from '@S-Loco/db/schem
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { jwtVerify, SignJWT } from 'jose'
 import { getDb } from '../db'
+import { normalizeProductType } from './product-types'
 
 type VoucherStatus = typeof vouchers.$inferSelect.status
 
@@ -65,7 +66,13 @@ export async function listVouchersByUser(
   const items = await db
     .select({
       voucher: vouchers,
-      service: { id: services.id, name: services.name, images: services.images },
+      service: {
+        id: services.id,
+        name: services.name,
+        images: services.images,
+        productType: services.productType,
+        fulfillmentType: services.fulfillmentType,
+      },
       vendor: { name: vendors.name },
       orderItem: { quantity: orderItems.quantity, totalPrice: orderItems.totalPrice },
     })
@@ -83,7 +90,7 @@ export async function listVouchersByUser(
     .from(vouchers)
     .where(and(...conditions))
 
-  return { items, total: Number(scalar(countRows).count), page, limit }
+  return { items: items.map(toTouristVoucherListItem), total: Number(scalar(countRows).count), page, limit }
 }
 
 // ─── List vendor vouchers ──────────────────────────────
@@ -109,7 +116,11 @@ export async function listVouchersByVendorIds(
   const rows = await db
     .select({
       voucher: vouchers,
-      service: { name: services.name },
+      service: {
+        name: services.name,
+        productType: services.productType,
+        fulfillmentType: services.fulfillmentType,
+      },
       customer: { fullName: users.fullName, email: users.email, phone: users.phone },
       orderItem: { totalPrice: orderItems.totalPrice },
     })
@@ -144,6 +155,8 @@ export async function getVoucherDetail(voucherId: string, userId: string) {
         name: services.name,
         images: services.images,
         description: services.description,
+        productType: services.productType,
+        fulfillmentType: services.fulfillmentType,
       },
       vendor: { name: vendors.name },
       orderItem: { quantity: orderItems.quantity, totalPrice: orderItems.totalPrice },
@@ -156,7 +169,7 @@ export async function getVoucherDetail(voucherId: string, userId: string) {
     .limit(1)
 
   if (!result) throw new VoucherError('NOT_FOUND', 'Voucher không tồn tại.')
-  return result
+  return toTouristVoucherListItem(result)
 }
 
 // ─── Get vendor voucher detail ─────────────────────────
@@ -169,7 +182,11 @@ export async function getVoucherDetailForVendor(voucherId: string, vendorIds: st
   const [result] = await db
     .select({
       voucher: vouchers,
-      service: { name: services.name },
+      service: {
+        name: services.name,
+        productType: services.productType,
+        fulfillmentType: services.fulfillmentType,
+      },
       customer: { fullName: users.fullName, email: users.email, phone: users.phone },
       orderItem: { totalPrice: orderItems.totalPrice },
     })
@@ -184,14 +201,40 @@ export async function getVoucherDetailForVendor(voucherId: string, vendorIds: st
   return toVendorVoucher(result)
 }
 
+function normalizeVoucherArtifact(row: {
+  voucher: typeof vouchers.$inferSelect
+  service: { productType?: string | null; fulfillmentType?: string | null }
+}) {
+  const productType = normalizeProductType({
+    productType: row.service.productType as any,
+    fulfillmentType: row.service.fulfillmentType as any,
+  })
+  return {
+    ...row.voucher,
+    artifact_type: row.voucher.artifactType,
+    product_type: productType,
+  }
+}
+
+function toTouristVoucherListItem(row: {
+  voucher: typeof vouchers.$inferSelect
+  service: { productType?: string | null; fulfillmentType?: string | null }
+}) {
+  return {
+    ...row,
+    voucher: normalizeVoucherArtifact(row),
+  }
+}
+
 function toVendorVoucher(row: {
   voucher: typeof vouchers.$inferSelect
-  service: { name: string }
+  service: { name: string; productType?: string | null; fulfillmentType?: string | null }
   customer: { fullName: string | null; email: string | null; phone: string | null }
   orderItem: { totalPrice: string }
 }) {
+  const artifact = normalizeVoucherArtifact(row)
   return {
-    ...row.voucher,
+    ...artifact,
     service_name: row.service.name,
     customer_name:
       row.customer.fullName || row.customer.email || row.customer.phone || 'Khách hàng',

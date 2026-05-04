@@ -517,8 +517,8 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 service.locationSummary()?.let { Text(it, color = TextMuted) }
                 Text("★ ${service.rating}", color = TextMuted)
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (service.isReservation) {
-                        Text("Đặt chỗ · Giảm thêm ${service.appDiscountPercent}%", color = Coral, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                    if (service.isCoupon) {
+                        Text("Coupon · Giảm thêm ${service.appDiscountPercent}%", color = Coral, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                     } else if (service.originalPrice > service.price) {
                         Text(formatVnd(service.originalPrice), color = TextMuted)
                         Text(formatVnd(service.price), color = Coral, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
@@ -530,9 +530,9 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 Text(service.description.ifBlank { "Trải nghiệm địa phương được chọn lọc bởi S-Loco." }, color = TextMuted)
                 if (service.durationMinutes > 0) Text("Thời lượng: ${service.durationMinutes} phút", color = TextMuted)
                 VendorLocationSection(service)
-                if (service.isReservation) {
+                if (service.isCoupon) {
                     AppCard {
-                        Text("Thông tin đặt chỗ", color = TextMain, fontWeight = FontWeight.ExtraBold)
+                        Text("Thông tin nhận coupon", color = TextMain, fontWeight = FontWeight.ExtraBold)
                         OutlinedTextField(partySize, { partySize = it }, label = { Text("Số người") }, singleLine = true)
                         OutlinedTextField(requestedTime, { requestedTime = it }, label = { Text("Thời gian mong muốn") }, singleLine = true)
                         OutlinedTextField(note, { note = it }, label = { Text("Ghi chú") })
@@ -547,12 +547,12 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (!service.isReservation) {
+            if (!service.isCoupon) {
                 Stepper(quantity, onMinus = { quantity = maxOf(1, quantity - 1) }, onPlus = { quantity += 1 })
             }
             Button(
                 onClick = {
-                    if (service.isReservation) {
+                    if (service.isCoupon) {
                         state.createReservation(service, partySize.toIntOrNull() ?: 2, requestedTime, note)
                     } else {
                         state.createOrder(service, quantity)
@@ -561,7 +561,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = Blue)
             ) {
-                Text(if (service.isReservation) "Gửi yêu cầu đặt chỗ" else "Mua ngay")
+                Text(if (service.isCoupon) "Nhận coupon" else "Mua ${service.productLabel.lowercase()}")
             }
         }
     }
@@ -729,7 +729,7 @@ private fun CheckoutScreen(state: AppState, orderId: String) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            BlueCard("SECURE CHECKOUT", "Xác nhận voucher", "Thanh toán qua cổng bảo mật, nhận voucher QR trong ví.")
+            BlueCard("SECURE CHECKOUT", "Xác nhận voucher/vé", "Thanh toán qua cổng bảo mật, nhận QR trong ví.")
             state.currentOrder?.let { order ->
                 AppCard {
                     Text("Đơn hàng #${order.id.take(8).uppercase()}", fontWeight = FontWeight.Bold)
@@ -768,7 +768,7 @@ private fun OrderDetailScreen(state: AppState, orderId: String) {
     Column(Modifier.fillMaxSize()) {
         TopBack("Đơn hàng", state::back)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            BlueCard("ORDER", "Chi tiết đơn hàng", "Theo dõi trạng thái và voucher đã phát hành.")
+            BlueCard("ORDER", "Chi tiết đơn hàng", "Theo dõi trạng thái và QR đã phát hành.")
             state.currentOrder?.let { order ->
                 AppCard {
                     Text(order.status, color = Blue, fontWeight = FontWeight.Bold)
@@ -789,12 +789,12 @@ private fun VouchersScreen(state: AppState) {
     }
     LazyColumn(Modifier.fillMaxSize()) {
         item {
-            BluePageHeader("MY PASSES", "Voucher của tôi", "Xuất trình QR khi sử dụng dịch vụ")
+            BluePageHeader("MY PASSES", "Voucher & vé của tôi", "Xuất trình QR khi sử dụng dịch vụ")
         }
         items(state.vouchers) { voucher ->
             VoucherCard(voucher) { state.screen = Screen.VoucherDetail(voucher) }
         }
-        item { SectionTitle("Đặt chỗ nhà hàng") }
+        item { SectionTitle("Coupon / mã giảm giá") }
         items(state.reservations) { reservation ->
             ReservationCard(reservation) { state.screen = Screen.ReservationDetail(reservation) }
         }
@@ -833,18 +833,18 @@ private fun ReservationDetailScreen(state: AppState, reservation: Reservation) {
 @Composable
 private fun VoucherDetailScreen(state: AppState, voucher: Voucher) {
     Column(Modifier.fillMaxSize()) {
-        TopBack("Voucher", state::back)
+        TopBack(voucher.productLabel, state::back)
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            BlueCard("S-LOCO VOUCHER", voucher.serviceName.ifBlank { "Voucher" }, statusLabel(voucher.status))
+            BlueCard("S-LOCO ${voucher.productLabel.uppercase()}", voucher.serviceName.ifBlank { voucher.productLabel }, statusLabel(voucher.status))
             if (voucher.qrToken.isNotBlank()) {
                 AppCard(horizontal = Alignment.CenterHorizontally) {
                     QrImage(voucher.qrToken)
-                    Text("Xuất trình mã QR này cho nhân viên để sử dụng dịch vụ.", color = TextMuted)
+                    Text("Xuất trình mã QR này cho nhân viên để sử dụng ${voucher.productLabel.lowercase()}.", color = TextMuted)
                 }
             } else {
                 AppCard { Text("QR sẽ khả dụng sau khi thanh toán.", color = TextMuted) }
@@ -1638,9 +1638,9 @@ private fun VoucherCard(voucher: Voucher, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(16.dp))
                     .background(BlueSoft),
                 contentAlignment = Alignment.Center
-            ) { Text("SL", color = Blue, fontWeight = FontWeight.ExtraBold) }
+            ) { Text(if (voucher.isTicket) "VÉ" else "VC", color = Blue, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp) }
             Column(Modifier.weight(1f)) {
-                Text(voucher.serviceName.ifBlank { "Voucher" }, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                Text(voucher.serviceName.ifBlank { voucher.productLabel }, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                 Text(voucher.vendorName, color = TextMuted, maxLines = 1)
                 Text(formatVnd(voucher.totalAmount), color = Blue, fontWeight = FontWeight.Bold)
             }
@@ -2298,6 +2298,9 @@ private fun parseService(obj: JsonObject): Service? {
     val appDiscount = pricing?.num("app_discount_percent")?.toInt()?.takeIf { it > 0 }
         ?: service.num("reservationDiscountPercent", "reservation_discount_percent").toInt()
     val fulfillmentType = service.str("fulfillmentType", "fulfillment_type").ifBlank { "fixed_price" }
+    val productType = service.str("productType", "product_type").ifBlank {
+        if (fulfillmentType == "reservation") "coupon" else "voucher"
+    }
     return Service(
         id = id,
         name = service.str("name").ifBlank { "Dịch vụ" },
@@ -2313,6 +2316,7 @@ private fun parseService(obj: JsonObject): Service? {
         discountPercent = discount,
         appDiscountPercent = appDiscount,
         fulfillmentType = fulfillmentType,
+        productType = productType,
         reservationDiscountPercent = appDiscount,
         rating = service.num("averageRating", "rating"),
         durationMinutes = service.int("durationMinutes", "duration_minutes")
@@ -2341,6 +2345,13 @@ private fun parseVoucher(obj: JsonObject): Voucher {
     val service = obj.obj("service")
     val vendor = obj.obj("vendor")
     val snapshot = obj.obj("serviceSnapshot")
+    val artifactType = voucher.str("artifact_type", "artifactType").ifBlank { snapshot?.str("artifactType", "artifact_type").orEmpty() }
+    val productType = voucher.str("product_type", "productType").ifBlank {
+        when (artifactType) {
+            "ticket" -> "ticket"
+            else -> "voucher"
+        }
+    }
     return Voucher(
         id = voucher.str("id"),
         status = voucher.str("status"),
@@ -2349,6 +2360,8 @@ private fun parseVoucher(obj: JsonObject): Voucher {
         quantity = obj.int("quantity").takeIf { it > 0 } ?: voucher.int("quantity").takeIf { it > 0 } ?: 1,
         totalAmount = obj.money("total_amount", "totalAmount", "totalPrice"),
         qrToken = voucher.str("qr_token", "qrToken"),
+        productType = productType,
+        artifactType = artifactType.ifBlank { if (productType == "ticket") "ticket" else "voucher" },
     )
 }
 
@@ -2497,11 +2510,19 @@ private data class Service(
     val discountPercent: Int,
     val appDiscountPercent: Int,
     val fulfillmentType: String,
+    val productType: String,
     val reservationDiscountPercent: Int,
     val rating: Double,
     val durationMinutes: Int,
 ) {
-    val isReservation: Boolean get() = fulfillmentType == "reservation"
+    val isCoupon: Boolean get() = productType == "coupon" || fulfillmentType == "reservation"
+    val isTicket: Boolean get() = productType == "ticket"
+    val isReservation: Boolean get() = isCoupon
+    val productLabel: String get() = when {
+        isCoupon -> "Coupon"
+        isTicket -> "Vé"
+        else -> "Voucher"
+    }
     fun locationSummary(): String? = distanceFromOriginKm?.let { String.format("%.1f km", it) }
         ?: vendorAddress.takeIf { it.isNotBlank() }
     fun isLodging(): Boolean {
@@ -2515,7 +2536,20 @@ private data class Service(
 }
 
 private data class Vendor(val id: String, val name: String, val address: String, val rating: Double)
-private data class Voucher(val id: String, val status: String, val serviceName: String, val vendorName: String, val quantity: Int, val totalAmount: Int, val qrToken: String)
+private data class Voucher(
+    val id: String,
+    val status: String,
+    val serviceName: String,
+    val vendorName: String,
+    val quantity: Int,
+    val totalAmount: Int,
+    val qrToken: String,
+    val productType: String,
+    val artifactType: String,
+) {
+    val isTicket: Boolean get() = productType == "ticket" || artifactType == "ticket"
+    val productLabel: String get() = if (isTicket) "Vé" else "Voucher"
+}
 private data class Reservation(
     val id: String,
     val status: String,

@@ -16,7 +16,7 @@ struct ScanView: View {
                     TextField("eyJhbGciOiJI...", text: $token, axis: .vertical)
                         .modifier(TokenFieldModifier())
                         .lineLimit(3...6)
-                    Button("Xác thực và đổi voucher") {
+                    Button("Xác thực và đổi voucher/vé") {
                         Task { await state.redeemQr(token) }
                     }
                     .disabled(token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || state.isLoading)
@@ -28,18 +28,19 @@ struct ScanView: View {
                 if let preview = state.qrPreview {
                     Section("Kết quả kiểm tra") {
                         LabeledContent("Mã", value: preview.code)
+                        LabeledContent("Loại", value: preview.productLabel)
                         LabeledContent("Trạng thái", value: preview.status)
                         LabeledContent("Có thể đổi", value: preview.canRedeem ? "Có" : "Không")
                     }
                 }
 
                 if let voucher = state.redeemedVoucher {
-                    Section("Đã đổi voucher") {
+                    Section("Đã đổi voucher/vé") {
                         VoucherRow(voucher: voucher)
-                        Button("Hoàn thành dịch vụ") {
+                        Button(voucher.isTicket ? "Vé đã hoàn tất" : "Hoàn thành dịch vụ") {
                             Task { await state.completeRedeemedVoucher() }
                         }
-                        .disabled(state.isLoading)
+                        .disabled(state.isLoading || voucher.isTicket)
                     }
                 }
             }

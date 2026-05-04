@@ -414,8 +414,8 @@ struct ServiceCard: View {
                 .foregroundStyle(TouristTheme.muted)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    if service.isReservation {
-                        Text("Đặt qua app")
+                    if service.isCoupon {
+                        Text("Coupon")
                             .font(.callout.bold())
                             .foregroundStyle(TouristTheme.primary)
                         if service.appDiscountPercent > 0 {

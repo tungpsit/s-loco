@@ -204,9 +204,9 @@ struct ServiceDetailView: View {
 
                     VendorLocationSection(service: service)
 
-                    if service.isReservation {
+                    if service.isCoupon {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("Thông tin đặt chỗ")
+                            Text("Thông tin nhận coupon")
                                 .font(.headline)
                             Stepper("Số người: \(partySize)", value: $partySize, in: 1...100)
                             TextField("Thời gian mong muốn", text: $requestedTime)
@@ -214,7 +214,7 @@ struct ServiceDetailView: View {
                                 .autocorrectionDisabled()
                             TextField("Ghi chú", text: $reservationNote, axis: .vertical)
                                 .lineLimit(2...4)
-                            Text("Nhà hàng sẽ liên hệ xác nhận trước khi phát hành mã ưu đãi iPos.")
+                            Text("Vendor sẽ xác nhận trước khi phát hành mã coupon iPos.")
                                 .font(.caption)
                                 .foregroundStyle(TouristTheme.muted)
                         }
@@ -234,17 +234,17 @@ struct ServiceDetailView: View {
             .safeAreaInset(edge: .bottom) {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text(service.isReservation ? "Ưu đãi" : "Tổng")
+                        Text(service.isCoupon ? "Ưu đãi" : "Tổng")
                             .font(.caption)
                             .foregroundStyle(TouristTheme.muted)
-                        Text(service.isReservation ? "Giảm \(service.reservationDiscountPercent)%" : (service.price * quantity).vnd)
+                        Text(service.isCoupon ? "Giảm \(service.reservationDiscountPercent)%" : (service.price * quantity).vnd)
                             .font(.headline)
                             .foregroundStyle(TouristTheme.primary)
                     }
                     Spacer()
                     Button {
                         Task {
-                            if service.isReservation {
+                            if service.isCoupon {
                                 await state.createReservation(
                                     service: service,
                                     partySize: partySize,
@@ -256,7 +256,7 @@ struct ServiceDetailView: View {
                             }
                         }
                     } label: {
-                        Label(service.isReservation ? "Đặt chỗ" : "Mua ngay", systemImage: service.isReservation ? "calendar.badge.plus" : "cart.fill")
+                        Label(service.isCoupon ? "Nhận coupon" : "Mua \(service.productLabel.lowercased())", systemImage: service.isCoupon ? "ticket.fill" : "cart.fill")
                     }
                     .buttonStyle(PrimaryButtonStyle())
                 }
@@ -442,7 +442,7 @@ struct VoucherDetailView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 18) {
-                Text(voucher.serviceName ?? "Voucher S-Loco")
+                Text(voucher.serviceName ?? "\(voucher.productLabel) S-Loco")
                     .font(.title2.bold())
                     .multilineTextAlignment(.center)
                     .foregroundStyle(TouristTheme.text)
@@ -465,7 +465,7 @@ struct VoucherDetailView: View {
             }
             .padding(20)
             .background(TouristTheme.surface.ignoresSafeArea())
-            .navigationTitle("QR Voucher")
+            .navigationTitle("QR \(voucher.productLabel)")
         }
     }
 }

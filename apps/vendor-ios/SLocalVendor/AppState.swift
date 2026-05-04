@@ -88,7 +88,7 @@ final class AppState: ObservableObject {
         name: String,
         categoryId: String,
         description: String,
-        fulfillmentType: String,
+        productType: String,
         originalPrice: String,
         discountPrice: String,
         reservationDiscountPercent: String,
@@ -101,17 +101,18 @@ final class AppState: ObservableObject {
             let currentVendor = try await currentVendor()
             let cleanedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
             let cleanedCategoryId = categoryId.trimmingCharacters(in: .whitespacesAndNewlines)
-            let isReservation = fulfillmentType == ServiceType.reservation
-            let cleanedPrice = originalPrice.onlyDigits.isEmpty && isReservation ? "0" : originalPrice.onlyDigits
+            let isCoupon = productType == productTypeCoupon
+            let fulfillmentType = fulfillmentTypeForProductType(productType)
+            let cleanedPrice = originalPrice.onlyDigits.isEmpty && isCoupon ? "0" : originalPrice.onlyDigits
             let cleanedDiscount = discountPrice.onlyDigits
             let cleanedReservationDiscount = reservationDiscountPercent.onlyPercent
             guard cleanedName.count >= 2 else { throw ClientError.message("Vui lòng nhập tên dịch vụ.") }
             guard !cleanedCategoryId.isEmpty else { throw ClientError.message("Vui lòng chọn danh mục.") }
-            guard !cleanedPrice.isEmpty else { throw ClientError.message("Vui lòng nhập giá gốc.") }
-            if isReservation && cleanedReservationDiscount.isEmpty {
-                throw ClientError.message("Vui lòng nhập % ưu đãi đặt bàn.")
+            guard !cleanedPrice.isEmpty else { throw ClientError.message(isCoupon ? "Vui lòng nhập giá tham chiếu." : "Vui lòng nhập giá gốc.") }
+            if isCoupon && cleanedReservationDiscount.isEmpty {
+                throw ClientError.message("Vui lòng nhập % ưu đãi coupon.")
             }
-            if !isReservation, !cleanedDiscount.isEmpty, let discount = Int(cleanedDiscount), let price = Int(cleanedPrice), discount > price {
+            if !isCoupon, !cleanedDiscount.isEmpty, let discount = Int(cleanedDiscount), let price = Int(cleanedPrice), discount > price {
                 throw ClientError.message("Giá khuyến mãi không được lớn hơn giá gốc.")
             }
             let duration = Int(durationMinutes.onlyDigits)
@@ -129,9 +130,10 @@ final class AppState: ObservableObject {
                         categoryId: cleanedCategoryId,
                         description: description.trimmedNil,
                         originalPrice: cleanedPrice,
-                        discountPrice: !isReservation && !cleanedDiscount.isEmpty ? cleanedDiscount : nil,
+                        discountPrice: !isCoupon && !cleanedDiscount.isEmpty ? cleanedDiscount : nil,
+                        productType: productType,
                         fulfillmentType: fulfillmentType,
-                        reservationDiscountPercent: isReservation ? cleanedReservationDiscount : nil,
+                        reservationDiscountPercent: isCoupon ? cleanedReservationDiscount : nil,
                         durationMinutes: duration,
                         maxQuantityPerOrder: maxQuantity,
                         isActive: isActive,
@@ -148,9 +150,10 @@ final class AppState: ObservableObject {
                         categoryId: cleanedCategoryId,
                         description: description.trimmedNil,
                         originalPrice: cleanedPrice,
-                        discountPrice: !isReservation && !cleanedDiscount.isEmpty ? cleanedDiscount : nil,
+                        discountPrice: !isCoupon && !cleanedDiscount.isEmpty ? cleanedDiscount : nil,
+                        productType: productType,
                         fulfillmentType: fulfillmentType,
-                        reservationDiscountPercent: isReservation ? cleanedReservationDiscount : nil,
+                        reservationDiscountPercent: isCoupon ? cleanedReservationDiscount : nil,
                         durationMinutes: duration,
                         maxQuantityPerOrder: maxQuantity,
                         images: images.isEmpty ? nil : images
@@ -251,7 +254,7 @@ final class AppState: ObservableObject {
             let value = token.trimmingCharacters(in: .whitespacesAndNewlines)
             let preview = try await api.verifyQr(value)
             guard preview.canRedeem else {
-                throw ClientError.message("Voucher trạng thái \(preview.status), không thể đổi.")
+                throw ClientError.message("Voucher/vé trạng thái \(preview.status), không thể đổi.")
             }
             qrPreview = preview
             redeemedVoucher = try await api.redeemQr(value)

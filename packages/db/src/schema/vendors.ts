@@ -26,6 +26,7 @@ export const serviceFulfillmentTypeEnum = pgEnum('service_fulfillment_type', [
   'fixed_price',
   'reservation',
 ])
+export const productTypeEnum = pgEnum('product_type', ['coupon', 'voucher', 'ticket'])
 
 // ─── Vendors ───────────────────────────────────────────
 export const vendors = pgTable(
@@ -98,6 +99,7 @@ export const services = pgTable(
     originalPrice: decimal('original_price', { precision: 12, scale: 2 }).notNull(),
     discountPrice: decimal('discount_price', { precision: 12, scale: 2 }),
     discountPercent: decimal('discount_percent', { precision: 5, scale: 2 }),
+    productType: productTypeEnum('product_type').notNull().default('voucher'),
     fulfillmentType: serviceFulfillmentTypeEnum('fulfillment_type')
       .notNull()
       .default('fixed_price'),

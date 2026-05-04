@@ -1,6 +1,7 @@
 import { getDb } from '../db'
 import { orderItems, settlementItems, settlements, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, gte, lte, sql } from 'drizzle-orm'
+import { settlementDirectionForProductType } from './product-types'
 
 /** Non-null assertion for Drizzle scalar selects */
 function scalar<T>(rows: T[]): T {
@@ -58,6 +59,7 @@ export async function createSettlementBatch(vendorId: string, periodStart: Date,
         totalAmount: String(totalAmount),
         commissionAmount: String(commissionAmount),
         netAmount: String(netAmount),
+        direction: settlementDirectionForProductType('voucher'),
         voucherCount: items.length,
         status: 'pending',
       })

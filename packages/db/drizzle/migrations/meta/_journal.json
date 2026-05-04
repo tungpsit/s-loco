@@ -71,6 +71,20 @@
       "when": 1777687500000,
       "tag": "0009_vendor_rejected_status",
       "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1777687600000,
+      "tag": "0010_product_types",
+      "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1777687700000,
+      "tag": "0011_settlement_direction",
+      "breakpoints": false
     }
   ]
 }

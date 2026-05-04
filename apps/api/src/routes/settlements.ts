@@ -57,6 +57,7 @@ settlementRoutes.get('/export', requireRole('admin'), async (c) => {
     'Tổng giá trị',
     'Hoa hồng',
     'Thực nhận',
+    'Chiều thanh toán',
     'Số voucher',
     'Trạng thái',
   ]
@@ -68,6 +69,10 @@ settlementRoutes.get('/export', requireRole('admin'), async (c) => {
     approved: 'Đã duyệt',
     disbursed: 'Đã giải ngân',
     rejected: 'Từ chối',
+  }
+  const directionMap: Record<string, string> = {
+    sloco_pays_vendor: 'S-Loco trả vendor',
+    vendor_pays_sloco: 'Vendor trả S-Loco',
   }
 
   const rows = items.map((row: any) => {
@@ -81,6 +86,7 @@ settlementRoutes.get('/export', requireRole('admin'), async (c) => {
       q(fmtMoney(s.totalAmount)),
       q(fmtMoney(s.commissionAmount)),
       q(fmtMoney(s.netAmount)),
+      q(directionMap[s.direction] || s.direction || ''),
       String(s.voucherCount ?? 0),
       q(statusMap[s.status] || s.status),
     ].join(sep)

@@ -13,7 +13,7 @@ struct DashboardView: View {
                     }
                     StatTile(title: "Chờ giải ngân", value: formatVnd(state.dashboard?.settlement.pending), color: VendorTheme.warning)
                 }
-                Section("Voucher gần đây") {
+                Section("Voucher & vé gần đây") {
                     ForEach(state.dashboard?.recentOrders ?? Array(state.vouchers.prefix(5))) { voucher in
                         VoucherRow(voucher: voucher)
                     }
@@ -60,7 +60,7 @@ struct VoucherRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(voucher.serviceName ?? voucher.id).font(.headline)
-            Text("\(voucher.customerName ?? "Khách hàng") · \(voucher.status) · \(formatVnd(voucher.finalAmount))")
+            Text("\(voucher.productLabel) · \(voucher.customerName ?? "Khách hàng") · \(voucher.status) · \(formatVnd(voucher.finalAmount))")
                 .font(.subheadline)
                 .foregroundStyle(VendorTheme.secondaryText)
         }

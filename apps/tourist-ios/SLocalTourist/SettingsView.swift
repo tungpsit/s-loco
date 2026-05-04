@@ -8,7 +8,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     profileCard
-                    menuRow(icon: "ticket", title: "Vé của tôi", subtitle: "Voucher và QR đã mua") {
+                    menuRow(icon: "ticket", title: "Voucher & vé của tôi", subtitle: "Voucher, vé và coupon đã lưu") {
                         state.tab = .vouchers
                     }
                     menuRow(icon: "sparkles", title: "AI Planner", subtitle: "Gợi ý lịch trình theo ngân sách") {

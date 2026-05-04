@@ -124,7 +124,7 @@ private struct ServiceListRow: View {
                         Label(String(format: "%.1f", service.rating), systemImage: "star.fill")
                             .foregroundStyle(TouristTheme.coral)
                         Spacer()
-                        Text(service.isReservation ? "Đặt chỗ" : service.price.vnd)
+                        Text(service.isCoupon ? "Coupon" : service.price.vnd)
                             .foregroundStyle(TouristTheme.primary)
                     }
                     .font(.caption.weight(.semibold))

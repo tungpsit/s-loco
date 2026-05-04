@@ -49,7 +49,9 @@ final class ModelDecodingTests: XCTestCase {
                   "id": "voucher-1",
                   "status": "paid",
                   "qrToken": "qr-token",
-                  "createdAt": "2026-04-29T00:00:00.000Z"
+                  "createdAt": "2026-04-29T00:00:00.000Z",
+                  "product_type": "ticket",
+                  "artifact_type": "ticket"
                 },
                 "service": {
                   "id": "service-1",
@@ -77,10 +79,30 @@ final class ModelDecodingTests: XCTestCase {
 
         XCTAssertEqual(wire.voucher?.id, "voucher-1")
         XCTAssertEqual(wire.voucher?.qrToken, "qr-token")
+        XCTAssertEqual(wire.voucher?.productType, "ticket")
+        XCTAssertEqual(wire.voucher?.artifactType, "ticket")
+        XCTAssertEqual(wire.voucher?.productLabel, "Vé")
         XCTAssertEqual(wire.service?.name, "Tour biển")
         XCTAssertEqual(wire.vendor?.name, "S-Loco Vendor")
         XCTAssertEqual(wire.orderItem?.quantity, 2)
         XCTAssertEqual(wire.orderItem?.totalPrice, 300000)
+    }
+
+    func testServiceCoreDecodesProductType() throws {
+        let raw = """
+        {
+          "id": "service-1",
+          "name": "Coupon hải sản",
+          "originalPrice": "0.00",
+          "fulfillmentType": "reservation",
+          "productType": "coupon",
+          "reservationDiscountPercent": "8.00"
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(ServiceCore.self, from: raw)
+
+        XCTAssertEqual(decoded.productType, "coupon")
     }
 
     func testLoadingTasksExposeVietnameseMessagesForApiWork() {

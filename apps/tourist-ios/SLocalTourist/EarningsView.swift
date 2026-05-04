@@ -33,7 +33,7 @@ struct EarningsView: View {
 
     private var voucherList: some View {
         List {
-            Section("Voucher") {
+            Section("Voucher & vé") {
                 ForEach(state.vouchers) { voucher in
                     Button {
                         state.route = .voucher(voucher)
@@ -45,7 +45,7 @@ struct EarningsView: View {
                     .listRowBackground(Color.clear)
                 }
             }
-            Section("Đặt chỗ nhà hàng") {
+            Section("Coupon / mã giảm giá") {
                 ForEach(state.reservations) { reservation in
                     Button {
                         state.route = .reservation(reservation)
@@ -69,7 +69,7 @@ struct EarningsView: View {
         }
         .overlay {
             if state.vouchers.isEmpty && state.reservations.isEmpty {
-                EmptyState(icon: "ticket", title: "Chưa có vé", message: "Voucher và đặt chỗ sẽ xuất hiện ở đây.")
+                EmptyState(icon: "ticket", title: "Chưa có voucher/vé", message: "Voucher, vé và coupon sẽ xuất hiện ở đây.")
             }
         }
     }
@@ -100,7 +100,7 @@ struct VoucherRow: View {
                 .frame(width: 58, height: 58)
                 .overlay(Image(systemName: "qrcode").font(.title2).foregroundStyle(TouristTheme.primary))
             VStack(alignment: .leading, spacing: 5) {
-                Text(voucher.serviceName ?? "Voucher S-Loco")
+                Text(voucher.serviceName ?? "\(voucher.productLabel) S-Loco")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(TouristTheme.text)
                     .lineLimit(2)

@@ -1,5 +1,13 @@
 import Foundation
 
+let productTypeCoupon = "coupon"
+let productTypeVoucher = "voucher"
+let productTypeTicket = "ticket"
+
+func productTypeLabel(_ productType: String) -> String {
+    productType == productTypeTicket ? "Vé" : (productType == productTypeCoupon ? "Coupon" : "Voucher")
+}
+
 struct TouristCategoryOption: Hashable {
     let value: String
     let label: String
@@ -136,13 +144,14 @@ struct ServiceCore: Decodable, Identifiable {
     let images: [String]?
     let durationMinutes: Int?
     let averageRating: String?
+    let productType: String?
     let fulfillmentType: String?
     let reservationDiscountPercent: String?
     let pricing: ServicePricingWire?
     enum CodingKeys: String, CodingKey {
         case id, name, description, images
         case originalPrice, discountPrice, discountPercent, durationMinutes, averageRating
-        case fulfillmentType, reservationDiscountPercent, pricing
+        case productType, fulfillmentType, reservationDiscountPercent, pricing
     }
 }
 
@@ -176,13 +185,17 @@ struct TouristService: Identifiable, Hashable {
     let price: Int
     let discountPercent: Int
     let appDiscountPercent: Int
+    let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: Int
     let rating: Double
     let durationMinutes: Int
     let imageURL: String?
 
-    var isReservation: Bool { fulfillmentType == "reservation" }
+    var isCoupon: Bool { productType == productTypeCoupon || fulfillmentType == "reservation" }
+    var isTicket: Bool { productType == productTypeTicket }
+    var isReservation: Bool { isCoupon }
+    var productLabel: String { productTypeLabel(productType) }
     var locationSummary: String? {
         if let distanceFromOriginKm {
             return String(format: "%.1f km", distanceFromOriginKm)
@@ -249,6 +262,8 @@ struct Voucher: Decodable, Identifiable, Hashable {
     let totalAmount: Int?
     let qrToken: String?
     let createdAt: String?
+    let productType: String
+    let artifactType: String
     init(
         id: String,
         status: String,
@@ -257,7 +272,9 @@ struct Voucher: Decodable, Identifiable, Hashable {
         quantity: Int? = nil,
         totalAmount: Int? = nil,
         qrToken: String? = nil,
-        createdAt: String? = nil
+        createdAt: String? = nil,
+        productType: String = productTypeVoucher,
+        artifactType: String = productTypeVoucher
     ) {
         self.id = id
         self.status = status
@@ -267,6 +284,8 @@ struct Voucher: Decodable, Identifiable, Hashable {
         self.totalAmount = totalAmount
         self.qrToken = qrToken
         self.createdAt = createdAt
+        self.productType = productType
+        self.artifactType = artifactType
     }
 
     enum CodingKeys: String, CodingKey {
@@ -280,6 +299,10 @@ struct Voucher: Decodable, Identifiable, Hashable {
         case qrToken = "qr_token"
         case qrTokenCamel = "qrToken"
         case createdAt = "created_at"
+        case productType = "product_type"
+        case productTypeCamel = "productType"
+        case artifactType = "artifact_type"
+        case artifactTypeCamel = "artifactType"
         case createdAtCamel = "createdAt"
     }
 
@@ -293,7 +316,12 @@ struct Voucher: Decodable, Identifiable, Hashable {
         totalAmount = container.decodeIntIfPresent(.totalAmount) ?? container.decodeIntIfPresent(.totalAmountCamel)
         qrToken = container.decodeStringIfPresent(.qrToken) ?? container.decodeStringIfPresent(.qrTokenCamel)
         createdAt = container.decodeStringIfPresent(.createdAt) ?? container.decodeStringIfPresent(.createdAtCamel)
+        artifactType = container.decodeStringIfPresent(.artifactType) ?? container.decodeStringIfPresent(.artifactTypeCamel) ?? productTypeVoucher
+        productType = container.decodeStringIfPresent(.productType) ?? container.decodeStringIfPresent(.productTypeCamel) ?? (artifactType == productTypeTicket ? productTypeTicket : productTypeVoucher)
     }
+
+    var isTicket: Bool { productType == productTypeTicket || artifactType == productTypeTicket }
+    var productLabel: String { isTicket ? "Vé" : "Voucher" }
 }
 
 struct VoucherWire: Decodable {

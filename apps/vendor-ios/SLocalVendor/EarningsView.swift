@@ -17,7 +17,7 @@ struct EarningsView: View {
                     ForEach(state.settlements) { settlement in
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Đối soát \(settlement.status)").font(.headline)
-                            Text("\(formatVnd(settlement.netAmount)) · \(settlement.voucherCount ?? 0) voucher")
+                            Text("\(formatVnd(settlement.netAmount)) · \(settlement.directionLabel) · \(settlement.voucherCount ?? 0) voucher/vé")
                                 .font(.subheadline)
                                 .foregroundStyle(VendorTheme.secondaryText)
                         }

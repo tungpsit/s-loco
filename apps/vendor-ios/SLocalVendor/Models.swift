@@ -1,5 +1,17 @@
 import Foundation
 
+let productTypeCoupon = "coupon"
+let productTypeVoucher = "voucher"
+let productTypeTicket = "ticket"
+
+func productTypeLabel(_ productType: String) -> String {
+    productType == productTypeTicket ? "Vé" : (productType == productTypeCoupon ? "Coupon" : "Voucher")
+}
+
+func fulfillmentTypeForProductType(_ productType: String) -> String {
+    productType == productTypeCoupon ? ServiceType.reservation : ServiceType.fixedPrice
+}
+
 struct ApiEnvelope<T: Decodable>: Decodable {
     let success: Bool
     let data: T?
@@ -155,6 +167,7 @@ struct VendorService: Decodable, Identifiable {
     let description: String?
     let originalPrice: Int
     let discountPrice: Int?
+    let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: String?
     let durationMinutes: Int?
@@ -173,6 +186,8 @@ struct VendorService: Decodable, Identifiable {
         case originalPriceSnake = "original_price"
         case discountPrice
         case discountPriceSnake = "discount_price"
+        case productType
+        case productTypeSnake = "product_type"
         case fulfillmentType
         case fulfillmentTypeSnake = "fulfillment_type"
         case reservationDiscountPercent
@@ -204,6 +219,9 @@ struct VendorService: Decodable, Identifiable {
         let decodedFulfillmentType = try container.decodeStringIfPresent(forKey: .fulfillmentType)
         let decodedFulfillmentTypeSnake = try container.decodeStringIfPresent(forKey: .fulfillmentTypeSnake)
         fulfillmentType = decodedFulfillmentType ?? decodedFulfillmentTypeSnake ?? ServiceType.fixedPrice
+        let decodedProductType = try container.decodeStringIfPresent(forKey: .productType)
+        let decodedProductTypeSnake = try container.decodeStringIfPresent(forKey: .productTypeSnake)
+        productType = decodedProductType ?? decodedProductTypeSnake ?? (fulfillmentType == ServiceType.reservation ? productTypeCoupon : productTypeVoucher)
         let decodedReservationDiscount = try container.decodeStringIfPresent(forKey: .reservationDiscountPercent)
         let decodedReservationDiscountSnake = try container.decodeStringIfPresent(forKey: .reservationDiscountPercentSnake)
         reservationDiscountPercent = decodedReservationDiscount ?? decodedReservationDiscountSnake
@@ -218,6 +236,9 @@ struct VendorService: Decodable, Identifiable {
         isActive = decodedIsActive ?? decodedIsActiveSnake ?? true
         images = (try? container.decodeIfPresent([String].self, forKey: .images)) ?? []
     }
+
+    var productLabel: String { productTypeLabel(productType) }
+    var isCoupon: Bool { productType == productTypeCoupon }
 }
 
 struct CreateServiceRequest: Encodable {
@@ -227,6 +248,7 @@ struct CreateServiceRequest: Encodable {
     let description: String?
     let originalPrice: String
     let discountPrice: String?
+    let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: String?
     let durationMinutes: Int?
@@ -240,6 +262,7 @@ struct CreateServiceRequest: Encodable {
         case description
         case originalPrice = "original_price"
         case discountPrice = "discount_price"
+        case productType = "product_type"
         case fulfillmentType = "fulfillment_type"
         case reservationDiscountPercent = "reservation_discount_percent"
         case durationMinutes = "duration_minutes"
@@ -254,6 +277,7 @@ struct UpdateServiceRequest: Encodable {
     let description: String?
     let originalPrice: String
     let discountPrice: String?
+    let productType: String
     let fulfillmentType: String
     let reservationDiscountPercent: String?
     let durationMinutes: Int?
@@ -267,6 +291,7 @@ struct UpdateServiceRequest: Encodable {
         case description
         case originalPrice = "original_price"
         case discountPrice = "discount_price"
+        case productType = "product_type"
         case fulfillmentType = "fulfillment_type"
         case reservationDiscountPercent = "reservation_discount_percent"
         case durationMinutes = "duration_minutes"
@@ -382,6 +407,8 @@ struct VoucherPreview: Decodable {
     let status: String
     let canRedeem: Bool
     let expiresAt: String?
+    let productType: String?
+    let artifactType: String?
 
     enum CodingKeys: String, CodingKey {
         case voucherId = "voucher_id"
@@ -389,6 +416,12 @@ struct VoucherPreview: Decodable {
         case status
         case canRedeem = "can_redeem"
         case expiresAt = "expires_at"
+        case productType = "product_type"
+        case artifactType = "artifact_type"
+    }
+
+    var productLabel: String {
+        productTypeLabel(productType ?? (artifactType == productTypeTicket ? productTypeTicket : productTypeVoucher))
     }
 }
 
@@ -401,6 +434,8 @@ struct Voucher: Decodable, Identifiable {
     let createdAt: String?
     let redeemedAt: String?
     let completedAt: String?
+    let productType: String?
+    let artifactType: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -411,7 +446,12 @@ struct Voucher: Decodable, Identifiable {
         case createdAt = "created_at"
         case redeemedAt = "redeemed_at"
         case completedAt = "completed_at"
+        case productType = "product_type"
+        case artifactType = "artifact_type"
     }
+
+    var isTicket: Bool { productType == productTypeTicket || artifactType == productTypeTicket }
+    var productLabel: String { isTicket ? "Vé" : "Voucher" }
 }
 
 struct Settlement: Decodable, Identifiable {
@@ -425,6 +465,7 @@ struct Settlement: Decodable, Identifiable {
     let periodEnd: String?
     let createdAt: String?
     let disbursedAt: String?
+    let direction: String
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -445,6 +486,8 @@ struct Settlement: Decodable, Identifiable {
         case createdAtSnake = "created_at"
         case disbursedAt
         case disbursedAtSnake = "disbursed_at"
+        case direction
+        case directionSnake = "settlement_direction"
     }
 
     init(from decoder: Decoder) throws {
@@ -467,6 +510,13 @@ struct Settlement: Decodable, Identifiable {
             ?? container.decodeStringIfPresent(forKey: .createdAtSnake)
         disbursedAt = try container.decodeStringIfPresent(forKey: .disbursedAt)
             ?? container.decodeStringIfPresent(forKey: .disbursedAtSnake)
+        direction = try container.decodeStringIfPresent(forKey: .direction)
+            ?? container.decodeStringIfPresent(forKey: .directionSnake)
+            ?? "sloco_pays_vendor"
+    }
+
+    var directionLabel: String {
+        direction == "vendor_pays_sloco" ? "Vendor trả S-Loco" : "S-Loco trả vendor"
     }
 }
 

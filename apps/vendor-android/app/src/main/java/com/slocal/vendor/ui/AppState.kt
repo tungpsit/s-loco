@@ -9,8 +9,8 @@ import vn.sloco.vendor.data.CreateServiceRequest
 import vn.sloco.vendor.data.Dashboard
 import vn.sloco.vendor.data.ReservationWire
 import vn.sloco.vendor.data.Settlement
-import vn.sloco.vendor.data.SERVICE_TYPE_FIXED_PRICE
-import vn.sloco.vendor.data.SERVICE_TYPE_RESERVATION
+import vn.sloco.vendor.data.PRODUCT_TYPE_COUPON
+import vn.sloco.vendor.data.fulfillmentTypeForProductType
 import vn.sloco.vendor.data.SessionExpiredException
 import vn.sloco.vendor.data.ServiceCategory
 import vn.sloco.vendor.data.TokenStore
@@ -117,7 +117,7 @@ class AppState(context: Context) {
         name: String,
         categoryId: String,
         description: String,
-        fulfillmentType: String,
+        productType: String,
         originalPrice: String,
         discountPrice: String,
         reservationDiscountPercent: String,
@@ -129,17 +129,18 @@ class AppState(context: Context) {
         val currentVendor = vendor ?: api.vendorProfile().also { vendor = it }
         val cleanedName = name.trim()
         val cleanedCategoryId = categoryId.trim()
-        val isReservation = fulfillmentType == SERVICE_TYPE_RESERVATION
-        val cleanedPrice = originalPrice.onlyDigits().ifBlank { if (isReservation) "0" else "" }
+        val isCoupon = productType == PRODUCT_TYPE_COUPON
+        val fulfillmentType = fulfillmentTypeForProductType(productType)
+        val cleanedPrice = originalPrice.onlyDigits().ifBlank { if (isCoupon) "0" else "" }
         val cleanedDiscount = discountPrice.onlyDigits()
         val cleanedReservationDiscount = reservationDiscountPercent.onlyPercent()
         require(cleanedName.length >= 2) { "Vui lòng nhập tên dịch vụ." }
         require(cleanedCategoryId.isNotBlank()) { "Vui lòng chọn danh mục." }
         require(cleanedPrice.isNotBlank()) { "Vui lòng nhập giá gốc." }
-        if (isReservation) {
-            require(cleanedReservationDiscount.isNotBlank()) { "Vui lòng nhập % ưu đãi đặt bàn." }
+        if (isCoupon) {
+            require(cleanedReservationDiscount.isNotBlank()) { "Vui lòng nhập % ưu đãi coupon." }
         }
-        if (!isReservation && cleanedDiscount.isNotBlank()) {
+        if (!isCoupon && cleanedDiscount.isNotBlank()) {
             require(cleanedDiscount.toLong() <= cleanedPrice.toLong()) { "Giá khuyến mãi không được lớn hơn giá gốc." }
         }
         val duration = durationMinutes.onlyDigits().toIntOrNull()
@@ -160,9 +161,10 @@ class AppState(context: Context) {
                     categoryId = cleanedCategoryId,
                     description = description.trim().takeIf { it.isNotBlank() },
                     originalPrice = cleanedPrice,
-                    discountPrice = cleanedDiscount.takeIf { !isReservation && it.isNotBlank() },
+                    discountPrice = cleanedDiscount.takeIf { !isCoupon && it.isNotBlank() },
+                    productType = productType,
                     fulfillmentType = fulfillmentType,
-                    reservationDiscountPercent = cleanedReservationDiscount.takeIf { isReservation },
+                    reservationDiscountPercent = cleanedReservationDiscount.takeIf { isCoupon },
                     durationMinutes = duration,
                     maxQuantityPerOrder = maxQuantity,
                     images = images,
@@ -177,9 +179,10 @@ class AppState(context: Context) {
                     categoryId = cleanedCategoryId,
                     description = description.trim().takeIf { it.isNotBlank() },
                     originalPrice = cleanedPrice,
-                    discountPrice = cleanedDiscount.takeIf { !isReservation && it.isNotBlank() },
+                    discountPrice = cleanedDiscount.takeIf { !isCoupon && it.isNotBlank() },
+                    productType = productType,
                     fulfillmentType = fulfillmentType,
-                    reservationDiscountPercent = cleanedReservationDiscount.takeIf { isReservation },
+                    reservationDiscountPercent = cleanedReservationDiscount.takeIf { isCoupon },
                     durationMinutes = duration,
                     maxQuantityPerOrder = maxQuantity,
                     isActive = isActive,

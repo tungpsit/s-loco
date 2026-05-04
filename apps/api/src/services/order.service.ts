@@ -4,6 +4,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import { getDb } from '../db'
 import { notifyOrderPaid } from './notification.service'
 import { calculateServicePricing } from './pricing'
+import { artifactTypeForProductType, normalizeProductType } from './product-types'
 import { generateQrToken, generateVoucherCode } from './voucher.service'
 
 /** Non-null assertion for Drizzle scalar selects */
@@ -40,6 +41,16 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         'SERVICE_NOT_FOUND',
         `Dịch vụ ${item.service_id} không tồn tại hoặc đã ngừng hoạt động.`,
       )
+    const productType = normalizeProductType({
+      productType: svc.service.productType,
+      fulfillmentType: svc.service.fulfillmentType,
+    })
+    if (productType === 'coupon') {
+      throw new OrderError(
+        'COUPON_NOT_PREPAID',
+        `"${svc.service.name}" là mã giảm giá, vui lòng nhận mã thay vì thanh toán đơn hàng.`,
+      )
+    }
     if (item.quantity > svc.service.maxQuantityPerOrder) {
       throw new OrderError(
         'QUANTITY_EXCEEDED',
@@ -58,11 +69,20 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     unitPrice: string
     totalPrice: string
     serviceSnapshot: object
+    artifactType: 'voucher' | 'ticket'
   }> = []
 
   for (const item of input.items) {
     const row = serviceMap.get(item.service_id)!
     const svc = row.service
+    const productType = normalizeProductType({
+      productType: svc.productType,
+      fulfillmentType: svc.fulfillmentType,
+    })
+    const artifactType = artifactTypeForProductType(productType)
+    if (!artifactType) {
+      throw new OrderError('COUPON_NOT_PREPAID', `"${svc.name}" là mã giảm giá, không thể thanh toán trước.`)
+    }
     const pricing = calculateServicePricing({
       originalPrice: svc.originalPrice,
       discountPrice: svc.discountPrice,
@@ -86,9 +106,12 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
         name: svc.name,
         originalPrice: svc.originalPrice,
         discountPrice: svc.discountPrice,
+        productType,
+        artifactType,
         pricing,
         images: svc.images,
       },
+      artifactType,
     })
   }
 
@@ -131,6 +154,9 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
     for (const orderItem of createdItems) {
+      const sourceItem = itemsData.find(
+        (item) => item.serviceId === orderItem.serviceId && item.vendorId === orderItem.vendorId,
+      )
       for (let i = 0; i < orderItem.quantity; i++) {
         const code = generateVoucherCode()
         const [voucher] = await tx
@@ -141,6 +167,7 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
             vendorId: orderItem.vendorId,
             serviceId: orderItem.serviceId,
             code,
+            artifactType: sourceItem?.artifactType ?? 'voucher',
             status: 'created',
             expiresAt,
           })

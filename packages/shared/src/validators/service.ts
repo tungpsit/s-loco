@@ -1,6 +1,23 @@
 import { z } from 'zod'
 import { latitudeNumberSchema, longitudeNumberSchema } from './common'
 
+const productTypeSchema = z.enum(['coupon', 'voucher', 'ticket'])
+const fulfillmentTypeSchema = z.enum(['fixed_price', 'reservation'])
+
+function fulfillmentTypeForProductType(productType: z.infer<typeof productTypeSchema>) {
+  return productType === 'coupon' ? 'reservation' : 'fixed_price'
+}
+
+function withProductTypeDefaults<T extends { product_type?: z.infer<typeof productTypeSchema>; fulfillment_type?: z.infer<typeof fulfillmentTypeSchema> }>(data: T): T {
+  if (data.product_type) {
+    return { ...data, fulfillment_type: fulfillmentTypeForProductType(data.product_type) }
+  }
+  if (data.fulfillment_type) {
+    return { ...data, product_type: data.fulfillment_type === 'reservation' ? 'coupon' : 'voucher' }
+  }
+  return data
+}
+
 // ─── Create Service ────────────────────────────────────
 export const createServiceSchema = z.object({
   name: z.string().min(2).max(200),
@@ -20,7 +37,8 @@ export const createServiceSchema = z.object({
     .string()
     .regex(/^\d+(\.\d{1,2})?$/)
     .optional(),
-  fulfillment_type: z.enum(['fixed_price', 'reservation']).default('fixed_price'),
+  product_type: productTypeSchema.optional(),
+  fulfillment_type: fulfillmentTypeSchema.default('fixed_price'),
   reservation_discount_percent: z
     .string()
     .regex(/^\d+(\.\d{1,2})?$/)
@@ -29,7 +47,7 @@ export const createServiceSchema = z.object({
   max_quantity_per_order: z.coerce.number().int().min(1).max(100).optional(),
   images: z.array(z.string().url()).max(10).optional(),
   options: z.record(z.unknown()).optional(),
-})
+}).transform(withProductTypeDefaults)
 export type CreateServiceInput = z.infer<typeof createServiceSchema>
 
 // ─── Update Service ────────────────────────────────────
@@ -51,7 +69,8 @@ export const updateServiceSchema = z.object({
     .regex(/^\d+(\.\d{1,2})?$/)
     .nullable()
     .optional(),
-  fulfillment_type: z.enum(['fixed_price', 'reservation']).optional(),
+  product_type: productTypeSchema.optional(),
+  fulfillment_type: fulfillmentTypeSchema.optional(),
   reservation_discount_percent: z
     .string()
     .regex(/^\d+(\.\d{1,2})?$/)
@@ -63,7 +82,7 @@ export const updateServiceSchema = z.object({
   options: z.record(z.unknown()).optional(),
   is_active: z.boolean().optional(),
   sort_order: z.coerce.number().int().min(0).optional(),
-})
+}).transform(withProductTypeDefaults)
 export type UpdateServiceInput = z.infer<typeof updateServiceSchema>
 
 // ─── Service Filters ───────────────────────────────────

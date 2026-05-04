@@ -145,6 +145,8 @@ data class VendorService(
     @SerialName("discountPrice") val discountPrice: Long? = null,
     @Serializable(with = NullableLongSerializer::class)
     @SerialName("discount_price") val discountPriceSnake: Long? = null,
+    @SerialName("productType") val productType: String? = null,
+    @SerialName("product_type") val productTypeSnake: String? = null,
     @SerialName("fulfillmentType") val fulfillmentType: String? = null,
     @SerialName("fulfillment_type") val fulfillmentTypeSnake: String? = null,
     @SerialName("reservationDiscountPercent") val reservationDiscountPercent: String? = null,
@@ -165,6 +167,10 @@ data class VendorService(
         get() = discountPrice ?: discountPriceSnake
     val fulfillmentTypeValue: String
         get() = fulfillmentType ?: fulfillmentTypeSnake ?: SERVICE_TYPE_FIXED_PRICE
+    val productTypeValue: String
+        get() = productType ?: productTypeSnake ?: if (fulfillmentTypeValue == SERVICE_TYPE_RESERVATION) PRODUCT_TYPE_COUPON else PRODUCT_TYPE_VOUCHER
+    val productLabel: String
+        get() = productTypeLabel(productTypeValue)
     val reservationDiscountPercentValue: String
         get() = reservationDiscountPercent ?: reservationDiscountPercentSnake ?: ""
     val durationMinutesValue: Int?
@@ -183,6 +189,7 @@ data class CreateServiceRequest(
     val description: String? = null,
     @SerialName("original_price") val originalPrice: String,
     @SerialName("discount_price") val discountPrice: String? = null,
+    @SerialName("product_type") val productType: String = PRODUCT_TYPE_VOUCHER,
     @SerialName("fulfillment_type") val fulfillmentType: String = SERVICE_TYPE_FIXED_PRICE,
     @SerialName("reservation_discount_percent") val reservationDiscountPercent: String? = null,
     @SerialName("duration_minutes") val durationMinutes: Int? = null,
@@ -197,6 +204,7 @@ data class UpdateServiceRequest(
     val description: String? = null,
     @SerialName("original_price") val originalPrice: String,
     @SerialName("discount_price") val discountPrice: String? = null,
+    @SerialName("product_type") val productType: String? = null,
     @SerialName("fulfillment_type") val fulfillmentType: String? = null,
     @SerialName("reservation_discount_percent") val reservationDiscountPercent: String? = null,
     @SerialName("duration_minutes") val durationMinutes: Int? = null,
@@ -207,6 +215,18 @@ data class UpdateServiceRequest(
 
 const val SERVICE_TYPE_FIXED_PRICE = "fixed_price"
 const val SERVICE_TYPE_RESERVATION = "reservation"
+const val PRODUCT_TYPE_COUPON = "coupon"
+const val PRODUCT_TYPE_VOUCHER = "voucher"
+const val PRODUCT_TYPE_TICKET = "ticket"
+
+fun productTypeLabel(productType: String): String = when (productType) {
+    PRODUCT_TYPE_COUPON -> "Coupon"
+    PRODUCT_TYPE_TICKET -> "Vé"
+    else -> "Voucher"
+}
+
+fun fulfillmentTypeForProductType(productType: String): String =
+    if (productType == PRODUCT_TYPE_COUPON) SERVICE_TYPE_RESERVATION else SERVICE_TYPE_FIXED_PRICE
 
 @Serializable
 data class Dashboard(
@@ -261,7 +281,12 @@ data class VoucherPreview(
     val status: String,
     @SerialName("can_redeem") val canRedeem: Boolean,
     @SerialName("expires_at") val expiresAt: String? = null,
-)
+    @SerialName("product_type") val productType: String? = null,
+    @SerialName("artifact_type") val artifactType: String? = null,
+) {
+    val productLabel: String
+        get() = productTypeLabel(productType ?: if (artifactType == PRODUCT_TYPE_TICKET) PRODUCT_TYPE_TICKET else PRODUCT_TYPE_VOUCHER)
+}
 
 @Serializable
 data class Voucher(
@@ -273,7 +298,12 @@ data class Voucher(
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("redeemed_at") val redeemedAt: String? = null,
     @SerialName("completed_at") val completedAt: String? = null,
-)
+    @SerialName("product_type") val productType: String? = null,
+    @SerialName("artifact_type") val artifactType: String? = null,
+) {
+    val productLabel: String
+        get() = productTypeLabel(productType ?: if (artifactType == PRODUCT_TYPE_TICKET) PRODUCT_TYPE_TICKET else PRODUCT_TYPE_VOUCHER)
+}
 
 @Serializable
 data class Settlement(
@@ -291,6 +321,8 @@ data class Settlement(
     @SerialName("net_amount") val netAmount: Long? = null,
     @Serializable(with = NullableLongSerializer::class)
     @SerialName("netAmount") val netAmountCamel: Long? = null,
+    val direction: String? = null,
+    @SerialName("settlement_direction") val directionSnake: String? = null,
     @SerialName("voucher_count") val voucherCount: Int? = null,
     @SerialName("voucherCount") val voucherCountCamel: Int? = null,
     @SerialName("period_start") val periodStart: String? = null,
@@ -305,6 +337,10 @@ data class Settlement(
         get() = netAmount ?: netAmountCamel
     val voucherCountValue: Int?
         get() = voucherCount ?: voucherCountCamel
+    val directionValue: String
+        get() = direction ?: directionSnake ?: "sloco_pays_vendor"
+    val directionLabel: String
+        get() = if (directionValue == "vendor_pays_sloco") "Vendor trả S-Loco" else "S-Loco trả vendor"
 }
 
 @Serializable

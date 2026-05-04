@@ -5,6 +5,7 @@ import { vendors } from './vendors'
 
 // ─── Enums ─────────────────────────────────────────────
 export const settlementStatusEnum = pgEnum('settlement_status', ['pending', 'approved', 'disbursed', 'rejected'])
+export const settlementDirectionEnum = pgEnum('settlement_direction', ['sloco_pays_vendor', 'vendor_pays_sloco'])
 
 // ─── Settlements ───────────────────────────────────────
 export const settlements = pgTable('settlements', {
@@ -15,6 +16,7 @@ export const settlements = pgTable('settlements', {
   totalAmount: decimal('total_amount', { precision: 12, scale: 2 }).notNull(),
   commissionAmount: decimal('commission_amount', { precision: 12, scale: 2 }).notNull(),
   netAmount: decimal('net_amount', { precision: 12, scale: 2 }).notNull(),
+  direction: settlementDirectionEnum('direction').notNull().default('sloco_pays_vendor'),
   voucherCount: integer('voucher_count').notNull().default(0),
   status: settlementStatusEnum('status').notNull().default('pending'),
   approvedBy: uuid('approved_by').references(() => users.id),

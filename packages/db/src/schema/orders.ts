@@ -5,6 +5,7 @@ import { combos, services, vendors } from './vendors'
 // ─── Enums ─────────────────────────────────────────────
 export const orderStatusEnum = pgEnum('order_status', ['created', 'paid', 'partially_refunded', 'refunded', 'cancelled'])
 export const voucherStatusEnum = pgEnum('voucher_status', ['created', 'paid', 'redeemed', 'completed', 'settled', 'refunded', 'expired', 'cancelled'])
+export const voucherArtifactTypeEnum = pgEnum('voucher_artifact_type', ['voucher', 'ticket'])
 export const paymentGatewayEnum = pgEnum('payment_gateway', ['vnpay', 'momo', 'sepay'])
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success', 'failed', 'refunded'])
 
@@ -49,6 +50,7 @@ export const vouchers = pgTable('vouchers', {
   vendorId: uuid('vendor_id').notNull().references(() => vendors.id),
   serviceId: uuid('service_id').notNull().references(() => services.id),
   code: varchar('code', { length: 20 }).notNull().unique(),
+  artifactType: voucherArtifactTypeEnum('artifact_type').notNull().default('voucher'),
   qrToken: text('qr_token'),
   giftToken: text('gift_token').unique(),
   status: voucherStatusEnum('status').notNull().default('created'),

@@ -131,7 +131,9 @@ final class APIClient {
                     quantity: voucher.quantity ?? wire.orderItem?.quantity ?? 1,
                     totalAmount: voucher.totalAmount ?? wire.orderItem?.totalPrice,
                     qrToken: voucher.qrToken,
-                    createdAt: voucher.createdAt
+                    createdAt: voucher.createdAt,
+                    productType: voucher.productType,
+                    artifactType: voucher.artifactType
                 )
             }
             return Voucher(
@@ -142,7 +144,9 @@ final class APIClient {
                 quantity: wire.orderItem?.quantity ?? 1,
                 totalAmount: wire.orderItem?.totalPrice,
                 qrToken: nil,
-                createdAt: nil
+                createdAt: nil,
+                productType: productTypeVoucher,
+                artifactType: productTypeVoucher
             )
         }
     }
@@ -255,6 +259,7 @@ final class APIClient {
             price: price,
             discountPercent: discount,
             appDiscountPercent: appDiscount,
+            productType: service.productType ?? (service.fulfillmentType == "reservation" ? productTypeCoupon : productTypeVoucher),
             fulfillmentType: service.fulfillmentType ?? "fixed_price",
             reservationDiscountPercent: appDiscount,
             rating: service.averageRating.doubleValue,

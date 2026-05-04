@@ -67,8 +67,9 @@ import androidx.core.content.ContextCompat
 import vn.sloco.vendor.data.Settlement
 import vn.sloco.vendor.data.ReservationWire
 import vn.sloco.vendor.data.ReservationStatusTone
-import vn.sloco.vendor.data.SERVICE_TYPE_FIXED_PRICE
-import vn.sloco.vendor.data.SERVICE_TYPE_RESERVATION
+import vn.sloco.vendor.data.PRODUCT_TYPE_COUPON
+import vn.sloco.vendor.data.PRODUCT_TYPE_TICKET
+import vn.sloco.vendor.data.PRODUCT_TYPE_VOUCHER
 import vn.sloco.vendor.data.ServiceCategory
 import vn.sloco.vendor.data.VendorProfile
 import vn.sloco.vendor.data.VendorService
@@ -353,7 +354,7 @@ private fun ServiceCard(service: VendorService, category: ServiceCategory?, onEd
                     Text(category?.name ?: "Chưa rõ danh mục", color = Color(0xFF3B4460), fontSize = 13.sp)
                 }
                 Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ServicePill(if (service.fulfillmentTypeValue == SERVICE_TYPE_RESERVATION) "Đặt bàn" else "Giá trước", Primary)
+                    ServicePill(service.productLabel, Primary)
                     ServicePill(
                         if (service.activeValue) "Đang bán" else "Tạm ẩn",
                         if (service.activeValue) Success else Warning,
@@ -364,8 +365,8 @@ private fun ServiceCard(service: VendorService, category: ServiceCategory?, onEd
                 Text(service.description, color = Color(0xFF3B4460), fontSize = 13.sp)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (service.fulfillmentTypeValue == SERVICE_TYPE_RESERVATION) {
-                    Text("Ưu đãi đặt bàn ${service.reservationDiscountPercentValue.ifBlank { "0" }}%", color = Warning, fontWeight = FontWeight.Bold)
+                if (service.productTypeValue == PRODUCT_TYPE_COUPON) {
+                    Text("Coupon giảm ${service.reservationDiscountPercentValue.ifBlank { "0" }}% trên hóa đơn", color = Warning, fontWeight = FontWeight.Bold)
                 } else {
                     Text(formatVnd(service.originalPriceValue), color = Primary, fontWeight = FontWeight.Bold)
                     service.discountPriceValue?.let {
@@ -402,7 +403,7 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
         mutableStateOf(service?.categoryIdValue?.takeIf { it.isNotBlank() } ?: categories.firstOrNull()?.id.orEmpty())
     }
     var description by remember(service?.id) { mutableStateOf(service?.description.orEmpty()) }
-    var fulfillmentType by remember(service?.id) { mutableStateOf(service?.fulfillmentTypeValue ?: SERVICE_TYPE_FIXED_PRICE) }
+    var productType by remember(service?.id) { mutableStateOf(service?.productTypeValue ?: PRODUCT_TYPE_VOUCHER) }
     var originalPrice by remember(service?.id) { mutableStateOf(service?.originalPriceValue?.takeIf { it > 0 }?.toString().orEmpty()) }
     var discountPrice by remember(service?.id) { mutableStateOf(service?.discountPriceValue?.toString().orEmpty()) }
     var reservationDiscountPercent by remember(service?.id) { mutableStateOf(service?.reservationDiscountPercentValue.orEmpty()) }
@@ -451,38 +452,49 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                         enabled = !state.isLoading,
                     )
                     Text("Loại sản phẩm", fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                        OutlinedButton(
-                            onClick = { fulfillmentType = SERVICE_TYPE_FIXED_PRICE },
-                            enabled = !state.isLoading,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text(if (fulfillmentType == SERVICE_TYPE_FIXED_PRICE) "✓ Giá trước" else "Giá trước")
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                            OutlinedButton(
+                                onClick = { productType = PRODUCT_TYPE_VOUCHER },
+                                enabled = !state.isLoading,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(if (productType == PRODUCT_TYPE_VOUCHER) "✓ Voucher" else "Voucher")
+                            }
+                            OutlinedButton(
+                                onClick = { productType = PRODUCT_TYPE_TICKET },
+                                enabled = !state.isLoading,
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text(if (productType == PRODUCT_TYPE_TICKET) "✓ Vé" else "Vé")
+                            }
                         }
                         OutlinedButton(
-                            onClick = { fulfillmentType = SERVICE_TYPE_RESERVATION },
+                            onClick = { productType = PRODUCT_TYPE_COUPON },
                             enabled = !state.isLoading,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text(if (fulfillmentType == SERVICE_TYPE_RESERVATION) "✓ Đặt bàn" else "Đặt bàn")
+                            Text(if (productType == PRODUCT_TYPE_COUPON) "✓ Coupon" else "Coupon")
                         }
                     }
-                    if (fulfillmentType == SERVICE_TYPE_RESERVATION) {
-                        Text("Khách gửi yêu cầu đặt bàn, vendor xác nhận rồi hệ thống phát hành voucher iPos theo % ưu đãi.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                    if (productType == PRODUCT_TYPE_COUPON) {
+                        Text("Coupon: tourist không trả trước; vendor thu tại quầy và trả hoa hồng cho S-Loco sau khi dùng.", color = Color(0xFF3B4460), fontSize = 12.sp)
+                    } else if (productType == PRODUCT_TYPE_TICKET) {
+                        Text("Vé: tourist trả trước, QR scan xong được hoàn tất ngay để đối soát S-Loco trả vendor.", color = Color(0xFF3B4460), fontSize = 12.sp)
                     }
                     OutlinedTextField(
                         value = originalPrice,
                         onValueChange = { originalPrice = it },
-                        label = { Text(if (fulfillmentType == SERVICE_TYPE_RESERVATION) "Giá tham chiếu" else "Giá gốc *") },
+                        label = { Text(if (productType == PRODUCT_TYPE_COUPON) "Giá tham chiếu" else "Giá gốc *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !state.isLoading,
                     )
-                    if (fulfillmentType == SERVICE_TYPE_RESERVATION) {
+                    if (productType == PRODUCT_TYPE_COUPON) {
                         OutlinedTextField(
                             value = reservationDiscountPercent,
                             onValueChange = { reservationDiscountPercent = it },
-                            label = { Text("Ưu đãi đặt bàn (%) *") },
+                            label = { Text("Ưu đãi coupon (%) *") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !state.isLoading,
@@ -539,7 +551,7 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                                     name = name,
                                     categoryId = categoryId,
                                     description = description,
-                                    fulfillmentType = fulfillmentType,
+                                    productType = productType,
                                     originalPrice = originalPrice,
                                     discountPrice = discountPrice,
                                     reservationDiscountPercent = reservationDiscountPercent,
@@ -553,8 +565,8 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                         enabled = !state.isLoading &&
                             name.isNotBlank() &&
                             categoryId.isNotBlank() &&
-                            (fulfillmentType == SERVICE_TYPE_RESERVATION || originalPrice.isNotBlank()) &&
-                            (fulfillmentType == SERVICE_TYPE_FIXED_PRICE || reservationDiscountPercent.isNotBlank()),
+                            (productType == PRODUCT_TYPE_COUPON || originalPrice.isNotBlank()) &&
+                            (productType != PRODUCT_TYPE_COUPON || reservationDiscountPercent.isNotBlank()),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(if (service == null) "Thêm dịch vụ" else "Lưu thay đổi")
@@ -1119,7 +1131,7 @@ private fun StatCard(title: String, value: String, modifier: Modifier, color: Co
 @Composable
 private fun VoucherCard(voucher: Voucher) {
     InfoCard(
-        title = voucher.serviceName ?: voucher.id,
+        title = "${voucher.productLabel}: ${voucher.serviceName ?: voucher.id}",
         body = "${voucher.customerName ?: "Khách hàng"} · ${voucher.status} · ${formatVnd(voucher.finalAmount)}",
     )
 }
@@ -1182,7 +1194,7 @@ private fun ReservationCard(state: AppState, item: ReservationWire) {
 private fun SettlementCard(settlement: Settlement) {
     InfoCard(
         title = "Đối soát ${settlement.status}",
-        body = "${formatVnd(settlement.netAmountValue)} · ${settlement.voucherCountValue ?: 0} voucher",
+        body = "${settlement.directionLabel} · ${formatVnd(settlement.netAmountValue)} · ${settlement.voucherCountValue ?: 0} voucher/vé",
     )
 }
 

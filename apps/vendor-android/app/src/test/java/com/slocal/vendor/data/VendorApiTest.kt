@@ -118,6 +118,7 @@ class VendorApiTest {
         assertEquals(350_000L, decoded.originalPriceValue)
         assertEquals(299_000L, decoded.discountPriceValue)
         assertEquals("reservation", decoded.fulfillmentTypeValue)
+        assertEquals(PRODUCT_TYPE_COUPON, decoded.productTypeValue)
         assertEquals("10.00", decoded.reservationDiscountPercentValue)
         assertEquals(90, decoded.durationMinutesValue)
         assertEquals(6, decoded.maxQuantityPerOrderValue)
@@ -134,6 +135,7 @@ class VendorApiTest {
                 categoryId = "c1",
                 originalPrice = "350000",
                 discountPrice = "299000",
+                productType = PRODUCT_TYPE_TICKET,
                 fulfillmentType = SERVICE_TYPE_FIXED_PRICE,
                 durationMinutes = 90,
                 maxQuantityPerOrder = 6,
@@ -142,7 +144,7 @@ class VendorApiTest {
         )
 
         assertEquals(
-            """{"name":"Buffet hải sản","slug":"buffet-hai-san","category_id":"c1","original_price":"350000","discount_price":"299000","duration_minutes":90,"max_quantity_per_order":6,"images":["https://example.com/a.jpg"]}""",
+            """{"name":"Buffet hải sản","slug":"buffet-hai-san","category_id":"c1","original_price":"350000","discount_price":"299000","product_type":"ticket","duration_minutes":90,"max_quantity_per_order":6,"images":["https://example.com/a.jpg"]}""",
             encoded,
         )
     }
@@ -156,15 +158,33 @@ class VendorApiTest {
                 slug = "dat-ban-hai-san",
                 categoryId = "c1",
                 originalPrice = "0",
+                productType = PRODUCT_TYPE_COUPON,
                 fulfillmentType = SERVICE_TYPE_RESERVATION,
                 reservationDiscountPercent = "10",
             ),
         )
 
         assertEquals(
-            """{"name":"Đặt bàn hải sản","slug":"dat-ban-hai-san","category_id":"c1","original_price":"0","fulfillment_type":"reservation","reservation_discount_percent":"10"}""",
+            """{"name":"Đặt bàn hải sản","slug":"dat-ban-hai-san","category_id":"c1","original_price":"0","product_type":"coupon","fulfillment_type":"reservation","reservation_discount_percent":"10"}""",
             encoded,
         )
+    }
+
+    @Test
+    fun settlementDecodesPaymentDirection() {
+        val raw = """
+            {
+              "id": "st1",
+              "status": "pending",
+              "net_amount": "240000.00",
+              "direction": "vendor_pays_sloco",
+              "voucher_count": 2
+            }
+        """.trimIndent()
+
+        val decoded = json.decodeFromString(Settlement.serializer(), raw)
+
+        assertEquals("vendor_pays_sloco", decoded.directionValue)
     }
 
     @Test

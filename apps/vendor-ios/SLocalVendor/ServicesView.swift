@@ -68,7 +68,7 @@ private struct ServiceRow: View {
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 6) {
-                    Text(service.fulfillmentType == ServiceType.reservation ? "Đặt bàn" : "Giá trước")
+                    Text(service.productLabel)
                         .font(.caption.weight(.bold))
                         .foregroundStyle(VendorTheme.primary)
                     Text(service.isActive ? "Đang bán" : "Tạm ẩn")
@@ -83,8 +83,8 @@ private struct ServiceRow: View {
                     .lineLimit(2)
             }
             HStack(spacing: 10) {
-                if service.fulfillmentType == ServiceType.reservation {
-                    Text("Ưu đãi đặt bàn \(service.reservationDiscountPercent ?? "0")%")
+                if service.isCoupon {
+                    Text("Coupon giảm \(service.reservationDiscountPercent ?? "0")% trên hóa đơn")
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(VendorTheme.warning)
                 } else {
@@ -110,7 +110,7 @@ private struct ServiceEditorView: View {
     @State private var name = ""
     @State private var categoryId = ""
     @State private var description = ""
-    @State private var fulfillmentType = ServiceType.fixedPrice
+    @State private var productType = productTypeVoucher
     @State private var originalPrice = ""
     @State private var discountPrice = ""
     @State private var reservationDiscountPercent = ""
@@ -134,24 +134,29 @@ private struct ServiceEditorView: View {
             }
 
             Section("Loại sản phẩm") {
-                Picker("Loại", selection: $fulfillmentType) {
-                    Text("Có giá trước").tag(ServiceType.fixedPrice)
-                    Text("Đặt bàn").tag(ServiceType.reservation)
+                Picker("Loại", selection: $productType) {
+                    Text("Voucher").tag(productTypeVoucher)
+                    Text("Vé").tag(productTypeTicket)
+                    Text("Coupon").tag(productTypeCoupon)
                 }
                 .pickerStyle(.segmented)
 
-                if fulfillmentType == ServiceType.reservation {
-                    Text("Khách gửi yêu cầu đặt bàn, vendor xác nhận rồi hệ thống phát hành voucher iPos theo % ưu đãi.")
+                if productType == productTypeCoupon {
+                    Text("Coupon: tourist không trả trước; vendor thu tại quầy và trả hoa hồng cho S-Loco sau khi dùng.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else if productType == productTypeTicket {
+                    Text("Vé: tourist trả trước, QR scan xong được hoàn tất ngay để đối soát S-Loco trả vendor.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
             }
 
             Section("Giá và vận hành") {
-                TextField(fulfillmentType == ServiceType.reservation ? "Giá tham chiếu" : "Giá gốc", text: $originalPrice)
+                TextField(productType == productTypeCoupon ? "Giá tham chiếu" : "Giá gốc", text: $originalPrice)
                     .keyboardType(.numberPad)
-                if fulfillmentType == ServiceType.reservation {
-                    TextField("Ưu đãi đặt bàn (%)", text: $reservationDiscountPercent)
+                if productType == productTypeCoupon {
+                    TextField("Ưu đãi coupon (%)", text: $reservationDiscountPercent)
                         .keyboardType(.decimalPad)
                 } else {
                     TextField("Giá khuyến mãi", text: $discountPrice)
@@ -181,7 +186,7 @@ private struct ServiceEditorView: View {
                             name: name,
                             categoryId: categoryId,
                             description: description,
-                            fulfillmentType: fulfillmentType,
+                            productType: productType,
                             originalPrice: originalPrice,
                             discountPrice: discountPrice,
                             reservationDiscountPercent: reservationDiscountPercent,
@@ -196,8 +201,8 @@ private struct ServiceEditorView: View {
                     state.isLoading ||
                         name.isEmpty ||
                         categoryId.isEmpty ||
-                        (fulfillmentType == ServiceType.fixedPrice && originalPrice.isEmpty) ||
-                        (fulfillmentType == ServiceType.reservation && reservationDiscountPercent.isEmpty)
+                        (productType != productTypeCoupon && originalPrice.isEmpty) ||
+                        (productType == productTypeCoupon && reservationDiscountPercent.isEmpty)
                 )
 
                 if let service {
@@ -235,7 +240,7 @@ private struct ServiceEditorView: View {
             ? service!.categoryId
             : state.serviceCategories.first?.id ?? ""
         description = service?.description ?? ""
-        fulfillmentType = service?.fulfillmentType ?? ServiceType.fixedPrice
+        productType = service?.productType ?? productTypeVoucher
         originalPrice = service.map { String($0.originalPrice) } ?? ""
         discountPrice = service?.discountPrice.map(String.init) ?? ""
         reservationDiscountPercent = service?.reservationDiscountPercent ?? ""
