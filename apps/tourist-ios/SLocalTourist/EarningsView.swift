@@ -189,6 +189,7 @@ struct EmptyState: View {
                 .foregroundStyle(TouristTheme.muted)
                 .padding(.horizontal, 28)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .touristReadableContent(maxWidth: TouristLayout.formMaxWidth)
+        .frame(maxHeight: .infinity)
     }
 }

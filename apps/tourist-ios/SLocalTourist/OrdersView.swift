@@ -54,6 +54,7 @@ struct OrdersView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
             }
+            .touristReadableContent()
             .padding(.horizontal, 16)
             .background(TouristTheme.surface.ignoresSafeArea())
             .navigationTitle("Tìm kiếm")

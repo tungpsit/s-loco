@@ -34,6 +34,7 @@ struct LoginView: View {
                 Spacer()
             }
             .padding(20)
+            .touristReadableContent(maxWidth: TouristLayout.formMaxWidth)
             .background(TouristTheme.surface.ignoresSafeArea())
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -109,6 +110,7 @@ struct OtpView: View {
                 Spacer()
             }
             .padding(20)
+            .touristReadableContent(maxWidth: TouristLayout.formMaxWidth)
             .background(TouristTheme.surface.ignoresSafeArea())
             .onReceive(resendTimer) { _ in
                 if resendRemaining > 0 { resendRemaining -= 1 }
@@ -231,6 +233,7 @@ struct ServiceDetailView: View {
                     }
                 }
                 .padding(16)
+                .touristReadableContent(maxWidth: TouristLayout.detailMaxWidth)
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .safeAreaInset(edge: .bottom) {
@@ -414,6 +417,7 @@ struct CheckoutView: View {
                     .buttonStyle(PrimaryButtonStyle())
                 }
                 .padding(16)
+                .touristReadableContent(maxWidth: TouristLayout.detailMaxWidth)
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .task { await state.loadOrder(orderId) }

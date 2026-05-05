@@ -42,6 +42,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -64,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -131,42 +134,7 @@ fun VendorApp() {
                 if (!state.isAuthenticated) {
                     LoginScreen(state)
                 } else {
-                    Scaffold(
-                        bottomBar = {
-                            NavigationBar {
-                                AppTab.visibleEntries.forEach { tab ->
-                                    NavigationBarItem(
-                                        selected = state.selectedTab == tab,
-                                        onClick = { state.selectedTab = tab },
-                                        icon = { Text(tab.label.take(1)) },
-                                        label = { Text(tab.label) },
-                                    )
-                                }
-                            }
-                        },
-                    ) { padding ->
-                        Box(Modifier.padding(padding)) {
-                            val selectedReservation = state.selectedReservation
-                            if (selectedReservation != null) {
-                                ReservationDetailScreen(state, selectedReservation)
-                            } else {
-                                when (state.selectedTab) {
-                                    AppTab.Dashboard -> DashboardScreen(state)
-                                    AppTab.Scan -> ScanScreen(state)
-                                    AppTab.Orders -> OrdersScreen(state)
-                                    AppTab.Services -> {
-                                        if (state.isCreatingService || state.editingService != null) {
-                                            ServiceEditorScreen(state, state.editingService)
-                                        } else {
-                                            ServicesScreen(state)
-                                        }
-                                    }
-                                    AppTab.Earnings -> EarningsScreen(state)
-                                    AppTab.Settings -> SettingsScreen(state)
-                                }
-                            }
-                        }
-                    }
+                    VendorTabs(state)
                 }
 
                 if (state.isLoading) {
@@ -179,6 +147,71 @@ fun VendorApp() {
                         .padding(16.dp),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun VendorTabs(state: AppState) {
+    val isTablet = isTabletWidth(LocalConfiguration.current.screenWidthDp)
+
+    if (isTablet) {
+        Row(Modifier.fillMaxSize()) {
+            NavigationRail(containerColor = Color.White) {
+                AppTab.visibleEntries.forEach { tab ->
+                    NavigationRailItem(
+                        selected = state.selectedTab == tab,
+                        onClick = { state.selectedTab = tab },
+                        icon = { Text(tab.label.take(1)) },
+                        label = { Text(tab.label) },
+                    )
+                }
+            }
+            Box(Modifier.weight(1f)) {
+                VendorTabContent(state)
+            }
+        }
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    AppTab.visibleEntries.forEach { tab ->
+                        NavigationBarItem(
+                            selected = state.selectedTab == tab,
+                            onClick = { state.selectedTab = tab },
+                            icon = { Text(tab.label.take(1)) },
+                            label = { Text(tab.label) },
+                        )
+                    }
+                }
+            },
+        ) { padding ->
+            Box(Modifier.padding(padding)) {
+                VendorTabContent(state)
+            }
+        }
+    }
+}
+
+@Composable
+private fun VendorTabContent(state: AppState) {
+    val selectedReservation = state.selectedReservation
+    if (selectedReservation != null) {
+        ReservationDetailScreen(state, selectedReservation)
+    } else {
+        when (state.selectedTab) {
+            AppTab.Dashboard -> DashboardScreen(state)
+            AppTab.Scan -> ScanScreen(state)
+            AppTab.Orders -> OrdersScreen(state)
+            AppTab.Services -> {
+                if (state.isCreatingService || state.editingService != null) {
+                    ServiceEditorScreen(state, state.editingService)
+                } else {
+                    ServicesScreen(state)
+                }
+            }
+            AppTab.Earnings -> EarningsScreen(state)
+            AppTab.Settings -> SettingsScreen(state)
         }
     }
 }
@@ -361,54 +394,51 @@ private fun ServicesScreen(state: AppState) {
 
 @Composable
 private fun ServiceCard(service: VendorService, category: ServiceCategory?, onEdit: () -> Unit) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.clickable(onClick = onEdit),
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onEdit)
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
     ) {
-        Row(
-            Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            ServiceThumbnail(service.images.firstOrNull())
+        ServiceThumbnail(service.images.firstOrNull())
 
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(service.name, fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
-                        Text(category?.name ?: "Chưa rõ danh mục", color = Color(0xFF3B4460), fontSize = 13.sp)
-                    }
-                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ServicePill(service.productLabel, Primary)
-                        ServicePill(
-                            if (service.activeValue) "Đang bán" else "Tạm ẩn",
-                            if (service.activeValue) Success else Warning,
-                        )
-                    }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(service.name, fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
+                    Text(category?.name ?: "Chưa rõ danh mục", color = Color(0xFF3B4460), fontSize = 13.sp)
                 }
-                if (!service.description.isNullOrBlank()) {
-                    Text(service.description, color = Color(0xFF3B4460), fontSize = 13.sp)
+                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(service.productLabel, color = Primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        if (service.activeValue) "Đang bán" else "Tạm ẩn",
+                        color = if (service.activeValue) Success else Warning,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    if (service.productTypeValue == PRODUCT_TYPE_COUPON) {
-                        Text("Coupon giảm ${service.reservationDiscountPercentValue.ifBlank { "0" }}% trên hóa đơn", color = Warning, fontWeight = FontWeight.Bold)
-                    } else {
-                        Text(formatVnd(service.originalPriceValue), color = Primary, fontWeight = FontWeight.Bold)
-                        service.discountPriceValue?.let {
-                            Text("KM ${formatVnd(it)}", color = Warning, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                        }
+            }
+            if (!service.description.isNullOrBlank()) {
+                Text(service.description, color = Color(0xFF3B4460), fontSize = 13.sp, maxLines = 2)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (service.productTypeValue == PRODUCT_TYPE_COUPON) {
+                    Text("Coupon giảm ${service.reservationDiscountPercentValue.ifBlank { "0" }}% trên hóa đơn", color = Warning, fontWeight = FontWeight.Bold)
+                } else {
+                    Text(formatVnd(service.originalPriceValue), color = Primary, fontWeight = FontWeight.Bold)
+                    service.discountPriceValue?.let {
+                        Text("KM ${formatVnd(it)}", color = Warning, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
-                }
-                TextButton(onClick = onEdit) {
-                    Text("Sửa dịch vụ")
                 }
             }
         }
+        Text("›", color = Color(0xFF3B4460), fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -559,29 +589,21 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
                         enabled = !state.isLoading,
                     )
                     Text("Loại sản phẩm", fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                            OutlinedButton(
-                                onClick = { productType = PRODUCT_TYPE_VOUCHER },
-                                enabled = !state.isLoading,
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text(if (productType == PRODUCT_TYPE_VOUCHER) "✓ Voucher" else "Voucher")
-                            }
-                            OutlinedButton(
-                                onClick = { productType = PRODUCT_TYPE_TICKET },
-                                enabled = !state.isLoading,
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                Text(if (productType == PRODUCT_TYPE_TICKET) "✓ Vé" else "Vé")
-                            }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFEAF1F7), RoundedCornerShape(10.dp))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        ProductTypeSegment("Voucher", productType == PRODUCT_TYPE_VOUCHER, !state.isLoading, Modifier.weight(1f)) {
+                            productType = PRODUCT_TYPE_VOUCHER
                         }
-                        OutlinedButton(
-                            onClick = { productType = PRODUCT_TYPE_COUPON },
-                            enabled = !state.isLoading,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(if (productType == PRODUCT_TYPE_COUPON) "✓ Coupon" else "Coupon")
+                        ProductTypeSegment("Vé", productType == PRODUCT_TYPE_TICKET, !state.isLoading, Modifier.weight(1f)) {
+                            productType = PRODUCT_TYPE_TICKET
+                        }
+                        ProductTypeSegment("Coupon", productType == PRODUCT_TYPE_COUPON, !state.isLoading, Modifier.weight(1f)) {
+                            productType = PRODUCT_TYPE_COUPON
                         }
                     }
                     if (productType == PRODUCT_TYPE_COUPON) {
@@ -763,6 +785,28 @@ private fun ServiceEditorScreen(state: AppState, service: VendorService?) {
             }
         }
     }
+}
+
+@Composable
+private fun ProductTypeSegment(
+    label: String,
+    selected: Boolean,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Text(
+        text = label,
+        color = if (selected) Primary else Color(0xFF3B4460),
+        fontSize = 13.sp,
+        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (selected) Color.White else Color.Transparent)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(vertical = 10.dp),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+    )
 }
 
 @Composable
@@ -1369,7 +1413,9 @@ private fun openLegalUrl(context: Context, url: String) {
 @Composable
 private fun ScreenList(title: String?, content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .widthIn(max = VENDOR_CONTENT_MAX_WIDTH_DP.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -1616,42 +1662,47 @@ private fun varTextField(
     var first by remember { mutableStateOf("") }
     var second by remember { mutableStateOf("") }
 
-    Column(
+    Box(
         Modifier
             .fillMaxSize()
             .background(SurfaceBg)
             .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center,
     ) {
-        Text(title, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
-        Text(subtitle, color = Color(0xFF3B4460))
-        Spacer(Modifier.height(20.dp))
-        OutlinedTextField(
-            value = first,
-            onValueChange = { first = it },
-            label = { Text(firstLabel) },
-            placeholder = { Text(firstPlaceholder) },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
-            value = second,
-            onValueChange = { second = it },
-            label = { Text(secondLabel) },
-            placeholder = { Text(secondPlaceholder) },
-            visualTransformation = if (secureSecond) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(18.dp))
-        Button(
-            onClick = { onSubmit(first, second) },
-            enabled = enabled && first.isNotBlank() && (!secureSecond || second.isNotBlank()),
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            Modifier.widthIn(max = VENDOR_FORM_MAX_WIDTH_DP.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
-            Text(buttonLabel)
+            Text(title, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
+            Text(subtitle, color = Color(0xFF3B4460))
+            Spacer(Modifier.height(20.dp))
+            OutlinedTextField(
+                value = first,
+                onValueChange = { first = it },
+                label = { Text(firstLabel) },
+                placeholder = { Text(firstPlaceholder) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = second,
+                onValueChange = { second = it },
+                label = { Text(secondLabel) },
+                placeholder = { Text(secondPlaceholder) },
+                visualTransformation = if (secureSecond) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(18.dp))
+            Button(
+                onClick = { onSubmit(first, second) },
+                enabled = enabled && first.isNotBlank() && (!secureSecond || second.isNotBlank()),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(buttonLabel)
+            }
+            Spacer(Modifier.height(16.dp))
+            extra()
         }
-        Spacer(Modifier.height(16.dp))
-        extra()
     }
 }
 

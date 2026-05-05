@@ -95,6 +95,7 @@ struct SettingsView: View {
             }
             .refreshable { await state.refreshHome() }
             .scrollContentBackground(.hidden)
+            .vendorReadableContent()
             .background(VendorTheme.surface)
         }
     }

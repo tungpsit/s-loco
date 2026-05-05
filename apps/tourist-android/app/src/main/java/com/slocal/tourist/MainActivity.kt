@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -45,6 +46,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -68,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -218,12 +222,13 @@ private fun TouristApp(context: Context) {
 
 @Composable
 private fun MainTabs(state: AppState) {
-    Scaffold(
-        containerColor = Surface,
-        bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+    val isTablet = isTabletWidth(LocalConfiguration.current.screenWidthDp)
+
+    if (isTablet) {
+        Row(Modifier.fillMaxSize()) {
+            NavigationRail(containerColor = Color.White) {
                 AppTab.entries.forEach { tab ->
-                    NavigationBarItem(
+                    NavigationRailItem(
                         selected = state.tab == tab,
                         onClick = { state.tab = tab },
                         icon = { Text(tab.icon, fontWeight = FontWeight.Bold) },
@@ -231,47 +236,85 @@ private fun MainTabs(state: AppState) {
                     )
                 }
             }
+            Box(Modifier.weight(1f)) {
+                MainTabContent(state)
+            }
         }
-    ) { padding ->
-        Box(Modifier.padding(padding)) {
-            when (state.tab) {
-                AppTab.Home -> HomeScreen(state)
-                AppTab.Browse -> BrowseScreen(state)
-                AppTab.Vouchers -> VouchersScreen(state)
-                AppTab.AI -> AIScreen(state)
-                AppTab.Profile -> ProfileScreen(state)
+    } else {
+        Scaffold(
+            containerColor = Surface,
+            bottomBar = {
+                NavigationBar(containerColor = Color.White) {
+                    AppTab.entries.forEach { tab ->
+                        NavigationBarItem(
+                            selected = state.tab == tab,
+                            onClick = { state.tab = tab },
+                            icon = { Text(tab.icon, fontWeight = FontWeight.Bold) },
+                            label = { Text(tab.label, fontSize = 11.sp) },
+                        )
+                    }
+                }
+            }
+        ) { padding ->
+            Box(Modifier.padding(padding)) {
+                MainTabContent(state)
             }
         }
     }
 }
 
 @Composable
+private fun MainTabContent(state: AppState) {
+    when (state.tab) {
+        AppTab.Home -> HomeScreen(state)
+        AppTab.Browse -> BrowseScreen(state)
+        AppTab.Vouchers -> VouchersScreen(state)
+        AppTab.AI -> AIScreen(state)
+        AppTab.Profile -> ProfileScreen(state)
+    }
+}
+
+@Composable
 private fun HomeScreen(state: AppState) {
+    val windowWidthDp = LocalConfiguration.current.screenWidthDp
+    val columns = serviceGridColumnsForWidth(windowWidthDp)
+
     LazyColumn(
         Modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Color(0xFFDDF6FF), Surface)))
     ) {
         item {
-            HomeHeader(state)
-            RecommendationTitle(
-                title = "Gợi ý cho bạn",
-                action = "Xem tất cả",
-                onAction = { state.tab = AppTab.Browse }
-            )
-        }
-        val rows = state.services.chunked(2)
-        items(rows) { row ->
-            Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { service ->
-                    Box(Modifier.weight(1f)) {
-                        ServiceCard(service) { state.openService(service) }
-                    }
-                }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
+            ReadableContent {
+                HomeHeader(state)
+                RecommendationTitle(
+                    title = "Gợi ý cho bạn",
+                    action = "Xem tất cả",
+                    onAction = { state.tab = AppTab.Browse }
+                )
             }
         }
+        val rows = state.services.chunked(columns)
+        items(rows) { row ->
+            ResponsiveServiceRow(row, columns) { service -> state.openService(service) }
+        }
         item { Spacer(Modifier.height(96.dp)) }
+    }
+}
+
+@Composable
+private fun ResponsiveServiceRow(services: List<Service>, columns: Int, onClick: (Service) -> Unit) {
+    ReadableContent {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            services.forEach { service ->
+                Box(Modifier.weight(1f)) {
+                    ServiceCard(service) { onClick(service) }
+                }
+            }
+            repeat(columns - services.size) {
+                Spacer(Modifier.weight(1f))
+            }
+        }
     }
 }
 
@@ -440,53 +483,52 @@ private fun RecommendationTitle(title: String, action: String, onAction: () -> U
 private fun BrowseScreen(state: AppState) {
     var query by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
-    var mode by remember { mutableStateOf("services") }
     val scope = rememberCoroutineScope()
 
-    LazyColumn(Modifier.fillMaxSize()) {
+    LazyColumn(
+        Modifier
+            .fillMaxSize()
+            .background(Surface)
+    ) {
         item {
-            HeroHeader(
-                title = "Tìm trải nghiệm",
-                subtitle = "EXPLORE SẦM SƠN",
-                searchText = query.ifBlank { "Tìm dịch vụ, cửa hàng..." },
-                onSearch = {}
-            )
-            OutlinedTextField(
-                value = query,
-                onValueChange = {
-                    query = it
-                    scope.launch { state.search(query, category) }
-                },
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                placeholder = { Text("Tìm dịch vụ, cửa hàng...") },
-                singleLine = true
-            )
-            CategoryChips(category) {
-                category = it
-                scope.launch { state.search(query, category) }
-            }
-            Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Pill("Dịch vụ", mode == "services") { mode = "services" }
-                Pill("Cửa hàng", mode == "vendors") { mode = "vendors" }
-            }
-            Spacer(Modifier.height(8.dp))
-        }
-        if (mode == "services") {
-            items(state.searchServices.chunked(2)) { row ->
-                Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    row.forEach { service ->
-                        Box(Modifier.weight(1f)) { ServiceCard(service) { state.openService(service) } }
+            ReadableContent {
+                Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SearchField(
+                        value = query,
+                        onValueChange = {
+                            query = it
+                            scope.launch { state.search(query, category) }
+                        },
+                    )
+                    CategoryChips(category) {
+                        category = it
+                        scope.launch { state.search(query, category) }
                     }
-                    if (row.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
-	        } else {
-	            items(state.vendors) { vendor ->
-	                VendorRow(vendor) { state.openVendor(vendor) }
-	            }
-	        }
+        }
+        item {
+            ReadableContent {
+                SectionTitle("Dịch vụ")
+            }
+        }
+        items(state.searchServices) { service ->
+            ReadableContent {
+                ServiceListRow(service) { state.openService(service) }
+            }
+        }
+        if (state.vendors.isNotEmpty()) {
+            item {
+                ReadableContent {
+                    SectionTitle("Nhà cung cấp")
+                }
+            }
+            items(state.vendors) { vendor ->
+                ReadableContent {
+                    VendorRow(vendor) { state.openVendor(vendor) }
+                }
+            }
+        }
         item { Spacer(Modifier.height(96.dp)) }
     }
 }
@@ -498,11 +540,15 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
     var requestedTime by remember { mutableStateOf("2026-05-01T12:00:00.000Z") }
     var note by remember { mutableStateOf("") }
     Column(Modifier.fillMaxSize()) {
-        TopBack("Dịch vụ", state::back)
+        ReadableContent(maxWidthDp = TOURIST_DETAIL_MAX_WIDTH_DP) {
+            TopBack("Dịch vụ", state::back)
+        }
         Column(
             Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
+                .widthIn(max = TOURIST_DETAIL_MAX_WIDTH_DP.dp)
+                .align(Alignment.CenterHorizontally)
         ) {
             Box(
                 Modifier
@@ -562,28 +608,30 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                 }
             }
         }
-        Row(
-            Modifier
-                .background(Color.White)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (!service.isCoupon) {
-                Stepper(quantity, onMinus = { quantity = maxOf(1, quantity - 1) }, onPlus = { quantity += 1 })
-            }
-            Button(
-                onClick = {
-                    if (service.isCoupon) {
-                        state.createReservation(service, partySize.toIntOrNull() ?: 2, requestedTime, note)
-                    } else {
-                        state.createOrder(service, quantity)
-                    }
-                },
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Blue)
+        ReadableContent(maxWidthDp = TOURIST_DETAIL_MAX_WIDTH_DP) {
+            Row(
+                Modifier
+                    .background(Color.White)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(if (service.isCoupon) "Nhận coupon" else "Mua ${service.productLabel.lowercase()}")
+                if (!service.isCoupon) {
+                    Stepper(quantity, onMinus = { quantity = maxOf(1, quantity - 1) }, onPlus = { quantity += 1 })
+                }
+                Button(
+                    onClick = {
+                        if (service.isCoupon) {
+                            state.createReservation(service, partySize.toIntOrNull() ?: 2, requestedTime, note)
+                        } else {
+                            state.createOrder(service, quantity)
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = Blue)
+                ) {
+                    Text(if (service.isCoupon) "Nhận coupon" else "Mua ${service.productLabel.lowercase()}")
+                }
             }
         }
     }
@@ -687,10 +735,19 @@ private fun VendorDetailScreen(state: AppState, vendor: Vendor) {
     val services = (state.services + state.searchServices)
         .distinctBy { it.id }
         .filter { it.vendorName.equals(vendor.name, ignoreCase = true) }
+    val windowWidthDp = LocalConfiguration.current.screenWidthDp
+    val columns = serviceGridColumnsForWidth(windowWidthDp)
 
     Column(Modifier.fillMaxSize()) {
-        TopBack("Đối tác", state::back)
-        LazyColumn(Modifier.fillMaxSize()) {
+        ReadableContent(maxWidthDp = TOURIST_DETAIL_MAX_WIDTH_DP) {
+            TopBack("Đối tác", state::back)
+        }
+        LazyColumn(
+            Modifier
+                .fillMaxSize()
+                .widthIn(max = TOURIST_DETAIL_MAX_WIDTH_DP.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
             item {
                 Box(
                     Modifier
@@ -735,12 +792,14 @@ private fun VendorDetailScreen(state: AppState, vendor: Vendor) {
                     }
                 }
             } else {
-                items(services.chunked(2)) { row ->
+                items(services.chunked(columns)) { row ->
                     Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         row.forEach { service ->
                             Box(Modifier.weight(1f)) { ServiceCard(service) { state.openService(service) } }
                         }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                        repeat(columns - row.size) {
+                            Spacer(Modifier.weight(1f))
+                        }
                     }
                 }
             }
@@ -823,16 +882,30 @@ private fun VouchersScreen(state: AppState) {
         LoginRequired(state)
         return
     }
-    LazyColumn(Modifier.fillMaxSize()) {
+    LazyColumn(
+        Modifier
+            .fillMaxSize()
+            .background(Surface)
+    ) {
         item {
-            BluePageHeader("MY PASSES", "Voucher & vé của tôi", "Xuất trình QR khi sử dụng dịch vụ")
+            ReadableContent {
+                SectionTitle("Voucher & vé")
+            }
         }
         items(state.vouchers) { voucher ->
-            VoucherCard(voucher) { state.screen = Screen.VoucherDetail(voucher) }
+            ReadableContent {
+                VoucherCard(voucher) { state.screen = Screen.VoucherDetail(voucher) }
+            }
         }
-        item { SectionTitle("Coupon / mã giảm giá") }
+        item {
+            ReadableContent {
+                SectionTitle("Coupon / mã giảm giá")
+            }
+        }
         items(state.reservations) { reservation ->
-            ReservationCard(reservation) { state.screen = Screen.ReservationDetail(reservation) }
+            ReadableContent {
+                ReservationCard(reservation) { state.screen = Screen.ReservationDetail(reservation) }
+            }
         }
         item { Spacer(Modifier.height(96.dp)) }
     }
@@ -1484,18 +1557,27 @@ private fun CategoryPanel(state: AppState) {
 
 @Composable
 private fun CategoryChips(selected: String, onSelect: (String) -> Unit) {
-    Row(
-        Modifier.padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        touristCategories.take(4).forEach { cat -> Pill(cat.label, selected == cat.value) { onSelect(cat.value) } }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            touristCategories.take(4).forEach { cat -> Pill(cat.label, selected == cat.value) { onSelect(cat.value) } }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            touristCategories.drop(4).forEach { cat -> Pill(cat.label, selected == cat.value) { onSelect(cat.value) } }
+        }
     }
-    Row(
-        Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        touristCategories.drop(4).forEach { cat -> Pill(cat.label, selected == cat.value) { onSelect(cat.value) } }
-    }
+}
+
+@Composable
+private fun SearchField(value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        leadingIcon = { Text("⌕", color = Blue, fontWeight = FontWeight.Bold) },
+        placeholder = { Text("Tìm tour, vé, địa điểm") },
+        singleLine = true,
+        shape = RoundedCornerShape(14.dp),
+    )
 }
 
 @Composable
@@ -1548,84 +1630,98 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
         Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .aspectRatio(1.12f)
-                .background(Blue),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            ServiceHeroImage(service)
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(
                 Modifier
-                    .fillMaxSize()
-                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.52f))))
-            )
-            Text("S-LOCO\nCoastal experience", color = Color.White, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
-            if (offerBadge != null) {
-                OfferBadge(
-                    label = offerBadge,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
-                )
+                    .fillMaxWidth()
+                    .height(112.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(BlueSoft),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                ServiceHeroImage(service)
+                if (offerBadge != null) {
+                    OfferBadge(
+                        label = offerBadge,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
-            Text(
-                service.category,
-                color = Blue,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(99.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 9.dp, vertical = 4.dp),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(service.name, color = TextMain, fontWeight = FontWeight.ExtraBold, maxLines = 2)
-            Text(service.vendorName, color = TextMuted, fontSize = 12.sp, maxLines = 1)
-            service.locationSummary()?.let { Text(it, color = TextMuted, fontSize = 12.sp, maxLines = 1) }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    if (service.isReservation) {
-                        Text("Đặt qua app", color = Blue, fontWeight = FontWeight.ExtraBold)
+            Text(service.name, color = TextMain, fontWeight = FontWeight.SemiBold, maxLines = 2)
+            service.locationSummary()?.let { Text("⌖ $it", color = TextMuted, fontSize = 11.sp, maxLines = 1) }
+            Text("★ ${service.rating}", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (service.isReservation) {
+                    Text("Coupon", color = Blue, fontWeight = FontWeight.Bold)
+                    if (service.appDiscountPercent > 0) {
+                        AppSavingStrip(
+                            "Nhận thêm ${service.appDiscountPercent}% tại cửa hàng",
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                } else {
+                    if (service.originalPrice > service.price) {
+                        Text(
+                            formatVnd(service.originalPrice),
+                            color = TextMuted,
+                            fontSize = 12.sp,
+                            textDecoration = TextDecoration.LineThrough
+                        )
+                    }
+                    if (preAppPrice != null && service.discountPercent > 0) {
+                        Text("Giá KM: ${formatVnd(preAppPrice)}", color = TextMuted, fontSize = 12.sp, maxLines = 1)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(formatVnd(service.price), color = Blue, fontWeight = FontWeight.Bold)
                         if (service.appDiscountPercent > 0) {
-                            AppSavingStrip(
-                                "Nhận thêm ${service.appDiscountPercent}% tại cửa hàng",
-                                modifier = Modifier.padding(top = 2.dp)
-                            )
-                        }
-                    } else {
-                        if (service.originalPrice > service.price) {
-                            Text(
-                                formatVnd(service.originalPrice),
-                                color = TextMuted,
-                                fontSize = 12.sp,
-                                textDecoration = TextDecoration.LineThrough
-                            )
-                        }
-                        if (preAppPrice != null && service.discountPercent > 0) {
-                            Text("Giá KM: ${formatVnd(preAppPrice)}", color = TextMuted, fontSize = 12.sp, maxLines = 1)
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(formatVnd(service.price), color = Blue, fontWeight = FontWeight.ExtraBold)
-                            if (service.appDiscountPercent > 0) {
-                                Text("giá app", color = Coral, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
-                            }
-                        }
-                        if (appSaving != null) {
-                            AppSavingStrip(
-                                "Đặt qua app tiết kiệm thêm ${formatVnd(appSaving)}",
-                                modifier = Modifier.padding(top = 2.dp)
-                            )
+                            Text("giá app", color = Coral, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
+                    if (appSaving != null) {
+                        AppSavingStrip(
+                            "Đặt qua app tiết kiệm thêm ${formatVnd(appSaving)}",
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
                 }
-                Text("★ ${service.rating}", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServiceListRow(service: Service, onClick: () -> Unit) {
+    Card(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+        Row(Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(width = 92.dp, height = 82.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(BlueSoft)
+            ) {
+                ServiceHeroImage(service)
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(service.name, color = TextMain, fontWeight = FontWeight.SemiBold, maxLines = 2)
+                Text(service.vendorName.ifBlank { service.category }, color = TextMuted, fontSize = 12.sp, maxLines = 1)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("★ ${service.rating}", color = Coral, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(if (service.isReservation) "Coupon" else formatVnd(service.price), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
@@ -1697,14 +1793,23 @@ private fun Service.appSavingAmount(): Int? {
 
 @Composable
 private fun VendorRow(vendor: Vendor, onClick: () -> Unit) {
-    AppCard {
-        Column(Modifier.clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(vendor.name, fontWeight = FontWeight.ExtraBold, color = TextMain)
-            Text(vendor.address, color = TextMuted, maxLines = 1)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("★ ${vendor.rating}", color = Blue, fontWeight = FontWeight.Bold)
-                Text("Xem chi tiết →", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+    Card(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("▣", color = Blue, fontWeight = FontWeight.Bold)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(vendor.name, fontWeight = FontWeight.SemiBold, color = TextMain)
+                Text(vendor.address.ifBlank { "Đối tác S-Loco" }, color = TextMuted, fontSize = 12.sp, maxLines = 1)
             }
+            Text("›", color = TextMuted, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -1713,26 +1818,28 @@ private fun VendorRow(vendor: Vendor, onClick: () -> Unit) {
 private fun VoucherCard(voucher: Voucher, onClick: () -> Unit) {
     Card(
         Modifier
-            .padding(horizontal = 16.dp, vertical = 7.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(Color.White)
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .size(58.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(BlueSoft),
                 contentAlignment = Alignment.Center
-            ) { Text(if (voucher.isTicket) "VÉ" else "VC", color = Blue, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp) }
-            Column(Modifier.weight(1f)) {
-                Text(voucher.serviceName.ifBlank { voucher.productLabel }, fontWeight = FontWeight.ExtraBold, maxLines = 1)
-                Text(voucher.vendorName, color = TextMuted, maxLines = 1)
-                Text(formatVnd(voucher.totalAmount), color = Blue, fontWeight = FontWeight.Bold)
+            ) { Text("QR", color = Blue, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp) }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(voucher.serviceName.ifBlank { "${voucher.productLabel} S-Loco" }, fontWeight = FontWeight.SemiBold, color = TextMain, maxLines = 2)
+                Text(voucher.vendorName.ifBlank { statusLabel(voucher.status) }, color = TextMuted, fontSize = 12.sp, maxLines = 1)
+                Text(formatVnd(voucher.totalAmount), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
-            Text(statusLabel(voucher.status), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text("›", color = TextMuted, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -1741,37 +1848,49 @@ private fun VoucherCard(voucher: Voucher, onClick: () -> Unit) {
 private fun ReservationCard(reservation: Reservation, onClick: () -> Unit) {
     Card(
         Modifier
-            .padding(horizontal = 16.dp, vertical = 7.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(Color.White)
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(reservation.serviceName.ifBlank { "Đặt chỗ" }, fontWeight = FontWeight.ExtraBold, color = TextMain)
-                Text(reservationStatusLabel(reservation.status), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(58.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(BlueSoft),
+                contentAlignment = Alignment.Center
+            ) { Text("□", color = Blue, fontSize = 22.sp, fontWeight = FontWeight.Bold) }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(reservation.serviceName.ifBlank { "Đặt chỗ" }, fontWeight = FontWeight.SemiBold, color = TextMain, maxLines = 2)
+                Text("${reservation.partySize} người · ${reservation.requestedTime}", color = TextMuted, fontSize = 12.sp, maxLines = 1)
+                if (!reservation.voucherCode.isNullOrBlank()) {
+                    Text("Mã iPos: ${reservation.voucherCode}", color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
             }
-            Text(reservation.vendorName, color = TextMuted)
-            Text("${reservation.partySize} người · ${reservation.requestedTime}", color = TextMuted, fontSize = 12.sp)
-            if (!reservation.voucherCode.isNullOrBlank()) Text("Mã iPos: ${reservation.voucherCode}", color = Coral, fontWeight = FontWeight.Bold)
+            Text(reservationStatusLabel(reservation.status), color = Blue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
 private fun BluePageHeader(kicker: String, title: String, subtitle: String) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
-            .background(Blue)
-            .padding(16.dp)
-            .padding(bottom = 34.dp)
-    ) {
-        Text(kicker, color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
-        Text(title, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
-        Text(subtitle, color = Color.White.copy(alpha = 0.78f))
+    ReadableContent {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                .background(Blue)
+                .padding(16.dp)
+                .padding(bottom = 34.dp)
+        ) {
+            Text(kicker, color = Color.White.copy(alpha = 0.72f), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold)
+            Text(title, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+            Text(subtitle, color = Color.White.copy(alpha = 0.78f))
+        }
     }
 }
 
@@ -1807,6 +1926,19 @@ private fun AppCard(horizontal: Alignment.Horizontal = Alignment.Start, content:
     }
 }
 
+@Composable
+private fun ReadableContent(
+    modifier: Modifier = Modifier,
+    maxWidthDp: Int = TOURIST_CONTENT_MAX_WIDTH_DP,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier
+            .fillMaxWidth()
+            .widthIn(max = maxWidthDp.dp),
+        content = content,
+    )
+}
 @Composable
 private fun DiscountChip(label: String, fontSize: Int = 13) {
     Text(

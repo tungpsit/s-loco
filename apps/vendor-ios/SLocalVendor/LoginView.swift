@@ -95,7 +95,7 @@ struct LoginView: View {
                         .disabled(!canSubmit)
                     }
                     .padding(20)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: VendorLayout.formMaxWidth)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22))
                     .shadow(color: .black.opacity(0.18), radius: 18, y: 10)
 

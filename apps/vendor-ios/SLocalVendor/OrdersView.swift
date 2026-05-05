@@ -67,6 +67,7 @@ struct OrdersView: View {
                 await state.refreshReservations()
             }
             .scrollContentBackground(.hidden)
+            .vendorReadableContent()
             .background(VendorTheme.surface)
         }
     }

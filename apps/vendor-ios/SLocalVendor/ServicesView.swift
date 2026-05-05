@@ -48,6 +48,7 @@ struct ServicesView: View {
                 }
             }
             .scrollContentBackground(.hidden)
+            .vendorReadableContent()
             .background(VendorTheme.surface)
         }
     }

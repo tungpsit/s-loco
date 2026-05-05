@@ -6,13 +6,7 @@ struct RootView: View {
     var body: some View {
         ZStack {
             if state.isAuthenticated {
-                TabView(selection: $state.selectedTab) {
-                    DashboardView().tabItem { Label(AppTab.dashboard.rawValue, systemImage: "house") }.tag(AppTab.dashboard)
-                    ScanView().tabItem { Label(AppTab.scan.rawValue, systemImage: "qrcode.viewfinder") }.tag(AppTab.scan)
-                    OrdersView().tabItem { Label(AppTab.orders.rawValue, systemImage: "bag") }.tag(AppTab.orders)
-                    ServicesView().tabItem { Label(AppTab.services.rawValue, systemImage: "ticket") }.tag(AppTab.services)
-                    SettingsView().tabItem { Label(AppTab.settings.rawValue, systemImage: "ellipsis.circle") }.tag(AppTab.settings)
-                }
+                adaptiveTabs
             } else {
                 LoginView()
             }
@@ -41,6 +35,27 @@ struct RootView: View {
             Button("OK", role: .cancel) { state.message = nil }
         } message: {
             Text(state.message ?? "")
+        }
+    }
+
+    @ViewBuilder
+    private var adaptiveTabs: some View {
+        if #available(iOS 18.0, *) {
+            tabs
+                .tabViewStyle(.sidebarAdaptable)
+        } else {
+            tabs
+        }
+    }
+
+    private var tabs: some View {
+        TabView(selection: $state.selectedTab) {
+            DashboardView().tabItem { Label(AppTab.dashboard.rawValue, systemImage: "house") }.tag(AppTab.dashboard)
+            ScanView().tabItem { Label(AppTab.scan.rawValue, systemImage: "qrcode.viewfinder") }.tag(AppTab.scan)
+            OrdersView().tabItem { Label(AppTab.orders.rawValue, systemImage: "bag") }.tag(AppTab.orders)
+            ServicesView().tabItem { Label(AppTab.services.rawValue, systemImage: "ticket") }.tag(AppTab.services)
+            EarningsView().tabItem { Label(AppTab.earnings.rawValue, systemImage: "chart.line.uptrend.xyaxis") }.tag(AppTab.earnings)
+            SettingsView().tabItem { Label(AppTab.settings.rawValue, systemImage: "ellipsis.circle") }.tag(AppTab.settings)
         }
     }
 }

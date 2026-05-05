@@ -27,6 +27,7 @@ struct EarningsView: View {
             .navigationTitle("Thu nhập")
             .refreshable { await state.refreshHome() }
             .scrollContentBackground(.hidden)
+            .vendorReadableContent()
             .background(VendorTheme.surface)
         }
     }

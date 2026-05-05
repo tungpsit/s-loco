@@ -11,6 +11,20 @@ enum TouristTheme {
     static let coral = Color(red: 1.0, green: 0.42, blue: 0.208)
 }
 
+enum TouristLayout {
+    static let contentMaxWidth: CGFloat = 980
+    static let formMaxWidth: CGFloat = 520
+    static let detailMaxWidth: CGFloat = 860
+    static let cardGridColumns = [GridItem(.adaptive(minimum: 160), spacing: 12)]
+}
+
+extension View {
+    func touristReadableContent(maxWidth: CGFloat = TouristLayout.contentMaxWidth, alignment: Alignment = .center) -> some View {
+        frame(maxWidth: maxWidth, alignment: alignment)
+            .frame(maxWidth: .infinity, alignment: alignment)
+    }
+}
+
 extension Int {
     var vnd: String {
         let formatter = NumberFormatter()

@@ -10,6 +10,18 @@ enum VendorTheme {
     static let warning = Color(red: 0.90, green: 0.32, blue: 0.0)
 }
 
+enum VendorLayout {
+    static let contentMaxWidth: CGFloat = 920
+    static let formMaxWidth: CGFloat = 520
+}
+
+extension View {
+    func vendorReadableContent(maxWidth: CGFloat = VendorLayout.contentMaxWidth, alignment: Alignment = .center) -> some View {
+        frame(maxWidth: maxWidth, alignment: alignment)
+            .frame(maxWidth: .infinity, alignment: alignment)
+    }
+}
+
 func formatVnd(_ value: Int?) -> String {
     let formatter = NumberFormatter()
     formatter.locale = Locale(identifier: "vi_VN")

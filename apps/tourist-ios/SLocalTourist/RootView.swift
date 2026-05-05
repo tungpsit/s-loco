@@ -5,28 +5,7 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            TabView(selection: $state.tab) {
-                DashboardView()
-                    .tabItem { Label(AppTab.home.rawValue, systemImage: AppTab.home.icon) }
-                    .tag(AppTab.home)
-
-                OrdersView()
-                    .tabItem { Label(AppTab.browse.rawValue, systemImage: AppTab.browse.icon) }
-                    .tag(AppTab.browse)
-
-                EarningsView()
-                    .tabItem { Label(AppTab.vouchers.rawValue, systemImage: AppTab.vouchers.icon) }
-                    .tag(AppTab.vouchers)
-
-                ScanView()
-                    .tabItem { Label(AppTab.ai.rawValue, systemImage: AppTab.ai.icon) }
-                    .tag(AppTab.ai)
-
-                SettingsView()
-                    .tabItem { Label(AppTab.profile.rawValue, systemImage: AppTab.profile.icon) }
-                    .tag(AppTab.profile)
-            }
-            .tint(TouristTheme.primary)
+            adaptiveTabs
 
             if state.isLoading {
                 LoadingOverlay(message: state.loadingMessage)
@@ -44,6 +23,41 @@ struct RootView: View {
         } message: {
             Text(state.message ?? "")
         }
+    }
+
+    @ViewBuilder
+    private var adaptiveTabs: some View {
+        if #available(iOS 18.0, *) {
+            tabs
+                .tabViewStyle(.sidebarAdaptable)
+        } else {
+            tabs
+        }
+    }
+
+    private var tabs: some View {
+        TabView(selection: $state.tab) {
+            DashboardView()
+                .tabItem { Label(AppTab.home.rawValue, systemImage: AppTab.home.icon) }
+                .tag(AppTab.home)
+
+            OrdersView()
+                .tabItem { Label(AppTab.browse.rawValue, systemImage: AppTab.browse.icon) }
+                .tag(AppTab.browse)
+
+            EarningsView()
+                .tabItem { Label(AppTab.vouchers.rawValue, systemImage: AppTab.vouchers.icon) }
+                .tag(AppTab.vouchers)
+
+            ScanView()
+                .tabItem { Label(AppTab.ai.rawValue, systemImage: AppTab.ai.icon) }
+                .tag(AppTab.ai)
+
+            SettingsView()
+                .tabItem { Label(AppTab.profile.rawValue, systemImage: AppTab.profile.icon) }
+                .tag(AppTab.profile)
+        }
+        .tint(TouristTheme.primary)
     }
 }
 

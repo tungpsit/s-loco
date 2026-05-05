@@ -115,6 +115,7 @@ struct ScanView: View {
                     }
                 }
                 .padding(16)
+                .touristReadableContent(maxWidth: TouristLayout.detailMaxWidth)
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .navigationTitle("AI")

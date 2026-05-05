@@ -31,6 +31,7 @@ struct DashboardView: View {
             .navigationTitle(state.vendor?.name ?? "Trang chủ")
             .refreshable { await state.refreshHome() }
             .scrollContentBackground(.hidden)
+            .vendorReadableContent()
             .background(VendorTheme.surface)
         }
     }

@@ -14,7 +14,7 @@ struct DashboardView: View {
                         sectionHeader("Gợi ý cho bạn", action: "Xem tất cả") {
                             state.tab = .browse
                         }
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        LazyVGrid(columns: TouristLayout.cardGridColumns, spacing: 12) {
                             ForEach(state.services.prefix(8)) { service in
                                 ServiceCard(service: service) {
                                     state.route = .service(service)
@@ -32,6 +32,7 @@ struct DashboardView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
+                    .touristReadableContent()
                 }
             }
             .background(
@@ -104,6 +105,7 @@ struct DashboardView: View {
         .padding(.horizontal, 16)
         .padding(.top, 18)
         .padding(.bottom, 18)
+        .touristReadableContent()
     }
 
     private var homeCategoryActions: [HomeCategoryAction] {
@@ -208,6 +210,7 @@ struct WeatherView: View {
                     }
                 }
                 .padding(16)
+                .touristReadableContent(maxWidth: TouristLayout.detailMaxWidth)
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .navigationTitle("Thời tiết Sầm Sơn")
@@ -612,7 +615,7 @@ struct VendorDetailView: View {
                         )
                         .frame(minHeight: 220)
                     } else {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        LazyVGrid(columns: TouristLayout.cardGridColumns, spacing: 12) {
                             ForEach(vendorServices) { service in
                                 ServiceCard(service: service) {
                                     state.route = .service(service)
@@ -622,6 +625,7 @@ struct VendorDetailView: View {
                     }
                 }
                 .padding(16)
+                .touristReadableContent(maxWidth: TouristLayout.detailMaxWidth)
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .navigationTitle("Đối tác")
