@@ -1,0 +1,18 @@
+/Users/tungps/workspace/s-loco/apps/tourist-ios/SLocalTourist/Models.swift:799:16: warning: no calls to throwing functions occur within 'try' expression
+        time = try c.decodeStringIfPresent(.time) ?? "09:00"
+               ^
+/Users/tungps/workspace/s-loco/apps/tourist-ios/SLocalTourist/Models.swift:800:17: warning: no calls to throwing functions occur within 'try' expression
+        title = try c.decodeStringIfPresent(.title) ?? ""
+                ^
+/Users/tungps/workspace/s-loco/apps/tourist-ios/SLocalTourist/Models.swift:801:23: warning: no calls to throwing functions occur within 'try' expression
+        description = try c.decodeStringIfPresent(.description) ?? ""
+                      ^
+/Users/tungps/workspace/s-loco/apps/tourist-ios/SLocalTourist/Models.swift:802:21: warning: no calls to throwing functions occur within 'try' expression
+        serviceId = try c.decodeStringIfPresent(.serviceId)
+                    ^
+/Users/tungps/workspace/s-loco/apps/tourist-ios/SLocalTourist/Models.swift:803:25: warning: no calls to throwing functions occur within 'try' expression
+        estimatedCost = try c.decodeIntIfPresent(.estimatedCost)
+                        ^
+/Users/tungps/workspace/s-loco/apps/tourist-ios/SLocalTourist/Models.swift:804:30: warning: no calls to throwing functions occur within 'try' expression
+        distanceFromStayKm = try c.decodeDoubleIfPresent(.distanceFromStayKm)
+                             ^

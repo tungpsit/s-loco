@@ -1,0 +1,510 @@
+2026-05-05 10:04:30 +0000 [MT] Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0xa46028f00; archive(resolved)="<IDEArchive: 0xa478a7e20>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team(resolved)="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	Chain (15, self inclusive):
+	<IDEDistributionProcessingPipelineContext: 0xa46028f00; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionProcessingPipelineContext: 0xa46029500; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b71b80; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b71900; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b71680; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b71400; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b70c80; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b70a00; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b71180; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b70780; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b70f00; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b70500; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="<IDEProvisioningBasicTeam: 0xa47cbe720; teamID='7ANTMTJ9KP', teamName='(null)'>">
+	<IDEDistributionContext: 0xa47b70280; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="(null)">
+	<IDEDistributionContext: 0xa47b70000; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="<IDEDistributionMethodiOSAppStoreDistribution: 0xa47c345a0>", team="(null)">
+	<IDEDistributionContext: 0x100e45900; archive = "<IDEArchive: 0xa478a7e20>", distributionMethod="(null)", team="(null)">
+</IDEDistributionProcessingPipelineContext: 0xa46028f00>
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionCreateDestRootStep
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionCopyItemStep
+2026-05-05 10:04:30 +0000 [MT] Running /usr/bin/ditto '-V' '/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app'
+2026-05-05 10:04:30 +0000  >>> Copying /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app 
+2026-05-05 10:04:30 +0000  copying file ./_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  16167 bytes for ./_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseCore.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  855 bytes for ./Firebase_FirebaseCore.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseCore.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  696 bytes for ./Firebase_FirebaseCore.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./nanopb_nanopb.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  374 bytes for ./nanopb_nanopb.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./nanopb_nanopb.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  670 bytes for ./nanopb_nanopb.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./AppIcon60x60@2x.png ... 
+2026-05-05 10:04:30 +0000  35432 bytes for ./AppIcon60x60@2x.png
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  748 bytes for ./GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-NSData.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./GoogleUtilities_GoogleUtilities-NSData.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-NSData.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  722 bytes for ./GoogleUtilities_GoogleUtilities-NSData.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseInstallations.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  1105 bytes for ./Firebase_FirebaseInstallations.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseInstallations.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  714 bytes for ./Firebase_FirebaseInstallations.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseCoreInternal.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  855 bytes for ./Firebase_FirebaseCoreInternal.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseCoreInternal.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  712 bytes for ./Firebase_FirebaseCoreInternal.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Logger.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./GoogleUtilities_GoogleUtilities-Logger.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Logger.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  722 bytes for ./GoogleUtilities_GoogleUtilities-Logger.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Reachability.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./GoogleUtilities_GoogleUtilities-Reachability.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Reachability.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  734 bytes for ./GoogleUtilities_GoogleUtilities-Reachability.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseMessaging.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  2357 bytes for ./Firebase_FirebaseMessaging.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Firebase_FirebaseMessaging.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  706 bytes for ./Firebase_FirebaseMessaging.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleService-Info.plist ... 
+2026-05-05 10:04:30 +0000  470 bytes for ./GoogleService-Info.plist
+2026-05-05 10:04:30 +0000  copying file ./SLocalTourist ... 
+2026-05-05 10:04:30 +0000  1969856 bytes for ./SLocalTourist
+2026-05-05 10:04:30 +0000  copying file ./GoogleDataTransport_GoogleDataTransport.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  1105 bytes for ./GoogleDataTransport_GoogleDataTransport.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleDataTransport_GoogleDataTransport.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  724 bytes for ./GoogleDataTransport_GoogleDataTransport.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Promises_FBLPromises.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  373 bytes for ./Promises_FBLPromises.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Promises_FBLPromises.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  686 bytes for ./Promises_FBLPromises.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Network.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  856 bytes for ./GoogleUtilities_GoogleUtilities-Network.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Network.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  724 bytes for ./GoogleUtilities_GoogleUtilities-Network.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Assets.car ... 
+2026-05-05 10:04:30 +0000  10668696 bytes for ./Assets.car
+2026-05-05 10:04:30 +0000  copying file ./AppIcon76x76@2x~ipad.png ... 
+53551 bytes for ./AppIcon76x76@2x~ipad.png
+copying file ./PrivacyInfo.xcprivacy ... 
+1146 bytes for ./PrivacyInfo.xcprivacy
+copying file ./GoogleUtilities_GoogleUtilities-UserDefaults.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  911 bytes for ./GoogleUtilities_GoogleUtilities-UserDefaults.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-UserDefaults.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  734 bytes for ./GoogleUtilities_GoogleUtilities-UserDefaults.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Environment.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  855 bytes for ./GoogleUtilities_GoogleUtilities-Environment.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-Environment.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  732 bytes for ./GoogleUtilities_GoogleUtilities-Environment.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAppMeasurement.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Frameworks/GoogleAppMeasurement.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement ... 
+2026-05-05 10:04:30 +0000  51392 bytes for ./Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAppMeasurement.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1550 bytes for ./Frameworks/GoogleAppMeasurement.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/FirebaseAnalytics.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Frameworks/FirebaseAnalytics.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics ... 
+2026-05-05 10:04:30 +0000  51376 bytes for ./Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/FirebaseAnalytics.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1541 bytes for ./Frameworks/FirebaseAnalytics.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAdsOnDeviceConversion.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Frameworks/GoogleAdsOnDeviceConversion.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion ... 
+2026-05-05 10:04:30 +0000  51408 bytes for ./Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAdsOnDeviceConversion.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1521 bytes for ./Frameworks/GoogleAdsOnDeviceConversion.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAppMeasurementIdentitySupport.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Frameworks/GoogleAppMeasurementIdentitySupport.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport ... 
+2026-05-05 10:04:30 +0000  51424 bytes for ./Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport
+2026-05-05 10:04:30 +0000  copying file ./Frameworks/GoogleAppMeasurementIdentitySupport.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1595 bytes for ./Frameworks/GoogleAppMeasurementIdentitySupport.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  738 bytes for ./GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./embedded.mobileprovision ... 
+2026-05-05 10:04:30 +0000  12220 bytes for ./embedded.mobileprovision
+2026-05-05 10:04:30 +0000  copying file ./Info.plist ... 
+2026-05-05 10:04:30 +0000  1508 bytes for ./Info.plist
+2026-05-05 10:04:30 +0000  copying file ./PkgInfo ... 
+2026-05-05 10:04:30 +0000  8 bytes for ./PkgInfo
+2026-05-05 10:04:30 +0000 [MT] /usr/bin/ditto exited with 0
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionEmbedProfileStep
+2026-05-05 10:04:30 +0000 [MT] Skipping profile for item: <IDEDistributionItem: 0xa461372a0; bundleID='org.cocoapods.FirebaseAnalytics', path='<DVTFilePath:0xa47b03b80:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.FirebaseAnalytics', executablePath='<DVTFilePath:0xa47b03c60:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics'>', hardenedRuntime='0'>'>
+2026-05-05 10:04:30 +0000 [MT] Skipping profile for item: <IDEDistributionItem: 0xa46137ea0; bundleID='com.google.ads.GoogleAdsOnDeviceConversion', path='<DVTFilePath:0xa47b61980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137360; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='com.google.ads.GoogleAdsOnDeviceConversion', executablePath='<DVTFilePath:0xa47b03db0:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion'>', hardenedRuntime='0'>'>
+2026-05-05 10:04:30 +0000 [MT] Skipping profile for item: <IDEDistributionItem: 0xa46136100; bundleID='org.cocoapods.GoogleAppMeasurement', path='<DVTFilePath:0xa47b03950:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa461360a0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurement', executablePath='<DVTFilePath:0xa47b03a30:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement'>', hardenedRuntime='0'>'>
+2026-05-05 10:04:30 +0000 [MT] Skipping profile for item: <IDEDistributionItem: 0xa46135f20; bundleID='org.cocoapods.GoogleAppMeasurementIdentitySupport', path='<DVTFilePath:0xa47b62980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135f80; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurementIdentitySupport', executablePath='<DVTFilePath:0xa47b61000:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport'>', hardenedRuntime='0'>'>
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionInfoPlistStep
+2026-05-05 10:04:30 +0000 [MT] Skipping Info.plist step because item: <IDEDistributionItem: 0xa461372a0; bundleID='org.cocoapods.FirebaseAnalytics', path='<DVTFilePath:0xa47b03b80:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.FirebaseAnalytics', executablePath='<DVTFilePath:0xa47b03c60:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics'>', hardenedRuntime='0'>'> is a framework or embedded in a framework.
+2026-05-05 10:04:30 +0000 [MT] Skipping Info.plist step because item: <IDEDistributionItem: 0xa46137ea0; bundleID='com.google.ads.GoogleAdsOnDeviceConversion', path='<DVTFilePath:0xa47b61980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137360; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='com.google.ads.GoogleAdsOnDeviceConversion', executablePath='<DVTFilePath:0xa47b03db0:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion'>', hardenedRuntime='0'>'> is a framework or embedded in a framework.
+2026-05-05 10:04:30 +0000 [MT] Skipping Info.plist step because item: <IDEDistributionItem: 0xa46136100; bundleID='org.cocoapods.GoogleAppMeasurement', path='<DVTFilePath:0xa47b03950:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa461360a0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurement', executablePath='<DVTFilePath:0xa47b03a30:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement'>', hardenedRuntime='0'>'> is a framework or embedded in a framework.
+2026-05-05 10:04:30 +0000 [MT] Skipping Info.plist step because item: <IDEDistributionItem: 0xa46135f20; bundleID='org.cocoapods.GoogleAppMeasurementIdentitySupport', path='<DVTFilePath:0xa47b62980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135f80; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurementIdentitySupport', executablePath='<DVTFilePath:0xa47b61000:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport'>', hardenedRuntime='0'>'> is a framework or embedded in a framework.
+2026-05-05 10:04:30 +0000 [MT] Skipping setting DTXcodeBuildDistribution because toolsBuildVersionName was nil.
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionItemRemovalStep
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionAppThinningPlistStep
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionAppThinningPlistStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionSymbolsStep
+2026-05-05 10:04:30 +0000 [MT] Writing /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Symbols/457BB518-8D60-35EB-A450-5DD9E0D9BCE9.symbols
+2026-05-05 10:04:30 +0000 [MT] Upload Symbols Failed
+2026-05-05 10:04:30 +0000 [MT] Upload Symbols Failed
+2026-05-05 10:04:30 +0000 [MT] Upload Symbols Failed
+2026-05-05 10:04:30 +0000 [MT] Upload Symbols Failed
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionCopyAppleProvidedContentStep
+2026-05-05 10:04:30 +0000 [MT] Running /usr/bin/ditto '-V' '/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Signatures' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Signatures'
+2026-05-05 10:04:30 +0000  >>> Copying /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Signatures 
+2026-05-05 10:04:30 +0000  copying file ./GoogleAppMeasurementIdentitySupport.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6253 bytes for ./GoogleAppMeasurementIdentitySupport.xcframework-ios.signature
+2026-05-05 10:04:30 +0000  copying file ./GoogleAppMeasurement.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6223 bytes for ./GoogleAppMeasurement.xcframework-ios.signature
+2026-05-05 10:04:30 +0000  copying file ./GoogleAdsOnDeviceConversion.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6237 bytes for ./GoogleAdsOnDeviceConversion.xcframework-ios.signature
+2026-05-05 10:04:30 +0000  copying file ./FirebaseAnalytics.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6217 bytes for ./FirebaseAnalytics.xcframework-ios.signature
+2026-05-05 10:04:30 +0000 [MT] /usr/bin/ditto exited with 0
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionAppThinningStep
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionAppThinningStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionArchThinningStep
+2026-05-05 10:04:30 +0000 [MT] Archs to thin for item /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework are []
+2026-05-05 10:04:30 +0000 [MT] Archs to thin for item /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework are []
+2026-05-05 10:04:30 +0000 [MT] Archs to thin for item /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework are []
+2026-05-05 10:04:30 +0000 [MT] Archs to thin for item /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework are []
+2026-05-05 10:04:30 +0000 [MT] Archs to thin for item /Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app are []
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionODRStep
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionStripXattrsStep
+2026-05-05 10:04:30 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-05-05 10:04:30 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-05-05 10:04:30 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-05-05 10:04:30 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-05-05 10:04:30 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionCodesignStep
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa461372a0; bundleID='org.cocoapods.FirebaseAnalytics', path='<DVTFilePath:0xa47b03b80:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.FirebaseAnalytics', executablePath='<DVTFilePath:0xa47b03c60:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics'>', hardenedRuntime='0'>'>: {
+}
+2026-05-05 10:04:30 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa461372a0; bundleID='org.cocoapods.FirebaseAnalytics', path='<DVTFilePath:0xa47b03b80:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.FirebaseAnalytics', executablePath='<DVTFilePath:0xa47b03c60:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics'>', hardenedRuntime='0'>'> are: {
+}
+2026-05-05 10:04:30 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xa461372a0; bundleID='org.cocoapods.FirebaseAnalytics', path='<DVTFilePath:0xa47b03b80:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135e00; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.FirebaseAnalytics', executablePath='<DVTFilePath:0xa47b03c60:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics'>', hardenedRuntime='0'>'> to: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~y3xomZ
+2026-05-05 10:04:30 +0000 [MT] invoking codesign: <NSConcreteTask: 0xa4632b250; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6CB64AA9FB006E85C15699A01F535C2779E724A3,
+    "--entitlements",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~y3xomZ",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework"
+)'>
+2026-05-05 10:04:30 +0000 [MT] codesign output: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework: replacing existing signature
+/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework: signed bundle with Mach-O universal (arm64) [org.cocoapods.FirebaseAnalytics]
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46137ea0; bundleID='com.google.ads.GoogleAdsOnDeviceConversion', path='<DVTFilePath:0xa47b61980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137360; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='com.google.ads.GoogleAdsOnDeviceConversion', executablePath='<DVTFilePath:0xa47b03db0:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion'>', hardenedRuntime='0'>'>: {
+}
+2026-05-05 10:04:30 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46137ea0; bundleID='com.google.ads.GoogleAdsOnDeviceConversion', path='<DVTFilePath:0xa47b61980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137360; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='com.google.ads.GoogleAdsOnDeviceConversion', executablePath='<DVTFilePath:0xa47b03db0:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion'>', hardenedRuntime='0'>'> are: {
+}
+2026-05-05 10:04:30 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xa46137ea0; bundleID='com.google.ads.GoogleAdsOnDeviceConversion', path='<DVTFilePath:0xa47b61980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137360; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='com.google.ads.GoogleAdsOnDeviceConversion', executablePath='<DVTFilePath:0xa47b03db0:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion'>', hardenedRuntime='0'>'> to: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~fNSwYL
+2026-05-05 10:04:30 +0000 [MT] invoking codesign: <NSConcreteTask: 0xa4632b390; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6CB64AA9FB006E85C15699A01F535C2779E724A3,
+    "--entitlements",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~fNSwYL",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework"
+)'>
+2026-05-05 10:04:30 +0000 [MT] codesign output: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework: replacing existing signature
+/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework: signed bundle with Mach-O universal (arm64) [com.google.ads.GoogleAdsOnDeviceConversion]
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46136100; bundleID='org.cocoapods.GoogleAppMeasurement', path='<DVTFilePath:0xa47b03950:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa461360a0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurement', executablePath='<DVTFilePath:0xa47b03a30:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement'>', hardenedRuntime='0'>'>: {
+}
+2026-05-05 10:04:30 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46136100; bundleID='org.cocoapods.GoogleAppMeasurement', path='<DVTFilePath:0xa47b03950:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa461360a0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurement', executablePath='<DVTFilePath:0xa47b03a30:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement'>', hardenedRuntime='0'>'> are: {
+}
+2026-05-05 10:04:30 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xa46136100; bundleID='org.cocoapods.GoogleAppMeasurement', path='<DVTFilePath:0xa47b03950:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa461360a0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurement', executablePath='<DVTFilePath:0xa47b03a30:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement'>', hardenedRuntime='0'>'> to: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~QYxmti
+2026-05-05 10:04:30 +0000 [MT] invoking codesign: <NSConcreteTask: 0xa4632b390; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6CB64AA9FB006E85C15699A01F535C2779E724A3,
+    "--entitlements",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~QYxmti",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework"
+)'>
+2026-05-05 10:04:30 +0000 [MT] codesign output: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework: replacing existing signature
+/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework: signed bundle with Mach-O universal (arm64) [org.cocoapods.GoogleAppMeasurement]
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46135f20; bundleID='org.cocoapods.GoogleAppMeasurementIdentitySupport', path='<DVTFilePath:0xa47b62980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135f80; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurementIdentitySupport', executablePath='<DVTFilePath:0xa47b61000:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport'>', hardenedRuntime='0'>'>: {
+}
+2026-05-05 10:04:30 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46135f20; bundleID='org.cocoapods.GoogleAppMeasurementIdentitySupport', path='<DVTFilePath:0xa47b62980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135f80; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurementIdentitySupport', executablePath='<DVTFilePath:0xa47b61000:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport'>', hardenedRuntime='0'>'> are: {
+}
+2026-05-05 10:04:30 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xa46135f20; bundleID='org.cocoapods.GoogleAppMeasurementIdentitySupport', path='<DVTFilePath:0xa47b62980:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46135f80; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='(null)', teamID='7ANTMTJ9KP', identifier='org.cocoapods.GoogleAppMeasurementIdentitySupport', executablePath='<DVTFilePath:0xa47b61000:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport'>', hardenedRuntime='0'>'> to: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~PkR7HP
+2026-05-05 10:04:30 +0000 [MT] invoking codesign: <NSConcreteTask: 0xa4632b390; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6CB64AA9FB006E85C15699A01F535C2779E724A3,
+    "--entitlements",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~PkR7HP",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework"
+)'>
+2026-05-05 10:04:30 +0000 [MT] codesign output: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework: replacing existing signature
+/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework: signed bundle with Mach-O universal (arm64) [org.cocoapods.GoogleAppMeasurementIdentitySupport]
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46137d20; bundleID='vn.sloco.tourist', path='<DVTFilePath:0xa478a7e90:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137f60; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf0c0; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='{
+    "application-identifier" = "7ANTMTJ9KP.vn.sloco.tourist";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.team-identifier" = 7ANTMTJ9KP;
+    "get-task-allow" = 0;
+}', teamID='7ANTMTJ9KP', identifier='vn.sloco.tourist', executablePath='<DVTFilePath:0xa46053c00:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/SLocalTourist'>', hardenedRuntime='0'>'>: {
+    "application-identifier" = "7ANTMTJ9KP.vn.sloco.tourist";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.team-identifier" = 7ANTMTJ9KP;
+    "get-task-allow" = 0;
+}
+2026-05-05 10:04:30 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-05-05 10:04:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0xa46137d20; bundleID='vn.sloco.tourist', path='<DVTFilePath:0xa478a7e90:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137f60; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='{
+    "application-identifier" = "7ANTMTJ9KP.vn.sloco.tourist";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.team-identifier" = 7ANTMTJ9KP;
+    "get-task-allow" = 0;
+}', teamID='7ANTMTJ9KP', identifier='vn.sloco.tourist', executablePath='<DVTFilePath:0xa46053c00:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/SLocalTourist'>', hardenedRuntime='0'>'> are: {
+    "application-identifier" = "7ANTMTJ9KP.vn.sloco.tourist";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.team-identifier" = 7ANTMTJ9KP;
+    "get-task-allow" = 0;
+}
+2026-05-05 10:04:30 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xa46137d20; bundleID='vn.sloco.tourist', path='<DVTFilePath:0xa478a7e90:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xa46137f60; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xa477cf300; name='Apple Distribution: Tung Pham (7ANTMTJ9KP)', hash='6CB64AA9FB006E85C15699A01F535C2779E724A3', serialNumber='64F8D7A0A548C377DB45635856BA080', certificateKinds='(
+    "1.2.840.113635.100.6.1.7",
+    "1.2.840.113635.100.6.1.4"
+), issueDate='2026-05-05 07:57:48 +0000''>', entitlements='{
+    "application-identifier" = "7ANTMTJ9KP.vn.sloco.tourist";
+    "aps-environment" = production;
+    "beta-reports-active" = 1;
+    "com.apple.developer.team-identifier" = 7ANTMTJ9KP;
+    "get-task-allow" = 0;
+}', teamID='7ANTMTJ9KP', identifier='vn.sloco.tourist', executablePath='<DVTFilePath:0xa46053c00:'/Users/tungps/workspace/s-loco/apps/tourist-ios/.asc/artifacts/SLocalTourist.xcarchive/Products/Applications/SLocalTourist.app/SLocalTourist'>', hardenedRuntime='0'>'> to: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~ExM0Gn
+2026-05-05 10:04:30 +0000 [MT] invoking codesign: <NSConcreteTask: 0xa4632b390; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    6CB64AA9FB006E85C15699A01F535C2779E724A3,
+    "--entitlements",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/entitlements~~~ExM0Gn",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app"
+)'>
+2026-05-05 10:04:30 +0000 [MT] codesign output: /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app: replacing existing signature
+/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app: signed app bundle with Mach-O thin (arm64) [vn.sloco.tourist]
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionZipODRItemStep
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionCreateIPAStep
+2026-05-05 10:04:30 +0000 [MT] Running /usr/bin/rsync '-8aPhhE' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Symbols' '--link-dest' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root'
+2026-05-05 10:04:30 +0000  Symbols/
+Symbols/457BB518-8D60-35EB-A450-5DD9E0D9BCE9.symbols
+2026-05-05 10:04:30 +0000 [MT] /usr/bin/rsync exited with 0
+2026-05-05 10:04:30 +0000 [MT] Running /usr/bin/ditto '-V' '-c' '-k' '--norsrc' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root' '/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Packages/SLocalTourist.ipa'
+2026-05-05 10:04:30 +0000  >>> Copying /var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root 
+2026-05-05 10:04:30 +0000  copying file ./Signatures/GoogleAppMeasurementIdentitySupport.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6253 bytes for ./Signatures/GoogleAppMeasurementIdentitySupport.xcframework-ios.signature
+copying file ./Signatures/GoogleAppMeasurement.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6223 bytes for ./Signatures/GoogleAppMeasurement.xcframework-ios.signature
+2026-05-05 10:04:30 +0000  copying file ./Signatures/GoogleAdsOnDeviceConversion.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6237 bytes for ./Signatures/GoogleAdsOnDeviceConversion.xcframework-ios.signature
+copying file ./Signatures/FirebaseAnalytics.xcframework-ios.signature ... 
+2026-05-05 10:04:30 +0000  6217 bytes for ./Signatures/FirebaseAnalytics.xcframework-ios.signature
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  16167 bytes for ./Payload/SLocalTourist.app/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Firebase_FirebaseCore.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  855 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseCore.bundle/PrivacyInfo.xcprivacy
+copying file ./Payload/SLocalTourist.app/Firebase_FirebaseCore.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  696 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseCore.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/nanopb_nanopb.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  374 bytes for ./Payload/SLocalTourist.app/nanopb_nanopb.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/nanopb_nanopb.bundle/Info.plist ... 
+670 bytes for ./Payload/SLocalTourist.app/nanopb_nanopb.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/AppIcon60x60@2x.png ... 
+2026-05-05 10:04:30 +0000  35432 bytes for ./Payload/SLocalTourist.app/AppIcon60x60@2x.png
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/PrivacyInfo.xcprivacy ... 
+478 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/PrivacyInfo.xcprivacy
+copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/Info.plist ... 
+748 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-AppDelegateSwizzler.bundle/Info.plist
+copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-NSData.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-NSData.bundle/PrivacyInfo.xcprivacy
+copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-NSData.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  722 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-NSData.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Firebase_FirebaseInstallations.bundle/PrivacyInfo.xcprivacy ... 
+1105 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseInstallations.bundle/PrivacyInfo.xcprivacy
+copying file ./Payload/SLocalTourist.app/Firebase_FirebaseInstallations.bundle/Info.plist ... 
+714 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseInstallations.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Firebase_FirebaseCoreInternal.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  855 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseCoreInternal.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Firebase_FirebaseCoreInternal.bundle/Info.plist ... 
+712 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseCoreInternal.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Logger.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Logger.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Logger.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  722 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Logger.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Reachability.bundle/PrivacyInfo.xcprivacy ... 
+478 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Reachability.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Reachability.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  734 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Reachability.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Firebase_FirebaseMessaging.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  2357 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseMessaging.bundle/PrivacyInfo.xcprivacy
+copying file ./Payload/SLocalTourist.app/Firebase_FirebaseMessaging.bundle/Info.plist ... 
+706 bytes for ./Payload/SLocalTourist.app/Firebase_FirebaseMessaging.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleService-Info.plist ... 
+2026-05-05 10:04:30 +0000  470 bytes for ./Payload/SLocalTourist.app/GoogleService-Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/SLocalTourist ... 
+2026-05-05 10:04:30 +0000  1969856 bytes for ./Payload/SLocalTourist.app/SLocalTourist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleDataTransport_GoogleDataTransport.bundle/PrivacyInfo.xcprivacy ... 
+1105 bytes for ./Payload/SLocalTourist.app/GoogleDataTransport_GoogleDataTransport.bundle/PrivacyInfo.xcprivacy
+copying file ./Payload/SLocalTourist.app/GoogleDataTransport_GoogleDataTransport.bundle/Info.plist ... 
+724 bytes for ./Payload/SLocalTourist.app/GoogleDataTransport_GoogleDataTransport.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Promises_FBLPromises.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  373 bytes for ./Payload/SLocalTourist.app/Promises_FBLPromises.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Promises_FBLPromises.bundle/Info.plist ... 
+686 bytes for ./Payload/SLocalTourist.app/Promises_FBLPromises.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Network.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  856 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Network.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Network.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  724 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Network.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Assets.car ... 
+2026-05-05 10:04:30 +0000  10668696 bytes for ./Payload/SLocalTourist.app/Assets.car
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/AppIcon76x76@2x~ipad.png ... 
+2026-05-05 10:04:30 +0000  53551 bytes for ./Payload/SLocalTourist.app/AppIcon76x76@2x~ipad.png
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  1146 bytes for ./Payload/SLocalTourist.app/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-UserDefaults.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  911 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-UserDefaults.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-UserDefaults.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  734 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-UserDefaults.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Environment.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  855 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Environment.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Environment.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  732 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-Environment.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement ... 
+2026-05-05 10:04:30 +0000  51392 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/GoogleAppMeasurement
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1550 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics ... 
+2026-05-05 10:04:30 +0000  51376 bytes for ./Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/FirebaseAnalytics
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1541 bytes for ./Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion ... 
+2026-05-05 10:04:30 +0000  51408 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/GoogleAdsOnDeviceConversion
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1521 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/_CodeSignature/CodeResources ... 
+2026-05-05 10:04:30 +0000  1798 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/_CodeSignature/CodeResources
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport ... 
+2026-05-05 10:04:30 +0000  51424 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/GoogleAppMeasurementIdentitySupport
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/Info.plist ... 
+2026-05-05 10:04:30 +0000  1595 bytes for ./Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/PrivacyInfo.xcprivacy ... 
+2026-05-05 10:04:30 +0000  478 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/PrivacyInfo.xcprivacy
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/Info.plist ... 
+2026-05-05 10:04:30 +0000  738 bytes for ./Payload/SLocalTourist.app/GoogleUtilities_GoogleUtilities-MethodSwizzler.bundle/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/embedded.mobileprovision ... 
+2026-05-05 10:04:30 +0000  12220 bytes for ./Payload/SLocalTourist.app/embedded.mobileprovision
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/Info.plist ... 
+2026-05-05 10:04:30 +0000  1508 bytes for ./Payload/SLocalTourist.app/Info.plist
+2026-05-05 10:04:30 +0000  copying file ./Payload/SLocalTourist.app/PkgInfo ... 
+2026-05-05 10:04:30 +0000  8 bytes for ./Payload/SLocalTourist.app/PkgInfo
+2026-05-05 10:04:30 +0000  copying file ./Symbols/457BB518-8D60-35EB-A450-5DD9E0D9BCE9.symbols ... 
+2026-05-05 10:04:30 +0000  4741644 bytes for ./Symbols/457BB518-8D60-35EB-A450-5DD9E0D9BCE9.symbols
+2026-05-05 10:04:30 +0000 [MT] /usr/bin/ditto exited with 0
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionAppStoreInformationStep
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionAppStoreInformationStep because it said so
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionGenerateProcessedDistributionItems
+2026-05-05 10:04:30 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xa47b67900:'/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAdsOnDeviceConversion.framework'>
+2026-05-05 10:04:30 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xa47de9dc0:'/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurement.framework'>
+2026-05-05 10:04:30 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xa47de9ea0:'/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/FirebaseAnalytics.framework'>
+2026-05-05 10:04:30 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xa47b67800:'/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app/Frameworks/GoogleAppMeasurementIdentitySupport.framework'>
+2026-05-05 10:04:30 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xa47de9650:'/var/folders/s5/6b4rlk6d5936y6h_qp1bftv40000gn/T/XcodeDistPipeline.~~~LBpufY/Root/Payload/SLocalTourist.app'>
+2026-05-05 10:04:30 +0000 [MT] Processing step: IDEDistributionCreateManifestStep
+2026-05-05 10:04:30 +0000 [MT] Skipping step: IDEDistributionCreateManifestStep because it said so
