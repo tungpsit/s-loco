@@ -79,7 +79,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@slocal.vn"
+                placeholder="admin@sloco.vn"
                 required
                 autoFocus
                 className="w-full px-4 py-3 rounded-xl bg-surface-low border border-outline-variant/30 text-on-surface placeholder:text-outline text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
@@ -123,7 +123,7 @@ export default function LoginPage() {
           {/* Dev hint */}
           <div className="mt-6 pt-5 border-t border-outline-variant/15">
             <p className="text-xs text-on-surface-variant text-center">
-              Demo: <code className="bg-surface-low px-1.5 py-0.5 rounded text-xs">admin@slocal.vn</code> / <code className="bg-surface-low px-1.5 py-0.5 rounded text-xs">admin123</code>
+              Demo: <code className="bg-surface-low px-1.5 py-0.5 rounded text-xs">admin@sloco.vn</code> / <code className="bg-surface-low px-1.5 py-0.5 rounded text-xs">admin123</code>
             </p>
           </div>
         </div>

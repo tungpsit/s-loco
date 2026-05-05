@@ -10,7 +10,7 @@ describe('vendor demo data', () => {
       .select({ vendorId: vendors.id })
       .from(users)
       .innerJoin(vendors, eq(vendors.ownerId, users.id))
-      .where(and(eq(users.email, 'vendor@slocal.vn'), isNull(vendors.deletedAt)))
+      .where(and(eq(users.email, 'vendor@sloco.vn'), isNull(vendors.deletedAt)))
       .limit(1)
 
     expect(row?.vendorId).toBeTruthy()

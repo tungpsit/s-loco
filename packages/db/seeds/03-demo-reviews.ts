@@ -88,7 +88,7 @@ async function seed() {
   }
 
   // Get tourist user for reviewer
-  const [tourist] = await db.select().from(users).where(eq(users.email, 'tourist@slocal.vn'))
+  const [tourist] = await db.select().from(users).where(eq(users.email, 'tourist@sloco.vn'))
   const reviewerId = tourist?.id ?? vendor.ownerId // fallback to vendor owner
 
   // Insert reviews

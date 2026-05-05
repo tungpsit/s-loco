@@ -54,7 +54,6 @@ struct RootView: View {
             ScanView().tabItem { Label(AppTab.scan.rawValue, systemImage: "qrcode.viewfinder") }.tag(AppTab.scan)
             OrdersView().tabItem { Label(AppTab.orders.rawValue, systemImage: "bag") }.tag(AppTab.orders)
             ServicesView().tabItem { Label(AppTab.services.rawValue, systemImage: "ticket") }.tag(AppTab.services)
-            EarningsView().tabItem { Label(AppTab.earnings.rawValue, systemImage: "chart.line.uptrend.xyaxis") }.tag(AppTab.earnings)
             SettingsView().tabItem { Label(AppTab.settings.rawValue, systemImage: "ellipsis.circle") }.tag(AppTab.settings)
         }
     }

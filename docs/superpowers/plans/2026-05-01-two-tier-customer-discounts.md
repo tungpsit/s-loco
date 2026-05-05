@@ -25,7 +25,7 @@
 - Modify `apps/api/src/services/order.service.ts`: charge final price after both discount layers and snapshot both layers.
 - Modify `apps/api/src/services/reservation.service.ts`: use vendor app discount for reservation discount vouchers.
 - Modify `apps/tourist-ios/SLocalTourist/Models.swift`, `APIClient.swift`, and `DashboardView.swift`: decode optional normalized pricing and render two discount labels.
-- Modify `apps/tourist-android/app/src/main/java/com/slocal/tourist/MainActivity.kt`: parse optional normalized pricing and render two discount labels.
+- Modify `apps/tourist-android/app/src/main/java/com/sloco/tourist/MainActivity.kt`: parse optional normalized pricing and render two discount labels.
 
 ## Task 1: Database and Vendor Validation
 
@@ -295,7 +295,7 @@ Expected: PASS.
 - Modify: `apps/tourist-ios/SLocalTourist/Models.swift`
 - Modify: `apps/tourist-ios/SLocalTourist/APIClient.swift`
 - Modify: `apps/tourist-ios/SLocalTourist/DashboardView.swift`
-- Modify: `apps/tourist-android/app/src/main/java/com/slocal/tourist/MainActivity.kt`
+- Modify: `apps/tourist-android/app/src/main/java/com/sloco/tourist/MainActivity.kt`
 
 - [ ] **Step 1: Decode optional normalized pricing**
 

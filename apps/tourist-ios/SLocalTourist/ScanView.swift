@@ -6,7 +6,7 @@ struct ScanView: View {
     @State private var budget = "3000000"
     @State private var preferences = "Ẩm thực địa phương, điểm tham quan nhẹ nhàng"
     @State private var groupType = ItineraryGroupType.couple
-    @State private var stayMode = ItineraryStayMode.slocal
+    @State private var stayMode = ItineraryStayMode.sloco
     @State private var selectedStayServiceId = ""
     @State private var manualStayLabel = ""
     @State private var preferNearStay = false
@@ -23,7 +23,7 @@ struct ScanView: View {
 
     private var stayContext: ItineraryStayContext {
         switch stayMode {
-        case .slocal:
+        case .sloco:
             guard let selectedStayService else { return ItineraryStayContext() }
             return ItineraryStayContext(
                 label: selectedStayService.stayLabel,
@@ -124,7 +124,7 @@ struct ScanView: View {
 }
 
 private enum ItineraryStayMode: String, CaseIterable, Identifiable {
-    case slocal = "Chọn lưu trú S-Loco"
+    case sloco = "Chọn lưu trú S-Loco"
     case manual = "Nhập nơi lưu trú"
 
     var id: String { rawValue }
@@ -204,7 +204,7 @@ private struct ItineraryStaySection: View {
                 }
                 .pickerStyle(.segmented)
 
-                if mode == .slocal {
+                if mode == .sloco {
                     if lodgingServices.isEmpty {
                         Text("Chưa có lưu trú S-Loco khả dụng. Bạn có thể nhập tên khách sạn hoặc địa chỉ thủ công.")
                             .font(.caption)

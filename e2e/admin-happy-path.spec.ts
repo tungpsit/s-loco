@@ -15,7 +15,7 @@ async function waitForAdminReady(page: import('@playwright/test').Page) {
 async function loginAsAdmin(page: import('@playwright/test').Page) {
   await waitForAdminReady(page)
   await page.goto(`${ADMIN_BASE}/login`, { waitUntil: 'domcontentloaded' })
-  await page.locator('#email').fill('admin@slocal.vn')
+  await page.locator('#email').fill('admin@sloco.vn')
   await page.locator('#password').fill('admin123')
   await page.getByRole('button', { name: /đăng nhập/i }).click()
   await page.waitForURL(/\/dashboard/, { timeout: 10000 })

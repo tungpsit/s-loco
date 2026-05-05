@@ -173,7 +173,7 @@ _Last updated: 2026-04-03 after Phase 5 task generation_
 
 - ✅ Task files generated: 63 individual task files created in `.haki/tasks/`
 - ✅ All 63 requirements now have individual task files with acceptance criteria, dependencies, and spec references
-- ✅ Milestone structure confirmed consistent with `docs/superpowers/specs/2026-04-03-slocal-design.md`
+- ✅ Milestone structure confirmed consistent with `docs/superpowers/specs/2026-04-03-sloco-design.md`
 - ✅ Task file template standardized: Status, Priority, Estimate, Acceptance Criteria, Technical Notes, Dependencies, Spec Reference
 
 ### Phase Requirement Tally (verified)

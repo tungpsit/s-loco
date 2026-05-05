@@ -434,7 +434,6 @@ enum AppTab: String, CaseIterable, Identifiable {
     case scan = "Quét QR"
     case orders = "Đơn hàng"
     case services = "Dịch vụ"
-    case earnings = "Thu nhập"
     case settings = "Thêm"
 
     var id: String { rawValue }

@@ -11,10 +11,10 @@ BEGIN
     INTO demo_vendor_id
   FROM vendors v
   INNER JOIN users owner ON owner.id = v.owner_id
-  WHERE owner.email IN ('vendor1@slocal.vn', 'vendor@slocal.vn')
+  WHERE owner.email IN ('vendor1@sloco.vn', 'vendor@sloco.vn')
     AND v.deleted_at IS NULL
   ORDER BY
-    CASE owner.email WHEN 'vendor1@slocal.vn' THEN 0 ELSE 1 END,
+    CASE owner.email WHEN 'vendor1@sloco.vn' THEN 0 ELSE 1 END,
     CASE v.name WHEN 'Nhà Hàng Hải Sản Biển Đông' THEN 0 ELSE 1 END,
     v.created_at ASC
   LIMIT 1;
@@ -24,7 +24,7 @@ BEGIN
   FROM users
   WHERE role = 'tourist'
   ORDER BY
-    CASE email WHEN 'tourist@slocal.vn' THEN 0 ELSE 1 END,
+    CASE email WHEN 'tourist@sloco.vn' THEN 0 ELSE 1 END,
     created_at ASC
   LIMIT 1;
 

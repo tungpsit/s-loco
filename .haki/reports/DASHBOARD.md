@@ -123,7 +123,7 @@ packages/
 docs/
 ├── ARCHITECTURE.md + api-contract.md
 ├── design-mobile/vendor/admin/pwa.md
-├── superpowers/specs/2026-04-03-slocal-design.md
+├── superpowers/specs/2026-04-03-sloco-design.md
 docs/             # GETTING_STARTED.md, README.md
 .haki/
 ├── reports/       # 14 phase + role reports

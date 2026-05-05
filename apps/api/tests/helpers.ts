@@ -39,7 +39,7 @@ export async function request(
 export async function adminLogin() {
   const { data } = await request('/api/v1/auth/login', {
     method: 'POST',
-    json: { email: 'admin@slocal.vn', password: 'admin123' },
+    json: { email: 'admin@sloco.vn', password: 'admin123' },
   })
   return data?.data?.tokens?.access_token || data?.data?.access_token || null
 }
@@ -48,7 +48,7 @@ export async function adminLogin() {
 export async function vendorLogin() {
   const { data } = await request('/api/v1/auth/login', {
     method: 'POST',
-    json: { email: 'vendor@slocal.vn', password: 'vendor123' },
+    json: { email: 'vendor@sloco.vn', password: 'vendor123' },
   })
   return data?.data?.tokens?.access_token || data?.data?.access_token || null
 }

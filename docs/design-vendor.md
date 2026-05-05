@@ -98,7 +98,7 @@ apps/vendor-ios/SLocalVendor/
 ├── EarningsView.swift      ← Earnings & settlements
 └── SettingsView.swift      ← Settings
 
-apps/vendor-android/app/src/main/java/com/slocal/vendor/
+apps/vendor-android/app/src/main/java/com/sloco/vendor/
 ├── ui/VendorApp.kt         ← Tab navigator + screens
 ├── ui/AppState.kt          ← App state/actions
 └── data/VendorApi.kt       ← API client

@@ -33,13 +33,13 @@ async function seed() {
     .insert(users)
     .values({
       phone: '0900000001',
-      email: 'admin@slocal.vn',
-      fullName: 'S-Local Admin',
+      email: 'admin@sloco.vn',
+      fullName: 'S-Loco Admin',
       role: 'admin',
       passwordHash: adminHash,
     })
     .onConflictDoNothing()
-  const [admin] = await db.select().from(users).where(eq(users.email, 'admin@slocal.vn'))
+  const [admin] = await db.select().from(users).where(eq(users.email, 'admin@sloco.vn'))
   console.log(`   ✅ Admin: ${admin?.email}`)
 
   // ─── 2. Vendor Owner ─────────────────────────────────
@@ -49,13 +49,13 @@ async function seed() {
     .insert(users)
     .values({
       phone: '0900000002',
-      email: 'vendor@slocal.vn',
+      email: 'vendor@sloco.vn',
       fullName: 'Nguyễn Văn Biển',
       role: 'vendor_owner',
       passwordHash: vendorHash,
     })
     .onConflictDoNothing()
-  const [vendorOwner] = await db.select().from(users).where(eq(users.email, 'vendor@slocal.vn'))
+  const [vendorOwner] = await db.select().from(users).where(eq(users.email, 'vendor@sloco.vn'))
   console.log(`   ✅ Vendor owner: ${vendorOwner?.email}`)
 
   if (!vendorOwner) {
@@ -69,12 +69,12 @@ async function seed() {
     .insert(users)
     .values({
       phone: '0900000003',
-      email: 'tourist@slocal.vn',
+      email: 'tourist@sloco.vn',
       fullName: 'Trần Minh Anh',
       role: 'tourist',
     })
     .onConflictDoNothing()
-  const [tourist] = await db.select().from(users).where(eq(users.email, 'tourist@slocal.vn'))
+  const [tourist] = await db.select().from(users).where(eq(users.email, 'tourist@sloco.vn'))
   console.log(`   ✅ Tourist: ${tourist?.email}`)
 
   // ─── 4. Demo Vendor ───────────────────────────────────
@@ -92,7 +92,7 @@ async function seed() {
       latitude: '19.7569',
       longitude: '105.9011',
       phone: '0903000001',
-      email: 'biepdong@slocal.vn',
+      email: 'biepdong@sloco.vn',
       status: 'active',
       settlementType: 'periodic',
       settlementPeriodDays: 3,
@@ -288,9 +288,9 @@ async function seed() {
   console.log('🎉 Demo data seed complete!')
   console.log('═══════════════════════════════════════════')
   console.log('Demo accounts:')
-  console.log('   Admin:    admin@slocal.vn    / admin123')
-  console.log('   Vendor:   vendor@slocal.vn   / vendor123')
-  console.log('   Tourist:  tourist@slocal.vn  (OTP — no password)')
+  console.log('   Admin:    admin@sloco.vn    / admin123')
+  console.log('   Vendor:   vendor@sloco.vn   / vendor123')
+  console.log('   Tourist:  tourist@sloco.vn  (OTP — no password)')
   console.log('═══════════════════════════════════════════\n')
 
   process.exit(0)

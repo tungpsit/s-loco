@@ -1,7 +1,7 @@
 UPDATE vendors
 SET owner_id = demo_owner.id
 FROM users AS demo_owner
-WHERE demo_owner.email = 'vendor@slocal.vn'
+WHERE demo_owner.email = 'vendor@sloco.vn'
   AND vendors.slug = 'nha-hang-hai-san-bien-dong'
   AND NOT EXISTS (
     SELECT 1

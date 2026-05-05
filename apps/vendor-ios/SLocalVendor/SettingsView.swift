@@ -93,6 +93,7 @@ struct SettingsView: View {
                     .disabled(state.isLoading)
                 }
             }
+            .navigationTitle("Thêm")
             .refreshable { await state.refreshHome() }
             .scrollContentBackground(.hidden)
             .vendorReadableContent()

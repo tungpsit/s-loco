@@ -77,7 +77,7 @@ S-Loco là siêu ứng dụng du lịch bản địa tại Sầm Sơn — nền 
 | **Phase 2: Strategy** | `.haki/PROJECT.md`, `prd.md`, `vision.md` | ✅ PROJECT.md done, prd/vision missing | **PARTIAL** — create prd.md + vision.md from PROJECT.md content |
 | **Phase 3: Architect** | `docs/ARCHITECTURE.md`, `api-contract.md` | ⚠️ Not in standard location | **RUN** — create `docs/ARCHITECTURE.md` from existing `system-architecture.md`, create `docs/api-contract.md` |
 | **Phase 3: Designer** | `DESIGN.md` | ✅ Exists | **EXTEND** — verify completeness, add mobile/vendor-specific components |
-| **Phase 4: Spec Writer** | `docs/superpowers/specs/YYYY-MM-DD-slocal-design.md` | ❌ Missing | **RUN** — consolidate all artifacts into approved spec |
+| **Phase 4: Spec Writer** | `docs/superpowers/specs/YYYY-MM-DD-sloco-design.md` | ❌ Missing | **RUN** — consolidate all artifacts into approved spec |
 | **Phase 5: Planner** | `.haki/ROADMAP.md`, `.haki/tasks/*.md` | ✅ ROADMAP exists, tasks missing | **RUN** — create task files from ROADMAP tasks |
 
 ---

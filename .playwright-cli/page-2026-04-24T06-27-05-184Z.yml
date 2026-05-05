@@ -6,7 +6,7 @@
   - generic [ref=e19]:
     - generic [ref=e20]: Đăng nhập
     - generic [ref=e21]: Email
-    - textbox "vendor@samson.vn" [ref=e22]: vendor1@slocal.vn
+    - textbox "vendor@samson.vn" [ref=e22]: vendor1@sloco.vn
     - generic [ref=e23]: Mật khẩu
     - textbox "••••••••" [ref=e24]: vendor123
     - generic [ref=e26] [cursor=pointer]: Đăng nhập

@@ -75,7 +75,7 @@ All artifacts ready:
 ✅ .haki/codebase/            — STACK.md, CONVENTIONS.md, STRUCTURE.md, ARCHITECTURE.md
 ✅ .haki/reports/             — All 7 phase reports (00-06)
 ✅ docs/superpowers/specs/
-    └── 2026-04-03-slocal-design.md  — Consolidated spec (674 lines, 12 sections)
+    └── 2026-04-03-sloco-design.md  — Consolidated spec (674 lines, 12 sections)
 ✅ docs/ARCHITECTURE.md       — Full architecture (9 sections)
 ✅ docs/api-contract.md       — API contracts (10 sections, 50+ endpoints)
 ✅ DESIGN.md                  — Design system "The Coastal Editorial" (extended)

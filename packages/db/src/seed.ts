@@ -172,22 +172,22 @@ const ARTICLES_DATA: Array<{ title: string; content: string; category: 'news' | 
   // News
   { title: 'Sầm Sơn đón hơn 1 triệu lượt khách trong tháng 6', content: '<p>Theo thống kê từ UBND thành phố Sầm Sơn, riêng trong tháng 6/2026, thành phố biển đã đón hơn 1 triệu lượt khách du lịch, tăng 15% so với cùng kỳ năm trước.</p><p>Lượng khách tăng mạnh chủ yếu đến từ Hà Nội, Nghệ An và các tỉnh phía Bắc. Hệ thống khách sạn, nhà hàng hoạt động gần như hết công suất vào các dịp cuối tuần.</p><p>Ông Nguyễn Văn Phương - Phó Chủ tịch UBND TP Sầm Sơn cho biết: "Chúng tôi đang tập trung nâng cao chất lượng dịch vụ, đảm bảo an toàn vệ sinh thực phẩm và trật tự đô thị để phục vụ du khách tốt nhất."</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800' },
   { title: 'Khai trương tuyến đường đi bộ ven biển mới', content: '<p>Tuyến đường đi bộ ven biển dài 3km từ bãi tắm A đến Đền Độc Cước đã chính thức khai trương vào ngày 15/3/2026.</p><p>Tuyến đường được lát đá granite, có đèn LED chiếu sáng nghệ thuật và ghế nghỉ chân mỗi 200m. Dọc tuyến đường có các quầy bán đồ uống và quà lưu niệm.</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800' },
-  { title: 'Giải pháp chống chặt chém du khách tại Sầm Sơn', content: '<p>Sầm Sơn triển khai hệ thống niêm yết giá minh bạch tại 100% nhà hàng, khách sạn. Ứng dụng S-Local ra đời giúp du khách mua voucher với giá cố định, tránh tình trạng "chặt chém".</p><p>Theo đại diện S-Local: "Mỗi voucher đều được bảo đảm giá trên hệ thống. Khách mua trước — đến cơ sở quét QR là xong, không lo bị tính thêm phí."</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800' },
-  { title: 'Hải sản Sầm Sơn vào mùa — giá giảm 20%', content: '<p>Mùa đánh bắt hải sản năm nay bắt đầu sớm hơn thường lệ. Ngư dân Sầm Sơn cho biết sản lượng tôm hùm, ghẹ, mực tăng mạnh, giá giảm 20-30% so với tháng trước.</p><p>Các nhà hàng hải sản trên S-Local đã cập nhật menu với giá mới, nhiều combo hấp dẫn cho gia đình.</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=800' },
-  { title: 'S-Local hợp tác cùng 50 vendor mới', content: '<p>Sau 3 tháng hoạt động, nền tảng S-Local đã ký kết hợp tác với thêm 50 nhà cung cấp dịch vụ mới tại Sầm Sơn, nâng tổng số vendor lên 80+.</p><p>Các vendor mới bao gồm nhà hàng, homestay, spa, dịch vụ thể thao biển và cửa hàng đặc sản. Du khách giờ đây có thêm nhiều lựa chọn với giá ưu đãi trên app.</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800' },
+  { title: 'Giải pháp chống chặt chém du khách tại Sầm Sơn', content: '<p>Sầm Sơn triển khai hệ thống niêm yết giá minh bạch tại 100% nhà hàng, khách sạn. Ứng dụng S-Loco ra đời giúp du khách mua voucher với giá cố định, tránh tình trạng "chặt chém".</p><p>Theo đại diện S-Loco: "Mỗi voucher đều được bảo đảm giá trên hệ thống. Khách mua trước — đến cơ sở quét QR là xong, không lo bị tính thêm phí."</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800' },
+  { title: 'Hải sản Sầm Sơn vào mùa — giá giảm 20%', content: '<p>Mùa đánh bắt hải sản năm nay bắt đầu sớm hơn thường lệ. Ngư dân Sầm Sơn cho biết sản lượng tôm hùm, ghẹ, mực tăng mạnh, giá giảm 20-30% so với tháng trước.</p><p>Các nhà hàng hải sản trên S-Loco đã cập nhật menu với giá mới, nhiều combo hấp dẫn cho gia đình.</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=800' },
+  { title: 'S-Loco hợp tác cùng 50 vendor mới', content: '<p>Sau 3 tháng hoạt động, nền tảng S-Loco đã ký kết hợp tác với thêm 50 nhà cung cấp dịch vụ mới tại Sầm Sơn, nâng tổng số vendor lên 80+.</p><p>Các vendor mới bao gồm nhà hàng, homestay, spa, dịch vụ thể thao biển và cửa hàng đặc sản. Du khách giờ đây có thêm nhiều lựa chọn với giá ưu đãi trên app.</p>', category: 'news', coverUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800' },
 
   // Events
-  { title: 'Lễ hội Carnival Biển Sầm Sơn 2026', content: '<p>Lễ hội Carnival Biển Sầm Sơn 2026 sẽ diễn ra từ 28/4 đến 1/5 tại Quảng trường biển Sầm Sơn.</p><p>Chương trình bao gồm: diễu hành carnival với 1000 nghệ sĩ, đêm nhạc EDM bãi biển, cuộc thi xây lâu đài cát, và lễ hội ẩm thực hải sản với hơn 50 gian hàng.</p><p>Vé tham dự miễn phí. Đặt voucher dịch vụ trên S-Local để nhận ưu đãi đặc biệt trong dịp lễ hội!</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800' },
-  { title: 'Giải Chạy Marathon Bãi Biển Sầm Sơn', content: '<p>Giải Marathon Bãi Biển Sầm Sơn lần thứ 3 sẽ tổ chức vào ngày 15/4/2026 với các cự ly 5km, 10km, 21km và 42km.</p><p>Đường chạy dọc bờ biển Sầm Sơn tuyệt đẹp. Giải thưởng tổng trị giá 500 triệu đồng.</p><p>Đăng ký trên app S-Local — nhận voucher giảm giá khách sạn và nhà hàng cho vận động viên!</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800' },
+  { title: 'Lễ hội Carnival Biển Sầm Sơn 2026', content: '<p>Lễ hội Carnival Biển Sầm Sơn 2026 sẽ diễn ra từ 28/4 đến 1/5 tại Quảng trường biển Sầm Sơn.</p><p>Chương trình bao gồm: diễu hành carnival với 1000 nghệ sĩ, đêm nhạc EDM bãi biển, cuộc thi xây lâu đài cát, và lễ hội ẩm thực hải sản với hơn 50 gian hàng.</p><p>Vé tham dự miễn phí. Đặt voucher dịch vụ trên S-Loco để nhận ưu đãi đặc biệt trong dịp lễ hội!</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800' },
+  { title: 'Giải Chạy Marathon Bãi Biển Sầm Sơn', content: '<p>Giải Marathon Bãi Biển Sầm Sơn lần thứ 3 sẽ tổ chức vào ngày 15/4/2026 với các cự ly 5km, 10km, 21km và 42km.</p><p>Đường chạy dọc bờ biển Sầm Sơn tuyệt đẹp. Giải thưởng tổng trị giá 500 triệu đồng.</p><p>Đăng ký trên app S-Loco — nhận voucher giảm giá khách sạn và nhà hàng cho vận động viên!</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800' },
   { title: 'Đêm Nhạc Acoustic Bên Bờ Biển', content: '<p>Mỗi tối thứ 7 hàng tuần, quảng trường biển Sầm Sơn tổ chức đêm nhạc acoustic miễn phí từ 19h-22h.</p><p>Các ban nhạc indie từ Hà Nội và địa phương biểu diễn, kết hợp với chợ đêm ẩm thực đường phố.</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800' },
   { title: 'Triển Lãm Ảnh "Sầm Sơn Qua Ống Kính"', content: '<p>Triển lãm ảnh nghệ thuật "Sầm Sơn Qua Ống Kính" trưng bày 100 tác phẩm của 30 nhiếp ảnh gia, diễn ra tại Trung tâm Văn hóa Sầm Sơn từ 1/4 đến 30/4/2026.</p><p>Chủ đề: Con người, biển cả và cuộc sống thường ngày tại Sầm Sơn.</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800' },
   { title: 'Hội Chợ Đặc Sản Thanh Hóa 2026', content: '<p>Hội chợ quy tụ hơn 200 gian hàng đặc sản từ 27 huyện thành phố Thanh Hóa. Du khách có cơ hội thưởng thức và mua các sản vật: nem chua, chả tôm, bánh gai, mắm tôm...</p><p>Thời gian: 10-15/5/2026 tại Quảng trường Lam Sơn, Sầm Sơn.</p>', category: 'event', coverUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800' },
 
   // Guides
   { title: 'Hướng dẫn du lịch Sầm Sơn 3 ngày 2 đêm', content: '<h2>Ngày 1 — Khám phá biển</h2><p>Sáng: Check-in khách sạn, tắm biển bãi A. Trưa: Ăn hải sản tại nhà hàng ven biển. Chiều: Xe điện tham quan Đền Độc Cước. Tối: Dạo phố đêm, ăn ốc.</p><h2>Ngày 2 — Trải nghiệm</h2><p>Sáng: Spa massage thư giãn. Trưa: Buffet tại resort. Chiều: Công viên giải trí Sun World. Tối: Đêm nhạc bãi biển.</p><h2>Ngày 3 — Mua sắm</h2><p>Sáng: Chợ hải sản. Trưa: Bún cá Sầm Sơn. Chiều: Mua đặc sản về làm quà. Check-out.</p>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800' },
-  { title: 'Top 10 quán hải sản ngon nhất Sầm Sơn', content: '<p>Bài viết tổng hợp 10 nhà hàng hải sản được du khách đánh giá cao nhất trên S-Local, kèm theo giá trung bình và món đặc trưng của mỗi quán.</p><ol><li>Nhà Hàng Hải Sản Biển Đông — Set hải sản 2 người chỉ 380,000₫</li><li>Quán Ốc Sầm Sơn — 30+ loại ốc, giá từ 50,000₫/đĩa</li><li>The Beach House — Buffet hải sản view biển</li></ol>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800' },
-  { title: 'Bí kíp tiết kiệm khi du lịch Sầm Sơn', content: '<p>Du lịch Sầm Sơn không hề đắt nếu bạn biết cách! Dưới đây là 7 mẹo tiết kiệm:</p><ol><li>Mua voucher trên S-Local — giảm 5-20% so với giá tại quầy</li><li>Đặt homestay thay vì khách sạn — tiết kiệm 50% tiền phòng</li><li>Ăn sáng tại quán địa phương — phở, bún chỉ 30-40k</li><li>Đi xe điện thay taxi — rẻ hơn 5 lần</li><li>Mua hải sản ở chợ, nhờ nhà hàng chế biến — tiết kiệm 40%</li><li>Đi giữa tuần — giá phòng giảm 30-50%</li><li>Combo gia đình trên S-Local — tiết kiệm thêm 15%</li></ol>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800' },
-  { title: 'Cẩm nang di chuyển đến Sầm Sơn', content: '<h2>Từ Hà Nội</h2><p>Xe khách: 3.5h, giá 120-150k. Xuất phát từ bến Giáp Bát hoặc Mỹ Đình.</p><p>Xe riêng: 3h đi cao tốc Mai Sơn — QL1A.</p><p>Tàu hỏa: 3.5h đến ga Thanh Hóa, sau đó taxi 16km đến Sầm Sơn (~100k).</p><h2>Từ Sân bay Thọ Xuân</h2><p>Cách Sầm Sơn 60km, taxi ~400k hoặc xe bus 80k.</p><h2>Di chuyển trong Sầm Sơn</h2><p>Xe điện tour: Booking trên S-Local. Grab/taxi: Phổ biến. Xe đạp: Nhiều điểm cho thuê.</p>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800' },
+  { title: 'Top 10 quán hải sản ngon nhất Sầm Sơn', content: '<p>Bài viết tổng hợp 10 nhà hàng hải sản được du khách đánh giá cao nhất trên S-Loco, kèm theo giá trung bình và món đặc trưng của mỗi quán.</p><ol><li>Nhà Hàng Hải Sản Biển Đông — Set hải sản 2 người chỉ 380,000₫</li><li>Quán Ốc Sầm Sơn — 30+ loại ốc, giá từ 50,000₫/đĩa</li><li>The Beach House — Buffet hải sản view biển</li></ol>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800' },
+  { title: 'Bí kíp tiết kiệm khi du lịch Sầm Sơn', content: '<p>Du lịch Sầm Sơn không hề đắt nếu bạn biết cách! Dưới đây là 7 mẹo tiết kiệm:</p><ol><li>Mua voucher trên S-Loco — giảm 5-20% so với giá tại quầy</li><li>Đặt homestay thay vì khách sạn — tiết kiệm 50% tiền phòng</li><li>Ăn sáng tại quán địa phương — phở, bún chỉ 30-40k</li><li>Đi xe điện thay taxi — rẻ hơn 5 lần</li><li>Mua hải sản ở chợ, nhờ nhà hàng chế biến — tiết kiệm 40%</li><li>Đi giữa tuần — giá phòng giảm 30-50%</li><li>Combo gia đình trên S-Loco — tiết kiệm thêm 15%</li></ol>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800' },
+  { title: 'Cẩm nang di chuyển đến Sầm Sơn', content: '<h2>Từ Hà Nội</h2><p>Xe khách: 3.5h, giá 120-150k. Xuất phát từ bến Giáp Bát hoặc Mỹ Đình.</p><p>Xe riêng: 3h đi cao tốc Mai Sơn — QL1A.</p><p>Tàu hỏa: 3.5h đến ga Thanh Hóa, sau đó taxi 16km đến Sầm Sơn (~100k).</p><h2>Từ Sân bay Thọ Xuân</h2><p>Cách Sầm Sơn 60km, taxi ~400k hoặc xe bus 80k.</p><h2>Di chuyển trong Sầm Sơn</h2><p>Xe điện tour: Booking trên S-Loco. Grab/taxi: Phổ biến. Xe đạp: Nhiều điểm cho thuê.</p>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800' },
   { title: 'Các điểm check-in đẹp nhất Sầm Sơn', content: '<p>Sầm Sơn không chỉ có biển! 8 điểm check-in sống ảo đẹp nhất:</p><ol><li>Đền Độc Cước — hoàng hôn tuyệt đẹp</li><li>Hòn Trống Mái — biểu tượng Sầm Sơn</li><li>Quảng trường biển — đèn LED ban đêm</li><li>Cầu cảng cá — chụp ảnh ngư dân</li><li>FLC Golf Links — sân golf view biển</li><li>Đường hoa ven biển — mùa phượng vĩ</li><li>Núi Trường Lệ — panorama thành phố</li><li>Bãi đá Ghềnh — sóng vỗ đá hoang sơ</li></ol>', category: 'guide', coverUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800' },
 ]
 
@@ -264,23 +264,23 @@ async function seed() {
     .insert(users)
     .values({
       phone: '0900000000',
-      email: 'admin@slocal.vn',
-      fullName: 'S-Local Admin',
+      email: 'admin@sloco.vn',
+      fullName: 'S-Loco Admin',
       role: 'admin',
       passwordHash: adminHash,
     })
     .onConflictDoNothing()
-  const [adminUser] = await db.select().from(users).where(eq(users.email, 'admin@slocal.vn'))
+  const [adminUser] = await db.select().from(users).where(eq(users.email, 'admin@sloco.vn'))
   console.log(`   ✅ Admin: ${adminUser?.email || 'error'}`)
 
   // 5 vendor owners
   const vendorOwnerData = [
-    { phone: '0900000002', email: 'vendor@slocal.vn', fullName: 'Nguyễn Văn Biển', role: 'vendor_owner' as const, passwordHash: vendorHash },
-    { phone: '0901111111', email: 'vendor1@slocal.vn', fullName: 'Nguyễn Văn Biển', role: 'vendor_owner' as const, passwordHash: vendorHash },
-    { phone: '0901111112', email: 'vendor2@slocal.vn', fullName: 'Trần Thị Hoa', role: 'vendor_owner' as const, passwordHash: vendorHash },
-    { phone: '0901111113', email: 'vendor3@slocal.vn', fullName: 'Lê Quang Vinh', role: 'vendor_owner' as const, passwordHash: vendorHash },
-    { phone: '0901111114', email: 'vendor4@slocal.vn', fullName: 'Phạm Thị Thu', role: 'vendor_owner' as const, passwordHash: vendorHash },
-    { phone: '0901111115', email: 'vendor5@slocal.vn', fullName: 'Hoàng Đức Mạnh', role: 'vendor_owner' as const, passwordHash: vendorHash },
+    { phone: '0900000002', email: 'vendor@sloco.vn', fullName: 'Nguyễn Văn Biển', role: 'vendor_owner' as const, passwordHash: vendorHash },
+    { phone: '0901111111', email: 'vendor1@sloco.vn', fullName: 'Nguyễn Văn Biển', role: 'vendor_owner' as const, passwordHash: vendorHash },
+    { phone: '0901111112', email: 'vendor2@sloco.vn', fullName: 'Trần Thị Hoa', role: 'vendor_owner' as const, passwordHash: vendorHash },
+    { phone: '0901111113', email: 'vendor3@sloco.vn', fullName: 'Lê Quang Vinh', role: 'vendor_owner' as const, passwordHash: vendorHash },
+    { phone: '0901111114', email: 'vendor4@sloco.vn', fullName: 'Phạm Thị Thu', role: 'vendor_owner' as const, passwordHash: vendorHash },
+    { phone: '0901111115', email: 'vendor5@sloco.vn', fullName: 'Hoàng Đức Mạnh', role: 'vendor_owner' as const, passwordHash: vendorHash },
   ]
   await db.insert(users).values(vendorOwnerData).onConflictDoNothing()
   const vendorOwners = await db.select().from(users).where(eq(users.role, 'vendor_owner'))
@@ -307,7 +307,7 @@ async function seed() {
     latitude: v.lat,
     longitude: v.lng,
     phone: `090${String(3000000 + idx).padStart(7, '0')}`,
-    email: `${slugify(v.name).slice(0, 15)}@slocal.vn`,
+    email: `${slugify(v.name).slice(0, 15)}@sloco.vn`,
     status: 'active' as const,
     ratingAvg: String((3.5 + Math.random() * 1.5).toFixed(2)),
     reviewCount: randomInt(5, 50),
@@ -318,7 +318,7 @@ async function seed() {
   const [defaultVendorOwner] = await db
     .select()
     .from(users)
-    .where(eq(users.email, 'vendor@slocal.vn'))
+    .where(eq(users.email, 'vendor@sloco.vn'))
   if (defaultVendorOwner) {
     await db
       .update(vendors)
@@ -599,7 +599,7 @@ async function seed() {
     { type: 'order', title: 'Đơn hàng mới', body: 'Bạn có đơn hàng mới cần xử lý' },
     { type: 'voucher', title: 'Voucher đã sử dụng', body: 'Khách hàng vừa sử dụng voucher tại cơ sở của bạn' },
     { type: 'settlement', title: 'Đối soát hoàn tất', body: 'Khoản thanh toán đã được chuyển vào tài khoản' },
-    { type: 'system', title: 'Chào mừng đến S-Local!', body: 'Cảm ơn bạn đã sử dụng S-Local. Khám phá ngay các ưu đãi!' },
+    { type: 'system', title: 'Chào mừng đến S-Loco!', body: 'Cảm ơn bạn đã sử dụng S-Loco. Khám phá ngay các ưu đãi!' },
     { type: 'promo', title: 'Ưu đãi cuối tuần', body: 'Giảm 20% tất cả dịch vụ spa cuối tuần này!' },
     { type: 'order', title: 'Đơn hàng đã thanh toán', body: 'Đơn hàng của bạn đã thanh toán thành công. Kiểm tra voucher!' },
     { type: 'system', title: 'Cập nhật ứng dụng', body: 'Phiên bản mới với nhiều tính năng hấp dẫn đã sẵn sàng!' },

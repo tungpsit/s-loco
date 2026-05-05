@@ -16,7 +16,7 @@ C4Context
     Person(vendor, "Nhà cung cấp", "Quản lý dịch vụ, nhận đơn, quét QR, đối soát")
     Person(admin, "Admin S-Loco", "Quản trị vendor, đơn hàng, nội dung, đối soát")
 
-    System(slocal, "S-Loco Platform", "Siêu ứng dụng du lịch bản địa — đặt dịch vụ, voucher, combo, AI lịch trình")
+    System(sloco, "S-Loco Platform", "Siêu ứng dụng du lịch bản địa — đặt dịch vụ, voucher, combo, AI lịch trình")
 
     System_Ext(payment, "Payment Gateways", "VNPay, Momo, SePay — xử lý thanh toán")
     System_Ext(ai, "AI Services", "OpenAI / Gemini — tạo lịch trình, gợi ý")
@@ -24,14 +24,14 @@ C4Context
     System_Ext(sms, "SMS/OTP", "Gửi OTP xác thực, thông báo")
     System_Ext(cdn, "CDN / Object Storage", "Lưu trữ media, hình ảnh vendor")
 
-    Rel(tourist, slocal, "Dùng native app")
-    Rel(vendor, slocal, "Dùng vendor app")
-    Rel(admin, slocal, "Dùng admin web")
-    Rel(slocal, payment, "Tạo giao dịch, webhook")
-    Rel(slocal, ai, "Gọi API tạo lịch trình")
-    Rel(slocal, push, "Gửi push notification")
-    Rel(slocal, sms, "Gửi OTP, thông báo")
-    Rel(slocal, cdn, "Upload/serve media")
+    Rel(tourist, sloco, "Dùng native app")
+    Rel(vendor, sloco, "Dùng vendor app")
+    Rel(admin, sloco, "Dùng admin web")
+    Rel(sloco, payment, "Tạo giao dịch, webhook")
+    Rel(sloco, ai, "Gọi API tạo lịch trình")
+    Rel(sloco, push, "Gửi push notification")
+    Rel(sloco, sms, "Gửi OTP, thông báo")
+    Rel(sloco, cdn, "Upload/serve media")
 ```
 
 ---
@@ -46,7 +46,7 @@ C4Container
     Person(vendor, "Nhà cung cấp")
     Person(admin, "Admin")
 
-    System_Boundary(slocal, "S-Loco Platform") {
+    System_Boundary(sloco, "S-Loco Platform") {
         Container(mobile, "Tourist Native Apps", "SwiftUI / Kotlin", "iOS & Android — khách du lịch")
         Container(vendorApp, "Vendor Native Apps", "SwiftUI / Kotlin", "Quản lý đơn, quét QR")
         Container(adminWeb, "Admin Dashboard", "Next.js 15", "Quản trị toàn hệ thống")

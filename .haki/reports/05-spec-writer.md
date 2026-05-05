@@ -35,7 +35,7 @@ Files read (all 16 source artifacts):
 ### Task 1: Consolidated Spec
 
 - **Status:** ✅ Done
-- **File created:** `D:/workspace/s-local/docs/superpowers/specs/2026-04-03-slocal-design.md`
+- **File created:** `D:/workspace/s-local/docs/superpowers/specs/2026-04-03-sloco-design.md`
 - **Sections:** 12 (Overview, Vision & Strategy, User Stories, Architecture, API Design, Data Model, UI/UX Design, NFRs, Roadmap, Acceptance Criteria, Open Questions, References)
 
 ### Task 2: Self-Review
@@ -68,7 +68,7 @@ Files read (all 16 source artifacts):
 ## Output
 
 - **Total files created:** 2 (spec + report)
-- **Spec location:** `D:/workspace/s-local/docs/superpowers/specs/2026-04-03-slocal-design.md`
+- **Spec location:** `D:/workspace/s-local/docs/superpowers/specs/2026-04-03-sloco-design.md`
 - **Report location:** `D:/workspace/s-local/.haki/reports/05-spec-writer.md`
 
 ## Verification Checklist
