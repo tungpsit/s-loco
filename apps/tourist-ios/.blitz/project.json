@@ -1,8 +1,9 @@
 {
   "bundleIdentifier" : "vn.sloco.tourist",
   "createdAt" : "2026-05-05T02:11:04Z",
-  "lastOpenedAt" : "2026-05-05T02:11:04Z",
+  "lastOpenedAt" : "2026-05-05T08:38:42Z",
   "name" : "tourist-ios",
   "platform" : "iOS",
+  "teamId" : "7ANTMTJ9KP",
   "type" : "swift"
 }
