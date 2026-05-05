@@ -13,18 +13,32 @@ import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Looper
+import android.util.Size
+import android.view.HapticFeedbackConstants
+import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraControl
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -54,20 +68,29 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size as ComposeSize
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -98,8 +121,14 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 private val Primary = Color(0xFF005E97)
 private val SurfaceBg = Color(0xFFF4F7FB)
@@ -288,32 +317,339 @@ private fun DashboardScreen(state: AppState) {
 
 @Composable
 private fun ScanScreen(state: AppState) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    varTextField(
-        title = "Quét QR",
-        subtitle = "Nhập hoặc dán QR token để xác thực với API thật.",
-        buttonLabel = "Xác thực và đổi voucher",
-        firstLabel = "QR token",
-        secondLabel = "Ghi chú",
-        firstPlaceholder = "eyJhbGciOiJI...",
-        secondPlaceholder = "Không bắt buộc",
-        enabled = !state.isLoading,
-        onSubmit = { token, _ -> scope.launch { state.redeemQr(token) } },
-        extra = {
-            state.qrPreview?.let { preview ->
-                InfoCard("Kết quả kiểm tra", "${preview.code} · ${preview.status} · ${if (preview.canRedeem) "Có thể đổi" else "Không thể đổi"}")
+    var scannedToken by remember { mutableStateOf("") }
+    var isScannerPaused by remember { mutableStateOf(false) }
+    var scannerSessionId by remember { mutableStateOf(0) }
+    var hasCameraPermission by remember {
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+    }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasCameraPermission = granted
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    ScreenList(title = "Quét QR") {
+        item {
+            QrScannerCard(
+                hasCameraPermission = hasCameraPermission,
+                isPaused = isScannerPaused,
+                sessionId = scannerSessionId,
+                onRequestPermission = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+                onTogglePause = { isScannerPaused = !isScannerPaused },
+                onScanAgain = {
+                    scannedToken = ""
+                    isScannerPaused = false
+                    scannerSessionId += 1
+                },
+                onCode = { token ->
+                    val value = token.trim()
+                    if (value.isNotBlank() && value != scannedToken) {
+                        scannedToken = value
+                        isScannerPaused = true
+                        scope.launch { state.redeemQr(value) }
+                    }
+                },
+            )
+        }
+        state.qrPreview?.let { preview ->
+            item {
+                InfoCard(
+                    "Kết quả kiểm tra",
+                    "${preview.code} · ${preview.status} · ${if (preview.canRedeem) "Có thể đổi" else "Không thể đổi"}",
+                )
             }
-            state.redeemedVoucher?.let { voucher ->
+        }
+        state.redeemedVoucher?.let { voucher ->
+            item {
                 InfoCard("Đã đổi voucher", "${voucher.serviceName ?: voucher.id} · ${formatVnd(voucher.finalAmount)}")
+            }
+            item {
                 Button(
                     onClick = { scope.launch { state.completeRedeemedVoucher() } },
                     enabled = !state.isLoading,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Hoàn thành dịch vụ")
+                    Text(if ((voucher.productType ?: voucher.artifactType) == PRODUCT_TYPE_TICKET) "Vé đã hoàn tất" else "Hoàn thành dịch vụ")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun QrScannerCard(
+    hasCameraPermission: Boolean,
+    isPaused: Boolean,
+    sessionId: Int,
+    onRequestPermission: () -> Unit,
+    onTogglePause: () -> Unit,
+    onScanAgain: () -> Unit,
+    onCode: (String) -> Unit,
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(28.dp)) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(0.72f)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(Primary, Color(0xFF061E2B), Color.Black),
+                            start = Offset.Zero,
+                            end = Offset.Infinite,
+                        ),
+                    ),
+            ) {
+                if (hasCameraPermission) {
+                    AndroidQrScannerPreview(
+                        isPaused = isPaused,
+                        sessionId = sessionId,
+                        onCode = onCode,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    CameraPermissionPrompt(onRequestPermission)
+                }
+
+                QrScannerOverlay(isPaused = isPaused)
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = onScanAgain, modifier = Modifier.weight(1f)) {
+                    Text("Quét mã khác")
+                }
+                OutlinedButton(onClick = onTogglePause) {
+                    Text(if (isPaused) "Tiếp tục" else "Tạm dừng")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CameraPermissionPrompt(onRequestPermission: () -> Unit) {
+    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.76f)), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text("Cần quyền camera", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("Cho phép camera để quét QR voucher/vé ngay trên tab này.", color = Color.White.copy(alpha = 0.82f))
+            Button(onClick = onRequestPermission) {
+                Text("Cho phép camera")
+            }
+        }
+    }
+}
+
+@Composable
+private fun QrScannerOverlay(isPaused: Boolean) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val frameSize = minOf(maxWidth * 0.72f, maxHeight * 0.52f)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Black.copy(alpha = 0.04f), Color.Black.copy(alpha = 0.56f)),
+                    ),
+                ),
+        )
+        Column(
+            modifier = Modifier.fillMaxSize().padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                "Đưa mã QR vào khung",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.background(Color.Black.copy(alpha = 0.34f), RoundedCornerShape(999.dp)).padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+            Spacer(Modifier.height(18.dp))
+            Box(
+                modifier = Modifier
+                    .width(frameSize)
+                    .height(frameSize)
+                    .background(Color.Black.copy(alpha = 0.18f), RoundedCornerShape(24.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.24f), RoundedCornerShape(24.dp)),
+            ) {
+                Canvas(Modifier.fillMaxSize().padding(6.dp)) {
+                    val strokeWidth = 5.dp.toPx()
+                    val corner = size.minDimension * 0.22f
+                    val color = Color.White
+                    drawLine(color, Offset(0f, corner), Offset(0f, 0f), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(0f, 0f), Offset(corner, 0f), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(size.width - corner, 0f), Offset(size.width, 0f), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(size.width, 0f), Offset(size.width, corner), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(size.width, size.height - corner), Offset(size.width, size.height), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(size.width, size.height), Offset(size.width - corner, size.height), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(corner, size.height), Offset(0f, size.height), strokeWidth, cap = StrokeCap.Round)
+                    drawLine(color, Offset(0f, size.height), Offset(0f, size.height - corner), strokeWidth, cap = StrokeCap.Round)
+                    drawRoundRect(
+                        color = Primary.copy(alpha = if (isPaused) 0.32f else 0.86f),
+                        topLeft = Offset(18.dp.toPx(), 18.dp.toPx()),
+                        size = ComposeSize(size.width - 36.dp.toPx(), size.height - 36.dp.toPx()),
+                        style = Stroke(width = 2.dp.toPx()),
+                    )
+                }
+            }
+            Spacer(Modifier.height(18.dp))
+            Text(
+                if (isPaused) "Scanner đang tạm dừng" else "Camera tự lấy nét và phóng gần khi phát hiện QR",
+                color = Color.White.copy(alpha = 0.88f),
+                fontSize = 13.sp,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.42f))
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(if (isPaused) "Nhấn Tiếp tục để quét" else "Đang quét tự động", color = Color.White, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
+private fun AndroidQrScannerPreview(
+    isPaused: Boolean,
+    sessionId: Int,
+    onCode: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val view = LocalView.current
+    val currentOnCode by rememberUpdatedState(onCode)
+    var hasDeliveredCode by remember(sessionId) { mutableStateOf(false) }
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    val barcodeScanner = remember {
+        BarcodeScanning.getClient(
+            BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                .build(),
+        )
+    }
+    var cameraControl by remember { mutableStateOf<CameraControl?>(null) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            barcodeScanner.close()
+            cameraExecutor.shutdown()
+        }
+    }
+
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+            PreviewView(ctx).apply {
+                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                scaleType = PreviewView.ScaleType.FILL_CENTER
+            }
+        },
+        update = { previewView ->
+            if (isPaused) {
+                ProcessCameraProvider.getInstance(context).get().unbindAll()
+                return@AndroidView
+            }
+
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            cameraProviderFuture.addListener({
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = androidx.camera.core.Preview.Builder().build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+                val analysis = ImageAnalysis.Builder()
+                    .setTargetResolution(Size(1280, 720))
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                    .also { imageAnalysis ->
+                        imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                            analyzeQrFrame(
+                                imageProxy = imageProxy,
+                                barcodeScanner = barcodeScanner,
+                                previewView = previewView,
+                                cameraControl = cameraControl,
+                                hasDelivered = { hasDeliveredCode },
+                                markDelivered = { hasDeliveredCode = true },
+                                onCode = { value ->
+                                    view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                    currentOnCode(value)
+                                },
+                            )
+                        }
+                    }
+
+                runCatching {
+                    cameraProvider.unbindAll()
+                    val camera = cameraProvider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis)
+                    cameraControl = camera.cameraControl
+                    camera.cameraControl.setLinearZoom(0f)
+                }
+            }, ContextCompat.getMainExecutor(context))
         },
     )
+}
+
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+private fun analyzeQrFrame(
+    imageProxy: ImageProxy,
+    barcodeScanner: com.google.mlkit.vision.barcode.BarcodeScanner,
+    previewView: PreviewView,
+    cameraControl: CameraControl?,
+    hasDelivered: () -> Boolean,
+    markDelivered: () -> Unit,
+    onCode: (String) -> Unit,
+) {
+    val mediaImage = imageProxy.image
+    if (mediaImage == null || hasDelivered()) {
+        imageProxy.close()
+        return
+    }
+
+    val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+    barcodeScanner.process(image)
+        .addOnSuccessListener { barcodes ->
+            val barcode = barcodes.firstOrNull { it.rawValue?.isNotBlank() == true }
+            if (barcode != null && !hasDelivered()) {
+                val box = barcode.boundingBox
+                if (box != null) {
+                    val centerX = box.exactCenterX() / imageProxy.width.coerceAtLeast(1)
+                    val centerY = box.exactCenterY() / imageProxy.height.coerceAtLeast(1)
+                    val point = previewView.meteringPointFactory.createPoint(
+                        centerX.coerceIn(0f, 1f) * previewView.width,
+                        centerY.coerceIn(0f, 1f) * previewView.height,
+                    )
+                    val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE)
+                        .setAutoCancelDuration(2, TimeUnit.SECONDS)
+                        .build()
+                    cameraControl?.startFocusAndMetering(action)
+                    val qrWidthRatio = (box.width().toFloat() / imageProxy.width.coerceAtLeast(1)).coerceIn(0.08f, 1f)
+                    val zoom = (0.34f / qrWidthRatio).coerceIn(0.18f, 0.72f)
+                    cameraControl?.setLinearZoom(zoom)
+                }
+                markDelivered()
+                onCode(barcode.rawValue.orEmpty())
+            }
+        }
+        .addOnCompleteListener {
+            imageProxy.close()
+        }
 }
 
 @Composable
