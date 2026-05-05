@@ -6,6 +6,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,7 +60,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -87,7 +92,11 @@ import vn.sloco.vendor.data.Voucher
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 private val Primary = Color(0xFF005E97)
 private val SurfaceBg = Color(0xFFF4F7FB)
@@ -98,6 +107,7 @@ private const val LEGAL_PRIVACY_URL = "https://sloco.vn/privacy"
 private const val LEGAL_TERMS_URL = "https://sloco.vn/terms"
 private const val LEGAL_SUPPORT_URL = "https://sloco.vn/support"
 private const val LEGAL_DELETE_ACCOUNT_URL = "https://sloco.vn/delete-account"
+private val imageHttpClient = OkHttpClient()
 
 @Composable
 fun VendorApp() {
@@ -356,40 +366,92 @@ private fun ServiceCard(service: VendorService, category: ServiceCategory?, onEd
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier.clickable(onClick = onEdit),
     ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(service.name, fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
-                    Text(category?.name ?: "Chưa rõ danh mục", color = Color(0xFF3B4460), fontSize = 13.sp)
-                }
-                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ServicePill(service.productLabel, Primary)
-                    ServicePill(
-                        if (service.activeValue) "Đang bán" else "Tạm ẩn",
-                        if (service.activeValue) Success else Warning,
-                    )
-                }
-            }
-            if (!service.description.isNullOrBlank()) {
-                Text(service.description, color = Color(0xFF3B4460), fontSize = 13.sp)
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (service.productTypeValue == PRODUCT_TYPE_COUPON) {
-                    Text("Coupon giảm ${service.reservationDiscountPercentValue.ifBlank { "0" }}% trên hóa đơn", color = Warning, fontWeight = FontWeight.Bold)
-                } else {
-                    Text(formatVnd(service.originalPriceValue), color = Primary, fontWeight = FontWeight.Bold)
-                    service.discountPriceValue?.let {
-                        Text("KM ${formatVnd(it)}", color = Warning, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Row(
+            Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            ServiceThumbnail(service.images.firstOrNull())
+
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(service.name, fontWeight = FontWeight.Bold, color = Color(0xFF161B2E))
+                        Text(category?.name ?: "Chưa rõ danh mục", color = Color(0xFF3B4460), fontSize = 13.sp)
+                    }
+                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        ServicePill(service.productLabel, Primary)
+                        ServicePill(
+                            if (service.activeValue) "Đang bán" else "Tạm ẩn",
+                            if (service.activeValue) Success else Warning,
+                        )
                     }
                 }
+                if (!service.description.isNullOrBlank()) {
+                    Text(service.description, color = Color(0xFF3B4460), fontSize = 13.sp)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (service.productTypeValue == PRODUCT_TYPE_COUPON) {
+                        Text("Coupon giảm ${service.reservationDiscountPercentValue.ifBlank { "0" }}% trên hóa đơn", color = Warning, fontWeight = FontWeight.Bold)
+                    } else {
+                        Text(formatVnd(service.originalPriceValue), color = Primary, fontWeight = FontWeight.Bold)
+                        service.discountPriceValue?.let {
+                            Text("KM ${formatVnd(it)}", color = Warning, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+                TextButton(onClick = onEdit) {
+                    Text("Sửa dịch vụ")
+                }
             }
-            TextButton(onClick = onEdit) {
-                Text("Sửa dịch vụ")
+        }
+    }
+}
+
+@Composable
+private fun ServiceThumbnail(url: String?) {
+    var bitmap by remember(url) { mutableStateOf<android.graphics.Bitmap?>(null) }
+
+    LaunchedEffect(url) {
+        bitmap = null
+        if (!url.isNullOrBlank()) {
+            bitmap = withContext(Dispatchers.IO) {
+                runCatching {
+                    val request = Request.Builder().url(url).build()
+                    imageHttpClient.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            null
+                        } else {
+                            response.body?.byteStream()?.use { stream -> BitmapFactory.decodeStream(stream) }
+                        }
+                    }
+                }.getOrNull()
             }
+        }
+    }
+
+    Box(
+        Modifier
+            .width(76.dp)
+            .height(76.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFFEAF1F7)),
+        contentAlignment = Alignment.Center,
+    ) {
+        val loadedBitmap = bitmap
+        if (loadedBitmap != null) {
+            Image(
+                bitmap = loadedBitmap.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Text("Ảnh", color = Color(0xFF64748B), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }

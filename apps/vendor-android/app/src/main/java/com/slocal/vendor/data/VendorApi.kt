@@ -309,7 +309,14 @@ class VendorApi(
                     throw SessionExpiredException()
                 }
             }
-            val envelope = json.decodeFromString(ApiEnvelope.serializer(serializer), raw)
+            val envelope = try {
+                json.decodeFromString(ApiEnvelope.serializer(serializer), raw)
+            } catch (_: Exception) {
+                if (!response.isSuccessful) {
+                    throw ApiException(response.code, "Upload ảnh thất bại (HTTP ${response.code}). Vui lòng kiểm tra API server.")
+                }
+                throw ApiException(response.code, "API trả về dữ liệu không đúng định dạng.")
+            }
             if (!response.isSuccessful || !envelope.success || envelope.data == null) {
                 throw ApiException(response.code, envelope.error?.message ?: "Không thể upload ảnh.")
             }

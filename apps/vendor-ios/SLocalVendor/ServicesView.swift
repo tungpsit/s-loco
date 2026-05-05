@@ -58,50 +58,88 @@ private struct ServiceRow: View {
     let category: ServiceCategory?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(service.name)
-                        .font(.headline)
-                        .foregroundStyle(VendorTheme.text)
-                    Text(category?.name ?? "Chưa rõ danh mục")
-                        .font(.subheadline)
+        HStack(alignment: .top, spacing: 12) {
+            ServiceThumbnail(url: service.images.first)
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(service.name)
+                            .font(.headline)
+                            .foregroundStyle(VendorTheme.text)
+                        Text(category?.name ?? "Chưa rõ danh mục")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 6) {
+                        Text(service.productLabel)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(VendorTheme.primary)
+                        Text(service.isActive ? "Đang bán" : "Tạm ẩn")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(service.isActive ? VendorTheme.success : VendorTheme.warning)
+                    }
+                }
+                if let description = service.description, !description.isEmpty {
+                    Text(description)
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .lineLimit(2)
                 }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 6) {
-                    Text(service.productLabel)
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(VendorTheme.primary)
-                    Text(service.isActive ? "Đang bán" : "Tạm ẩn")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(service.isActive ? VendorTheme.success : VendorTheme.warning)
-                }
-            }
-            if let description = service.description, !description.isEmpty {
-                Text(description)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-            HStack(spacing: 10) {
-                if service.isCoupon {
-                    Text("Coupon giảm \(service.reservationDiscountPercent ?? "0")% trên hóa đơn")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(VendorTheme.warning)
-                } else {
-                    Text(formatVnd(service.originalPrice))
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(VendorTheme.primary)
-                    if let discountPrice = service.discountPrice {
-                        Text("KM \(formatVnd(discountPrice))")
-                            .font(.caption.weight(.semibold))
+                HStack(spacing: 10) {
+                    if service.isCoupon {
+                        Text("Coupon giảm \(service.reservationDiscountPercent ?? "0")% trên hóa đơn")
+                            .font(.subheadline.weight(.bold))
                             .foregroundStyle(VendorTheme.warning)
+                    } else {
+                        Text(formatVnd(service.originalPrice))
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(VendorTheme.primary)
+                        if let discountPrice = service.discountPrice {
+                            Text("KM \(formatVnd(discountPrice))")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(VendorTheme.warning)
+                        }
                     }
                 }
             }
         }
         .padding(.vertical, 6)
+    }
+}
+
+private struct ServiceThumbnail: View {
+    let url: String?
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemGray6))
+            if let url, let imageURL = URL(string: url) {
+                AsyncImage(url: imageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure:
+                        placeholder
+                    default:
+                        ProgressView().tint(VendorTheme.primary)
+                    }
+                }
+            } else {
+                placeholder
+            }
+        }
+        .frame(width: 72, height: 72)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityHidden(true)
+    }
+
+    private var placeholder: some View {
+        Image(systemName: "photo")
+            .font(.title3.weight(.semibold))
+            .foregroundStyle(.secondary)
     }
 }
 

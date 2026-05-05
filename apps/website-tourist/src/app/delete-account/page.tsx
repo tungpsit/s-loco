@@ -3,8 +3,37 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Xóa tài khoản — S-Loco',
-  description: 'Yêu cầu xóa tài khoản và dữ liệu S-Loco.',
+  description:
+    'Hướng dẫn yêu cầu xóa tài khoản S-Loco Tourist hoặc S-Loco Vendor và dữ liệu liên quan.',
 }
+
+const requestSteps = [
+  {
+    title: '1. Gửi yêu cầu',
+    body: 'Gửi email từ địa chỉ hoặc số điện thoại liên kết với tài khoản nếu có thể. Nếu bạn không còn truy cập được tài khoản, hãy mô tả rõ tình huống để S-Loco xác minh thủ công.',
+  },
+  {
+    title: '2. Xác minh chủ tài khoản',
+    body: 'S-Loco có thể yêu cầu xác nhận OTP, email, mã đơn hàng gần nhất hoặc thông tin vendor để đảm bảo yêu cầu đến từ đúng chủ tài khoản.',
+  },
+  {
+    title: '3. Xử lý dữ liệu',
+    body: 'Sau khi xác minh, S-Loco sẽ vô hiệu hóa tài khoản và xóa hoặc ẩn danh dữ liệu đủ điều kiện theo chính sách riêng tư.',
+  },
+]
+
+const deletedData = [
+  'Thông tin hồ sơ tài khoản như tên hiển thị, thông tin liên hệ phụ và cài đặt cá nhân không còn cần thiết.',
+  'Token thiết bị, phiên đăng nhập, tùy chọn thông báo và dữ liệu chẩn đoán không cần giữ lại.',
+  'Dữ liệu sử dụng hoặc gợi ý cá nhân hóa có thể được xóa hoặc ẩn danh khỏi hồ sơ người dùng.',
+  'Nội dung hỗ trợ không liên quan đến giao dịch, gian lận, bảo mật hoặc nghĩa vụ pháp lý đang mở.',
+]
+
+const retainedData = [
+  'Hồ sơ giao dịch, thanh toán, hoàn tiền, voucher, QR redemption và đối soát cần lưu cho kế toán, thuế, kiểm toán hoặc xử lý tranh chấp.',
+  'Dữ liệu chống gian lận, log bảo mật hoặc bằng chứng liên quan đến truy cập trái phép, lạm dụng voucher hoặc vi phạm điều khoản.',
+  'Thông tin vendor cần giữ để đáp ứng nghĩa vụ hợp đồng, thanh toán, đối soát hoặc yêu cầu pháp luật áp dụng.',
+]
 
 export default function DeleteAccountPage() {
   return (
@@ -20,41 +49,79 @@ export default function DeleteAccountPage() {
           Xóa tài khoản S-Loco
         </h1>
         <p className="mt-5 text-lg leading-8 text-ink-muted">
-          Người dùng Tourist và Vendor có thể khởi tạo yêu cầu xóa tài khoản từ trong app hoặc tại
-          trang này. S-Loco sẽ xác minh chủ tài khoản trước khi xóa dữ liệu.
+          Người dùng S-Loco Tourist và S-Loco Vendor có thể yêu cầu xóa tài khoản từ trong app hoặc
+          qua trang này. S-Loco sẽ xác minh chủ tài khoản trước khi vô hiệu hóa tài khoản và xử lý
+          dữ liệu liên quan.
         </p>
 
+        <section className="mt-8 rounded-3xl border border-line bg-coast p-5 text-base leading-8 text-ink-muted">
+          <h2 className="text-2xl font-black tracking-tight text-deep-ocean">Cách gửi yêu cầu</h2>
+          <p className="mt-3">
+            Gửi email tới{' '}
+            <a
+              className="font-bold text-ocean hover:text-deep-ocean"
+              href="mailto:privacy@sloco.vn?subject=Yeu%20cau%20xoa%20tai%20khoan%20S-Loco"
+            >
+              privacy@sloco.vn
+            </a>{' '}
+            với tiêu đề “Yêu cầu xóa tài khoản S-Loco”. Vui lòng ghi rõ bạn dùng app Tourist hay
+            Vendor, số điện thoại/email đăng nhập và lý do cần hỗ trợ nếu có.
+          </p>
+        </section>
+
+        <section className="mt-8 grid gap-4 md:grid-cols-3">
+          {requestSteps.map((step) => (
+            <section key={step.title} className="rounded-3xl border border-line bg-white p-5">
+              <h2 className="text-xl font-black tracking-tight text-deep-ocean">{step.title}</h2>
+              <p className="mt-3 text-sm leading-7 text-ink-muted">{step.body}</p>
+            </section>
+          ))}
+        </section>
+
         <section className="mt-8 space-y-5 text-base leading-8 text-ink-muted">
-          <div className="rounded-3xl border border-line bg-coast p-5">
-            <h2 className="text-2xl font-black tracking-tight text-deep-ocean">Cách gửi yêu cầu</h2>
-            <p className="mt-3">
-              Gửi email tới{' '}
-              <a
-                className="font-bold text-ocean hover:text-deep-ocean"
-                href="mailto:privacy@sloco.vn?subject=Yeu%20cau%20xoa%20tai%20khoan%20S-Loco"
-              >
-                privacy@sloco.vn
-              </a>{' '}
-              với tiêu đề “Yêu cầu xóa tài khoản S-Loco”. Vui lòng ghi rõ bạn dùng app Tourist hay
-              Vendor và số điện thoại/email đăng nhập.
-            </p>
-          </div>
           <div className="rounded-3xl border border-line bg-white p-5">
             <h2 className="text-2xl font-black tracking-tight text-deep-ocean">
-              Dữ liệu sẽ được xóa
+              Dữ liệu sẽ được xóa hoặc ẩn danh
+            </h2>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
+              {deletedData.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-3xl border border-line bg-white p-5">
+            <h2 className="text-2xl font-black tracking-tight text-deep-ocean">
+              Dữ liệu có thể cần lưu giữ
             </h2>
             <p className="mt-3">
-              S-Loco sẽ xóa hoặc ẩn danh thông tin tài khoản, token thiết bị, hồ sơ cá nhân và dữ
-              liệu không còn cần thiết cho vận hành dịch vụ. Hồ sơ giao dịch, voucher, đối soát hoặc
-              dữ liệu chống gian lận có thể được lưu giữ khi pháp luật hoặc nghĩa vụ kế toán yêu
-              cầu.
+              Một số dữ liệu không thể xóa ngay nếu S-Loco cần lưu để hoàn tất giao dịch, tuân thủ
+              pháp luật hoặc bảo vệ quyền lợi của khách du lịch, vendor và nền tảng:
             </p>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
+              {retainedData.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
-          <div className="rounded-3xl border border-line bg-white p-5">
+
+          <div className="rounded-3xl bg-sand-soft p-5">
             <h2 className="text-2xl font-black tracking-tight text-deep-ocean">Thời gian xử lý</h2>
             <p className="mt-3">
-              Chúng tôi phản hồi yêu cầu trong vòng 7 ngày làm việc và hoàn tất xóa dữ liệu đủ điều
-              kiện trong thời hạn phù hợp với quy định áp dụng.
+              S-Loco phản hồi yêu cầu trong vòng 7 ngày làm việc. Việc xóa hoặc ẩn danh dữ liệu đủ
+              điều kiện sẽ được hoàn tất trong thời hạn phù hợp với quy định áp dụng và trạng thái
+              giao dịch của tài khoản.
+            </p>
+            <p className="mt-3">
+              Nếu cần hỗ trợ thêm, vui lòng xem{' '}
+              <Link href="/privacy" className="font-bold text-ocean hover:text-deep-ocean">
+                chính sách riêng tư
+              </Link>{' '}
+              hoặc liên hệ qua{' '}
+              <Link href="/support" className="font-bold text-ocean hover:text-deep-ocean">
+                trang hỗ trợ
+              </Link>
+              .
             </p>
           </div>
         </section>

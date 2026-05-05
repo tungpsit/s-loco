@@ -252,6 +252,9 @@ final class APIClient {
         do {
             envelope = try decoder.decode(ApiEnvelope<UploadedImage>.self, from: responseData)
         } catch {
+            if !(200..<300).contains(statusCode) {
+                throw ClientError.message("Upload ảnh thất bại (HTTP \(statusCode)). Vui lòng kiểm tra API server.")
+            }
             throw ClientError.message("API trả về dữ liệu không đúng định dạng.")
         }
         if (200..<300).contains(statusCode), envelope.success, let payload = envelope.data {

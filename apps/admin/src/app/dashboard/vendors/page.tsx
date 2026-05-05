@@ -652,34 +652,58 @@ function ServiceManager({ vendorId, onChanged }: { vendorId: string; onChanged: 
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="rounded-xl border border-outline-variant/15 p-4 space-y-2"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-on-surface">{service.name}</p>
-                  <p className="text-xs text-on-surface-variant">
-                    {service.discountPrice || service.originalPrice} VND
-                  </p>
+          {services.map((service) => {
+            const thumbnailUrl = service.images?.find(Boolean)
+            return (
+              <div
+                key={service.id}
+                className="rounded-xl border border-outline-variant/15 p-4 space-y-2"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
+                    {thumbnailUrl ? (
+                      <Image
+                        src={thumbnailUrl}
+                        alt=""
+                        width={56}
+                        height={56}
+                        unoptimized
+                        className="h-14 w-14 shrink-0 rounded-xl bg-surface object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-surface text-xs font-semibold text-on-surface-variant"
+                        aria-hidden="true"
+                      >
+                        Ảnh
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-on-surface">
+                        {service.name}
+                      </p>
+                      <p className="text-xs text-on-surface-variant">
+                        {service.discountPrice || service.originalPrice} VND
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs rounded-full bg-surface-high px-2 py-1">
+                    {service.isActive ? 'Đang bật' : 'Đang ẩn'}
+                  </span>
                 </div>
-                <span className="text-xs rounded-full bg-surface-high px-2 py-1">
-                  {service.isActive ? 'Đang bật' : 'Đang ẩn'}
-                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingService(service)}
+                    className="px-3 py-1.5 rounded-lg bg-surface-high text-xs font-medium"
+                  >
+                    Sửa
+                  </button>
+                  <DeleteServiceButton serviceId={service.id} onChanged={onChanged} />
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingService(service)}
-                  className="px-3 py-1.5 rounded-lg bg-surface-high text-xs font-medium"
-                >
-                  Sửa
-                </button>
-                <DeleteServiceButton serviceId={service.id} onChanged={onChanged} />
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
       {(isCreating || editingService) && (

@@ -3,7 +3,9 @@ package vn.sloco.tourist
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 
 class TouristCategoryTest {
     @Test
@@ -17,6 +19,25 @@ class TouristCategoryTest {
             listOf("", "am-thuc", "luu-tru", "spa-massage", "xe-dien", "giai-tri", "mua-sam"),
             touristCategories.map { it.value }
         )
+    }
+
+    @Test
+    fun serviceParserUsesFirstImageUrl() {
+        val raw = Json.parseToJsonElement(
+            """
+            {
+              "id": "svc-1",
+              "name": "Buffet biển",
+              "images": ["https://cdn.sloco.vn/service_image/first.jpg", "https://cdn.sloco.vn/service_image/second.jpg"],
+              "original_price": "300000",
+              "discount_price": "250000"
+            }
+            """.trimIndent()
+        ).jsonObject
+
+        val service = parseService(raw)
+
+        assertEquals("https://cdn.sloco.vn/service_image/first.jpg", service?.imageUrl)
     }
 
     @Test

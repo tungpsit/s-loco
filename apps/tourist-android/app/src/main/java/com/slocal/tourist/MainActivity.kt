@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -130,6 +131,7 @@ private val Border = Color(0xFFD9E7F2)
 private val TextMain = Color(0xFF102033)
 private val TextMuted = Color(0xFF5D6B7A)
 private val Coral = Color(0xFFFF6B35)
+private val touristImageHttpClient = OkHttpClient()
 private val Yellow = Color(0xFFFFC83D)
 private const val LEGAL_PRIVACY_URL = "https://sloco.vn/privacy"
 private const val LEGAL_TERMS_URL = "https://sloco.vn/terms"
@@ -509,12 +511,7 @@ private fun ServiceDetailScreen(state: AppState, service: Service) {
                     .background(Blue),
                 contentAlignment = Alignment.BottomStart
             ) {
-                Image(
-                    painter = painterResource(serviceImageRes(service)),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                ServiceHeroImage(service)
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -1562,12 +1559,7 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
                 .background(Blue),
             contentAlignment = Alignment.BottomStart
         ) {
-            Image(
-                painter = painterResource(serviceImageRes(service)),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            ServiceHeroImage(service)
             Box(
                 Modifier
                     .fillMaxSize()
@@ -1636,6 +1628,53 @@ private fun ServiceCard(service: Service, onClick: () -> Unit) {
                 Text("★ ${service.rating}", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
+    }
+}
+
+@Composable
+private fun ServiceHeroImage(service: Service) {
+    RemoteImage(url = service.imageUrl) {
+        Image(
+            painter = painterResource(serviceImageRes(service)),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+private fun RemoteImage(url: String?, fallback: @Composable () -> Unit) {
+    var bitmap by remember(url) { mutableStateOf<android.graphics.Bitmap?>(null) }
+
+    LaunchedEffect(url) {
+        bitmap = null
+        if (!url.isNullOrBlank()) {
+            bitmap = withContext(Dispatchers.IO) {
+                runCatching {
+                    val request = Request.Builder().url(url).build()
+                    touristImageHttpClient.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            null
+                        } else {
+                            response.body?.byteStream()?.use { stream -> BitmapFactory.decodeStream(stream) }
+                        }
+                    }
+                }.getOrNull()
+            }
+        }
+    }
+
+    val loadedBitmap = bitmap
+    if (loadedBitmap != null) {
+        Image(
+            bitmap = loadedBitmap.asImageBitmap(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    } else {
+        fallback()
     }
 }
 
@@ -2329,7 +2368,7 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
     }
 }
 
-private fun parseService(obj: JsonObject): Service? {
+fun parseService(obj: JsonObject): Service? {
     val service = obj.obj("service") ?: obj
     val vendor = obj.obj("vendor")
     val category = obj.obj("category")
@@ -2348,10 +2387,14 @@ private fun parseService(obj: JsonObject): Service? {
     val productType = service.str("productType", "product_type").ifBlank {
         if (fulfillmentType == "reservation") "coupon" else "voucher"
     }
+    val imageUrl = service.array("images")
+        .mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+        .firstOrNull { it.isNotBlank() }
     return Service(
         id = id,
         name = service.str("name").ifBlank { "Dịch vụ" },
         description = service.str("description"),
+        imageUrl = imageUrl,
         category = category?.str("name").ifNullOrBlank { service.str("category") },
         vendorName = vendor?.str("name").ifNullOrBlank { service.str("vendor_name") },
         vendorAddress = vendor?.str("address").orEmpty(),
@@ -2543,10 +2586,11 @@ private sealed class Screen {
     data object Weather : Screen()
 }
 
-private data class Service(
+data class Service(
     val id: String,
     val name: String,
     val description: String,
+    val imageUrl: String?,
     val category: String,
     val vendorName: String,
     val vendorAddress: String,
