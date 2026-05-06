@@ -1,5 +1,10 @@
 import { Hono } from 'hono'
 import { authMiddleware } from '../middleware/auth'
+import {
+  buildNotificationFilters,
+  normalizeNotificationCategory,
+  normalizeNotificationSeverity,
+} from '../services/admin-notification.service'
 import * as notifSvc from '../services/notification.service'
 
 const notificationRoutes = new Hono<{
@@ -10,10 +15,14 @@ notificationRoutes.use('*', authMiddleware())
 // ─── GET /notifications — list ────
 notificationRoutes.get('/', async (c) => {
   const userId = c.get('userId')!
-  const unreadOnly = c.req.query('unread') === 'true'
-  const page = Number(c.req.query('page') || 1)
-  const limit = Number(c.req.query('limit') || 20)
-  const result = await notifSvc.listNotifications(userId, { unread_only: unreadOnly, page, limit })
+  const filters = buildNotificationFilters({
+    unreadOnly: c.req.query('unread') === 'true',
+    category: c.req.query('category'),
+    severity: c.req.query('severity'),
+    page: Number(c.req.query('page') || 1),
+    limit: Number(c.req.query('limit') || 20),
+  })
+  const result = await notifSvc.listNotifications(userId, filters)
   return c.json({ success: true, data: result })
 })
 
@@ -54,6 +63,20 @@ notificationRoutes.post('/register-token', async (c) => {
   }
   await notifSvc.registerPushToken(userId, token, platform)
   return c.json({ success: true })
+})
+
+notificationRoutes.get('/options', async (c) => {
+  return c.json({
+    success: true,
+    data: {
+      categories: ['order', 'vendor', 'settlement', 'payment', 'refund', 'content', 'system'],
+      severities: ['info', 'success', 'warning', 'critical'],
+      normalize: {
+        category: normalizeNotificationCategory(c.req.query('category')),
+        severity: normalizeNotificationSeverity(c.req.query('severity')),
+      },
+    },
+  })
 })
 
 export default notificationRoutes

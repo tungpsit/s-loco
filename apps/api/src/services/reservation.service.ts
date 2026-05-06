@@ -163,7 +163,12 @@ export async function listReservationsByUser(
     .select({ count: sql<number>`count(*)` })
     .from(reservations)
     .where(and(...conditions))
-  return { items: items.map(toReservationListItemDto), total: Number(scalar(rows).count), page, limit }
+  return {
+    items: items.map(toReservationListItemDto),
+    total: Number(scalar(rows).count),
+    page,
+    limit,
+  }
 }
 
 export async function listReservationsByVendorOwner(
@@ -203,7 +208,12 @@ export async function listReservationsByVendorOwner(
     .innerJoin(vendors, eq(reservations.vendorId, vendors.id))
     .where(and(...conditions))
 
-  return { items: items.map(toReservationListItemDto), total: Number(scalar(rows).count), page, limit }
+  return {
+    items: items.map(toReservationListItemDto),
+    total: Number(scalar(rows).count),
+    page,
+    limit,
+  }
 }
 
 export async function confirmReservation(reservationId: string, ownerId: string) {

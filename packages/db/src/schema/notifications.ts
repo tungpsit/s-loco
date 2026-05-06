@@ -1,11 +1,30 @@
-import { boolean, index, jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import { boolean, index, jsonb, pgEnum, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 import { users } from './users'
+
+export const notificationCategoryEnum = pgEnum('notification_category', [
+  'order',
+  'vendor',
+  'settlement',
+  'payment',
+  'refund',
+  'content',
+  'system',
+])
+
+export const notificationSeverityEnum = pgEnum('notification_severity', [
+  'info',
+  'success',
+  'warning',
+  'critical',
+])
 
 // ─── Notifications ─────────────────────────────────────
 export const notifications = pgTable('notifications', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   type: varchar('type', { length: 50 }).notNull(),
+  category: notificationCategoryEnum('category').notNull().default('system'),
+  severity: notificationSeverityEnum('severity').notNull().default('info'),
   title: varchar('title', { length: 200 }).notNull(),
   body: text('body').notNull(),
   data: jsonb('data'),
@@ -14,4 +33,6 @@ export const notifications = pgTable('notifications', {
 }, (table) => [
   index('notifications_user_id_idx').on(table.userId),
   index('notifications_is_read_idx').on(table.userId, table.isRead),
+  index('notifications_category_idx').on(table.userId, table.category),
+  index('notifications_severity_idx').on(table.userId, table.severity),
 ])

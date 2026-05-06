@@ -4,6 +4,11 @@ import { getDb } from '../db'
 import { momoGateway } from '../gateways/momo'
 import { sepayGateway } from '../gateways/sepay'
 import { vnpayGateway } from '../gateways/vnpay'
+import {
+  notifyAdminsRefundCompleted,
+  notifyAdminsRefundRequested,
+  notifyAdminsWebhookFailed,
+} from './admin-notification.service'
 import { notifyOrderPaid } from './notification.service'
 import type { PaymentGateway } from './payment-gateway'
 import { generateQrToken } from './voucher.service'
@@ -108,6 +113,14 @@ export async function processWebhook(
         .update(payments)
         .set({ rawWebhook: result.rawData, updatedAt: new Date() })
         .where(eq(payments.id, payment.id))
+      void notifyAdminsWebhookFailed({
+        gateway,
+        code: 'AMOUNT_MISMATCH',
+        message: `Kỳ vọng ${expectedAmount}, nhận ${receivedAmount}`,
+        transactionId: result.transactionId,
+      }).catch((err) => {
+        console.error('[AdminNotification] Failed to notify amount mismatch:', err)
+      })
       throw new PaymentError('AMOUNT_MISMATCH', 'Số tiền thanh toán không khớp với đơn hàng.')
     }
 
@@ -123,6 +136,14 @@ export async function processWebhook(
     const msg = err instanceof Error ? err.message : String(err)
     console.error(`[Webhook] ${gateway} processing error: ${msg}`)
     await enqueueWebhookRetry(gateway, payload, signature, msg)
+    void notifyAdminsWebhookFailed({
+      gateway,
+      code: err instanceof PaymentError ? err.code : undefined,
+      message: msg,
+      transactionId: result.transactionId,
+    }).catch((notifyErr) => {
+      console.error('[AdminNotification] Failed to notify webhook failure:', notifyErr)
+    })
     throw err
   }
 
@@ -204,7 +225,7 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
   if (payment?.gateway) {
     const gw = gateways[payment.gateway]
     if (gw && payment.gatewayTransactionId) {
-        const refundResult = await gw.processRefund({
+      const refundResult = await gw.processRefund({
         transactionId: payment.gatewayTransactionId,
         amount: Math.round(Number(item.unitPrice)),
         originalAmount,
@@ -212,17 +233,22 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
       })
       const completion = getRefundCompletionStatus(payment.gateway, refundResult.success)
 
+      let refundId: string | undefined
       await db.transaction(async (tx) => {
-        await tx.insert(refunds).values({
-          voucherId,
-          paymentId: payment.id,
-          amount: item.unitPrice,
-          gateway: payment.gateway,
-          gatewayRefundId: refundResult.refundTransactionId,
-          status: completion.refundStatus,
-          reason,
-          initiatedBy: userId,
-        })
+        const [createdRefund] = await tx
+          .insert(refunds)
+          .values({
+            voucherId,
+            paymentId: payment.id,
+            amount: item.unitPrice,
+            gateway: payment.gateway,
+            gatewayRefundId: refundResult.refundTransactionId,
+            status: completion.refundStatus,
+            reason,
+            initiatedBy: userId,
+          })
+          .returning({ id: refunds.id })
+        refundId = createdRefund?.id
         await tx
           .update(vouchers)
           .set({ status: 'refunded', updatedAt: new Date() })
@@ -234,6 +260,16 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
         await updateOrderRefundStatus(tx, item.orderId)
       })
 
+      void notifyAdminsRefundRequested({
+        refundId,
+        voucherId,
+        orderId: item.orderId,
+        amount: item.unitPrice,
+        status: completion.refundStatus,
+      }).catch((err) => {
+        console.error('[AdminNotification] Failed to notify refund request:', err)
+      })
+
       return { success: true, message: completion.message }
     }
   }
@@ -242,6 +278,15 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
     .update(vouchers)
     .set({ status: 'refunded', updatedAt: new Date() })
     .where(eq(vouchers.id, voucherId))
+
+  void notifyAdminsRefundRequested({
+    voucherId,
+    orderId: item.orderId,
+    amount: item.unitPrice,
+    status: 'manual_processing',
+  }).catch((err) => {
+    console.error('[AdminNotification] Failed to notify manual refund request:', err)
+  })
 
   return { success: true, message: 'Yêu cầu hoàn tiền đã được ghi nhận.' }
 }
@@ -266,7 +311,11 @@ export async function completeManualRefund(
         })
         .where(eq(refunds.id, refundId))
 
-      const [payment] = await tx.select().from(payments).where(eq(payments.id, refund.paymentId)).limit(1)
+      const [payment] = await tx
+        .select()
+        .from(payments)
+        .where(eq(payments.id, refund.paymentId))
+        .limit(1)
       if (payment) {
         const [item] = await tx
           .select({ orderId: orderItems.orderId })
@@ -281,6 +330,10 @@ export async function completeManualRefund(
       }
     })
   }
+
+  void notifyAdminsRefundCompleted({ refundId, status: completion.refundStatus }).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify refund completion ${refundId}:`, err)
+  })
 
   return {
     success: true,
@@ -303,7 +356,10 @@ export function getManualRefundCompleteStatus(status: string): {
   throw new PaymentError('INVALID_REFUND_STATE', 'Refund không ở trạng thái có thể hoàn tất.')
 }
 
-export function getRefundCompletionStatus(gateway: string, gatewaySuccess = true): {
+export function getRefundCompletionStatus(
+  gateway: string,
+  gatewaySuccess = true,
+): {
   refundStatus: string
   paymentStatus: 'success' | 'refunded'
   message: string
@@ -343,7 +399,9 @@ async function updateOrderRefundStatus(tx: any, orderId: string) {
     .from(vouchers)
     .innerJoin(orderItems, eq(vouchers.orderItemId, orderItems.id))
     .where(eq(orderItems.orderId, orderId))
-  const allRefunded = voucherRows.length > 0 && voucherRows.every((row: { status: string }) => row.status === 'refunded')
+  const allRefunded =
+    voucherRows.length > 0 &&
+    voucherRows.every((row: { status: string }) => row.status === 'refunded')
   const anyRefunded = voucherRows.some((row: { status: string }) => row.status === 'refunded')
   if (allRefunded || anyRefunded) {
     await tx
@@ -359,7 +417,9 @@ async function updatePaymentRefundStatus(tx: any, paymentId: string, orderId: st
     .from(vouchers)
     .innerJoin(orderItems, eq(vouchers.orderItemId, orderItems.id))
     .where(eq(orderItems.orderId, orderId))
-  const allRefunded = voucherRows.length > 0 && voucherRows.every((row: { status: string }) => row.status === 'refunded')
+  const allRefunded =
+    voucherRows.length > 0 &&
+    voucherRows.every((row: { status: string }) => row.status === 'refunded')
   if (allRefunded) {
     await tx
       .update(payments)

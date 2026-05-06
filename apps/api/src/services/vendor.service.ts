@@ -7,6 +7,10 @@ import type {
 } from '@S-Loco/shared/validators'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import { getDb } from '../db'
+import {
+  notifyAdminsVendorCreated,
+  notifyAdminsVendorStatusChanged,
+} from './admin-notification.service'
 
 type VendorStatus = UpdateVendorStatusInput['status']
 
@@ -49,6 +53,11 @@ export async function createVendor(data: CreateVendorInput) {
       businessHours: data.business_hours,
     })
     .returning()
+  if (vendor) {
+    void notifyAdminsVendorCreated(vendor).catch((err) => {
+      console.error(`[AdminNotification] Failed to notify vendor ${vendor.id}:`, err)
+    })
+  }
   return vendor!
 }
 
@@ -88,6 +97,9 @@ export async function updateVendorStatus(vendorId: string, input: UpdateVendorSt
     .where(eq(vendors.id, vendorId))
     .returning()
   if (!updated) throw new VendorError('NOT_FOUND', 'Cửa hàng không tồn tại.')
+  void notifyAdminsVendorStatusChanged(updated).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify vendor status ${vendorId}:`, err)
+  })
   return updated
 }
 

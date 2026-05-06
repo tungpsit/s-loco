@@ -25,7 +25,7 @@ interface DataTableProps<T> {
   onPageChange?: (page: number) => void
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   columns,
   data,
   isLoading,
@@ -54,7 +54,7 @@ export function DataTable<T extends Record<string, any>>({
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
     } else {
       setSortKey(key)
       setSortDir('asc')
@@ -77,7 +77,7 @@ export function DataTable<T extends Record<string, any>>({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-outline-variant/15 bg-surface-low/40">
-              {columns.map(col => (
+              {columns.map((col) => (
                 <th
                   key={col.key}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
@@ -110,8 +110,11 @@ export function DataTable<T extends Record<string, any>>({
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   className={`hover:bg-primary/[0.03] transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
                 >
-                  {columns.map(col => (
-                    <td key={col.key} className={`px-6 py-4 text-on-surface ${col.className ?? ''}`}>
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={`px-6 py-4 text-on-surface ${col.className ?? ''}`}
+                    >
                       {col.render ? col.render(row) : String(row[col.key] ?? '—')}
                     </td>
                   ))}
@@ -130,6 +133,7 @@ export function DataTable<T extends Record<string, any>>({
           </p>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-high text-on-surface-variant hover:bg-surface-highest disabled:opacity-30 transition-colors"
@@ -140,6 +144,7 @@ export function DataTable<T extends Record<string, any>>({
               Trang {page} / {totalPages}
             </span>
             <button
+              type="button"
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surface-high text-on-surface-variant hover:bg-surface-highest disabled:opacity-30 transition-colors"

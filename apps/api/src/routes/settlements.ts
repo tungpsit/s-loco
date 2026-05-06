@@ -40,14 +40,15 @@ settlementRoutes.get('/reconciliation', requireRole('admin'), async (c) => {
 })
 
 // ─── GET /settlements/export — download CSV report ────
-settlementRoutes.get('/export', requireRole('admin'), async (c) => {
+settlementRoutes.get('/export', requireRole('admin'), async (_c) => {
   const result = await settlementSvc.listAllSettlements({ page: 1, limit: 1000 })
   const items = result.items
 
   const sep = ','
-  const q = (v: string) => '"' + v.replace(/"/g, '""') + '"'
-  const fmtDate = (d: any) => (d ? new Date(d).toLocaleDateString('vi-VN') : '')
-  const fmtMoney = (n: any) => Number(n || 0).toLocaleString('vi-VN')
+  const q = (v: string) => `"${v.replace(/"/g, '""')}"`
+  const fmtDate = (d: string | Date | null | undefined) =>
+    d ? new Date(d).toLocaleDateString('vi-VN') : ''
+  const fmtMoney = (n: string | number | null | undefined) => Number(n || 0).toLocaleString('vi-VN')
 
   const header = [
     'Mã thanh toán',
@@ -75,11 +76,11 @@ settlementRoutes.get('/export', requireRole('admin'), async (c) => {
     vendor_pays_sloco: 'Vendor trả S-Loco',
   }
 
-  const rows = items.map((row: any) => {
+  const rows = items.map((row) => {
     const s = row.settlement || row
     const vendorName = row.vendor?.name || ''
     return [
-      q('STL-' + (s.id || '').slice(0, 8).toUpperCase()),
+      q(`STL-${(s.id || '').slice(0, 8).toUpperCase()}`),
       q(vendorName),
       q(fmtDate(s.periodStart)),
       q(fmtDate(s.periodEnd)),

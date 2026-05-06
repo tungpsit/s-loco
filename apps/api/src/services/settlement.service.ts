@@ -1,6 +1,7 @@
-import { getDb } from '../db'
 import { orderItems, settlementItems, settlements, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, gte, lte, sql } from 'drizzle-orm'
+import { getDb } from '../db'
+import { notifyAdminsSettlementPending } from './admin-notification.service'
 import { settlementDirectionForProductType } from './product-types'
 
 /** Non-null assertion for Drizzle scalar selects */
@@ -83,6 +84,10 @@ export async function createSettlementBatch(vendorId: string, periodStart: Date,
     }
 
     return settlement!
+  })
+
+  void notifyAdminsSettlementPending(result).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify settlement ${result.id}:`, err)
   })
 
   return result

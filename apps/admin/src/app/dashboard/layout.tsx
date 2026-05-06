@@ -1,9 +1,10 @@
 'use client'
 
-import Sidebar, { MobileTopBar, SidebarProvider } from '@/components/sidebar'
-import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { NotificationBell } from '@/components/notification-bell'
+import Sidebar, { MobileTopBar, SidebarProvider } from '@/components/sidebar'
+import { useAuth } from '@/lib/auth-context'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -37,6 +38,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Content wrapper — full width on mobile, offset by sidebar on desktop */}
         <div className="md:ml-64 min-w-0">
           <MobileTopBar />
+          <div className="hidden md:flex justify-end px-8 pt-6 max-w-7xl mx-auto">
+            <NotificationBell />
+          </div>
           <main className="px-4 py-6 md:px-8 md:py-8 max-w-7xl mx-auto">{children}</main>
         </div>
       </div>

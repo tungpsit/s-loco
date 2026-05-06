@@ -105,20 +105,25 @@ auth.post('/logout', authMiddleware(), async (c) => {
 })
 
 // ─── POST /auth/change-password ────────────────────────
-auth.post('/change-password', authMiddleware(), zValidator('json', changePasswordSchema), async (c) => {
-  try {
-    const userId = c.get('userId')!
-    const { current_password, new_password } = c.req.valid('json')
-    await changePassword(userId, current_password, new_password)
-    return c.json({ success: true, data: { message: 'Đã đổi mật khẩu.' } })
-  } catch (err) {
-    if (err instanceof AuthError) {
-      const status = err.code === 'INVALID_CURRENT_PASSWORD' ? 401 : 400
-      return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+auth.post(
+  '/change-password',
+  authMiddleware(),
+  zValidator('json', changePasswordSchema),
+  async (c) => {
+    try {
+      const userId = c.get('userId')!
+      const { current_password, new_password } = c.req.valid('json')
+      await changePassword(userId, current_password, new_password)
+      return c.json({ success: true, data: { message: 'Đã đổi mật khẩu.' } })
+    } catch (err) {
+      if (err instanceof AuthError) {
+        const status = err.code === 'INVALID_CURRENT_PASSWORD' ? 401 : 400
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+      }
+      throw err
     }
-    throw err
-  }
-})
+  },
+)
 
 // ─── POST /auth/reset-password ─────────────────────────
 auth.post('/reset-password', authMiddleware(), async (c) => {

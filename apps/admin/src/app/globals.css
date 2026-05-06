@@ -8,38 +8,38 @@
 /* ─── S-Loco Blue Design System ─────────────────────── */
 :root {
   /* Primary — Ocean Blue */
-  --color-primary: #005E97;
-  --color-primary-container: #0077B6;
-  --color-primary-fixed: #90E0EF;
-  --color-primary-fixed-dim: #48CAE4;
+  --color-primary: #005e97;
+  --color-primary-container: #0077b6;
+  --color-primary-fixed: #90e0ef;
+  --color-primary-fixed-dim: #48cae4;
 
   /* Secondary — Slate Blue */
-  --color-secondary: #3A5A8C;
-  --color-secondary-container: #B8D4F0;
-  --color-on-secondary-container: #1E3A5F;
+  --color-secondary: #3a5a8c;
+  --color-secondary-container: #b8d4f0;
+  --color-on-secondary-container: #1e3a5f;
 
   /* Tertiary — Deep Indigo */
-  --color-tertiary: #3F3D99;
-  --color-tertiary-container: #5856D6;
-  --color-tertiary-fixed: #E0DFFF;
+  --color-tertiary: #3f3d99;
+  --color-tertiary-container: #5856d6;
+  --color-tertiary-fixed: #e0dfff;
 
   /* Surfaces — Cool Blue-Gray */
-  --color-surface: #F4F7FB;
-  --color-surface-container-low: #EDF1F8;
-  --color-surface-container: #E6EBF4;
-  --color-surface-container-high: #DEE4EF;
-  --color-surface-container-highest: #D6DDEA;
-  --color-surface-container-lowest: #FFFFFF;
+  --color-surface: #f4f7fb;
+  --color-surface-container-low: #edf1f8;
+  --color-surface-container: #e6ebf4;
+  --color-surface-container-high: #dee4ef;
+  --color-surface-container-highest: #d6ddea;
+  --color-surface-container-lowest: #ffffff;
 
   /* Text */
-  --color-on-surface: #161B2E;
-  --color-on-surface-variant: #3B4460;
-  --color-outline: #6B7694;
-  --color-outline-variant: #B5BED4;
+  --color-on-surface: #161b2e;
+  --color-on-surface-variant: #3b4460;
+  --color-outline: #6b7694;
+  --color-outline-variant: #b5bed4;
 
   /* Error */
-  --color-error: #BA1A1A;
-  --color-on-error: #FFFFFF;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
 
   /* Background / Foreground shortcuts */
 
@@ -113,26 +113,26 @@
   --color-foreground: var(--foreground);
 
   /* Design Tokens */
-  --color-primary: #005E97;
-  --color-primary-container: #0077B6;
-  --color-primary-fixed: #90E0EF;
-  --color-primary-fixed-dim: #48CAE4;
-  --color-secondary: #3A5A8C;
-  --color-secondary-container: #B8D4F0;
-  --color-on-secondary-container: #1E3A5F;
-  --color-tertiary: #3F3D99;
-  --color-tertiary-container: #5856D6;
-  --color-tertiary-fixed: #E0DFFF;
-  --color-surface: #F4F7FB;
-  --color-surface-low: #EDF1F8;
-  --color-surface-mid: #E6EBF4;
-  --color-surface-high: #DEE4EF;
-  --color-surface-highest: #D6DDEA;
-  --color-on-surface: #161B2E;
-  --color-on-surface-variant: #3B4460;
-  --color-outline: #6B7694;
-  --color-outline-variant: #B5BED4;
-  --color-error: #BA1A1A;
+  --color-primary: #005e97;
+  --color-primary-container: #0077b6;
+  --color-primary-fixed: #90e0ef;
+  --color-primary-fixed-dim: #48cae4;
+  --color-secondary: #3a5a8c;
+  --color-secondary-container: #b8d4f0;
+  --color-on-secondary-container: #1e3a5f;
+  --color-tertiary: #3f3d99;
+  --color-tertiary-container: #5856d6;
+  --color-tertiary-fixed: #e0dfff;
+  --color-surface: #f4f7fb;
+  --color-surface-low: #edf1f8;
+  --color-surface-mid: #e6ebf4;
+  --color-surface-high: #dee4ef;
+  --color-surface-highest: #d6ddea;
+  --color-on-surface: #161b2e;
+  --color-on-surface-variant: #3b4460;
+  --color-outline: #6b7694;
+  --color-outline-variant: #b5bed4;
+  --color-error: #ba1a1a;
 
   --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-body: "Be Vietnam Pro", system-ui, sans-serif;

@@ -90,7 +90,12 @@ export async function listVouchersByUser(
     .from(vouchers)
     .where(and(...conditions))
 
-  return { items: items.map(toTouristVoucherListItem), total: Number(scalar(countRows).count), page, limit }
+  return {
+    items: items.map(toTouristVoucherListItem),
+    total: Number(scalar(countRows).count),
+    page,
+    limit,
+  }
 }
 
 // ─── List vendor vouchers ──────────────────────────────

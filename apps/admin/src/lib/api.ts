@@ -42,6 +42,40 @@ type ApiJson = {
   activeVendors?: number
 } & ApiJson[]
 
+export type NotificationCategory =
+  | 'order'
+  | 'vendor'
+  | 'settlement'
+  | 'payment'
+  | 'refund'
+  | 'content'
+  | 'system'
+
+export type NotificationSeverity = 'info' | 'success' | 'warning' | 'critical'
+
+export type AdminNotification = {
+  id: string
+  userId: string
+  type: string
+  category: NotificationCategory
+  severity: NotificationSeverity
+  title: string
+  body: string
+  data?: { actionUrl?: string; [key: string]: unknown } | null
+  isRead: boolean
+  createdAt: string
+}
+
+export type NotificationListResponse = {
+  success: boolean
+  data: {
+    items: AdminNotification[]
+    total: number
+    page: number
+    limit: number
+  }
+}
+
 export async function api<T = ApiJson>(
   path: string,
   opts?: RequestInit & { noAuth?: boolean },
@@ -102,6 +136,33 @@ export class ApiError extends Error {
 export const dashboardApi = {
   adminStats: () => api('/dashboard/admin'),
   adminOrders: (page = 1, limit = 20) => api(`/dashboard/admin/orders?page=${page}&limit=${limit}`),
+}
+
+// ─── Notifications ───
+export const notificationApi = {
+  list: (params?: {
+    unread?: boolean
+    category?: NotificationCategory | ''
+    severity?: NotificationSeverity | ''
+    page?: number
+    limit?: number
+  }) => {
+    const q = new URLSearchParams()
+    if (params?.unread) q.set('unread', 'true')
+    if (params?.category) q.set('category', params.category)
+    if (params?.severity) q.set('severity', params.severity)
+    q.set('page', String(params?.page || 1))
+    q.set('limit', String(params?.limit || 20))
+    return api<NotificationListResponse>(`/notifications?${q}`)
+  },
+  count: () => api<{ success: boolean; data: { unread: number } }>('/notifications/count'),
+  markRead: (id: string) => api(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: () => api('/notifications/read-all', { method: 'POST' }),
+  registerToken: (token: string, platform: 'web' | 'ios' | 'android' = 'web') =>
+    api('/notifications/register-token', {
+      method: 'POST',
+      body: JSON.stringify({ token, platform }),
+    }),
 }
 
 // ─── Vendors ───

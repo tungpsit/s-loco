@@ -2,6 +2,7 @@ import { orderItems, orders, services, vendors, vouchers } from '@S-Loco/db/sche
 import type { CreateOrderInput } from '@S-Loco/shared/validators'
 import { and, eq, sql } from 'drizzle-orm'
 import { getDb } from '../db'
+import { notifyAdminsOrderCancelled } from './admin-notification.service'
 import { notifyOrderPaid } from './notification.service'
 import { calculateServicePricing } from './pricing'
 import { artifactTypeForProductType, normalizeProductType } from './product-types'
@@ -87,7 +88,10 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     })
     const artifactType = artifactTypeForProductType(productType)
     if (!artifactType) {
-      throw new OrderError('COUPON_NOT_PREPAID', `"${svc.name}" là mã giảm giá, không thể thanh toán trước.`)
+      throw new OrderError(
+        'COUPON_NOT_PREPAID',
+        `"${svc.name}" là mã giảm giá, không thể thanh toán trước.`,
+      )
     }
     const pricing = calculateServicePricing({
       originalPrice: svc.originalPrice,
@@ -208,7 +212,7 @@ export async function mockPayOrder(orderId: string, userId: string) {
       .where(eq(orders.id, orderId))
 
     // Mark all vouchers as paid and generate QR tokens
-    const orderVouchers = await tx
+    const _orderVouchers = await tx
       .select()
       .from(vouchers)
       .where(
@@ -261,6 +265,10 @@ export async function cancelOrder(orderId: string, userId: string) {
       .where(
         sql`${vouchers.orderItemId} IN (SELECT id FROM order_items WHERE order_id = ${orderId})`,
       )
+  })
+
+  void notifyAdminsOrderCancelled(order).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify cancelled order ${orderId}:`, err)
   })
 
   return { success: true }

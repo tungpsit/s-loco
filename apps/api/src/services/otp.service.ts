@@ -43,8 +43,8 @@ export async function sendOtp(phone: string) {
 }
 
 export async function sendOtpMessage(provider: SMSProvider, phone: string, code: string) {
-  let message = `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`
-  let sent = await provider.send(phone, message)
+  const message = `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`
+  const sent = await provider.send(phone, message)
   if (!sent) {
     throw new OtpError('SMS_SEND_FAILED', 'Không thể gửi mã OTP. Vui lòng thử lại sau.')
   }

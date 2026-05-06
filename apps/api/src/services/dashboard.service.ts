@@ -1,6 +1,6 @@
-import { getDb } from '../db'
 import { orderItems, orders, settlements, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, gte, sql } from 'drizzle-orm'
+import { getDb } from '../db'
 
 /** Non-null assertion for Drizzle scalar selects */
 function scalar<T>(rows: T[]): T {
@@ -23,9 +23,7 @@ export async function getVendorDashboard(vendorId: string) {
     .from(orderItems)
     .leftJoin(orders, eq(orderItems.orderId, orders.id))
     .leftJoin(vouchers, eq(vouchers.orderItemId, orderItems.id))
-    .where(
-      and(eq(orderItems.vendorId, vendorId), gte(orders.createdAt, today)),
-    )
+    .where(and(eq(orderItems.vendorId, vendorId), gte(orders.createdAt, today)))
 
   // Total stats
   const [totalStats] = await db

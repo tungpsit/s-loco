@@ -1,5 +1,5 @@
-import { getDb, schema } from '../db'
 import { and, eq, sql } from 'drizzle-orm'
+import { getDb, schema } from '../db'
 import { createSettlementBatch } from '../services/settlement.service'
 
 const { vouchers } = schema

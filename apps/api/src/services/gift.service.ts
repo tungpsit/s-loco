@@ -1,8 +1,8 @@
-import { getDb } from '../db'
 import { notifications, users, voucherAuditLog, vouchers } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
+import { getDb } from '../db'
 import { redis } from '../lib/redis'
-import { generateQrToken, VoucherError } from './voucher.service'
+import { generateQrToken } from './voucher.service'
 
 // ─── Types ───────────────────────────────────────────────
 interface GiftByPhoneParams {
@@ -28,7 +28,12 @@ export class GiftError extends Error {
 }
 
 // ─── Gift by Phone ───────────────────────────────────────
-export async function giftByPhone({ voucherId, senderId, recipientPhone, message }: GiftByPhoneParams) {
+export async function giftByPhone({
+  voucherId,
+  senderId,
+  recipientPhone,
+  message,
+}: GiftByPhoneParams) {
   const db = getDb()
 
   // 1. Verify voucher belongs to sender

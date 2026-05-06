@@ -1,7 +1,7 @@
-import { randomUUID } from 'crypto'
-import { getDb } from '../db'
 import { savedItineraries } from '@S-Loco/db/schema'
-import { and, desc, eq, isNull } from 'drizzle-orm'
+import { randomUUID } from 'node:crypto'
+import { and, desc, eq } from 'drizzle-orm'
+import { getDb } from '../db'
 
 // ---- Save AI Itinerary ---------------------------------
 export async function saveItinerary(
@@ -70,7 +70,8 @@ export async function getItineraryByShareToken(token: string) {
     .where(and(eq(savedItineraries.shareToken, token), eq(savedItineraries.isShared, true)))
     .limit(1)
 
-  if (!row) throw new ItinerarySaveError('NOT_FOUND', 'Lịch trình không tồn tại hoặc không được chia sẻ.')
+  if (!row)
+    throw new ItinerarySaveError('NOT_FOUND', 'Lịch trình không tồn tại hoặc không được chia sẻ.')
 
   return row
 }

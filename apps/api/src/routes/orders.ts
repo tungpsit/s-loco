@@ -1,5 +1,5 @@
-import { zValidator } from '@hono/zod-validator'
 import { createOrderSchema } from '@S-Loco/shared/validators'
+import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { authMiddleware } from '../middleware/auth'
 import * as orderSvc from '../services/order.service'

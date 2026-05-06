@@ -16,10 +16,10 @@ import { processWebhook } from './payment.service'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const RETRY_DELAYS_MS = [
-  30_000,   // Retry 1: 30 seconds
-  120_000,  // Retry 2: 2 minutes
-  300_000,  // Retry 3: 5 minutes
-  900_000,  // Retry 4: 15 minutes
+  30_000, // Retry 1: 30 seconds
+  120_000, // Retry 2: 2 minutes
+  300_000, // Retry 3: 5 minutes
+  900_000, // Retry 4: 15 minutes
   3600_000, // Retry 5: 1 hour
 ]
 const MAX_RETRIES = 5
@@ -102,7 +102,8 @@ export async function processRetryQueue(): Promise<{ processed: number; failed: 
       }
 
       // Re-queue with exponential backoff
-      const delay = RETRY_DELAYS_MS[nextRetryCount] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1] ?? 30_000
+      const delay =
+        RETRY_DELAYS_MS[nextRetryCount] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1] ?? 30_000
       const updated: RetryEntry = {
         ...entry,
         retryCount: nextRetryCount,

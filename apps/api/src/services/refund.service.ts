@@ -1,6 +1,6 @@
-import { getDb } from '../db'
-import { orderItems, orders, payments, refunds, vouchers } from '@S-Loco/db/schema'
+import { orderItems, payments, refunds, vouchers } from '@S-Loco/db/schema'
 import { and, eq } from 'drizzle-orm'
+import { getDb } from '../db'
 import { momoGateway } from '../gateways/momo'
 import { sepayGateway } from '../gateways/sepay'
 import { vnpayGateway } from '../gateways/vnpay'
@@ -15,11 +15,7 @@ const gateways: Record<string, PaymentGateway> = {
 }
 
 // ---- Partial Refund (single voucher) -----------------
-export async function requestPartialRefund(
-  voucherId: string,
-  userId: string,
-  reason?: string,
-) {
+export async function requestPartialRefund(voucherId: string, userId: string, reason?: string) {
   const db = getDb()
 
   // Gate: voucher must be PAID and owned by user
@@ -77,7 +73,12 @@ export async function requestPartialRefund(
     .set({ status: 'refunded', updatedAt: new Date() })
     .where(eq(vouchers.id, voucherId))
 
-  return { success: true, message: 'Hoàn tiền voucher đã được xử lý.', voucherId, amount: refundAmount }
+  return {
+    success: true,
+    message: 'Hoàn tiền voucher đã được xử lý.',
+    voucherId,
+    amount: refundAmount,
+  }
 }
 
 // ---- Refund Error --------------------------------------

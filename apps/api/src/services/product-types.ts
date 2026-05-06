@@ -13,7 +13,9 @@ export function productTypeForFulfillmentType(fulfillmentType: LegacyFulfillment
   return fulfillmentType === 'reservation' ? 'coupon' : 'voucher'
 }
 
-export function fulfillmentTypeForProductType(productType: ProductType): 'fixed_price' | 'reservation' {
+export function fulfillmentTypeForProductType(
+  productType: ProductType,
+): 'fixed_price' | 'reservation' {
   return productType === 'coupon' ? 'reservation' : 'fixed_price'
 }
 

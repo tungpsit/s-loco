@@ -1,14 +1,14 @@
-import { zValidator } from '@hono/zod-validator'
 import { giftByPhoneSchema, redeemVoucherSchema, selfRedeemSchema } from '@S-Loco/shared/validators'
+import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { autoConfirmExpired } from '../jobs/auto-confirm'
 import { authMiddleware, requireRole } from '../middleware/auth'
+import * as giftSvc from '../services/gift.service'
 import * as qrSvc from '../services/qr.service'
 import { RefundError, requestPartialRefund } from '../services/refund.service'
-import { StateError } from '../services/voucher-state'
 import * as voucherSvc from '../services/voucher.service'
 import { VoucherError } from '../services/voucher.service'
-import * as giftSvc from '../services/gift.service'
+import { StateError } from '../services/voucher-state'
 
 const voucherRoutes = new Hono<{ Variables: { userId: string | null; userRole: string | null } }>()
 
@@ -212,33 +212,52 @@ voucherRoutes.post('/:id/complete', requireRole('vendor_owner'), async (c) => {
 })
 
 // ─── POST /vouchers/:id/gift/phone — gift voucher by phone ────
-voucherRoutes.post('/:id/gift/phone', requireRole('tourist'), zValidator('json', giftByPhoneSchema), async (c) => {
-  try {
-    const voucherId = c.req.param('id')
-    const senderId = c.get('userId')!
-    const { recipient_phone, message } = c.req.valid('json')
-    const result = await giftSvc.giftByPhone({ voucherId, senderId, recipientPhone: recipient_phone, message })
-    return c.json({ success: true, data: result })
-  } catch (err) {
-    if (err instanceof giftSvc.GiftError) {
-      const status = err.code === 'NOT_FOUND' ? 404 : 400
-      return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+voucherRoutes.post(
+  '/:id/gift/phone',
+  requireRole('tourist'),
+  zValidator('json', giftByPhoneSchema),
+  async (c) => {
+    try {
+      const voucherId = c.req.param('id')
+      const senderId = c.get('userId')!
+      const { recipient_phone, message } = c.req.valid('json')
+      const result = await giftSvc.giftByPhone({
+        voucherId,
+        senderId,
+        recipientPhone: recipient_phone,
+        message,
+      })
+      return c.json({ success: true, data: result })
+    } catch (err) {
+      if (err instanceof giftSvc.GiftError) {
+        const status = err.code === 'NOT_FOUND' ? 404 : 400
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, status)
+      }
+      throw err
     }
-    throw err
-  }
-})
+  },
+)
 
 // ─── POST /vouchers/:id/gift/link — create one-time gift link ────
 voucherRoutes.post('/:id/gift/link', requireRole('tourist'), async (c) => {
   try {
     const voucherId = c.req.param('id')
     if (!voucherId) {
-      return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Voucher ID không hợp lệ.' } }, 400)
+      return c.json(
+        {
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Voucher ID không hợp lệ.' },
+        },
+        400,
+      )
     }
 
     const senderId = c.get('userId')
     if (!senderId) {
-      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, 401)
+      return c.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        401,
+      )
     }
 
     const result = await giftSvc.createGiftLink({ voucherId, senderId })
@@ -263,12 +282,21 @@ voucherRoutes.post('/:id/refund', requireRole('tourist'), async (c) => {
   try {
     const voucherId = c.req.param('id')
     if (!voucherId) {
-      return c.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Voucher ID không hợp lệ.' } }, 400)
+      return c.json(
+        {
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Voucher ID không hợp lệ.' },
+        },
+        400,
+      )
     }
 
     const userId = c.get('userId')
     if (!userId) {
-      return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, 401)
+      return c.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        401,
+      )
     }
 
     const body = (await c.req.json()) as { reason?: string }

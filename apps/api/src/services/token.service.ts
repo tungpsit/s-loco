@@ -1,8 +1,8 @@
-import { getDb } from '../db'
 import { userSessions } from '@S-Loco/db/schema'
 import { APP_CONSTANTS } from '@S-Loco/shared'
 import { eq } from 'drizzle-orm'
-import { SignJWT, jwtVerify } from 'jose'
+import { jwtVerify, SignJWT } from 'jose'
+import { getDb } from '../db'
 
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET) {

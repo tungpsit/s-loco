@@ -12,6 +12,7 @@ function scalar<T>(rows: T[]): T {
 import { notifications, orderItems, orders, vendors } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { redis } from '../lib/redis'
+import type { NotificationCategory, NotificationSeverity } from './admin-notification.service'
 
 const PUSH_TOKEN_TTL = 60 * 60 * 24 * 30 // 30 days
 
@@ -38,7 +39,7 @@ export async function getPushToken(
 ): Promise<{ token: string; platform: string } | null> {
   const key = `push_token:${userId}`
   const data = await redis.hgetall(key)
-  if (!data || !data.token) return null
+  if (!data?.token) return null
   return { token: data.token, platform: data.platform! }
 }
 
@@ -54,6 +55,8 @@ export async function createNotification(
   title: string,
   body: string,
   data?: Record<string, unknown>,
+  category: NotificationCategory = 'system',
+  severity: NotificationSeverity = 'info',
 ) {
   const db = getDb()
   const [notif] = await db
@@ -61,18 +64,29 @@ export async function createNotification(
     .values({
       userId,
       type,
+      category,
+      severity,
       title,
       body,
       data,
     })
     .returning()
+  if (notif) {
+    fireAndForgetPush(userId, notif.title, notif.body, data ?? {})
+  }
   return notif!
 }
 
 // ─── List user notifications ───────────────────────────
 export async function listNotifications(
   userId: string,
-  opts: { page?: number; limit?: number; unread_only?: boolean },
+  opts: {
+    page?: number
+    limit?: number
+    unread_only?: boolean
+    category?: NotificationCategory
+    severity?: NotificationSeverity
+  },
 ) {
   const db = getDb()
   const page = opts.page || 1
@@ -81,6 +95,8 @@ export async function listNotifications(
 
   const conditions = [eq(notifications.userId, userId)]
   if (opts.unread_only) conditions.push(eq(notifications.isRead, false))
+  if (opts.category) conditions.push(eq(notifications.category, opts.category))
+  if (opts.severity) conditions.push(eq(notifications.severity, opts.severity))
 
   const items = await db
     .select()
@@ -180,53 +196,59 @@ export async function notifyOrderPaid(orderId: string) {
   )
 
   for (const item of pendingNotifications) {
-    const notif = await createNotification(item.userId, item.type, item.title, item.body, item.data)
-    fireAndForgetPush(item.userId, notif.title, notif.body, item.data)
+    await createNotification(item.userId, item.type, item.title, item.body, item.data)
   }
+
+  const { notifyAdminsOrderPaid } = await import('./admin-notification.service')
+  await notifyAdminsOrderPaid({ id: orderId })
 }
 
 export async function notifyOrderCreated(userId: string, orderId: string) {
-  const notif = await createNotification(
+  await createNotification(
     userId,
     'order_created',
     'Đặt hàng thành công!',
     `Đơn hàng #${orderId.slice(0, 8)} đã được tạo.`,
     { orderId },
+    'order',
+    'info',
   )
-  fireAndForgetPush(userId, notif.title, notif.body, { orderId })
 }
 
 export async function notifyPaymentSuccess(userId: string, orderId: string) {
-  const notif = await createNotification(
+  await createNotification(
     userId,
     'payment_success',
     'Thanh toán thành công!',
     `Đơn hàng #${orderId.slice(0, 8)} đã được thanh toán. Voucher đã sẵn sàng.`,
     { orderId },
+    'payment',
+    'success',
   )
-  fireAndForgetPush(userId, notif.title, notif.body, { orderId })
 }
 
 export async function notifyVendorNewOrder(vendorOwnerId: string, orderId: string) {
-  const notif = await createNotification(
+  await createNotification(
     vendorOwnerId,
     'vendor_new_order',
     'Đơn hàng mới!',
     `Bạn có đơn hàng mới #${orderId.slice(0, 8)}.`,
     { orderId },
+    'order',
+    'info',
   )
-  fireAndForgetPush(vendorOwnerId, notif.title, notif.body, { orderId })
 }
 
 export async function notifyVoucherRedeemed(userId: string, voucherId: string) {
-  const notif = await createNotification(
+  await createNotification(
     userId,
     'voucher_redeemed',
     'Voucher đã được sử dụng',
     `Voucher #${voucherId.slice(0, 8)} đã được đổi thành công.`,
     { voucherId },
+    'order',
+    'success',
   )
-  fireAndForgetPush(userId, notif.title, notif.body, { voucherId })
 }
 
 /** Fire push notification (no await — failures are non-critical) */

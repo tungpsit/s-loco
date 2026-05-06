@@ -1,15 +1,17 @@
 'use client'
 
-import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { NotificationBell } from '@/components/notification-bell'
+import { useAuth } from '@/lib/auth-context'
 
 const nav = [
   { href: '/dashboard', icon: '📊', label: 'Tổng quan' },
   { href: '/dashboard/vendors', icon: '🏪', label: 'Vendor' },
   { href: '/dashboard/orders', icon: '🛒', label: 'Đơn hàng' },
   { href: '/dashboard/settlements', icon: '💳', label: 'Đối soát' },
+  { href: '/dashboard/notifications', icon: '🔔', label: 'Thông báo' },
   { href: '/dashboard/content', icon: '📝', label: 'Nội dung' },
   { href: '/dashboard/users', icon: '👤', label: 'Người dùng' },
 ]
@@ -28,16 +30,33 @@ export function MobileTopBar() {
   return (
     <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/90 backdrop-blur-sm border-b border-outline-variant/15 px-4 py-3 md:hidden">
       <button
+        type="button"
         onClick={() => setOpen(true)}
         className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-high text-on-surface"
         aria-label="Mở menu"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        <svg
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="4" x2="20" y1="12" y2="12" />
+          <line x1="4" x2="20" y1="6" y2="6" />
+          <line x1="4" x2="20" y1="18" y2="18" />
+        </svg>
       </button>
       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-container text-sm text-white font-bold">
         S
       </span>
-      <p className="font-display font-bold text-on-surface text-sm">S-Loco Admin</p>
+      <p className="font-display font-bold text-on-surface text-sm flex-1">S-Loco Admin</p>
+      <NotificationBell />
     </header>
   )
 }
@@ -45,25 +64,33 @@ export function MobileTopBar() {
 /* ── Sidebar drawer & desktop panel ──────────────── */
 export default function Sidebar() {
   const pathname = usePathname()
+  const [lastPathname, setLastPathname] = useState(pathname)
   const { open, setOpen } = useContext(SidebarCtx)
   const { user, logout } = useAuth()
 
   // Close drawer on route change
-  useEffect(() => { setOpen(false) }, [pathname, setOpen])
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname)
+    setOpen(false)
+  }
 
   // Lock body scroll when mobile drawer is open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [open])
 
   return (
     <>
       {/* ── Overlay (mobile) ────────────────────────── */}
       {open && (
-        <div
+        <button
+          type="button"
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] md:hidden"
           onClick={() => setOpen(false)}
+          aria-label="Đóng menu"
         />
       )}
 
@@ -89,18 +116,35 @@ export default function Sidebar() {
           </div>
           {/* Close button (mobile only) */}
           <button
+            type="button"
             onClick={() => setOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-high md:hidden"
             aria-label="Đóng menu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            <svg
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {nav.map((item) => {
-            const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            const active =
+              pathname === item.href ||
+              (item.href !== '/dashboard' && pathname.startsWith(item.href))
             return (
               <Link
                 key={item.href}
@@ -126,16 +170,34 @@ export default function Sidebar() {
                 {user.fullName?.charAt(0)?.toUpperCase() || 'A'}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-on-surface truncate">{user.fullName || 'Admin'}</p>
+                <p className="text-sm font-medium text-on-surface truncate">
+                  {user.fullName || 'Admin'}
+                </p>
                 <p className="text-xs text-on-surface-variant truncate">{user.email}</p>
               </div>
             </div>
           )}
           <button
+            type="button"
             onClick={logout}
             className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-error hover:bg-error/5 transition-colors w-full"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            <svg
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" x2="9" y1="12" y2="12" />
+            </svg>
             Đăng xuất
           </button>
         </div>

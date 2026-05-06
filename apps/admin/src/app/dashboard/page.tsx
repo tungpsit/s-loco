@@ -1,23 +1,23 @@
 'use client'
 
-import { dashboardApi } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
   Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts'
+import { dashboardApi } from '@/lib/api'
 
-const fmt = (n?: number | string) => n != null ? Number(n).toLocaleString('vi-VN') : '—'
-const fmtVND = (n?: number | string) => n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—'
+const fmt = (n?: number | string) => (n != null ? Number(n).toLocaleString('vi-VN') : '—')
+const fmtVND = (n?: number | string) => (n != null ? `${Number(n).toLocaleString('vi-VN')}₫` : '—')
 const tooltipNumber = (value: number | string | readonly (string | number)[] | undefined) => {
   if (Array.isArray(value)) return Number(value[0] ?? 0)
   return Number(value ?? 0)
@@ -35,16 +35,50 @@ const CHART_COLORS = {
 
 const PIE_COLORS = ['#2D6A4F', '#F4A261', '#E76F51', '#64748B', '#2563EB']
 
+type OrderStats = {
+  orders?: number
+  totalOrders?: number
+  paidOrders?: number
+  createdOrders?: number
+  cancelledOrders?: number
+  refundedOrders?: number
+  partiallyRefundedOrders?: number
+}
+
+type DashboardStats = OrderStats & {
+  revenue?: OrderStats & { total?: number }
+  vendors?: { active?: number }
+  activeVendors?: number
+  vouchersToday?: number
+  todayVouchers?: number
+  totalRevenue?: number
+}
+
+type DashboardOrder = {
+  id?: string
+  userId?: string
+  vendorId?: string
+  vendorName?: string
+  finalAmount?: number | string
+  totalAmount?: number | string
+  status: string
+  createdAt?: string
+}
+
+function asArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : []
+}
+
 // Mock data — last 7 days revenue breakdown
 function getLast7DaysRevenue(): { day: string; revenue: number }[] {
   const days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-  return days.map((day, i) => ({
+  return days.map((day, _i) => ({
     day,
     revenue: Math.floor(Math.random() * 8_000_000) + 1_000_000,
   }))
 }
 
-function getOrderStatusBreakdown(stats: any) {
+function getOrderStatusBreakdown(stats?: DashboardStats) {
   const orderStats = stats?.revenue ?? stats
   const total = Number(orderStats?.orders ?? orderStats?.totalOrders ?? 0)
   const paid = Number(orderStats?.paidOrders ?? 0)
@@ -73,18 +107,32 @@ function getTopVendors(): { name: string; revenue: number }[] {
 }
 
 // Shared chart tooltip formatter
-const tooltipFormatter = (value: number) => [value.toLocaleString('vi-VN') + '₫', 'Doanh thu']
-const tooltipLabelStyle = { color: '#374151' }
+const _tooltipFormatter = (value: number) => [`${value.toLocaleString('vi-VN')}₫`, 'Doanh thu']
+const _tooltipLabelStyle = { color: '#374151' }
 
-function StatCard({ icon, label, value, accent }: { icon: string; label: string; value: string; accent: string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: string
+  label: string
+  value: string
+  accent: string
+}) {
   return (
     <div className="flex items-center gap-3 bg-white rounded-2xl p-4 md:p-5">
-      <span className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl text-lg md:text-xl ${accent}`}>
+      <span
+        className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl text-lg md:text-xl ${accent}`}
+      >
         {icon}
       </span>
       <div className="min-w-0">
         <p className="text-xs md:text-sm text-on-surface-variant truncate">{label}</p>
-        <p className="text-lg md:text-2xl font-display font-bold text-on-surface truncate">{value}</p>
+        <p className="text-lg md:text-2xl font-display font-bold text-on-surface truncate">
+          {value}
+        </p>
       </div>
     </div>
   )
@@ -92,14 +140,18 @@ function StatCard({ icon, label, value, accent }: { icon: string; label: string;
 
 function OrderStatus({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    paid:              { label: 'Đã TT',        cls: 'bg-primary-fixed/30 text-primary' },
-    created:           { label: 'Chờ TT',        cls: 'bg-tertiary-fixed/50 text-tertiary' },
-    cancelled:         { label: 'Đã hủy',         cls: 'bg-error/10 text-error' },
-    refunded:          { label: 'Hoàn tiền',      cls: 'bg-outline-variant/20 text-outline' },
-    partially_refunded:{ label: 'Hoàn một phần', cls: 'bg-blue-50 text-blue-700' },
+    paid: { label: 'Đã TT', cls: 'bg-primary-fixed/30 text-primary' },
+    created: { label: 'Chờ TT', cls: 'bg-tertiary-fixed/50 text-tertiary' },
+    cancelled: { label: 'Đã hủy', cls: 'bg-error/10 text-error' },
+    refunded: { label: 'Hoàn tiền', cls: 'bg-outline-variant/20 text-outline' },
+    partially_refunded: { label: 'Hoàn một phần', cls: 'bg-blue-50 text-blue-700' },
   }
   const s = map[status] ?? { label: status ?? '—', cls: 'bg-surface-high text-on-surface-variant' }
-  return <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>
+  return (
+    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${s.cls}`}>
+      {s.label}
+    </span>
+  )
 }
 
 export default function DashboardPage() {
@@ -113,8 +165,8 @@ export default function DashboardPage() {
     queryFn: () => dashboardApi.adminOrders(1, 10),
   })
 
-  const stats = statsData?.data
-  const recentOrders: any[] = ordersData?.data?.items || ordersData?.data || []
+  const stats = statsData?.data as DashboardStats | undefined
+  const recentOrders = asArray<DashboardOrder>(ordersData?.data?.items || ordersData?.data)
 
   // Chart data derived from API response
   const revenueChartData = getLast7DaysRevenue()
@@ -168,29 +220,56 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 mb-6 md:mb-8'>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 mb-6 md:mb-8">
         {/* Revenue Overview Bar Chart */}
-        <div className='bg-white rounded-2xl overflow-hidden'>
-          <div className='px-6 py-4 border-b border-outline-variant/15'>
-            <h2 className='font-display font-semibold text-on-surface text-sm'>Doanh thu 7 ngày qua</h2>
+        <div className="bg-white rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-outline-variant/15">
+            <h2 className="font-display font-semibold text-on-surface text-sm">
+              Doanh thu 7 ngày qua
+            </h2>
           </div>
-          <div className='p-4'>
+          <div className="p-4">
             {statsLoading ? (
-              <div className='h-[300px] flex items-center justify-center text-on-surface-variant'>Đang tải…</div>
+              <div className="h-[300px] flex items-center justify-center text-on-surface-variant">
+                Đang tải…
+              </div>
             ) : revenueChartData.length === 0 ? (
-              <div className='h-[300px] flex items-center justify-center text-on-surface-variant text-sm'>Chưa có dữ liệu</div>
+              <div className="h-[300px] flex items-center justify-center text-on-surface-variant text-sm">
+                Chưa có dữ liệu
+              </div>
             ) : (
-              <ResponsiveContainer width='100%' height={300}>
-                <BarChart data={revenueChartData} margin={{ top: 8, right: 16, left: 8, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray='3 3' stroke='#f0f0f0' vertical={false} />
-                  <XAxis dataKey='day' tick={{ fontSize: 12, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`} />
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={revenueChartData}
+                  margin={{ top: 8, right: 16, left: 8, bottom: 4 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#6B7280' }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `${(v / 1_000_000).toFixed(1)}M`}
+                  />
                   <Tooltip
                     contentStyle={customTooltipStyle}
-                    formatter={(value) => [`${tooltipNumber(value).toLocaleString('vi-VN')}₫`, 'Doanh thu']}
+                    formatter={(value) => [
+                      `${tooltipNumber(value).toLocaleString('vi-VN')}₫`,
+                      'Doanh thu',
+                    ]}
                     labelStyle={{ color: '#374151', fontWeight: 600 }}
                   />
-                  <Bar dataKey='revenue' fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar
+                    dataKey="revenue"
+                    fill={CHART_COLORS.primary}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={40}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -198,30 +277,36 @@ export default function DashboardPage() {
         </div>
 
         {/* Order Status Pie Chart */}
-        <div className='bg-white rounded-2xl overflow-hidden'>
-          <div className='px-6 py-4 border-b border-outline-variant/15'>
-            <h2 className='font-display font-semibold text-on-surface text-sm'>Trạng thái đơn hàng</h2>
+        <div className="bg-white rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-outline-variant/15">
+            <h2 className="font-display font-semibold text-on-surface text-sm">
+              Trạng thái đơn hàng
+            </h2>
           </div>
-          <div className='p-4'>
+          <div className="p-4">
             {statsLoading ? (
-              <div className='h-[300px] flex items-center justify-center text-on-surface-variant'>Đang tải…</div>
-            ) : orderStatusData.every(d => d.value === 0) ? (
-              <div className='h-[300px] flex items-center justify-center text-on-surface-variant text-sm'>Chưa có dữ liệu</div>
+              <div className="h-[300px] flex items-center justify-center text-on-surface-variant">
+                Đang tải…
+              </div>
+            ) : orderStatusData.every((d) => d.value === 0) ? (
+              <div className="h-[300px] flex items-center justify-center text-on-surface-variant text-sm">
+                Chưa có dữ liệu
+              </div>
             ) : (
-              <ResponsiveContainer width='100%' height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={orderStatusData}
-                    dataKey='value'
-                    nameKey='name'
-                    cx='50%'
-                    cy='50%'
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
                     outerRadius={100}
                     innerRadius={55}
                     paddingAngle={3}
                   >
-                    {orderStatusData.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i] ?? CHART_COLORS.muted} />
+                    {orderStatusData.map((item, i) => (
+                      <Cell key={item.name} fill={PIE_COLORS[i] ?? CHART_COLORS.muted} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -230,7 +315,7 @@ export default function DashboardPage() {
                     labelStyle={{ color: '#374151' }}
                   />
                   <Legend
-                    iconType='circle'
+                    iconType="circle"
                     iconSize={8}
                     wrapperStyle={{ fontSize: '12px', color: '#374151', paddingTop: '8px' }}
                   />
@@ -242,29 +327,66 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Vendors Horizontal Bar Chart */}
-      <div className='bg-white rounded-2xl overflow-hidden mb-6 md:mb-8'>
-        <div className='flex items-center justify-between px-6 py-4 border-b border-outline-variant/15'>
-          <h2 className='font-display font-semibold text-on-surface text-sm'>Top Vendor theo doanh thu</h2>
+      <div className="bg-white rounded-2xl overflow-hidden mb-6 md:mb-8">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/15">
+          <h2 className="font-display font-semibold text-on-surface text-sm">
+            Top Vendor theo doanh thu
+          </h2>
         </div>
-        <div className='p-4'>
+        <div className="p-4">
           {statsLoading ? (
-            <div className='h-[300px] flex items-center justify-center text-on-surface-variant'>Đang tải…</div>
+            <div className="h-[300px] flex items-center justify-center text-on-surface-variant">
+              Đang tải…
+            </div>
           ) : topVendorsData.length === 0 ? (
-            <div className='h-[300px] flex items-center justify-center text-on-surface-variant text-sm'>Chưa có dữ liệu</div>
+            <div className="h-[300px] flex items-center justify-center text-on-surface-variant text-sm">
+              Chưa có dữ liệu
+            </div>
           ) : (
-            <ResponsiveContainer width='100%' height={300}>
-              <BarChart data={topVendorsData} layout='vertical' margin={{ top: 8, right: 40, left: 8, bottom: 4 }}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#f0f0f0' horizontal={false} />
-                <XAxis type='number' tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
-                <YAxis type='category' dataKey='name' tick={{ fontSize: 12, fill: '#374151' }} axisLine={false} tickLine={false} width={130} />
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={topVendorsData}
+                layout="vertical"
+                margin={{ top: 8, right: 40, left: 8, bottom: 4 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 11, fill: '#6B7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tick={{ fontSize: 12, fill: '#374151' }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={130}
+                />
                 <Tooltip
                   contentStyle={customTooltipStyle}
-                  formatter={(value) => [`${tooltipNumber(value).toLocaleString('vi-VN')}₫`, 'Doanh thu']}
+                  formatter={(value) => [
+                    `${tooltipNumber(value).toLocaleString('vi-VN')}₫`,
+                    'Doanh thu',
+                  ]}
                   labelStyle={{ color: '#374151', fontWeight: 600 }}
                 />
-                <Bar dataKey='revenue' radius={[0, 4, 4, 0]} maxBarSize={28}>
-                  {topVendorsData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? CHART_COLORS.primary : i === 1 ? CHART_COLORS.secondary : i === 2 ? CHART_COLORS.tertiary : CHART_COLORS.amber} />
+                <Bar dataKey="revenue" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                  {topVendorsData.map((vendor, i) => (
+                    <Cell
+                      key={vendor.name}
+                      fill={
+                        i === 0
+                          ? CHART_COLORS.primary
+                          : i === 1
+                            ? CHART_COLORS.secondary
+                            : i === 2
+                              ? CHART_COLORS.tertiary
+                              : CHART_COLORS.amber
+                      }
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -277,10 +399,7 @@ export default function DashboardPage() {
       <div className="bg-white rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/15">
           <h2 className="font-display font-semibold text-on-surface">Đơn hàng gần đây</h2>
-          <a
-            href="/dashboard/orders"
-            className="text-xs font-medium text-primary hover:underline"
-          >
+          <a href="/dashboard/orders" className="text-xs font-medium text-primary hover:underline">
             Xem tất cả →
           </a>
         </div>
@@ -299,16 +418,28 @@ export default function DashboardPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-outline-variant/15 bg-surface-low/40">
-                    <th className="text-left px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Mã đơn</th>
-                    <th className="text-left px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Khách hàng</th>
-                    <th className="text-left px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Vendor</th>
-                    <th className="text-right px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Tổng tiền</th>
-                    <th className="text-center px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Trạng thái</th>
-                    <th className="text-right px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Ngày</th>
+                    <th className="text-left px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                      Mã đơn
+                    </th>
+                    <th className="text-left px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                      Khách hàng
+                    </th>
+                    <th className="text-left px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                      Vendor
+                    </th>
+                    <th className="text-right px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                      Tổng tiền
+                    </th>
+                    <th className="text-center px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                      Trạng thái
+                    </th>
+                    <th className="text-right px-6 py-3.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                      Ngày
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/5">
-                  {recentOrders.map((o: any) => (
+                  {recentOrders.map((o) => (
                     <tr key={o.id} className="hover:bg-primary/[0.02] transition-colors">
                       <td className="px-6 py-4 font-mono text-xs font-medium text-primary">
                         #{String(o.id).slice(0, 8)}
@@ -317,7 +448,9 @@ export default function DashboardPage() {
                         {o.userId ? String(o.userId).slice(0, 8) : '—'}
                       </td>
                       <td className="px-6 py-4 text-sm text-on-surface truncate max-w-[140px]">
-                        {o.vendorName || o.vendorId ? String(o.vendorName ?? o.vendorId).slice(0, 8) : '—'}
+                        {o.vendorName || o.vendorId
+                          ? String(o.vendorName ?? o.vendorId).slice(0, 8)
+                          : '—'}
                       </td>
                       <td className="px-6 py-4 text-right text-sm font-medium text-on-surface whitespace-nowrap">
                         {fmtVND(o.finalAmount ?? o.totalAmount)}
@@ -336,7 +469,7 @@ export default function DashboardPage() {
 
             {/* Mobile cards */}
             <div className="md:hidden divide-y divide-outline-variant/10">
-              {recentOrders.slice(0, 5).map((o: any) => (
+              {recentOrders.slice(0, 5).map((o) => (
                 <div key={o.id} className="p-4 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-mono font-medium text-primary">

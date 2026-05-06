@@ -1,6 +1,6 @@
-import { getDb } from '../db'
 import { reviews, services, vendors, vouchers } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
+import { getDb } from '../db'
 
 /** Non-null assertion for Drizzle scalar selects */
 function scalar<T>(rows: T[]): T {

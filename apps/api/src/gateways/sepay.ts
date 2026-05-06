@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import type {
   CreatePaymentParams,
   PaymentGateway,
@@ -25,11 +25,7 @@ const signedFieldOrder = [
   'cancel_url',
 ]
 
-const ipnSignedFieldOrder = [
-  'notification_type',
-  'order_invoice_number',
-  'amount',
-]
+const ipnSignedFieldOrder = ['notification_type', 'order_invoice_number', 'amount']
 
 type SePayEnv = 'sandbox' | 'production' | string
 
@@ -58,11 +54,17 @@ export function getSePayInvoiceNumber(orderId: string): string {
   return `SL-${orderId}`
 }
 
-export function signSePayFields(fields: Record<string, unknown>, secretKey = SEPAY_SECRET_KEY): string {
+export function signSePayFields(
+  fields: Record<string, unknown>,
+  secretKey = SEPAY_SECRET_KEY,
+): string {
   return signOrderedFields(fields, signedFieldOrder, secretKey)
 }
 
-export function signSePayIpnFields(fields: Record<string, unknown>, secretKey = SEPAY_SECRET_KEY): string {
+export function signSePayIpnFields(
+  fields: Record<string, unknown>,
+  secretKey = SEPAY_SECRET_KEY,
+): string {
   return signOrderedFields(fields, ipnSignedFieldOrder, secretKey)
 }
 
@@ -100,13 +102,16 @@ export function buildSePayCheckoutFields(input: {
 export function parseSePayIpn(payload: Record<string, unknown>): WebhookResult {
   const order = objectValue(payload.order)
   const transaction = objectValue(payload.transaction)
-  const invoiceNumber = stringValue(order.order_invoice_number) || stringValue(payload.order_invoice_number)
+  const invoiceNumber =
+    stringValue(order.order_invoice_number) || stringValue(payload.order_invoice_number)
   const orderAmount = numberValue(order.order_amount) || numberValue(payload.order_amount)
-  const transactionAmount = numberValue(transaction.transaction_amount) || numberValue(payload.transaction_amount)
+  const transactionAmount =
+    numberValue(transaction.transaction_amount) || numberValue(payload.transaction_amount)
   const amount = transactionAmount || orderAmount
   const notificationType = stringValue(payload.notification_type)
   const orderStatus = stringValue(order.order_status) || stringValue(payload.order_status)
-  const transactionStatus = stringValue(transaction.transaction_status) || stringValue(payload.transaction_status)
+  const transactionStatus =
+    stringValue(transaction.transaction_status) || stringValue(payload.transaction_status)
 
   return {
     transactionId: invoiceNumber,
@@ -126,14 +131,18 @@ export function verifySePayIpn(
   secretKey = SEPAY_SECRET_KEY,
 ): boolean {
   const result = parseSePayIpn(payload)
-  if (!stringValue(payload.notification_type) || !result.transactionId || result.amount <= 0) return false
+  if (!stringValue(payload.notification_type) || !result.transactionId || result.amount <= 0)
+    return false
   if (!signature) return true
 
-  const expected = signSePayIpnFields({
-    notification_type: stringValue(payload.notification_type),
-    order_invoice_number: result.transactionId,
-    amount: String(Math.round(result.amount)),
-  }, secretKey)
+  const expected = signSePayIpnFields(
+    {
+      notification_type: stringValue(payload.notification_type),
+      order_invoice_number: result.transactionId,
+      amount: String(Math.round(result.amount)),
+    },
+    secretKey,
+  )
   return timingSafeEqual(signature, expected)
 }
 
@@ -179,9 +188,13 @@ function withPaymentStatus(returnUrl: string, status: 'success' | 'error' | 'can
   return url.toString()
 }
 
-function signOrderedFields(fields: Record<string, unknown>, orderedFields: string[], secretKey: string): string {
+function signOrderedFields(
+  fields: Record<string, unknown>,
+  orderedFields: string[],
+  secretKey: string,
+): string {
   const signed = orderedFields
-    .filter((field) => Object.prototype.hasOwnProperty.call(fields, field))
+    .filter((field) => Object.hasOwn(fields, field))
     .map((field) => `${field}=${String(fields[field] ?? '')}`)
     .join(',')
 
@@ -191,11 +204,16 @@ function signOrderedFields(fields: Record<string, unknown>, orderedFields: strin
 function timingSafeEqual(input: string, expected: string): boolean {
   const inputBuffer = Buffer.from(input)
   const expectedBuffer = Buffer.from(expected)
-  return inputBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(inputBuffer, expectedBuffer)
+  return (
+    inputBuffer.length === expectedBuffer.length &&
+    crypto.timingSafeEqual(inputBuffer, expectedBuffer)
+  )
 }
 
 function objectValue(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
 }
 
 function stringValue(value: unknown): string {

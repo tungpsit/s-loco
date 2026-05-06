@@ -1,6 +1,13 @@
-import { articles } from '@S-Loco/db/schema'
+import { articleCategoryEnum, articles } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { getDb } from '../db'
+import { notifyAdminsContentChanged } from './admin-notification.service'
+
+type ArticleCategory = (typeof articleCategoryEnum.enumValues)[number]
+
+function isArticleCategory(category: string): category is ArticleCategory {
+  return (articleCategoryEnum.enumValues as readonly string[]).includes(category)
+}
 
 /** Non-null assertion for Drizzle scalar selects */
 function scalar<T>(rows: T[]): T {
@@ -13,7 +20,8 @@ export async function listArticles(opts: { category?: string; page?: number; lim
   const limit = opts.limit || 20
   const offset = (page - 1) * limit
   const conditions = [eq(articles.isPublished, true)]
-  if (opts.category) conditions.push(eq(articles.category, opts.category as any))
+  if (opts.category && isArticleCategory(opts.category))
+    conditions.push(eq(articles.category, opts.category))
   const items = await db
     .select()
     .from(articles)
@@ -59,6 +67,15 @@ export async function createArticle(
       publishedAt: data.isPublished ? new Date() : null,
     })
     .returning()
+  if (article) {
+    void notifyAdminsContentChanged({
+      articleId: article.id,
+      title: article.title,
+      action: article.isPublished ? 'published' : 'created',
+    }).catch((err) => {
+      console.error(`[AdminNotification] Failed to notify content creation ${article.id}:`, err)
+    })
+  }
   return article!
 }
 
@@ -82,12 +99,31 @@ export async function updateArticle(
     .where(eq(articles.id, articleId))
     .returning()
   if (!updated) throw new ContentError('NOT_FOUND', 'Bài viết không tồn tại.')
+  const action =
+    data.isPublished === true ? 'published' : data.isPublished === false ? 'unpublished' : 'updated'
+  void notifyAdminsContentChanged({
+    articleId: updated.id,
+    title: updated.title,
+    action,
+  }).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify content update ${updated.id}:`, err)
+  })
   return updated
 }
 
 export async function deleteArticle(articleId: string) {
   const db = getDb()
+  const [article] = await db.select().from(articles).where(eq(articles.id, articleId)).limit(1)
   await db.delete(articles).where(eq(articles.id, articleId))
+  if (article) {
+    void notifyAdminsContentChanged({
+      articleId,
+      title: article.title,
+      action: 'deleted',
+    }).catch((err) => {
+      console.error(`[AdminNotification] Failed to notify content deletion ${articleId}:`, err)
+    })
+  }
   return { success: true }
 }
 

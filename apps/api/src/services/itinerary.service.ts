@@ -210,8 +210,12 @@ function roundDistanceKm(km: number) {
   return Math.round(km * 10) / 10
 }
 
-function distanceKmForActivity(service: AvailableService | undefined, input: ItineraryInput): number | undefined {
-  if (!service || !hasGeoPoint({ latitude: input.stayLatitude, longitude: input.stayLongitude })) return undefined
+function distanceKmForActivity(
+  service: AvailableService | undefined,
+  input: ItineraryInput,
+): number | undefined {
+  if (!service || !hasGeoPoint({ latitude: input.stayLatitude, longitude: input.stayLongitude }))
+    return undefined
   const km = service.distanceFromStayKm
   if (km === undefined || km === null) return undefined
   return roundDistanceKm(km)
@@ -219,7 +223,9 @@ function distanceKmForActivity(service: AvailableService | undefined, input: Iti
 
 function attachDistanceFromStay(availableServices: AvailableService[], input: ItineraryInput) {
   if (!hasGeoPoint({ latitude: input.stayLatitude, longitude: input.stayLongitude })) {
-    return availableServices.map(({ distanceFromStayKm: _distanceFromStayKm, ...service }) => service)
+    return availableServices.map(
+      ({ distanceFromStayKm: _distanceFromStayKm, ...service }) => service,
+    )
   }
 
   const stayLatitude = input.stayLatitude

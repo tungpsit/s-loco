@@ -1,6 +1,13 @@
-import { auditLogs, users } from '@S-Loco/db/schema'
+import { auditLogs, userRoleEnum, users } from '@S-Loco/db/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { getDb } from '../db'
+import { notifyAdminsUserChanged } from './admin-notification.service'
+
+type UserRole = (typeof userRoleEnum.enumValues)[number]
+
+function isUserRole(role: string): role is UserRole {
+  return (userRoleEnum.enumValues as readonly string[]).includes(role)
+}
 
 /** Non-null assertion for Drizzle limit(1) / scalar select returning arrays */
 function scalar<T>(rows: T[]): T {
@@ -14,7 +21,7 @@ export async function listUsers(opts: { role?: string; page?: number; limit?: nu
   const offset = (page - 1) * limit
 
   const conditions: ReturnType<typeof eq>[] = []
-  if (opts.role) conditions.push(eq(users.role, opts.role as any))
+  if (opts.role && isUserRole(opts.role)) conditions.push(eq(users.role, opts.role))
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
@@ -41,6 +48,7 @@ export async function listUsers(opts: { role?: string; page?: number; limit?: nu
 }
 
 export async function updateUserRole(userId: string, role: string, adminId: string) {
+  if (!isUserRole(role)) throw new AdminError('INVALID_ROLE', 'Vai trò không hợp lệ.')
   const db = getDb()
 
   // Prevent self-demotion
@@ -66,7 +74,7 @@ export async function updateUserRole(userId: string, role: string, adminId: stri
   // Update role
   const [updated] = await db
     .update(users)
-    .set({ role: role as any, updatedAt: new Date() })
+    .set({ role, updatedAt: new Date() })
     .where(eq(users.id, userId))
     .returning({
       id: users.id,
@@ -85,6 +93,16 @@ export async function updateUserRole(userId: string, role: string, adminId: stri
     oldData: { role: target.role },
     newData: { role },
     performedBy: adminId,
+  })
+
+  void notifyAdminsUserChanged({
+    userId,
+    action: 'role_change',
+    adminId,
+    oldValue: target.role,
+    newValue: role,
+  }).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify role change ${userId}:`, err)
   })
 
   return updated
@@ -129,6 +147,16 @@ export async function updateUserStatus(userId: string, isActive: boolean, adminI
     oldData: { isActive: target.isActive },
     newData: { isActive },
     performedBy: adminId,
+  })
+
+  void notifyAdminsUserChanged({
+    userId,
+    action: 'status_change',
+    adminId,
+    oldValue: target.isActive,
+    newValue: isActive,
+  }).catch((err) => {
+    console.error(`[AdminNotification] Failed to notify status change ${userId}:`, err)
   })
 
   return updated

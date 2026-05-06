@@ -1,5 +1,10 @@
+import {
+  completeRefundSchema,
+  initiatePaymentSchema,
+  refundRequestSchema,
+} from '@S-Loco/shared/validators'
 import { zValidator } from '@hono/zod-validator'
-import { completeRefundSchema, initiatePaymentSchema, refundRequestSchema } from '@S-Loco/shared/validators'
+import type { Context } from 'hono'
 import { Hono } from 'hono'
 import { getSePayCheckoutActionUrl } from '../gateways/sepay'
 import { authMiddleware, requireRole } from '../middleware/auth'
@@ -17,7 +22,7 @@ paymentRoutes.post(
   async (c) => {
     try {
       const userId = c.get('userId')!
-      const { order_id, gateway, return_url } = c.req.valid('json')
+      const { order_id, gateway } = c.req.valid('json')
       const ipAddress = c.req.header('x-forwarded-for') || c.req.header('x-real-ip')
       const result = await paymentSvc.initiatePayment(
         order_id,
@@ -36,7 +41,7 @@ paymentRoutes.post(
 )
 
 // ─── GET/POST /payments/webhook/vnpay — VNPay IPN ────
-async function handleVnpayWebhook(c: any) {
+async function handleVnpayWebhook(c: Context) {
   try {
     const payload = c.req.method === 'GET' ? c.req.query() : await c.req.json()
     await paymentSvc.processWebhook('vnpay', payload, '')
@@ -95,7 +100,8 @@ paymentRoutes.get('/checkout/sepay/:invoice', async (c) => {
 
 // ─── GET /payments/return — post-payment redirect ────
 paymentRoutes.get('/return', async (c) => {
-  const status = c.req.query('payment') || (c.req.query('vnp_ResponseCode') === '00' ? 'success' : 'failed')
+  const status =
+    c.req.query('payment') || (c.req.query('vnp_ResponseCode') === '00' ? 'success' : 'failed')
   const message = paymentReturnMessage(status)
   return c.html(renderPaymentReturnPage(status, message))
 })
@@ -152,7 +158,10 @@ paymentRoutes.post('/poll', authMiddleware(), requireRole('admin'), async (c) =>
 
 function renderAutoSubmitCheckoutForm(action: string, fields: Record<string, string>) {
   const inputs = Object.entries(fields)
-    .map(([name, value]) => `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}" />`)
+    .map(
+      ([name, value]) =>
+        `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}" />`,
+    )
     .join('\n')
   return `<!doctype html>
 <html lang="vi">

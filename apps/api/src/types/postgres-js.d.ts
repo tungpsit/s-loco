@@ -19,9 +19,7 @@ declare module 'postgres-js' {
     count?: number
   }
 
-  export interface Transaction {
-    <T>(fn: (sql: Sql) => Promise<T>): Promise<T>
-  }
+  export type Transaction = <T>(fn: (sql: Sql) => Promise<T>) => Promise<T>
 
   export interface Sql {
     <T = Record<string, unknown>>(

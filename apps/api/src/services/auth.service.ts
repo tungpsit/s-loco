@@ -1,7 +1,7 @@
-import { getDb } from '../db'
 import { users } from '@S-Loco/db/schema'
 import { APP_CONSTANTS } from '@S-Loco/shared'
 import { eq } from 'drizzle-orm'
+import { getDb } from '../db'
 import { hashPassword, verifyPassword } from '../lib/password'
 import { verifyOtp } from './otp.service'
 import { generateAccessToken, generateRefreshToken, revokeAllSessions } from './token.service'
@@ -24,17 +24,14 @@ export async function registerOrLoginWithOtp(
 
   if (!user) {
     // Create new tourist user
-    const insertValues: Record<string, unknown> = {
+    const insertValues: typeof users.$inferInsert = {
       phone,
       role: 'tourist',
     }
     if (profile?.full_name) insertValues.fullName = profile.full_name
     if (profile?.email) insertValues.email = profile.email
 
-    const [newUser] = await db
-      .insert(users)
-      .values(insertValues as any)
-      .returning()
+    const [newUser] = await db.insert(users).values(insertValues).returning()
     user = newUser!
   }
 
