@@ -14,3 +14,10 @@ export const refundRequestSchema = z.object({
   reason: z.string().max(500).optional(),
 })
 export type RefundRequestInput = z.infer<typeof refundRequestSchema>
+
+// ─── Complete Manual Refund ─────────────────────────────
+export const completeRefundSchema = z.object({
+  gateway_refund_id: z.string().max(255).optional(),
+  note: z.string().max(500).optional(),
+})
+export type CompleteRefundInput = z.infer<typeof completeRefundSchema>

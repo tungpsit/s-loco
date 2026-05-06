@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  getManualRefundCompleteStatus,
   getPendingPaymentPollDecision,
   getRefundCompletionStatus,
 } from '../src/services/payment.service'
@@ -19,6 +20,21 @@ describe('payment policy helpers', () => {
       paymentStatus: 'refunded',
       message: 'Yêu cầu hoàn tiền đã được xử lý.',
     })
+  })
+
+  test('admin completion of manual refund is idempotent', () => {
+    expect(getManualRefundCompleteStatus('manual_processing')).toEqual({
+      refundStatus: 'completed',
+      message: 'Refund đã được đánh dấu hoàn tất.',
+    })
+    expect(getManualRefundCompleteStatus('completed')).toEqual({
+      refundStatus: 'completed',
+      message: 'Refund đã hoàn tất trước đó.',
+    })
+  })
+
+  test('admin completion rejects failed refund states', () => {
+    expect(() => getManualRefundCompleteStatus('failed')).toThrow('Refund không ở trạng thái có thể hoàn tất.')
   })
 
   test('pending payment polling only expires stale payments after configured cutoff', () => {

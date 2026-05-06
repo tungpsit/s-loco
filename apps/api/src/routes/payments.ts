@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import { initiatePaymentSchema, refundRequestSchema } from '@S-Loco/shared/validators'
+import { completeRefundSchema, initiatePaymentSchema, refundRequestSchema } from '@S-Loco/shared/validators'
 import { Hono } from 'hono'
 import { getSePayCheckoutActionUrl } from '../gateways/sepay'
 import { authMiddleware, requireRole } from '../middleware/auth'
@@ -113,6 +113,30 @@ paymentRoutes.post(
       return c.json({ success: true, data: result })
     } catch (err) {
       if (err instanceof PaymentError || err instanceof StateError) {
+        return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+      }
+      throw err
+    }
+  },
+)
+
+// ─── POST /payments/refunds/:id/complete — admin marks manual refund completed ────
+paymentRoutes.post(
+  '/refunds/:id/complete',
+  authMiddleware(),
+  requireRole('admin'),
+  zValidator('json', completeRefundSchema),
+  async (c) => {
+    try {
+      const refundId = c.req.param('id')
+      const { gateway_refund_id, note } = c.req.valid('json')
+      const result = await paymentSvc.completeManualRefund(refundId!, {
+        gatewayRefundId: gateway_refund_id,
+        note,
+      })
+      return c.json({ success: true, data: result })
+    } catch (err) {
+      if (err instanceof PaymentError) {
         return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
       }
       throw err

@@ -246,6 +246,63 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
   return { success: true, message: 'Yêu cầu hoàn tiền đã được ghi nhận.' }
 }
 
+export async function completeManualRefund(
+  refundId: string,
+  input: { gatewayRefundId?: string; note?: string } = {},
+) {
+  const db = getDb()
+  const [refund] = await db.select().from(refunds).where(eq(refunds.id, refundId)).limit(1)
+  if (!refund) throw new PaymentError('NOT_FOUND', 'Refund không tồn tại.')
+
+  const completion = getManualRefundCompleteStatus(refund.status)
+  if (refund.status !== 'completed') {
+    await db.transaction(async (tx) => {
+      await tx
+        .update(refunds)
+        .set({
+          status: completion.refundStatus,
+          gatewayRefundId: input.gatewayRefundId || refund.gatewayRefundId,
+          reason: appendRefundCompletionNote(refund.reason, input.note),
+        })
+        .where(eq(refunds.id, refundId))
+
+      const [payment] = await tx.select().from(payments).where(eq(payments.id, refund.paymentId)).limit(1)
+      if (payment) {
+        const [item] = await tx
+          .select({ orderId: orderItems.orderId })
+          .from(vouchers)
+          .innerJoin(orderItems, eq(vouchers.orderItemId, orderItems.id))
+          .where(eq(vouchers.id, refund.voucherId))
+          .limit(1)
+        if (item) {
+          await updateOrderRefundStatus(tx, item.orderId)
+          await updatePaymentRefundStatus(tx, payment.id, item.orderId)
+        }
+      }
+    })
+  }
+
+  return {
+    success: true,
+    refundId,
+    status: completion.refundStatus,
+    message: completion.message,
+  }
+}
+
+export function getManualRefundCompleteStatus(status: string): {
+  refundStatus: 'completed'
+  message: string
+} {
+  if (status === 'completed') {
+    return { refundStatus: 'completed', message: 'Refund đã hoàn tất trước đó.' }
+  }
+  if (status === 'manual_processing' || status === 'pending') {
+    return { refundStatus: 'completed', message: 'Refund đã được đánh dấu hoàn tất.' }
+  }
+  throw new PaymentError('INVALID_REFUND_STATE', 'Refund không ở trạng thái có thể hoàn tất.')
+}
+
 export function getRefundCompletionStatus(gateway: string, gatewaySuccess = true): {
   refundStatus: string
   paymentStatus: 'success' | 'refunded'
@@ -294,6 +351,26 @@ async function updateOrderRefundStatus(tx: any, orderId: string) {
       .set({ status: allRefunded ? 'refunded' : 'partially_refunded', updatedAt: new Date() })
       .where(eq(orders.id, orderId))
   }
+}
+
+async function updatePaymentRefundStatus(tx: any, paymentId: string, orderId: string) {
+  const voucherRows = await tx
+    .select({ status: vouchers.status })
+    .from(vouchers)
+    .innerJoin(orderItems, eq(vouchers.orderItemId, orderItems.id))
+    .where(eq(orderItems.orderId, orderId))
+  const allRefunded = voucherRows.length > 0 && voucherRows.every((row: { status: string }) => row.status === 'refunded')
+  if (allRefunded) {
+    await tx
+      .update(payments)
+      .set({ status: 'refunded', updatedAt: new Date() })
+      .where(eq(payments.id, paymentId))
+  }
+}
+
+function appendRefundCompletionNote(reason: string | null, note?: string): string | null {
+  if (!note?.trim()) return reason
+  return [reason, `Admin completion: ${note.trim()}`].filter(Boolean).join('\n')
 }
 
 // ─── Poll pending payments ─────────────────────────────
