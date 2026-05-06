@@ -810,6 +810,8 @@ private fun VendorDetailScreen(state: AppState, vendor: Vendor) {
 
 @Composable
 private fun CheckoutScreen(state: AppState, orderId: String) {
+    val scope = rememberCoroutineScope()
+    var showPayment by remember { mutableStateOf(false) }
     LaunchedEffect(orderId) { state.loadOrder(orderId) }
     Column(Modifier.fillMaxSize()) {
         TopBack("Thanh toán", state::back)
@@ -820,10 +822,11 @@ private fun CheckoutScreen(state: AppState, orderId: String) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            BlueCard("SECURE CHECKOUT", "Xác nhận voucher/vé", "Thanh toán qua cổng bảo mật, nhận QR trong ví.")
+            BlueCard("SECURE CHECKOUT", "Xác nhận voucher/vé", "Thanh toán qua SePay, nhận QR trong ví.")
             state.currentOrder?.let { order ->
                 AppCard {
                     Text("Đơn hàng #${order.id.take(8).uppercase()}", fontWeight = FontWeight.Bold)
+                    Text(if (order.status == "paid") "Đã thanh toán" else "Đang chờ thanh toán", color = if (order.status == "paid") Blue else Coral, fontWeight = FontWeight.Bold)
                     order.items.forEach {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("${it.quantity}x ${it.name}", modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -838,22 +841,81 @@ private fun CheckoutScreen(state: AppState, orderId: String) {
                 }
             }
             AppCard {
-                Text("Thanh toán trực tuyến đang được hoàn thiện", fontWeight = FontWeight.ExtraBold, color = TextMain)
+                Text("SePay QR chuyển khoản", fontWeight = FontWeight.ExtraBold, color = TextMain)
                 Text(
-                    "Bản phát hành này ghi nhận đơn hàng/voucher để nhân viên S-Loco xác nhận. Cổng VNPay, MoMo và SePay sẽ xuất hiện khi được kích hoạt chính thức.",
+                    "Ứng dụng sẽ mở cổng SePay trong màn hình bảo mật. Sau khi thanh toán, S-Loco kiểm tra IPN từ SePay trước khi phát voucher.",
                     color = TextMuted
                 )
             }
         }
-        Button(
-            onClick = { state.message = "Đơn hàng đã được ghi nhận. S-Loco sẽ thông báo khi cổng thanh toán trực tuyến sẵn sàng." },
-            modifier = Modifier
+        Row(
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Blue)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Ghi nhận đơn hàng")
+            TextButton(
+                onClick = { scope.launch { state.refreshAfterPayment(orderId) } },
+                modifier = Modifier.weight(1f),
+            ) { Text("Làm mới") }
+            Button(
+                onClick = {
+                    scope.launch {
+                        state.startSePayPayment(orderId)
+                        showPayment = state.currentPayment?.paymentUrl?.isNotBlank() == true
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                enabled = state.currentOrder?.status != "paid",
+                colors = ButtonDefaults.buttonColors(containerColor = Blue)
+            ) {
+                Text("Thanh toán SePay")
+            }
         }
+    }
+    if (showPayment) {
+        val url = state.currentPayment?.paymentUrl.orEmpty()
+        SePayCheckoutWebView(
+            url = url,
+            onClose = { showPayment = false },
+            onResult = { result ->
+                showPayment = false
+                scope.launch { state.confirmPaymentUntilSettled(orderId, result) }
+            }
+        )
+    }
+}
+
+@Composable
+private fun SePayCheckoutWebView(url: String, onClose: () -> Unit, onResult: (PaymentResult) -> Unit) {
+    Box(Modifier.fillMaxSize().background(Color.White)) {
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.javaScriptEnabled = true
+                    webViewClient = object : WebViewClient() {
+                        override fun shouldOverrideUrlLoading(view: WebView, request: android.webkit.WebResourceRequest): Boolean {
+                            val result = PaymentResult.fromUrl(request.url.toString())
+                            return if (result != null) {
+                                onResult(result)
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                    }
+                    loadUrl(url)
+                }
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+        TextButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp)
+                .background(Color.White, RoundedCornerShape(999.dp))
+        ) { Text("Đóng", color = Blue, fontWeight = FontWeight.Bold) }
     }
 }
 
@@ -2090,6 +2152,7 @@ private class AppState(val context: Context) {
     var vouchers by mutableStateOf(emptyList<Voucher>())
     var reservations by mutableStateOf(emptyList<Reservation>())
     var currentOrder by mutableStateOf<Order?>(null)
+    var currentPayment by mutableStateOf<PaymentInitiation?>(null)
     var itinerary by mutableStateOf<GeneratedItinerary?>(null)
     var weather by mutableStateOf<Weather?>(null)
     private var refreshJob: Job? = null
@@ -2170,6 +2233,36 @@ private class AppState(val context: Context) {
 
     suspend fun loadOrder(id: String) = run("Đang tải đơn hàng...") {
         currentOrder = api.order(id)
+    }
+
+    suspend fun startSePayPayment(orderId: String) = run("Đang mở SePay...") {
+        currentPayment = api.initiatePayment(orderId)
+    }
+
+    suspend fun refreshAfterPayment(orderId: String, result: PaymentResult? = null) = run("Đang kiểm tra thanh toán...") {
+        currentOrder = api.order(orderId)
+        vouchers = api.vouchers()
+        if (currentOrder?.status == "paid") {
+            currentPayment = null
+            tab = AppTab.Vouchers
+            screen = Screen.Main
+            message = "Thanh toán thành công. Voucher của bạn đã sẵn sàng."
+        } else {
+            message = result?.message ?: "Giao dịch đang chờ SePay xác nhận. Vui lòng thử làm mới sau ít phút."
+        }
+    }
+
+    suspend fun confirmPaymentUntilSettled(orderId: String, result: PaymentResult? = null) {
+        if (result != null) message = result.message
+        val delays = listOf(2_000L, 3_000L, 5_000L, 8_000L, 12_000L)
+        for (delayMs in delays) {
+            delay(delayMs)
+            refreshAfterPayment(orderId, result)
+            if (currentOrder?.status == "paid") return
+        }
+        if (currentOrder?.status != "paid") {
+            message = "S-Loco chưa nhận được xác nhận IPN từ SePay. Vui lòng thử làm mới sau ít phút."
+        }
     }
 
     fun loadVouchers() {
@@ -2394,6 +2487,18 @@ private class ApiClient(private val prefs: android.content.SharedPreferences) {
             )
         }
         return Order(order.str("id"), order.str("status"), order.money("finalAmount", "total_amount", "totalAmount"), items)
+    }
+
+    suspend fun initiatePayment(orderId: String): PaymentInitiation {
+        val body = buildJsonObject {
+            put("order_id", orderId)
+            put("gateway", "sepay")
+        }
+        val data = request("/payments/initiate", "POST", body).obj("data") ?: error("Không khởi tạo được thanh toán SePay.")
+        return PaymentInitiation(
+            paymentUrl = data.str("paymentUrl", "payment_url"),
+            transactionId = data.str("transactionId", "transaction_id"),
+        )
     }
 
     suspend fun vouchers(): List<Voucher> {
@@ -2809,6 +2914,19 @@ private data class Reservation(
 )
 private data class Order(val id: String, val status: String, val totalAmount: Int, val items: List<OrderLine>)
 private data class OrderLine(val name: String, val quantity: Int, val price: Int)
+private data class PaymentInitiation(val paymentUrl: String, val transactionId: String)
+private enum class PaymentResult(val queryValue: String, val message: String) {
+    Success("success", "SePay đã trả về thành công. S-Loco đang xác nhận giao dịch."),
+    Error("error", "Thanh toán SePay thất bại. Vui lòng thử lại."),
+    Cancel("cancel", "Bạn đã hủy thanh toán SePay.");
+
+    companion object {
+        fun fromUrl(url: String): PaymentResult? {
+            val value = Uri.parse(url).getQueryParameter("payment") ?: return null
+            return entries.firstOrNull { it.queryValue == value }
+        }
+    }
+}
 private data class AuthResult(val token: String, val refreshToken: String, val expiresIn: Int, val name: String)
 private data class Weather(
     val temperature: Int,

@@ -117,6 +117,14 @@ final class APIClient {
         return data.order
     }
 
+    func initiatePayment(orderId: String, gateway: String = "sepay") async throws -> PaymentInitiation {
+        try await request(
+            "/payments/initiate",
+            method: "POST",
+            body: InitiatePaymentRequest(orderId: orderId, gateway: gateway)
+        )
+    }
+
     func vouchers(status: String? = nil) async throws -> [Voucher] {
         var path = "/vouchers?page=1&limit=50"
         if let status, !status.isEmpty { path += "&status=\(status)" }

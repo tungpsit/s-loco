@@ -299,6 +299,34 @@ struct OrderLine: Decodable, Hashable {
     }
 }
 
+struct InitiatePaymentRequest: Encodable {
+    let orderId: String
+    let gateway: String
+
+    enum CodingKeys: String, CodingKey {
+        case orderId = "order_id"
+        case gateway
+    }
+}
+
+struct PaymentInitiation: Decodable, Hashable {
+    let paymentUrl: String
+    let transactionId: String
+
+    enum CodingKeys: String, CodingKey {
+        case paymentUrl
+        case paymentUrlSnake = "payment_url"
+        case transactionId
+        case transactionIdSnake = "transaction_id"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        paymentUrl = container.decodeStringIfPresent(.paymentUrl) ?? container.decodeStringIfPresent(.paymentUrlSnake) ?? ""
+        transactionId = container.decodeStringIfPresent(.transactionId) ?? container.decodeStringIfPresent(.transactionIdSnake) ?? ""
+    }
+}
+
 struct Voucher: Decodable, Identifiable, Hashable {
     let id: String
     let status: String

@@ -1,4 +1,4 @@
-import { orderItems, orders, payments, vouchers } from '@S-Loco/db/schema'
+import { orderItems, orders, payments, refunds, vouchers } from '@S-Loco/db/schema'
 import { and, eq, lt } from 'drizzle-orm'
 import { getDb } from '../db'
 import { momoGateway } from '../gateways/momo'
@@ -101,8 +101,18 @@ export async function processWebhook(
 
   // 5. Update payment + order + vouchers (wrapped for retry queue)
   try {
+    const expectedAmount = Math.round(Number(payment.amount))
+    const receivedAmount = Math.round(result.amount)
+    if (result.success && expectedAmount !== receivedAmount) {
+      await db
+        .update(payments)
+        .set({ rawWebhook: result.rawData, updatedAt: new Date() })
+        .where(eq(payments.id, payment.id))
+      throw new PaymentError('AMOUNT_MISMATCH', 'Số tiền thanh toán không khớp với đơn hàng.')
+    }
+
     if (result.success) {
-      await handlePaymentSuccess(payment.id, payment.orderId)
+      await handlePaymentSuccess(payment.id, payment.orderId, result.rawData)
     } else {
       await db
         .update(payments)
@@ -120,14 +130,18 @@ export async function processWebhook(
 }
 
 // ─── Handle successful payment ─────────────────────────
-async function handlePaymentSuccess(paymentId: string, orderId: string) {
+async function handlePaymentSuccess(
+  paymentId: string,
+  orderId: string,
+  rawWebhook?: Record<string, unknown>,
+) {
   const db = getDb()
 
   await db.transaction(async (tx) => {
     // Update payment
     await tx
       .update(payments)
-      .set({ status: 'success', paidAt: new Date(), updatedAt: new Date() })
+      .set({ status: 'success', paidAt: new Date(), rawWebhook, updatedAt: new Date() })
       .where(eq(payments.id, paymentId))
 
     // Update order
@@ -190,46 +204,122 @@ export async function requestRefund(voucherId: string, userId: string, reason?: 
   if (payment?.gateway) {
     const gw = gateways[payment.gateway]
     if (gw && payment.gatewayTransactionId) {
-      await gw.processRefund({
+        const refundResult = await gw.processRefund({
         transactionId: payment.gatewayTransactionId,
         amount: Math.round(Number(item.unitPrice)),
         originalAmount,
         reason,
       })
+      const completion = getRefundCompletionStatus(payment.gateway, refundResult.success)
+
+      await db.transaction(async (tx) => {
+        await tx.insert(refunds).values({
+          voucherId,
+          paymentId: payment.id,
+          amount: item.unitPrice,
+          gateway: payment.gateway,
+          gatewayRefundId: refundResult.refundTransactionId,
+          status: completion.refundStatus,
+          reason,
+          initiatedBy: userId,
+        })
+        await tx
+          .update(vouchers)
+          .set({ status: 'refunded', updatedAt: new Date() })
+          .where(eq(vouchers.id, voucherId))
+        await tx
+          .update(payments)
+          .set({ status: completion.paymentStatus, updatedAt: new Date() })
+          .where(eq(payments.id, payment.id))
+        await updateOrderRefundStatus(tx, item.orderId)
+      })
+
+      return { success: true, message: completion.message }
     }
   }
 
-  // Update voucher status
   await db
     .update(vouchers)
     .set({ status: 'refunded', updatedAt: new Date() })
     .where(eq(vouchers.id, voucherId))
 
-  return { success: true, message: 'Yêu cầu hoàn tiền đã được xử lý.' }
+  return { success: true, message: 'Yêu cầu hoàn tiền đã được ghi nhận.' }
+}
+
+export function getRefundCompletionStatus(gateway: string, gatewaySuccess = true): {
+  refundStatus: string
+  paymentStatus: 'success' | 'refunded'
+  message: string
+} {
+  if (gateway === 'sepay') {
+    return {
+      refundStatus: 'manual_processing',
+      paymentStatus: 'success',
+      message: 'Yêu cầu hoàn tiền SePay đã được ghi nhận và cần vận hành xử lý thủ công.',
+    }
+  }
+  if (!gatewaySuccess) {
+    return {
+      refundStatus: 'failed',
+      paymentStatus: 'success',
+      message: 'Không thể xử lý hoàn tiền qua cổng thanh toán. Vui lòng thử lại sau.',
+    }
+  }
+  return {
+    refundStatus: 'completed',
+    paymentStatus: 'refunded',
+    message: 'Yêu cầu hoàn tiền đã được xử lý.',
+  }
+}
+
+export function getPendingPaymentPollDecision(
+  createdAt: Date,
+  now = new Date(),
+  staleAfterMs = 40 * 60 * 1000,
+): 'keep_pending' | 'expire' {
+  return now.getTime() - createdAt.getTime() >= staleAfterMs ? 'expire' : 'keep_pending'
+}
+
+async function updateOrderRefundStatus(tx: any, orderId: string) {
+  const voucherRows = await tx
+    .select({ status: vouchers.status })
+    .from(vouchers)
+    .innerJoin(orderItems, eq(vouchers.orderItemId, orderItems.id))
+    .where(eq(orderItems.orderId, orderId))
+  const allRefunded = voucherRows.length > 0 && voucherRows.every((row: { status: string }) => row.status === 'refunded')
+  const anyRefunded = voucherRows.some((row: { status: string }) => row.status === 'refunded')
+  if (allRefunded || anyRefunded) {
+    await tx
+      .update(orders)
+      .set({ status: allRefunded ? 'refunded' : 'partially_refunded', updatedAt: new Date() })
+      .where(eq(orders.id, orderId))
+  }
 }
 
 // ─── Poll pending payments ─────────────────────────────
 export async function pollPendingPayments() {
   const db = getDb()
-  const cutoff = new Date(Date.now() - 30 * 60 * 1000) // 30 min stale
+  const now = new Date()
+  const cutoff = new Date(now.getTime() - 40 * 60 * 1000)
 
   const stale = await db
     .select()
     .from(payments)
     .where(and(eq(payments.status, 'pending'), lt(payments.createdAt, cutoff)))
 
+  let expired = 0
   console.log(`[PayPoll] Found ${stale.length} stale pending payment(s)`)
 
-  // In production, would query each gateway for real status
-  // For now, mark as failed after 30 min
   for (const p of stale) {
+    if (getPendingPaymentPollDecision(p.createdAt, now) !== 'expire') continue
     await db
       .update(payments)
       .set({ status: 'failed', updatedAt: new Date() })
       .where(eq(payments.id, p.id))
+    expired += 1
   }
 
-  return { checked: stale.length }
+  return { checked: stale.length, expired }
 }
 
 export class PaymentError extends Error {

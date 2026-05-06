@@ -386,6 +386,7 @@ struct VendorMapPreview: View {
 struct CheckoutView: View {
     @EnvironmentObject private var state: AppState
     let orderId: String
+    @State private var showingPayment = false
 
     var body: some View {
         NavigationStack {
@@ -396,47 +397,67 @@ struct CheckoutView: View {
                         .foregroundStyle(TouristTheme.text)
                     if let order = state.currentOrder {
                         OrderSummary(order: order)
+                        paymentStatus(order: order)
                     }
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Thanh toán trực tuyến đang được hoàn thiện")
-                            .font(.headline)
-                            .foregroundStyle(TouristTheme.text)
-                        Text("Bản phát hành này ghi nhận đơn hàng/voucher để nhân viên S-Loco xác nhận. Cổng VNPay, MoMo và SePay sẽ xuất hiện khi được kích hoạt chính thức.")
-                            .font(.subheadline)
-                            .foregroundStyle(TouristTheme.muted)
-                    }
-                    .padding(14)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 14))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+                    sepayCard
                     Button {
-                        state.message = "Đơn hàng đã được ghi nhận. S-Loco sẽ thông báo khi cổng thanh toán trực tuyến sẵn sàng."
+                        Task {
+                            await state.startSePayPayment(orderId: orderId)
+                            showingPayment = state.currentPayment?.paymentUrl.isEmpty == false
+                        }
                     } label: {
-                        Text("Ghi nhận đơn hàng")
+                        Text("Thanh toán qua SePay")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PrimaryButtonStyle())
+                    .disabled(state.currentOrder?.status == "paid")
+
+                    Button {
+                        Task { await state.refreshAfterPayment(orderId: orderId) }
+                    } label: {
+                        Text("Làm mới trạng thái thanh toán")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
                 }
                 .padding(16)
                 .touristReadableContent(maxWidth: TouristLayout.detailMaxWidth)
             }
             .background(TouristTheme.surface.ignoresSafeArea())
             .task { await state.loadOrder(orderId) }
+            .sheet(isPresented: $showingPayment) {
+                if let value = state.currentPayment?.paymentUrl, let url = URL(string: value) {
+                    PaymentWebView(url: url) { result in
+                        showingPayment = false
+                        Task { await state.confirmPaymentUntilSettled(orderId: orderId, result: result) }
+                    }
+                    .ignoresSafeArea()
+                }
+            }
         }
     }
 
-    private func paymentRow(icon: String, title: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundStyle(TouristTheme.primary)
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-            Spacer()
-            Image(systemName: "circle")
-                .foregroundStyle(TouristTheme.border)
+    private var sepayCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("SePay QR chuyển khoản")
+                .font(.headline)
+                .foregroundStyle(TouristTheme.text)
+            Text("Ứng dụng sẽ mở cổng SePay trong màn hình bảo mật. Sau khi thanh toán, S-Loco kiểm tra IPN từ SePay trước khi phát voucher.")
+                .font(.subheadline)
+                .foregroundStyle(TouristTheme.muted)
         }
         .padding(14)
         .background(.white, in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(TouristTheme.border))
+    }
+
+    private func paymentStatus(order: Order) -> some View {
+        Text(order.status == "paid" ? "Đã thanh toán" : "Đang chờ thanh toán")
+            .font(.caption.bold())
+            .foregroundStyle(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(order.status == "paid" ? TouristTheme.primary : TouristTheme.coral, in: Capsule())
     }
 }
 

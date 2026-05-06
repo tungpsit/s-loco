@@ -12,6 +12,7 @@ final class AppState: ObservableObject {
     @Published var selectedCategory = ""
     @Published var user: TouristUser?
     @Published var currentOrder: Order?
+    @Published var currentPayment: PaymentInitiation?
     @Published var itinerary: GeneratedItinerary?
     @Published var weather: TouristWeather?
     @Published var loadingTask: AppLoadingTask?
@@ -139,6 +140,44 @@ final class AppState: ObservableObject {
     func loadOrder(_ id: String) async {
         await run(.checkout) {
             currentOrder = try await api.order(id: id)
+        }
+    }
+
+    func startSePayPayment(orderId: String) async {
+        await run(.checkout) {
+            currentPayment = try await api.initiatePayment(orderId: orderId)
+        }
+    }
+
+    func refreshAfterPayment(orderId: String, result: PaymentWebViewResult? = nil) async {
+        await run(.checkout) {
+            currentOrder = try await api.order(id: orderId)
+            vouchers = try await api.vouchers(status: nil)
+            if currentOrder?.status == "paid" {
+                currentPayment = nil
+                tab = .vouchers
+                route = nil
+                message = "Thanh toán thành công. Voucher của bạn đã sẵn sàng."
+            } else if let result {
+                message = result.message
+            } else {
+                message = "Giao dịch đang chờ SePay xác nhận. Vui lòng thử làm mới sau ít phút."
+            }
+        }
+    }
+
+    func confirmPaymentUntilSettled(orderId: String, result: PaymentWebViewResult? = nil) async {
+        if let result {
+            message = result.message
+        }
+        let delays: [UInt64] = [2, 3, 5, 8, 12]
+        for delay in delays {
+            try? await Task.sleep(nanoseconds: delay * 1_000_000_000)
+            await refreshAfterPayment(orderId: orderId, result: result)
+            if currentOrder?.status == "paid" { return }
+        }
+        if currentOrder?.status != "paid" {
+            message = "S-Loco chưa nhận được xác nhận IPN từ SePay. Vui lòng thử làm mới sau ít phút."
         }
     }
 

@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator'
 import { initiatePaymentSchema, refundRequestSchema } from '@S-Loco/shared/validators'
 import { Hono } from 'hono'
+import { getSePayCheckoutActionUrl } from '../gateways/sepay'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import * as paymentSvc from '../services/payment.service'
 import { PaymentError } from '../services/payment.service'
@@ -62,31 +63,41 @@ paymentRoutes.post('/webhook/momo', async (c) => {
   }
 })
 
-// ─── POST /payments/webhook/sepay — SePay callback ────
+// ─── POST /payments/webhook/sepay — SePay IPN ────
 paymentRoutes.post('/webhook/sepay', async (c) => {
   try {
     const payload = await c.req.json()
     const signature = c.req.header('x-sepay-signature') || ''
     await paymentSvc.processWebhook('sepay', payload, signature)
     return c.json({ success: true })
-  } catch {
+  } catch (err) {
+    if (err instanceof PaymentError) {
+      return c.json({ success: false, error: { code: err.code, message: err.message } }, 400)
+    }
     return c.json({ success: false }, 400)
   }
 })
 
+// ─── GET /payments/checkout/sepay/:invoice — SePay auto-submit checkout ────
+paymentRoutes.get('/checkout/sepay/:invoice', async (c) => {
+  const encodedFields = c.req.query('fields')
+  if (!encodedFields) return c.text('Missing checkout fields', 400)
+
+  let fields: Record<string, string>
+  try {
+    fields = JSON.parse(Buffer.from(encodedFields, 'base64url').toString('utf8'))
+  } catch {
+    return c.text('Invalid checkout fields', 400)
+  }
+
+  return c.html(renderAutoSubmitCheckoutForm(getSePayCheckoutActionUrl(), fields))
+})
+
 // ─── GET /payments/return — post-payment redirect ────
 paymentRoutes.get('/return', async (c) => {
-  // Redirect to mobile app or web success page
-  const vnpResponseCode = c.req.query('vnp_ResponseCode')
-  const status = vnpResponseCode === '00' ? 'success' : 'failed'
-  // In production, redirect to deep link or web page
-  return c.json({
-    success: true,
-    data: {
-      payment_status: status,
-      message: status === 'success' ? 'Thanh toán thành công!' : 'Thanh toán thất bại.',
-    },
-  })
+  const status = c.req.query('payment') || (c.req.query('vnp_ResponseCode') === '00' ? 'success' : 'failed')
+  const message = paymentReturnMessage(status)
+  return c.html(renderPaymentReturnPage(status, message))
 })
 
 // ─── POST /payments/refund — request refund ────
@@ -114,5 +125,67 @@ paymentRoutes.post('/poll', authMiddleware(), requireRole('admin'), async (c) =>
   const result = await paymentSvc.pollPendingPayments()
   return c.json({ success: true, data: result })
 })
+
+function renderAutoSubmitCheckoutForm(action: string, fields: Record<string, string>) {
+  const inputs = Object.entries(fields)
+    .map(([name, value]) => `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}" />`)
+    .join('\n')
+  return `<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đang chuyển sang SePay</title>
+  <style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;display:grid;min-height:100vh;place-items:center;background:#f5faff;color:#102033}.card{max-width:360px;padding:24px;border:1px solid #d9e7f2;border-radius:18px;background:white;text-align:center}.spinner{width:28px;height:28px;border:3px solid #d9e7f2;border-top-color:#006dcc;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}</style>
+</head>
+<body>
+  <div class="card"><div class="spinner"></div><strong>Đang mở cổng thanh toán SePay...</strong><p>Vui lòng không đóng màn hình này.</p></div>
+  <form id="sepay-checkout" method="POST" action="${escapeHtml(action)}">
+    ${inputs}
+  </form>
+  <script>document.getElementById('sepay-checkout').submit()</script>
+</body>
+</html>`
+}
+
+function renderPaymentReturnPage(status: string, message: string) {
+  return `<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(message)}</title>
+</head>
+<body data-payment-status="${escapeHtml(status)}">
+  <main style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px;text-align:center">
+    <h1>${escapeHtml(message)}</h1>
+    <p>Bạn có thể quay lại ứng dụng S-Loco. Ứng dụng sẽ kiểm tra trạng thái thanh toán từ hệ thống.</p>
+  </main>
+</body>
+</html>`
+}
+
+function paymentReturnMessage(status: string) {
+  switch (status) {
+    case 'success':
+      return 'Thanh toán thành công'
+    case 'cancel':
+      return 'Bạn đã hủy thanh toán'
+    case 'error':
+    case 'failed':
+      return 'Thanh toán thất bại'
+    default:
+      return 'Đang kiểm tra thanh toán'
+  }
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+}
 
 export default paymentRoutes
