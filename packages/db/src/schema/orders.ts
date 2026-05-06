@@ -12,6 +12,7 @@ export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'success',
 // ─── Orders ────────────────────────────────────────────
 export const orders = pgTable('orders', {
   id: uuid('id').defaultRandom().primaryKey(),
+  orderNumber: varchar('order_number', { length: 50 }).notNull(),
   userId: uuid('user_id').notNull().references(() => users.id),
   totalAmount: decimal('total_amount', { precision: 12, scale: 2 }).notNull(),
   discountAmount: decimal('discount_amount', { precision: 12, scale: 2 }).notNull().default('0.00'),
@@ -22,6 +23,7 @@ export const orders = pgTable('orders', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
+  uniqueIndex('orders_order_number_idx').on(table.orderNumber),
   index('orders_user_id_idx').on(table.userId),
   index('orders_status_idx').on(table.status),
 ])

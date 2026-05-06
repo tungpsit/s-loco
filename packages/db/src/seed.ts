@@ -35,6 +35,11 @@ function generateQrToken(): string {
   return `qr_${crypto.randomUUID().replace(/-/g, '')}`
 }
 
+function generateOrderNumber(index: number): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  return `SL-DEMO-${date}-${String(index + 1).padStart(4, '0')}`
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -442,6 +447,7 @@ async function seed() {
     const [order] = await db
       .insert(orders)
       .values({
+        orderNumber: generateOrderNumber(i),
         userId,
         totalAmount: String(subtotal),
         discountAmount: '0.00',

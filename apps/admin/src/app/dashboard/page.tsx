@@ -33,7 +33,7 @@ const CHART_COLORS = {
   muted: '#94A3B8',
 }
 
-const PIE_COLORS = ['#2D6A4F', '#F4A261', '#E76F51']
+const PIE_COLORS = ['#2D6A4F', '#F4A261', '#E76F51', '#64748B', '#2563EB']
 
 // Mock data — last 7 days revenue breakdown
 function getLast7DaysRevenue(): { day: string; revenue: number }[] {
@@ -44,16 +44,21 @@ function getLast7DaysRevenue(): { day: string; revenue: number }[] {
   }))
 }
 
-// Mock order status breakdown from stats
 function getOrderStatusBreakdown(stats: any) {
-  const paid = Number(stats?.paidOrders ?? 0) || 47
-  const pending = Number(stats?.totalOrders ?? 0) - paid || 12
-  const failed = Math.floor((stats?.totalOrders ?? 0) * 0.03) || 3
+  const orderStats = stats?.revenue ?? stats
+  const total = Number(orderStats?.orders ?? orderStats?.totalOrders ?? 0)
+  const paid = Number(orderStats?.paidOrders ?? 0)
+  const created = Number(orderStats?.createdOrders ?? Math.max(total - paid, 0))
+  const cancelled = Number(orderStats?.cancelledOrders ?? 0)
+  const refunded = Number(orderStats?.refundedOrders ?? 0)
+  const partiallyRefunded = Number(orderStats?.partiallyRefundedOrders ?? 0)
   return [
     { name: 'Đã thanh toán', value: paid },
-    { name: 'Chờ thanh toán', value: pending },
-    { name: 'Đã hủy', value: failed },
-  ]
+    { name: 'Chờ thanh toán', value: created },
+    { name: 'Đã hủy', value: cancelled },
+    { name: 'Hoàn tiền', value: refunded },
+    { name: 'Hoàn một phần', value: partiallyRefunded },
+  ].filter((item) => item.value > 0)
 }
 
 // Mock top vendors by revenue

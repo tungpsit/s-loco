@@ -9,6 +9,12 @@ function scalar<T>(rows: T[]): T {
   return rows[0]!
 }
 
+function generateOrderNumber(): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const suffix = crypto.randomUUID().slice(0, 8).toUpperCase()
+  return `SL-${date}-${suffix}`
+}
+
 interface ComboItem {
   serviceId: string
   quantity: number
@@ -100,6 +106,7 @@ export async function purchaseCombo(comboServiceId: string, userId: string, quan
     const [order] = await tx
       .insert(orders)
       .values({
+        orderNumber: generateOrderNumber(),
         userId,
         totalAmount: String(Number(combo.originalPrice) * quantity),
         discountAmount: String(Number(combo.originalPrice) * quantity - finalAmount),

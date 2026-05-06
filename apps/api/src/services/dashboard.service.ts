@@ -75,6 +75,10 @@ export async function getAdminDashboard() {
       totalRevenue: sql<string>`COALESCE(SUM(${orders.finalAmount}::numeric), 0)`,
       totalOrders: sql<number>`count(*)`,
       paidOrders: sql<number>`count(CASE WHEN ${orders.status} = 'paid' THEN 1 END)`,
+      refundedOrders: sql<number>`count(CASE WHEN ${orders.status} = 'refunded' THEN 1 END)`,
+      partiallyRefundedOrders: sql<number>`count(CASE WHEN ${orders.status} = 'partially_refunded' THEN 1 END)`,
+      cancelledOrders: sql<number>`count(CASE WHEN ${orders.status} = 'cancelled' THEN 1 END)`,
+      createdOrders: sql<number>`count(CASE WHEN ${orders.status} = 'created' THEN 1 END)`,
     })
     .from(orders)
 
@@ -100,6 +104,10 @@ export async function getAdminDashboard() {
       total: revStats!.totalRevenue,
       orders: Number(revStats!.totalOrders),
       paidOrders: Number(revStats!.paidOrders),
+      refundedOrders: Number(revStats!.refundedOrders),
+      partiallyRefundedOrders: Number(revStats!.partiallyRefundedOrders),
+      cancelledOrders: Number(revStats!.cancelledOrders),
+      createdOrders: Number(revStats!.createdOrders),
     },
     vendors: { total: Number(vendorStats!.total), active: Number(vendorStats!.active) },
     settlements: {

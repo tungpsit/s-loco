@@ -12,6 +12,12 @@ function scalar<T>(rows: T[]): T {
   return rows[0]!
 }
 
+function generateOrderNumber(): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const suffix = crypto.randomUUID().slice(0, 8).toUpperCase()
+  return `SL-${date}-${suffix}`
+}
+
 export async function createOrder(userId: string, input: CreateOrderInput) {
   const db = getDb()
 
@@ -123,6 +129,7 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
     const [order] = await tx
       .insert(orders)
       .values({
+        orderNumber: generateOrderNumber(),
         userId,
         totalAmount: String(totalAmount),
         discountAmount: String(discountAmount),

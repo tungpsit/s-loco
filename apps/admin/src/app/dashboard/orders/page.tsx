@@ -16,6 +16,8 @@ export default function OrdersPage() {
   const orders: any[] = data?.data?.items || data?.data || []
   const total = data?.data?.total || orders.length
   const fmt = (n?: number | string) => n != null ? Number(n).toLocaleString('vi-VN') : '—'
+  const refundedCount = orders.filter((o: any) => o.status === 'refunded').length
+  const partiallyRefundedCount = orders.filter((o: any) => o.status === 'partially_refunded').length
 
   return (
     <>
@@ -32,12 +34,14 @@ export default function OrdersPage() {
           <option value="">Tất cả trạng thái</option>
           <option value="paid">Đã thanh toán</option>
           <option value="created">Chờ thanh toán</option>
+          <option value="partially_refunded">Hoàn một phần</option>
+          <option value="refunded">Đã hoàn tiền</option>
           <option value="cancelled">Đã hủy</option>
         </select>
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
         <div className="bg-white rounded-xl p-3 md:p-4 text-center">
           <p className="text-lg md:text-2xl font-display font-bold text-on-surface">{total}</p>
           <p className="text-xs text-on-surface-variant mt-1">Tổng đơn</p>
@@ -45,6 +49,14 @@ export default function OrdersPage() {
         <div className="bg-white rounded-xl p-3 md:p-4 text-center">
           <p className="text-lg md:text-2xl font-display font-bold text-primary">{orders.filter((o: any) => o.status === 'paid').length}</p>
           <p className="text-xs text-on-surface-variant mt-1">Đã TT</p>
+        </div>
+        <div className="bg-white rounded-xl p-3 md:p-4 text-center">
+          <p className="text-lg md:text-2xl font-display font-bold text-blue-700">{partiallyRefundedCount}</p>
+          <p className="text-xs text-on-surface-variant mt-1">Hoàn một phần</p>
+        </div>
+        <div className="bg-white rounded-xl p-3 md:p-4 text-center">
+          <p className="text-lg md:text-2xl font-display font-bold text-slate-600">{refundedCount}</p>
+          <p className="text-xs text-on-surface-variant mt-1">Đã hoàn</p>
         </div>
         <div className="bg-white rounded-xl p-3 md:p-4 text-center">
           <p className="text-lg md:text-2xl font-display font-bold text-error">{orders.filter((o: any) => o.status === 'cancelled').length}</p>
@@ -128,7 +140,8 @@ function OrderStatus({ status }: { status: string }) {
     paid: { label: 'Đã TT', cls: 'bg-primary-fixed/30 text-primary' },
     created: { label: 'Chờ TT', cls: 'bg-tertiary-fixed/50 text-tertiary' },
     cancelled: { label: 'Đã hủy', cls: 'bg-error/10 text-error' },
-    refunded: { label: 'Hoàn tiền', cls: 'bg-outline-variant/20 text-outline' },
+    refunded: { label: 'Đã hoàn tiền', cls: 'bg-slate-100 text-slate-700' },
+    partially_refunded: { label: 'Hoàn một phần', cls: 'bg-blue-50 text-blue-700' },
   }
   const s = map[status] || { label: status, cls: '' }
   return <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>

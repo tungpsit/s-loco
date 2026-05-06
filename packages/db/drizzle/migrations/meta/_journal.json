@@ -92,6 +92,13 @@
       "when": 1777687800000,
       "tag": "0012_service_applicability_policy",
       "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1778030807413,
+      "tag": "0013_notifications_data",
+      "breakpoints": false
     }
   ]
 }
