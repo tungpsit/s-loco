@@ -21,6 +21,23 @@ export interface EsmsConfig {
   smsType?: number
   isUnicode?: number
   endpoint?: string
+  callbackUrl?: string
+  campaignId?: string
+  sandbox?: string | number
+  requestIdFactory?: () => string
+}
+
+export interface SmsSendResult {
+  ok: boolean
+  provider: string
+  requestId?: string
+  smsId?: string
+  codeResult?: string
+  errorMessage?: string
+  sendStatus?: string
+  status: 'accepted' | 'failed'
+  requestPayload?: Record<string, unknown>
+  responsePayload?: Record<string, unknown>
 }
 
 export class EsmsSMSProvider implements SMSProvider {
@@ -40,34 +57,66 @@ export class EsmsSMSProvider implements SMSProvider {
   }
 
   async send(phone: string, message: string) {
+    const result = await this.sendDetailed(phone, message)
+    return result.ok
+  }
+
+  async sendDetailed(phone: string, message: string): Promise<SmsSendResult> {
+    const requestId = this.config.requestIdFactory?.() ?? crypto.randomUUID()
+    const payload = compactObject({
+      ApiKey: this.config.apiKey,
+      SecretKey: this.config.secretKey,
+      Content: message,
+      Phone: phone,
+      Brandname: this.config.brandName,
+      SmsType: this.smsType,
+      IsUnicode: this.isUnicode,
+      campaignid: this.config.campaignId,
+      RequestId: requestId,
+      CallbackUrl: this.config.callbackUrl,
+      Sandbox: this.config.sandbox,
+    })
+
     const res = await this.fetcher(this.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ApiKey: this.config.apiKey,
-        SecretKey: this.config.secretKey,
-        Content: message,
-        Phone: phone,
-        Brandname: this.config.brandName,
-        SmsType: this.smsType,
-        IsUnicode: this.isUnicode,
-      }),
+      body: JSON.stringify(payload),
     })
 
     if (!res.ok) {
-      console.warn('[SMS:eSMS] Send failed', { httpStatus: res.status, body: await readJson(res) })
-      return false
+      const body = await readJson(res)
+      console.warn('[SMS:eSMS] Send failed', { httpStatus: res.status, body })
+      return {
+        ok: false,
+        provider: 'esms',
+        requestId,
+        status: 'failed',
+        requestPayload: payload,
+        responsePayload: normalizeJsonObject(body),
+      }
     }
 
-    const data = (await res.json().catch(() => null)) as { CodeResult?: string | number } | null
-    const sent = String(data?.CodeResult) === '100'
+    const data = normalizeJsonObject(await res.json().catch(() => null))
+    const codeResult = stringFrom(data.CodeResult)
+    const errorMessage = stringFrom(data.ErrorMessage)
+    const sendStatus = stringFrom(data.SendStatus)
+    const smsId = stringFrom(data.SMSID)
+    const sent = codeResult === '100'
     if (!sent) {
-      console.warn('[SMS:eSMS] Send failed', {
-        codeResult: data?.CodeResult,
-        errorMessage: (data as { ErrorMessage?: string } | null)?.ErrorMessage,
-      })
+      console.warn('[SMS:eSMS] Send failed', { codeResult, errorMessage })
     }
-    return sent
+    return {
+      ok: sent,
+      provider: 'esms',
+      requestId,
+      smsId,
+      codeResult,
+      errorMessage,
+      sendStatus,
+      status: sent ? 'accepted' : 'failed',
+      requestPayload: payload,
+      responsePayload: data,
+    }
   }
 }
 
@@ -239,6 +288,9 @@ function createNamedProvider(
           brandName: optionalEnv(env, 'ESMS_BRAND_NAME'),
           smsType: numberFromEnv(env.ESMS_SMS_TYPE, optionalEnv(env, 'ESMS_BRAND_NAME') ? 2 : 8),
           isUnicode: numberFromEnv(env.ESMS_IS_UNICODE, 1),
+          callbackUrl: optionalEnv(env, 'ESMS_CALLBACK_URL'),
+          campaignId: optionalEnv(env, 'ESMS_CAMPAIGN_ID'),
+          sandbox: optionalEnv(env, 'ESMS_SANDBOX'),
         },
         fetcher,
       )
@@ -295,6 +347,22 @@ function numberFromEnv(value: string | undefined, fallback: number) {
 
 async function readJson(res: Response) {
   return res.json().catch(() => null)
+}
+
+function compactObject(input: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(input).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+  )
+}
+
+function normalizeJsonObject(value: unknown): Record<string, unknown> {
+  if (value && typeof value === 'object' && !Array.isArray(value)) return value as Record<string, unknown>
+  return {}
+}
+
+function stringFrom(value: unknown) {
+  if (value === undefined || value === null) return undefined
+  return String(value)
 }
 
 function toInfobipPhone(phone: string) {

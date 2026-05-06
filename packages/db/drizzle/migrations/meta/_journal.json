@@ -106,6 +106,13 @@
       "when": 1778032440000,
       "tag": "0014_notification_category_severity",
       "breakpoints": false
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1778035680000,
+      "tag": "0015_sms_logs",
+      "breakpoints": false
     }
   ]
 }

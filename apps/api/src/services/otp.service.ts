@@ -2,7 +2,8 @@ import { otpCodes } from '@S-Loco/db/schema'
 import { APP_CONSTANTS } from '@S-Loco/shared'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import { getDb } from '../db'
-import { createSMSProvider, type SMSProvider } from '../lib/sms-provider'
+import { createSMSProvider, EsmsSMSProvider, type SMSProvider } from '../lib/sms-provider'
+import { createSmsLog } from './sms-log.service'
 
 const smsProvider: SMSProvider = createSMSProvider()
 
@@ -43,7 +44,34 @@ export async function sendOtp(phone: string) {
 }
 
 export async function sendOtpMessage(provider: SMSProvider, phone: string, code: string) {
-  const message = `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`
+  let message = `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`
+
+  // TODO: Remove this after testing
+  if (process.env.ESMS_BRAND_NAME === 'Baotrixemay') {
+    message = "Cam on quy khach da su dung dich vu cua chung toi. Chuc quy khach mot ngay tot lanh!"
+  }
+  if (provider instanceof EsmsSMSProvider) {
+    const result = await provider.sendDetailed(phone, message)
+    await createSmsLog({
+      provider: result.provider,
+      purpose: 'otp',
+      phone,
+      content: message,
+      requestId: result.requestId,
+      smsId: result.smsId,
+      status: result.status,
+      codeResult: result.codeResult,
+      errorMessage: result.errorMessage,
+      sendStatus: result.sendStatus,
+      requestPayload: result.requestPayload,
+      responsePayload: result.responsePayload,
+    })
+    if (!result.ok) {
+      throw new OtpError('SMS_SEND_FAILED', 'Không thể gửi mã OTP. Vui lòng thử lại sau.')
+    }
+    return
+  }
+
   const sent = await provider.send(phone, message)
   if (!sent) {
     throw new OtpError('SMS_SEND_FAILED', 'Không thể gửi mã OTP. Vui lòng thử lại sau.')

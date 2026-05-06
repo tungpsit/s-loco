@@ -1,7 +1,24 @@
 import { Hono } from 'hono'
 import { IposWebhookError, processIposWebhook } from '../services/ipos-webhook.service'
+import { processEsmsCallback } from '../services/sms-log.service'
 
 const webhookRoutes = new Hono()
+
+webhookRoutes.post('/esms/sms-status', async (c) => {
+  try {
+    const payload = await c.req.json<Record<string, unknown>>()
+    const result = await processEsmsCallback(payload)
+    return c.json({ success: true, data: { matched: result.matched } })
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      return c.json(
+        { success: false, error: { code: 'INVALID_JSON', message: 'Payload eSMS không hợp lệ.' } },
+        400,
+      )
+    }
+    throw err
+  }
+})
 
 webhookRoutes.post('/ipos', async (c) => {
   try {

@@ -24,11 +24,24 @@ describe('SMS providers', () => {
     }
 
     const provider = new EsmsSMSProvider(
-      { apiKey: 'api-key', secretKey: 'secret-key', brandName: 'S-Loco' },
+      {
+        apiKey: 'api-key',
+        secretKey: 'secret-key',
+        brandName: 'S-Loco',
+        callbackUrl: 'https://api.example.com/api/v1/webhooks/esms/sms-status',
+        requestIdFactory: () => 'req-1',
+      },
       fetcher,
     )
 
-    await expect(provider.send('0912345678', 'Mã OTP S-Loco của bạn: 1234')).resolves.toBe(true)
+    await expect(provider.sendDetailed('0912345678', 'Mã OTP S-Loco của bạn: 1234')).resolves.toMatchObject({
+      ok: true,
+      provider: 'esms',
+      requestId: 'req-1',
+      smsId: 'sms-1',
+      codeResult: '100',
+      status: 'accepted',
+    })
     expect(calls).toHaveLength(1)
     expect(calls[0]?.url).toBe(
       'https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json',
@@ -43,6 +56,8 @@ describe('SMS providers', () => {
       Content: 'Mã OTP S-Loco của bạn: 1234',
       SmsType: 2,
       IsUnicode: 1,
+      RequestId: 'req-1',
+      CallbackUrl: 'https://api.example.com/api/v1/webhooks/esms/sms-status',
     })
   })
 
