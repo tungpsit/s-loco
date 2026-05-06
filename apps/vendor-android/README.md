@@ -12,7 +12,7 @@ Native Android vendor app written in Kotlin and Jetpack Compose.
 - QR token verify/redeem/complete flow through the real voucher endpoints
 - Settlement history from `GET /api/v1/settlements`
 
-Release builds use `https://api.sloco.vn/api/v1`. Debug builds use `http://10.0.2.2:3000/api/v1` for the Android Emulator.
+API environments are selected by Gradle product flavor while keeping the same `applicationId`: `local` uses `http://127.0.0.1:3000/api/v1`, `staging` uses `https://api-staging.sloco.vn/api/v1`, and `production` uses `https://api.sloco.vn/api/v1`.
 
 ## Run
 

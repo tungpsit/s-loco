@@ -1,0 +1,2 @@
+API_BASE_URL = https:/$()/api-staging.sloco.vn/api/v1
+ENVIRONMENT = staging

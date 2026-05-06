@@ -1,0 +1,2 @@
+API_BASE_URL = https:/$()/api.sloco.vn/api/v1
+ENVIRONMENT = production

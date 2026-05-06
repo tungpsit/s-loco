@@ -30,9 +30,28 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-        buildConfigField("String", "API_BASE_URL", "\"https://api.sloco.vn/api/v1\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("local") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"http://127.0.0.1:3000/api/v1\"")
+            buildConfigField("String", "ENVIRONMENT", "\"local\"")
+        }
+        create("staging") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api-staging.sloco.vn/api/v1\"")
+            buildConfigField("String", "ENVIRONMENT", "\"staging\"")
+        }
+        create("production") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api.sloco.vn/api/v1\"")
+            buildConfigField("String", "ENVIRONMENT", "\"production\"")
+        }
     }
 
     buildFeatures {
@@ -53,7 +72,6 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/v1\"")
         }
         release {
             isMinifyEnabled = false

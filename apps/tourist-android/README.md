@@ -12,7 +12,7 @@ Native tourist/customer Android app written in Kotlin and Jetpack Compose.
 - Checkout, order lookup, vouchers, voucher QR display
 - Profile, weather/content shell, AI itinerary request screen
 
-Release builds use `https://api.sloco.vn/api/v1`. Debug builds use `http://10.0.2.2:3000/api/v1` for the Android Emulator.
+API environments are selected by Gradle product flavor while keeping the same `applicationId`: `local` uses `http://127.0.0.1:3000/api/v1`, `staging` uses `https://api-staging.sloco.vn/api/v1`, and `production` uses `https://api.sloco.vn/api/v1`.
 
 ## Run
 
