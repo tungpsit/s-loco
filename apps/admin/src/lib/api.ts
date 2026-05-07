@@ -1,15 +1,50 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api-staging.sloco.vn/api/v1'
 
-// Shared storage keys
+// ─── Token management ──────────────────────────────────────
 const TOKEN_KEY = 'sloco_admin_token'
+const REFRESH_KEY = 'sloco_admin_refresh'
 
-// Token stored in memory for admin session
 let authToken: string | null = null
 export function setAuthToken(token: string | null) {
   authToken = token
 }
 export function getAuthToken() {
   return authToken
+}
+
+// ─── Refresh queue — prevents concurrent refresh floods ────
+let refreshPromise: Promise<boolean> | null = null
+
+async function doRefresh(): Promise<boolean> {
+  try {
+    const refreshToken = localStorage.getItem(REFRESH_KEY)
+    if (!refreshToken) return false
+
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
+    if (!res.ok) return false
+
+    const json = await res.json()
+    const { access_token, refresh_token } = json.data
+    if (!access_token) return false
+
+    authToken = access_token
+    localStorage.setItem(TOKEN_KEY, access_token)
+    if (refresh_token) localStorage.setItem(REFRESH_KEY, refresh_token)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function clearSession() {
+  authToken = null
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(REFRESH_KEY)
+  localStorage.removeItem('sloco_admin_user')
 }
 
 type ApiJson = {
@@ -96,17 +131,36 @@ export async function api<T = ApiJson>(
 
   const res = await fetch(`${API_BASE}${path}`, { ...opts, headers })
 
-  if (res.status === 401 && !opts?.noAuth) {
-    // Token might be expired or invalid
-    if (typeof window !== 'undefined') {
-      // Clear memory and local storage
-      authToken = null
-      localStorage.removeItem(TOKEN_KEY)
+  if (res.status === 401 && !opts?.noAuth && typeof window !== 'undefined') {
+    // Attempt to refresh token — deduplicate concurrent 401s
+    if (!refreshPromise) {
+      refreshPromise = doRefresh().finally(() => {
+        refreshPromise = null
+      })
+    }
 
-      // Optionally redirect to login if we're not already there
-      if (!window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login'
+    const refreshed = await refreshPromise
+    if (refreshed) {
+      // Retry the original request with the new token
+      const newToken = authToken || localStorage.getItem(TOKEN_KEY)
+      if (newToken) {
+        headers.Authorization = `Bearer ${newToken}`
+        const retryRes = await fetch(`${API_BASE}${path}`, { ...opts, headers })
+        const retryData = await retryRes.json()
+        if (!retryRes.ok)
+          throw new ApiError(
+            retryData?.error?.code || 'ERROR',
+            retryData?.error?.message || 'API error',
+            retryRes.status,
+          )
+        return retryData as T
       }
+    }
+
+    // Refresh failed — clear session and redirect to login
+    clearSession()
+    if (!window.location.pathname.startsWith('/login')) {
+      window.location.href = '/login'
     }
     throw new ApiError('UNAUTHORIZED', 'Phiên làm việc hết hạn. Vui lòng đăng nhập lại.', 401)
   }

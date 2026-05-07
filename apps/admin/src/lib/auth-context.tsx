@@ -50,10 +50,21 @@ const TOKEN_KEY = 'sloco_admin_token'
 const REFRESH_KEY = 'sloco_admin_refresh'
 const USER_KEY = 'sloco_admin_user'
 
+// Refresh ~2 minutes before access token expires (15 min TTL)
+const REFRESH_INTERVAL_MS = 13 * 60 * 1000 // 13 minutes
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  const clearSession = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_KEY)
+    localStorage.removeItem(USER_KEY)
+    setAuthToken(null)
+    setUser(null)
+  }, [])
 
   const refreshSession = useCallback(async (refreshToken: string) => {
     const res = (await api('/auth/refresh', {
@@ -75,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Restore session on mount
+  // ─── Restore session on mount ───────────────────────────
   useEffect(() => {
     const savedToken = localStorage.getItem(TOKEN_KEY)
     const savedUser = localStorage.getItem(USER_KEY)
@@ -85,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         setUser(JSON.parse(savedUser))
       } catch {
-        clearStorage()
+        clearSession()
       }
 
       // Verify token is still valid by fetching profile
@@ -105,19 +116,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
               await refreshSession(refreshToken)
             } catch {
-              clearStorage()
-              setUser(null)
+              clearSession()
             }
           } else {
-            clearStorage()
-            setUser(null)
+            clearSession()
           }
         })
         .finally(() => setIsLoading(false))
     } else {
       setIsLoading(false)
     }
-  }, [refreshSession])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ─── Periodic refresh to keep session alive ────────────
+  useEffect(() => {
+    if (!user) return
+
+    let intervalId: ReturnType<typeof setInterval> | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+    const doRefresh = async () => {
+      const refreshToken = localStorage.getItem(REFRESH_KEY)
+      if (!refreshToken) {
+        clearSession()
+        return
+      }
+      try {
+        await refreshSession(refreshToken)
+      } catch {
+        // If refresh fails, clear everything
+        clearSession()
+      }
+    }
+
+    // Helper to schedule the next refresh
+    const scheduleNext = () => {
+      // Clear any existing timers
+      if (intervalId) clearInterval(intervalId)
+      if (timeoutId) clearTimeout(timeoutId)
+
+      // On visibility change or focus, do a quick refresh if due
+      intervalId = setInterval(doRefresh, REFRESH_INTERVAL_MS)
+    }
+
+    scheduleNext()
+
+    // Also refresh when the tab becomes visible again (user returns from idle)
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Debounce: clear any scheduled refresh and do it now,
+        // then reset the interval
+        if (timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          doRefresh()
+          scheduleNext()
+        }, 1000)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+      if (timeoutId) clearTimeout(timeoutId)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
+  }, [user, refreshSession, clearSession])
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -154,11 +218,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     // Best-effort server logout
     api('/auth/logout', { method: 'POST' }).catch(() => {})
-    clearStorage()
-    setAuthToken(null)
-    setUser(null)
+    clearSession()
     router.push('/login')
-  }, [router])
+  }, [router, clearSession])
 
   return (
     <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout }}>
@@ -173,8 +235,3 @@ export function useAuth() {
   return ctx
 }
 
-function clearStorage() {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(REFRESH_KEY)
-  localStorage.removeItem(USER_KEY)
-}
