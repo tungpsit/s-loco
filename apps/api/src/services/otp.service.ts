@@ -44,12 +44,7 @@ export async function sendOtp(phone: string) {
 }
 
 export async function sendOtpMessage(provider: SMSProvider, phone: string, code: string) {
-  let message = `Mã OTP S-Loco của bạn: ${code}. Hết hạn sau 5 phút.`
-
-  // TODO: Remove this after testing
-  if (process.env.ESMS_BRAND_NAME === 'Baotrixemay') {
-    message = "Cam on quy khach da su dung dich vu cua chung toi. Chuc quy khach mot ngay tot lanh!"
-  }
+  const message = `[TING TING] Mã OTP của bạn là ${code}. #tingting.dev`
   if (provider instanceof EsmsSMSProvider) {
     const result = await provider.sendDetailed(phone, message)
     await createSmsLog({

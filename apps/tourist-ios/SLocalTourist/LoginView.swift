@@ -466,7 +466,7 @@ private struct OrderSummary: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Mã đơn \(order.id)")
+            Text("Mã đơn \(order.orderNumber ?? order.id)")
                 .font(.headline)
             Text("Trạng thái: \(order.status)")
                 .font(.subheadline)

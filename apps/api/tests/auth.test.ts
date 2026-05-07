@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test'
+import { loginSchema } from '@S-Loco/shared/validators'
 import { users } from '@S-Loco/db/schema'
 import { getDb } from '../src/db'
 import { hashPassword } from '../src/lib/password'
+import { loginWithEmail } from '../src/services/auth.service'
 import { randomPhone, request } from './helpers'
 
 describe('Auth Flow', () => {
@@ -40,6 +42,17 @@ describe('Auth Flow', () => {
 
   // ─── Email Login ───
   describe('Email Login', () => {
+    test('POST /auth/login — allows vendor to login with phone number', async () => {
+      const { phone } = await createPasswordTestUser('phone-login')
+
+      const parsed = loginSchema.safeParse({ email: phone, password: 'oldpass123' })
+      const data = await loginWithEmail(phone, 'oldpass123')
+
+      expect(parsed.success).toBe(true)
+      expect(data.user.role).toBe('vendor_owner')
+      expect(data.tokens.access_token).toBeString()
+    })
+
     test('POST /auth/login — rejects wrong credentials', async () => {
       const { status, data } = await request('/api/v1/auth/login', {
         method: 'POST',
@@ -84,7 +97,7 @@ describe('Auth Flow', () => {
     })
 
     test('POST /auth/change-password — changes password with current password', async () => {
-      const email = await createPasswordTestUser('change')
+      const { email } = await createPasswordTestUser('change')
       const login = await request('/api/v1/auth/login', {
         method: 'POST',
         json: { email, password: 'oldpass123' },
@@ -114,7 +127,7 @@ describe('Auth Flow', () => {
     })
 
     test('POST /auth/change-password — rejects wrong current password', async () => {
-      const email = await createPasswordTestUser('wrong-current')
+      const { email } = await createPasswordTestUser('wrong-current')
       const login = await request('/api/v1/auth/login', {
         method: 'POST',
         json: { email, password: 'oldpass123' },
@@ -132,7 +145,7 @@ describe('Auth Flow', () => {
     })
 
     test('POST /auth/reset-password — returns temporary password and revokes refresh sessions', async () => {
-      const email = await createPasswordTestUser('reset')
+      const { email } = await createPasswordTestUser('reset')
       const login = await request('/api/v1/auth/login', {
         method: 'POST',
         json: { email, password: 'oldpass123' },
@@ -180,12 +193,13 @@ describe('Auth Flow', () => {
 async function createPasswordTestUser(label: string) {
   const db = getDb()
   const email = `auth-${label}-${crypto.randomUUID()}@example.com`
+  const phone = randomPhone()
   const passwordHash = await hashPassword('oldpass123')
   const [user] = await db
     .insert(users)
     .values({
       email,
-      phone: randomPhone(),
+      phone,
       fullName: 'Auth Test Vendor',
       role: 'vendor_owner',
       passwordHash,
@@ -193,5 +207,5 @@ async function createPasswordTestUser(label: string) {
     .returning()
 
   if (!user) throw new Error('Unable to create test user')
-  return email
+  return { email, phone }
 }

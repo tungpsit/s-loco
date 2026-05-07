@@ -211,7 +211,7 @@ export default function SettlementsPage() {
           <button
             type="button"
             onClick={async () => {
-              const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'
+              const API = process.env.NEXT_PUBLIC_API_URL || 'https://api-staging.sloco.vn/api/v1'
               const token =
                 typeof window !== 'undefined' ? localStorage.getItem('sloco_admin_token') : null
               const res = await fetch(`${API}/settlements/export`, {

@@ -61,7 +61,11 @@ export async function listVouchersByUser(
   const offset = (page - 1) * limit
 
   const conditions = [eq(vouchers.userId, userId)]
-  if (opts.status) conditions.push(eq(vouchers.status, opts.status as VoucherStatus))
+  if (opts.status) {
+    conditions.push(eq(vouchers.status, opts.status as VoucherStatus))
+  } else {
+    conditions.push(sql`${vouchers.status} <> 'created'`)
+  }
 
   const items = await db
     .select({

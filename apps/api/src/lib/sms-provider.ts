@@ -120,6 +120,61 @@ export class EsmsSMSProvider implements SMSProvider {
   }
 }
 
+export interface TingTingConfig {
+  apiKey: string
+  sender: string
+  endpoint?: string
+}
+
+export class TingTingSMSProvider implements SMSProvider {
+  private readonly endpoint: string
+
+  constructor(
+    private readonly config: TingTingConfig,
+    private readonly fetcher: Fetcher = fetch,
+  ) {
+    this.endpoint = config.endpoint ?? 'https://v1.tingting.im/api/sms'
+  }
+
+  async send(phone: string, message: string) {
+    const res = await this.fetcher(this.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: this.config.apiKey,
+      },
+      body: JSON.stringify({
+        to: toTingTingPhone(phone),
+        content: message,
+        sender: this.config.sender,
+      }),
+    })
+
+    if (!res.ok) {
+      console.warn('[SMS:TingTing] Send failed', {
+        httpStatus: res.status,
+        body: await readJson(res),
+      })
+      return false
+    }
+
+    const data = (await res.json().catch(() => null)) as {
+      status?: string
+      code?: string | number
+      message?: string
+    } | null
+    const sent = data?.status === 'success'
+    if (!sent) {
+      console.warn('[SMS:TingTing] Send failed', {
+        status: data?.status,
+        code: data?.code,
+        message: data?.message,
+      })
+    }
+    return sent
+  }
+}
+
 export interface SpeedSmsConfig {
   accessToken: string
   sender?: string
@@ -261,7 +316,7 @@ export function createSMSProvider(
   env: Record<string, string | undefined> = process.env,
   fetcher: Fetcher = fetch,
 ): SMSProvider {
-  const primary = normalizeProviderName(env.SMS_PROVIDER ?? 'mock')
+  const primary = normalizeProviderName(env.SMS_PROVIDER ?? (env.TINGTING_API_KEY ? 'tingting' : 'mock'))
   if (primary === 'mock' || primary === 'console') return new ConsoleSMSProvider()
 
   const providers = [createNamedProvider(primary, env, fetcher)]
@@ -280,6 +335,15 @@ function createNamedProvider(
   fetcher: Fetcher,
 ): SMSProvider {
   switch (name) {
+    case 'tingting':
+      return new TingTingSMSProvider(
+        {
+          apiKey: requireEnv(env, 'TINGTING_API_KEY'),
+          sender: requireEnv(env, 'TINGTING_SENDER'),
+          endpoint: optionalEnv(env, 'TINGTING_ENDPOINT'),
+        },
+        fetcher,
+      )
     case 'esms':
       return new EsmsSMSProvider(
         {
@@ -370,4 +434,8 @@ function toInfobipPhone(phone: string) {
   if (normalized.startsWith('+')) return normalized.slice(1)
   if (normalized.startsWith('0')) return `84${normalized.slice(1)}`
   return normalized
+}
+
+function toTingTingPhone(phone: string) {
+  return toInfobipPhone(phone)
 }

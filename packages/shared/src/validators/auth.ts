@@ -21,9 +21,9 @@ export const verifyOtpSchema = z.object({
 })
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>
 
-// ─── Email/Password Login ──────────────────────────────
+// ─── Email/Phone Password Login ────────────────────────
 export const loginSchema = z.object({
-  email: z.string().email('Email không hợp lệ'),
+  email: z.string().min(1, 'Email hoặc số điện thoại không được để trống'),
   password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
 })
 export type LoginInput = z.infer<typeof loginSchema>

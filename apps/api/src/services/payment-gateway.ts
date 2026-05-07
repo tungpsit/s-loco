@@ -19,6 +19,7 @@ export interface PaymentGateway {
 
 export interface CreatePaymentParams {
   orderId: string
+  orderNumber?: string
   amount: number // VND integer (no decimals)
   description: string
   returnUrl: string

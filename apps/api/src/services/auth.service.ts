@@ -54,19 +54,21 @@ export async function registerOrLoginWithOtp(
   }
 }
 
-// ─── Email/Password Login (Vendor/Admin) ───────────────
+// ─── Email/Phone Password Login (Vendor/Admin) ─────────
 export async function loginWithEmail(
-  email: string,
+  identifier: string,
   password: string,
   deviceInfo?: Record<string, unknown>,
   ipAddress?: string,
 ) {
   const db = getDb()
+  const normalizedIdentifier = identifier.trim()
+  const loginColumn = normalizedIdentifier.includes('@') ? users.email : users.phone
 
-  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
+  const [user] = await db.select().from(users).where(eq(loginColumn, normalizedIdentifier)).limit(1)
 
   if (!user) {
-    throw new AuthError('INVALID_CREDENTIALS', 'Email hoặc mật khẩu không đúng.')
+    throw new AuthError('INVALID_CREDENTIALS', 'Email/số điện thoại hoặc mật khẩu không đúng.')
   }
 
   if (!user.isActive) {
@@ -84,7 +86,7 @@ export async function loginWithEmail(
 
   const isValid = await verifyPassword(password, user.passwordHash)
   if (!isValid) {
-    throw new AuthError('INVALID_CREDENTIALS', 'Email hoặc mật khẩu không đúng.')
+    throw new AuthError('INVALID_CREDENTIALS', 'Email/số điện thoại hoặc mật khẩu không đúng.')
   }
 
   // Generate tokens

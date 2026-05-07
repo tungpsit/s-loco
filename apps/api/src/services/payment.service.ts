@@ -47,10 +47,12 @@ export async function initiatePayment(
   const idempotencyKey = `${orderId}_${gateway}_${Date.now()}`
 
   // Create payment record
+  const orderNumber = order.orderNumber || orderId
   const { paymentUrl, transactionId } = await gw.createPaymentUrl({
     orderId,
+    orderNumber,
     amount: Math.round(Number(order.finalAmount)),
-    description: `S-Loco #${orderId.slice(0, 8)}`,
+    description: `S-Loco #${orderNumber}`,
     returnUrl: `${APP_URL}/api/v1/payments/return`,
     ipnUrl: `${APP_URL}/api/v1/payments/webhook/${gateway}`,
     ipAddress,

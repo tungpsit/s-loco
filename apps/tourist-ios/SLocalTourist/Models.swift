@@ -276,15 +276,31 @@ struct CreateOrderItem: Encodable {
 struct OrderEnvelope: Decodable { let order: Order }
 struct Order: Decodable, Identifiable, Hashable {
     let id: String
+    let orderNumber: String?
     let status: String
     let totalAmount: Int?
     let finalAmount: Int?
     let items: [OrderLine]?
     enum CodingKeys: String, CodingKey {
         case id, status, items
+        case orderNumber
+        case orderNumberSnake = "order_number"
         case totalAmount = "total_amount"
+        case totalAmountCamel = "totalAmount"
         case finalAmount
+        case finalAmountSnake = "final_amount"
     }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        orderNumber = container.decodeStringIfPresent(.orderNumber) ?? container.decodeStringIfPresent(.orderNumberSnake)
+        status = try container.decode(String.self, forKey: .status)
+        totalAmount = container.decodeIntIfPresent(.totalAmount) ?? container.decodeIntIfPresent(.totalAmountCamel)
+        finalAmount = container.decodeIntIfPresent(.finalAmount) ?? container.decodeIntIfPresent(.finalAmountSnake)
+        items = try container.decodeIfPresent([OrderLine].self, forKey: .items)
+    }
+
     var amount: Int { finalAmount ?? totalAmount ?? 0 }
 }
 
@@ -295,7 +311,17 @@ struct OrderLine: Decodable, Hashable {
     let unitPrice: Int?
     enum CodingKeys: String, CodingKey {
         case serviceName = "service_name"
+        case serviceNameCamel = "serviceName"
         case quantity, price, unitPrice
+        case unitPriceSnake = "unit_price"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        serviceName = container.decodeStringIfPresent(.serviceName) ?? container.decodeStringIfPresent(.serviceNameCamel)
+        quantity = container.decodeIntIfPresent(.quantity) ?? 1
+        price = container.decodeIntIfPresent(.price)
+        unitPrice = container.decodeIntIfPresent(.unitPrice) ?? container.decodeIntIfPresent(.unitPriceSnake)
     }
 }
 

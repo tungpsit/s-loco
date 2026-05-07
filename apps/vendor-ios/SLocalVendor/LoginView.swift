@@ -59,9 +59,9 @@ struct LoginView: View {
                             .font(.headline.weight(.semibold))
                             .foregroundStyle(VendorTheme.text)
 
-                        LoginFieldRow(title: "Email", systemImage: "envelope", isFocused: focusedField == .email) {
-                            TextField("vendor@samson.vn", text: $email)
-                                .textContentType(.emailAddress)
+                        LoginFieldRow(title: "Email hoặc số điện thoại", systemImage: "person.text.rectangle", isFocused: focusedField == .email) {
+                            TextField("vendor@samson.vn hoặc 0912345678", text: $email)
+                                .textContentType(.username)
                                 .modifier(EmailFieldModifier())
                                 .focused($focusedField, equals: .email)
                                 .submitLabel(.next)

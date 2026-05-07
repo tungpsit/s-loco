@@ -6,6 +6,7 @@ import {
   InfobipSMSProvider,
   type SMSProvider,
   SpeedSmsProvider,
+  TingTingSMSProvider,
 } from '../src/lib/sms-provider'
 
 function jsonResponse(body: unknown, status = 200) {
@@ -85,6 +86,52 @@ describe('SMS providers', () => {
       IsUnicode: 1,
     })
     expect(body).not.toHaveProperty('Brandname')
+  })
+
+  test('Ting Ting provider sends SMS payload and accepts success response', async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = []
+    const fetcher = async (url: string | URL | Request, init?: RequestInit) => {
+      calls.push({ url: String(url), init: init ?? {} })
+      return jsonResponse({ status: 'success', sms: 1, cost: 850, tranId: 'tran-1' })
+    }
+
+    const provider = new TingTingSMSProvider({ apiKey: 'ting-key', sender: 'S-Loco' }, fetcher)
+
+    await expect(provider.send('0912345678', '[TING TING] Mã OTP của bạn là 1234. #tingting.dev')).resolves.toBe(true)
+    expect(calls).toHaveLength(1)
+    expect(calls[0]?.url).toBe('https://v1.tingting.im/api/sms')
+    expect(calls[0]?.init.headers).toMatchObject({
+      'Content-Type': 'application/json',
+      apikey: 'ting-key',
+    })
+
+    const body = JSON.parse(String(calls[0]?.init.body))
+    expect(body).toEqual({
+      to: '84912345678',
+      content: '[TING TING] Mã OTP của bạn là 1234. #tingting.dev',
+      sender: 'S-Loco',
+    })
+  })
+
+  test('factory prefers Ting Ting when credentials are configured', async () => {
+    const calls: string[] = []
+    const fetcher = async (url: string | URL | Request) => {
+      calls.push(String(url))
+      return jsonResponse({ status: 'success', tranId: 'tran-1' })
+    }
+
+    const provider = createSMSProvider(
+      {
+        TINGTING_API_KEY: 'ting-key',
+        TINGTING_SENDER: 'S-Loco',
+        ESMS_API_KEY: 'api-key',
+        ESMS_SECRET_KEY: 'secret-key',
+      },
+      fetcher,
+    )
+
+    await expect(provider.send('0912345678', 'otp')).resolves.toBe(true)
+    expect(calls).toEqual(['https://v1.tingting.im/api/sms'])
   })
 
   test('SpeedSMS provider sends brandname payload and accepts success code 00', async () => {
