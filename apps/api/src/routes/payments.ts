@@ -156,13 +156,14 @@ paymentRoutes.post('/poll', authMiddleware(), requireRole('admin'), async (c) =>
   return c.json({ success: true, data: result })
 })
 
-function renderAutoSubmitCheckoutForm(action: string, fields: Record<string, string>) {
+function renderAutoSubmitCheckoutForm(action: string, fields: Record<string, string | number>) {
   const inputs = Object.entries(fields)
     .map(
       ([name, value]) =>
-        `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}" />`,
+        `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(String(value))}" />`,
     )
     .join('\n')
+
   return `<!doctype html>
 <html lang="vi">
 <head>

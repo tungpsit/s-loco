@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { SePayPgClient } from 'sepay-pg-node'
 import type {
   CreatePaymentParams,
   PaymentGateway,
@@ -11,29 +12,15 @@ const SEPAY_ENV = process.env.SEPAY_ENV || 'sandbox'
 const SEPAY_MERCHANT_ID = process.env.SEPAY_MERCHANT_ID || 'demo_merchant'
 const SEPAY_SECRET_KEY = process.env.SEPAY_SECRET_KEY || 'demo_secret'
 
-const signedFieldOrder = [
-  'merchant',
-  'operation',
-  'payment_method',
-  'order_amount',
-  'currency',
-  'order_invoice_number',
-  'order_description',
-  'customer_id',
-  'success_url',
-  'error_url',
-  'cancel_url',
-]
-
 const ipnSignedFieldOrder = ['notification_type', 'order_invoice_number', 'amount']
 
-type SePayEnv = 'sandbox' | 'production' | string
+type SePayEnv = 'sandbox' | 'production'
 
-export type SePayCheckoutFields = Record<string, string> & {
+export type SePayCheckoutFields = Record<string, string | number> & {
   merchant: string
   operation: 'PURCHASE'
   payment_method: 'BANK_TRANSFER'
-  order_amount: string
+  order_amount: number
   currency: 'VND'
   order_invoice_number: string
   order_description: string
@@ -43,22 +30,12 @@ export type SePayCheckoutFields = Record<string, string> & {
   signature: string
 }
 
-export function getSePayCheckoutActionUrl(env: SePayEnv = SEPAY_ENV): string {
-  if (process.env.SEPAY_CHECKOUT_URL) return process.env.SEPAY_CHECKOUT_URL
-  return env === 'production'
-    ? 'https://pay.sepay.vn/v1/checkout/init'
-    : 'https://pay-sandbox.sepay.vn/v1/checkout/init'
+export function getSePayCheckoutActionUrl(env: SePayEnv = getSePayEnv()): string {
+  return createSePayClient({ env }).checkout.initCheckoutUrl()
 }
 
-export function getSePayInvoiceNumber(orderId: string): string {
-  return `SL-${orderId}`
-}
-
-export function signSePayFields(
-  fields: Record<string, unknown>,
-  secretKey = SEPAY_SECRET_KEY,
-): string {
-  return signOrderedFields(fields, signedFieldOrder, secretKey)
+export function getSePayInvoiceNumber(orderRef: string): string {
+  return orderRef.startsWith('SL-') ? orderRef : `SL-${orderRef}`
 }
 
 export function signSePayIpnFields(
@@ -77,26 +54,21 @@ export function buildSePayCheckoutFields(input: {
   successUrl: string
   errorUrl: string
   cancelUrl: string
-  customerId?: string
 }): SePayCheckoutFields {
-  const fields: Record<string, string> = {
+  const client = createSePayClient({ merchantId: input.merchantId, secretKey: input.secretKey })
+
+  return client.checkout.initOneTimePaymentFields({
     merchant: input.merchantId,
     operation: 'PURCHASE',
     payment_method: 'BANK_TRANSFER',
-    order_amount: String(Math.round(input.amount)),
-    currency: 'VND',
     order_invoice_number: input.invoiceNumber,
+    order_amount: Math.round(input.amount),
+    currency: 'VND',
     order_description: input.description,
     success_url: input.successUrl,
     error_url: input.errorUrl,
     cancel_url: input.cancelUrl,
-  }
-  if (input.customerId) fields.customer_id = input.customerId
-
-  return {
-    ...fields,
-    signature: signSePayFields(fields, input.secretKey),
-  } as SePayCheckoutFields
+  }) as SePayCheckoutFields
 }
 
 export function parseSePayIpn(payload: Record<string, unknown>): WebhookResult {
@@ -148,7 +120,7 @@ export function verifySePayIpn(
 
 export const sepayGateway: PaymentGateway = {
   async createPaymentUrl(params: CreatePaymentParams) {
-    const transactionId = getSePayInvoiceNumber(params.orderId)
+    const transactionId = getSePayInvoiceNumber(params.orderNumber || params.orderId)
     const fields = buildSePayCheckoutFields({
       merchantId: SEPAY_MERCHANT_ID,
       secretKey: SEPAY_SECRET_KEY,
@@ -159,7 +131,9 @@ export const sepayGateway: PaymentGateway = {
       errorUrl: withPaymentStatus(params.returnUrl, 'error'),
       cancelUrl: withPaymentStatus(params.returnUrl, 'cancel'),
     })
-    const encodedFields = Buffer.from(JSON.stringify(fields)).toString('base64url')
+    const encodedFields = Buffer.from(JSON.stringify(stringifyCheckoutFields(fields))).toString(
+      'base64url',
+    )
     const paymentUrl = `${params.returnUrl.replace('/return', '/checkout/sepay')}/${encodeURIComponent(transactionId)}?fields=${encodedFields}`
 
     return { paymentUrl, transactionId }
@@ -186,6 +160,24 @@ function withPaymentStatus(returnUrl: string, status: 'success' | 'error' | 'can
   const url = new URL(returnUrl)
   url.searchParams.set('payment', status)
   return url.toString()
+}
+
+function createSePayClient(
+  input: { env?: SePayEnv; merchantId?: string; secretKey?: string } = {},
+) {
+  return new SePayPgClient({
+    env: input.env ?? getSePayEnv(),
+    merchant_id: input.merchantId ?? SEPAY_MERCHANT_ID,
+    secret_key: input.secretKey ?? SEPAY_SECRET_KEY,
+  })
+}
+
+function getSePayEnv(): SePayEnv {
+  return SEPAY_ENV === 'production' ? 'production' : 'sandbox'
+}
+
+function stringifyCheckoutFields(fields: SePayCheckoutFields): Record<string, string> {
+  return Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, String(value)]))
 }
 
 function signOrderedFields(

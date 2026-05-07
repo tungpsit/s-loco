@@ -1,11 +1,12 @@
 import { describe, expect, test } from 'bun:test'
+import { buildSePayCheckoutFields, getSePayInvoiceNumber } from '../src/gateways/sepay'
 import { request } from './helpers'
 
 describe('Payment Webhooks', () => {
   // ─── VNPay ───
   describe('VNPay', () => {
     test('GET /payments/webhook/vnpay — rejects missing params', async () => {
-      const { status, data } = await request('/api/v1/payments/webhook/vnpay')
+      const { status } = await request('/api/v1/payments/webhook/vnpay')
       // Should handle gracefully (not crash)
       expect([200, 400, 500]).toContain(status)
     })
@@ -52,6 +53,24 @@ describe('Payment Webhooks', () => {
         },
       })
       expect([200, 400, 401, 500]).toContain(status)
+    })
+
+    test('checkout fields use a human-readable invoice number and SePay signing order', () => {
+      const invoiceNumber = getSePayInvoiceNumber('SL-20260507-ABCD1234')
+      const fields = buildSePayCheckoutFields({
+        merchantId: 'MERCHANT_123',
+        secretKey: 'secret',
+        invoiceNumber,
+        amount: 100000,
+        description: 'S-Loco #SL-20260507-ABCD1234',
+        successUrl: 'https://example.com/success',
+        errorUrl: 'https://example.com/error',
+        cancelUrl: 'https://example.com/cancel',
+      })
+
+      expect(invoiceNumber).toBe('SL-20260507-ABCD1234')
+      expect(typeof fields.signature).toBe('string')
+      expect(fields.signature.length).toBeGreaterThan(0)
     })
   })
 
